@@ -219,10 +219,15 @@ const SupabaseClient = (function () {
         return SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_URL';
     }
 
+    function getClient() {
+        return supabase;
+    }
+
     // ========== PUBLIC API ==========
     return {
         init,
         isConfigured,
+        getClient,
 
         // Auth
         signUp,
