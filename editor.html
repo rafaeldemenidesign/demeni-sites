@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor | Demeni Sites</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Cropper.js for image cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/editor.css">
+</head>
+
+<body>
+    <div id="app" class="editor-app">
+        <!-- HEADER -->
+        <header class="editor-header">
+            <div class="header-left">
+                <button class="btn-icon" id="btn-back" title="Voltar">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="logo">Demeni <span>Sites</span></h1>
+            </div>
+            <div class="header-center">
+                <input type="text" id="project-name" value="Meu Site" placeholder="Nome do projeto">
+            </div>
+            <div class="header-right">
+                <button class="btn-secondary" id="btn-preview">
+                    <i class="fas fa-eye"></i> Preview
+                </button>
+                <button class="btn-primary" id="btn-publish">
+                    <i class="fas fa-rocket"></i> Publicar
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="editor-main">
+            <!-- CONTROLS PANEL -->
+            <aside class="controls-panel" id="controls">
+                <!-- TAB NAV -->
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-tab="perfil">
+                        <i class="fas fa-user"></i> Perfil
+                    </button>
+                    <button class="tab-btn" data-tab="links">
+                        <i class="fas fa-link"></i> Links
+                    </button>
+                    <button class="tab-btn" data-tab="banners">
+                        <i class="fas fa-images"></i> Banners
+                    </button>
+                    <button class="tab-btn" data-tab="video">
+                        <i class="fas fa-video"></i> Vídeo
+                    </button>
+                    <button class="tab-btn" data-tab="estilo">
+                        <i class="fas fa-palette"></i> Estilo
+                    </button>
+                </nav>
+
+                <!-- TAB: PERFIL -->
+                <div class="tab-content active" id="tab-perfil">
+                    <div class="control-section">
+                        <h3>Foto de Perfil</h3>
+                        <div class="avatar-upload">
+                            <div class="avatar-preview" id="avatar-preview">
+                                <img src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=200"
+                                    alt="Avatar" id="avatar-img">
+                                <div class="avatar-overlay">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            <input type="file" id="avatar-input" accept="image/*" hidden>
+                            <button class="btn-text" id="btn-upload-avatar">
+                                <i class="fas fa-upload"></i> Enviar foto
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>Informações</h3>
+                        <div class="form-group">
+                            <label for="input-name">Nome</label>
+                            <input type="text" id="input-name" placeholder="Seu nome completo">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-role">Cargo / Profissão</label>
+                            <input type="text" id="input-role" placeholder="Ex: Designer & Consultor">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-bio">Bio</label>
+                            <textarea id="input-bio" rows="3" placeholder="Uma breve descrição sobre você"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>Contato</h3>
+                        <div class="form-group">
+                            <label for="input-whatsapp">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </label>
+                            <input type="text" id="input-whatsapp" placeholder="84999779798">
+                            <small>DDD + número (sem espaços ou +55)</small>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER/ASSINATURA DO CRIADOR -->
+                    <div class="control-section">
+                        <h3><i class="fas fa-signature"></i> Sua Assinatura</h3>
+                        <p class="section-desc">Aparece no rodapé - marketing para você!</p>
+
+                        <div class="form-group">
+                            <label>Sua Logo</label>
+                            <div class="footer-logo-upload">
+                                <div class="footer-logo-preview" id="footer-logo-preview">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                                <input type="file" id="footer-logo-input" accept="image/*" hidden>
+                                <button class="btn-text" id="btn-upload-footer-logo">
+                                    <i class="fas fa-upload"></i> Enviar Logo
+                                </button>
+                            </div>
+                            <small>PNG transparente recomendado (será comprimido)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="footer-text">Texto/CTA</label>
+                            <input type="text" id="footer-text" placeholder="Feito por @seunome">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="footer-link">Seu Link</label>
+                            <input type="text" id="footer-link" placeholder="https://wa.me/5511999999999">
+                            <small>WhatsApp, Instagram ou seu site</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: LINKS -->
+                <div class="tab-content" id="tab-links">
+                    <div class="control-section">
+                        <h3>Seus Links</h3>
+                        <div id="links-list" class="links-list">
+                            <!-- Links renderizados via JS -->
+                        </div>
+                        <button class="btn-add-link" id="btn-add-link">
+                            <i class="fas fa-plus"></i> Adicionar Link
+                        </button>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>Links Rápidos</h3>
+                        <div class="quick-links">
+                            <button class="quick-link-btn" data-type="instagram">
+                                <i class="fab fa-instagram"></i>
+                            </button>
+                            <button class="quick-link-btn" data-type="youtube">
+                                <i class="fab fa-youtube"></i>
+                            </button>
+                            <button class="quick-link-btn" data-type="linkedin">
+                                <i class="fab fa-linkedin"></i>
+                            </button>
+                            <button class="quick-link-btn" data-type="tiktok">
+                                <i class="fab fa-tiktok"></i>
+                            </button>
+                            <button class="quick-link-btn" data-type="email">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                            <button class="quick-link-btn" data-type="website">
+                                <i class="fas fa-globe"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: BANNERS -->
+                <div class="tab-content" id="tab-banners">
+                    <!-- BANNER DE DESTAQUE -->
+                    <div class="control-section">
+                        <h3><i class="fas fa-star"></i> Banner de Destaque</h3>
+                        <p class="section-desc">Fixo abaixo do perfil • Ativar/desativar</p>
+
+                        <div class="form-group">
+                            <label>Imagem do Banner</label>
+                            <div class="banner-upload">
+                                <div class="banner-preview" id="banner-preview">
+                                    <span>Clique para adicionar imagem</span>
+                                </div>
+                                <input type="file" id="banner-input" accept="image/*" hidden>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="banner-tag">Etiqueta (Tag)</label>
+                            <input type="text" id="banner-tag" placeholder="Ex: Mentoria, E-book, Curso">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="banner-title">Título</label>
+                            <input type="text" id="banner-title" placeholder="Nome do produto ou serviço">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="banner-desc">Descrição</label>
+                            <textarea id="banner-desc" rows="2" placeholder="Breve descrição ou benefícios"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="banner-cta">Texto do Botão</label>
+                            <input type="text" id="banner-cta" placeholder="Ex: Saiba Mais, Comprar">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="banner-link">Link do Botão</label>
+                            <input type="text" id="banner-link" placeholder="https://...">
+                        </div>
+
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="banner-active">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Exibir Banner de Destaque</span>
+                        </label>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- CARROSSEL DE BANNERS -->
+                    <div class="control-section">
+                        <h3><i class="fas fa-images"></i> Carrossel de Banners</h3>
+                        <p class="section-desc">Até 3 banners • Pode reordenar na barra lateral</p>
+
+                        <!-- Banner 1 -->
+                        <div class="banner-slot" id="banner-slot-1">
+                            <h4>Banner 1</h4>
+                            <div class="banner-upload-zone" id="banner-preview-1">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Clique para enviar</span>
+                            </div>
+                            <input type="file" id="banner-input-1" accept="image/*" hidden>
+                            <div class="form-group">
+                                <input type="text" id="banner-title-1" placeholder="Título do banner">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="banner-link-1" placeholder="https://...">
+                            </div>
+                            <div class="form-group orientation-group">
+                                <label>Orientação:</label>
+                                <div class="orientation-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-1" value="horizontal" checked>
+                                        <span><i class="fas fa-arrows-alt-h"></i> Horizontal</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-1" value="vertical">
+                                        <span><i class="fas fa-arrows-alt-v"></i> Vertical</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Banner 2 -->
+                        <div class="banner-slot" id="banner-slot-2">
+                            <h4>Banner 2</h4>
+                            <div class="banner-upload-zone" id="banner-preview-2">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Clique para enviar</span>
+                            </div>
+                            <input type="file" id="banner-input-2" accept="image/*" hidden>
+                            <div class="form-group">
+                                <input type="text" id="banner-title-2" placeholder="Título do banner">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="banner-link-2" placeholder="https://...">
+                            </div>
+                            <div class="form-group orientation-group">
+                                <label>Orientação:</label>
+                                <div class="orientation-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-2" value="horizontal" checked>
+                                        <span><i class="fas fa-arrows-alt-h"></i> Horizontal</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-2" value="vertical">
+                                        <span><i class="fas fa-arrows-alt-v"></i> Vertical</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Banner 3 -->
+                        <div class="banner-slot" id="banner-slot-3">
+                            <h4>Banner 3</h4>
+                            <div class="banner-upload-zone" id="banner-preview-3">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Clique para enviar</span>
+                            </div>
+                            <input type="file" id="banner-input-3" accept="image/*" hidden>
+                            <div class="form-group">
+                                <input type="text" id="banner-title-3" placeholder="Título do banner">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="banner-link-3" placeholder="https://...">
+                            </div>
+                            <div class="form-group orientation-group">
+                                <label>Orientação:</label>
+                                <div class="orientation-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-3" value="horizontal" checked>
+                                        <span><i class="fas fa-arrows-alt-h"></i> Horizontal</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-3" value="vertical">
+                                        <span><i class="fas fa-arrows-alt-v"></i> Vertical</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Banner 3 (Original - now with orientation) -->
+                        <div class="banner-slot" id="banner-slot-3">
+                            <h4>Banner 3</h4>
+                            <div class="banner-upload-zone" id="banner-preview-3">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Clique para enviar</span>
+                            </div>
+                            <input type="file" id="banner-input-3" accept="image/*" hidden>
+                            <div class="form-group">
+                                <input type="text" id="banner-title-3" placeholder="Título do banner">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="banner-link-3" placeholder="https://...">
+                            </div>
+                            <div class="form-group orientation-group">
+                                <label>Orientação:</label>
+                                <div class="orientation-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-3" value="horizontal" checked>
+                                        <span><i class="fas fa-arrows-alt-h"></i> Horizontal</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="orientation-3" value="vertical">
+                                        <span><i class="fas fa-arrows-alt-v"></i> Vertical</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="banners-carousel-active">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Ativar carrossel de banners</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- TAB: VÍDEO -->
+                <div class="tab-content" id="tab-video">
+                    <div class="control-section">
+                        <h3><i class="fas fa-video"></i> Vídeo em Destaque</h3>
+                        <p class="section-desc">Adicione um vídeo do YouTube ou Vimeo</p>
+
+                        <div class="form-group">
+                            <label for="video-url">URL do Vídeo</label>
+                            <input type="text" id="video-url" placeholder="https://youtube.com/watch?v=...">
+                            <small>Cole a URL do YouTube ou Vimeo</small>
+                        </div>
+
+                        <div class="video-preview-box" id="video-preview-box">
+                            <i class="fas fa-play-circle"></i>
+                            <span>Preview do vídeo aparece aqui</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="video-title">Título do Vídeo (opcional)</label>
+                            <input type="text" id="video-title" placeholder="Ex: Assista meu último vídeo">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="video-cta-text">Texto do Botão CTA (opcional)</label>
+                            <input type="text" id="video-cta-text" placeholder="Ex: Ver mais vídeos">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="video-cta-link">Link do Botão CTA</label>
+                            <input type="text" id="video-cta-link" placeholder="https://youtube.com/@seunome">
+                        </div>
+
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="video-active">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Exibir vídeo no site</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- TAB: ESTILO -->
+                <div class="tab-content" id="tab-estilo">
+                    <div class="control-section">
+                        <h3>Cor de Destaque</h3>
+
+                        <!-- Solid Colors -->
+                        <div class="form-group">
+                            <label>Cores Sólidas</label>
+                            <div class="color-presets accent-colors">
+                                <button class="color-preset active" data-accent="#D4AF37" style="background:#D4AF37"
+                                    title="Dourado"></button>
+                                <button class="color-preset" data-accent="#C0C0C0" style="background:#C0C0C0"
+                                    title="Prata"></button>
+                                <button class="color-preset" data-accent="#FF6B6B" style="background:#FF6B6B"
+                                    title="Coral"></button>
+                                <button class="color-preset" data-accent="#4ECDC4" style="background:#4ECDC4"
+                                    title="Turquesa"></button>
+                                <button class="color-preset" data-accent="#A855F7" style="background:#A855F7"
+                                    title="Roxo"></button>
+                                <button class="color-preset" data-accent="#3B82F6" style="background:#3B82F6"
+                                    title="Azul"></button>
+                                <button class="color-preset" data-accent="#22C55E" style="background:#22C55E"
+                                    title="Verde"></button>
+                            </div>
+                        </div>
+
+                        <!-- Gradient Colors -->
+                        <div class="form-group">
+                            <label>Degradês</label>
+                            <div class="color-presets gradient-colors">
+                                <button class="gradient-preset"
+                                    data-gradient="linear-gradient(135deg, #D4AF37 0%, #F5D75A 100%)"
+                                    style="background:linear-gradient(135deg, #D4AF37, #F5D75A)"
+                                    title="Dourado"></button>
+                                <button class="gradient-preset"
+                                    data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                                    style="background:linear-gradient(135deg, #667eea, #764ba2)"
+                                    title="Violeta"></button>
+                                <button class="gradient-preset"
+                                    data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                                    style="background:linear-gradient(135deg, #f093fb, #f5576c)" title="Rosa"></button>
+                                <button class="gradient-preset"
+                                    data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+                                    style="background:linear-gradient(135deg, #4facfe, #00f2fe)" title="Ciano"></button>
+                                <button class="gradient-preset"
+                                    data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                                    style="background:linear-gradient(135deg, #43e97b, #38f9d7)" title="Verde"></button>
+                                <button class="gradient-preset"
+                                    data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+                                    style="background:linear-gradient(135deg, #fa709a, #fee140)"
+                                    title="Sunset"></button>
+                                <button class="gradient-preset"
+                                    data-gradient="linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"
+                                    style="background:linear-gradient(135deg, #a8edea, #fed6e3)"
+                                    title="Pastel"></button>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Color Picker -->
+                        <div class="form-group">
+                            <button class="btn-advanced-toggle" id="btn-advanced-color">
+                                <i class="fas fa-sliders-h"></i> Avançado
+                            </button>
+                            <div class="advanced-color-picker" id="advanced-color-picker" style="display:none;">
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-accent" value="#D4AF37">
+                                    <span class="color-value">#D4AF37</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="color-bg">Fundo</label>
+
+                        <!-- Light Colors -->
+                        <p class="color-section-label">Cores Claras</p>
+                        <div class="color-presets bg-colors">
+                            <button class="color-preset" data-color="#ffffff"
+                                style="background:#ffffff; border: 1px solid #ccc" title="Branco"></button>
+                            <button class="color-preset" data-color="#f8f9fa"
+                                style="background:#f8f9fa; border: 1px solid #ccc" title="Cinza Claro"></button>
+                            <button class="color-preset" data-color="#e8f5e9"
+                                style="background:#e8f5e9; border: 1px solid #ccc" title="Verde Claro"></button>
+                            <button class="color-preset" data-color="#e3f2fd"
+                                style="background:#e3f2fd; border: 1px solid #ccc" title="Azul Claro"></button>
+                            <button class="color-preset" data-color="#f3e5f5"
+                                style="background:#f3e5f5; border: 1px solid #ccc" title="Roxo Claro"></button>
+                            <button class="color-preset" data-color="#fff3e0"
+                                style="background:#fff3e0; border: 1px solid #ccc" title="Laranja Claro"></button>
+                            <button class="color-preset" data-color="#fce4ec"
+                                style="background:#fce4ec; border: 1px solid #ccc" title="Rosa Claro"></button>
+                        </div>
+
+                        <!-- Dark Colors -->
+                        <p class="color-section-label">Cores Escuras</p>
+                        <div class="color-presets bg-colors">
+                            <button class="color-preset active" data-color="#000000" style="background:#000000"
+                                title="Preto"></button>
+                            <button class="color-preset" data-color="#1a1a2e" style="background:#1a1a2e"
+                                title="Índigo Escuro"></button>
+                            <button class="color-preset" data-color="#1f1f1f" style="background:#1f1f1f"
+                                title="Cinza Escuro"></button>
+                            <button class="color-preset" data-color="#1a1f1a" style="background:#1a1f1a"
+                                title="Verde Escuro"></button>
+                            <button class="color-preset" data-color="#2d1f1f" style="background:#2d1f1f"
+                                title="Vinho Escuro"></button>
+                            <button class="color-preset" data-color="#1f1a2d" style="background:#1f1a2d"
+                                title="Roxo Escuro"></button>
+                            <button class="color-preset" data-color="#0f172a" style="background:#0f172a"
+                                title="Azul Escuro"></button>
+                        </div>
+
+                        <!-- Background Image -->
+                        <p class="color-section-label">Imagem de Fundo</p>
+                        <div class="bg-image-upload">
+                            <div class="bg-preview" id="bg-preview">
+                                <span>Sem imagem</span>
+                            </div>
+                            <input type="file" id="bg-input" accept="image/*" hidden>
+                            <div class="bg-actions">
+                                <button class="btn-text" id="btn-upload-bg">
+                                    <i class="fas fa-upload"></i> Enviar
+                                </button>
+                                <button class="btn-text btn-danger" id="btn-remove-bg">
+                                    <i class="fas fa-trash"></i> Remover
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Estilo dos Botões</h3>
+                    <div class="button-styles">
+                        <button class="style-preset active" data-style="glass">
+                            <div class="style-demo glass"></div>
+                            <span>Glass</span>
+                        </button>
+                        <button class="style-preset" data-style="solid">
+                            <div class="style-demo solid"></div>
+                            <span>Sólido</span>
+                        </button>
+                        <button class="style-preset" data-style="outline">
+                            <div class="style-demo outline"></div>
+                            <span>Contorno</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB: ORDEM -->
+                <div class="tab-content" id="tab-ordem">
+                    <div class="control-section">
+                        <h3><i class="fas fa-sort"></i> Ordem dos Blocos</h3>
+                        <p class="section-desc">Arraste para reorganizar os blocos do seu site</p>
+
+                        <div class="fixed-block">
+                            <i class="fas fa-lock"></i>
+                            <span>Perfil (fixo no topo)</span>
+                        </div>
+
+                        <div id="block-order-list" class="block-order-list">
+                            <!-- Renderizado via JS -->
+                        </div>
+
+                        <div class="fixed-block">
+                            <i class="fas fa-lock"></i>
+                            <span>Marca d'água (fixo no fim)</span>
+                        </div>
+
+                        <button class="btn-text" id="btn-reset-order" style="margin-top: 16px;">
+                            <i class="fas fa-undo"></i> Restaurar ordem padrão
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- SECONDARY TOOLBAR (Block Order) -->
+            <div class="secondary-toolbar" id="secondary-toolbar">
+                <h4 class="toolbar-title">Ordem</h4>
+                <div id="floating-block-order" class="floating-block-order">
+                    <!-- Rendered via JS -->
+                </div>
+                <button class="btn-reset-mini" id="btn-reset-order-mini" title="Restaurar ordem padrão">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+
+            <!-- PREVIEW AREA -->
+            <div class="preview-area">
+                <div class="device-frame">
+                    <div class="device-screen">
+                        <div class="device-notch"></div>
+                        <div class="device-content" id="preview-frame">
+                            <!-- Preview content rendered here -->
+                        </div>
+                    </div>
+                </div>
+                <p class="preview-label">
+                    <i class="fas fa-mobile-alt"></i> Preview ao vivo
+                </p>
+            </div>
+        </main>
+
+        <!-- MODAL: IMAGE CROP -->
+        <div class="modal" id="modal-crop">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h2>Ajustar Imagem</h2>
+                    <button class="modal-close" id="crop-cancel">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="crop-container">
+                        <img id="crop-image" src="" alt="Crop">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="crop-cancel-btn">Cancelar</button>
+                    <button class="btn-primary" id="crop-confirm">
+                        <i class="fas fa-check"></i> Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: PUBLISH -->
+        <div class="modal" id="modal-publish">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-rocket"></i> Publicar Site</h2>
+                    <button class="modal-close" id="publish-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body center">
+                    <div class="publish-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Seu site está pronto!</h3>
+                    <p class="publish-text">
+                        Por apenas <strong>R$ 147</strong> você pode publicar<br>
+                        e colocar no seu Instagram agora mesmo.
+                    </p>
+                    <a href="https://pay.kiwify.com.br/DzGxIEZ" target="_blank" class="btn-gold" id="btn-pay">
+                        <i class="fab fa-pix"></i> Publicar Agora
+                    </a>
+                    <p class="publish-note">
+                        Pagamento único • Site vitalício
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cropper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+    <!-- Data Modules -->
+    <script src="js/userData.js"></script>
+
+    <!-- Editor JS -->
+    <script src="js/editor.js"></script>
+
+    <!-- Diagnostic (remove after debugging) -->
+    <script src="js/diagnostic.js"></script>
+</body>
+
+</html>

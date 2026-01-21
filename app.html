@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Demeni Sites</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+    <div id="app" class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">Demeni <span>Sites</span></h1>
+            </div>
+
+            <!-- User Profile Card -->
+            <div class="user-card" id="user-card">
+                <div class="user-card-header">
+                    <button class="btn-edit-profile" id="btn-edit-profile" title="Editar Perfil">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <div class="user-avatar">
+                        <img src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=80"
+                            alt="Avatar" id="user-avatar">
+                        <div class="level-badge" id="level-badge">1</div>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <h3 id="user-name">Usuário</h3>
+                    <div class="user-level">
+                        <span class="level-tag" id="level-tag">Nível 1</span>
+                        <span class="border-tag" id="border-tag">Iniciante</span>
+                    </div>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-progress" id="xp-progress" style="width: 0%"></div>
+                </div>
+                <p class="xp-text" id="xp-text">0 / 200 XP</p>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="projects">
+                    <i class="fas fa-folder"></i>
+                    <span>Meus Projetos</span>
+                </a>
+                <a href="#" class="nav-item" data-page="new">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Novo Projeto</span>
+                </a>
+                <a href="#" class="nav-item" data-page="wallet">
+                    <i class="fas fa-wallet"></i>
+                    <span>Minha Carteira</span>
+                    <span class="credits-badge" id="credits-badge">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="lessons">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Aulas</span>
+                </a>
+                <a href="#" class="nav-item" data-page="help">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Ajuda</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 id="page-title">Meus Projetos</h2>
+                <div class="header-actions">
+                    <div class="credits-display">
+                        <i class="fas fa-coins"></i>
+                        <span id="header-credits">0</span> créditos
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page: Projects -->
+            <section class="page active" id="page-projects">
+                <div class="page-header">
+                    <p class="page-subtitle">Gerencie seus sites criados</p>
+                    <button class="btn-primary" id="btn-new-project">
+                        <i class="fas fa-plus"></i> Novo Projeto
+                    </button>
+                </div>
+
+                <div class="projects-grid" id="projects-grid">
+                    <!-- Projects rendered here -->
+                </div>
+
+                <div class="empty-state" id="empty-projects">
+                    <i class="fas fa-folder-open"></i>
+                    <h3>Nenhum projeto ainda</h3>
+                    <p>Crie seu primeiro site agora mesmo!</p>
+                    <button class="btn-primary" id="btn-first-project">
+                        <i class="fas fa-rocket"></i> Criar Primeiro Site
+                    </button>
+                </div>
+            </section>
+
+            <!-- Page: Wallet -->
+            <section class="page" id="page-wallet">
+                <div class="wallet-header">
+                    <div class="wallet-balance">
+                        <span class="balance-label">Saldo Atual</span>
+                        <span class="balance-amount" id="wallet-balance">0</span>
+                        <span class="balance-unit">créditos</span>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Comprar Créditos</h3>
+                <div class="packages-grid" id="packages-grid">
+                    <!-- Packages rendered here -->
+                </div>
+
+                <h3 class="section-title">Histórico de Transações</h3>
+                <div class="transactions-list" id="transactions-list">
+                    <!-- Transactions rendered here -->
+                </div>
+            </section>
+
+            <!-- Page: Lessons -->
+            <section class="page" id="page-lessons">
+                <div class="page-header">
+                    <p class="page-subtitle">Aprenda a criar sites incríveis</p>
+                </div>
+
+                <div class="lessons-grid">
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Bem-vindo à Plataforma</h4>
+                            <p>Aprenda como funciona e comece a criar</p>
+                            <span class="lesson-duration">5 min</span>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Criando seu Primeiro Site</h4>
+                            <p>Passo a passo do editor</p>
+                            <span class="lesson-duration">8 min</span>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Personalizando Cores e Estilo</h4>
+                            <p>Deixe seu site com sua cara</p>
+                            <span class="lesson-duration">6 min</span>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Publicando e Compartilhando</h4>
+                            <p>Como colocar na bio do Instagram</p>
+                            <span class="lesson-duration">4 min</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Help -->
+            <section class="page" id="page-help">
+                <div class="page-header">
+                    <p class="page-subtitle">Dúvidas frequentes</p>
+                </div>
+
+                <div class="faq-list">
+                    <details class="faq-item">
+                        <summary>Como criar meu primeiro site?</summary>
+                        <p>Clique em "Novo Projeto" no menu, preencha suas informações, personalize as cores e clique em
+                            "Publicar".</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Quanto custa para publicar?</summary>
+                        <p>A primeira publicação custa R$147 (pagamento único). Depois, cada site adicional custa 50
+                            créditos.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Como funcionam os créditos?</summary>
+                        <p>Créditos são usados para publicar sites. Você pode comprar pacotes: 100 créditos por R$100,
+                            com bônus nos pacotes maiores.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Posso editar meu site depois de publicar?</summary>
+                        <p>Sim! Edições são gratuitas. Só a primeira publicação tem custo.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Como ganho XP e subo de nível?</summary>
+                        <p>Você ganha XP ao comprar créditos (2.5x o valor). Níveis mais altos dão descontos e badges
+                            exclusivos!</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Preciso de ajuda, como falo com vocês?</summary>
+                        <p>Entre em contato pelo WhatsApp: (83) 99635-3619</p>
+                    </details>
+                </div>
+
+                <div class="help-cta">
+                    <h4>Ainda tem dúvidas?</h4>
+                    <a href="https://wa.me/5583996353619" target="_blank" class="btn-whatsapp">
+                        <i class="fab fa-whatsapp"></i> Falar no WhatsApp
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: Buy Credits -->
+    <div class="modal" id="modal-buy">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-coins"></i> Comprar Créditos</h2>
+                <button class="modal-close" onclick="closeBuyModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="buy-modal-body">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Level Up -->
+    <div class="modal" id="modal-levelup">
+        <div class="modal-content modal-small">
+            <div class="modal-body center">
+                <div class="levelup-icon">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <h3>Level Up!</h3>
+                <p id="levelup-text">Você subiu para o Nível X!</p>
+                <button class="btn-primary" onclick="closeLevelUpModal()">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Login -->
+    <div class="modal" id="modal-login">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user"></i> Acesse sua conta</h2>
+                <button class="modal-close" onclick="closeLoginModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form -->
+                <div id="login-form">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="login-password" placeholder="Sua senha">
+                    </div>
+                    <p id="login-error" class="error-text" style="display: none;"></p>
+                    <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="doLogin()">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                    <p style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                        Não tem conta? <a href="#" onclick="showRegisterForm()"
+                            style="color: var(--gold);">Cadastre-se</a>
+                    </p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-form" style="display: none;">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" id="register-name" placeholder="Seu nome">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="register-email" placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="register-password" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <p id="register-error" class="error-text" style="display: none;"></p>
+                    <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="doRegister()">
+                        <i class="fas fa-user-plus"></i> Criar Conta
+                    </button>
+                    <p style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                        Já tem conta? <a href="#" onclick="showLoginForm()" style="color: var(--gold);">Fazer login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/userData.js"></script>
+    <script src="js/credits.js"></script>
+    <script src="js/xpSystem.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>
