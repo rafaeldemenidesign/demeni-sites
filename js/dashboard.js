@@ -211,18 +211,68 @@ function publishProject(id) {
 }
 
 // ========== PACKAGES ==========
-function loadPackages() {
-    const packages = Credits.getPackages();
+async function loadPackages() {
     const grid = document.getElementById('packages-grid');
+    if (!grid) return;
 
-    grid.innerHTML = packages.map((pkg, i) => `
-        <div class="package-card ${i === 1 ? 'popular' : ''}" onclick="buyPackage('${pkg.id}')">
-            <p class="package-name">${pkg.label}</p>
-            <p class="package-credits">${pkg.credits}</p>
-            <p class="package-bonus">${pkg.bonus > 0 ? `+${pkg.bonus} bônus` : '&nbsp;'}</p>
-            <p class="package-price">${Credits.formatPrice(pkg.price)}</p>
-        </div>
-    `).join('');
+    // Check if Payments module is available
+    if (window.Payments && typeof Payments.getPackages === 'function') {
+        const pkgs = Payments.getPackages();
+        const discount = Payments.getUserDiscount ? Payments.getUserDiscount() : 0;
+
+        // Show discount banner if user has a discount
+        let discountBanner = '';
+        if (discount > 0) {
+            discountBanner = `
+                <div class="discount-banner">
+                    <i class="fas fa-star"></i>
+                    Seu nível te dá <strong>${discount}% de desconto</strong> em todos os pacotes!
+                </div>
+            `;
+        }
+
+        grid.innerHTML = discountBanner + pkgs.map((pkg, i) => `
+            <div class="credit-package ${i === 1 ? 'popular' : ''}" data-package-id="${pkg.id}">
+                ${i === 1 ? '<span class="package-badge">Mais Popular</span>' : ''}
+                <h3 class="package-name">${pkg.name}</h3>
+                <div class="package-credits">
+                    <span class="credits-amount">${pkg.totalCredits}</span>
+                    <span class="credits-label">créditos</span>
+                </div>
+                ${pkg.bonus_credits > 0 ? `<div class="package-bonus">+${pkg.bonus_credits} bônus</div>` : ''}
+                <div class="package-price">
+                    ${pkg.discountPercent > 0 ? `
+                        <span class="original-price">R$ ${pkg.originalPrice.toFixed(2)}</span>
+                        <span class="discount-badge">-${pkg.discountPercent}%</span>
+                    ` : ''}
+                    <span class="final-price">R$ ${pkg.finalPrice.toFixed(2)}</span>
+                </div>
+                <button class="btn-buy" onclick="buyPackageMP('${pkg.id}')">
+                    <i class="fab fa-pix"></i> Comprar
+                </button>
+            </div>
+        `).join('');
+    } else {
+        // Fallback to old Credits system
+        const packages = Credits.getPackages();
+        grid.innerHTML = packages.map((pkg, i) => `
+            <div class="package-card ${i === 1 ? 'popular' : ''}" onclick="buyPackage('${pkg.id}')">
+                <p class="package-name">${pkg.label}</p>
+                <p class="package-credits">${pkg.credits}</p>
+                <p class="package-bonus">${pkg.bonus > 0 ? `+${pkg.bonus} bônus` : '&nbsp;'}</p>
+                <p class="package-price">${Credits.formatPrice(pkg.price)}</p>
+            </div>
+        `).join('');
+    }
+}
+
+// Buy package using Mercado Pago
+async function buyPackageMP(packageId) {
+    if (window.Payments) {
+        await Payments.openCheckout(packageId);
+    } else {
+        showNotification('Sistema de pagamento não disponível', 'error');
+    }
 }
 
 function buyPackage(packageId) {
@@ -358,6 +408,7 @@ function deleteProjectConfirm(id) {
 window.editProject = editProject;
 window.publishProject = publishProject;
 window.buyPackage = buyPackage;
+window.buyPackageMP = buyPackageMP;
 window.deleteProjectConfirm = deleteProjectConfirm;
 window.closeBuyModal = closeBuyModal;
 window.closeLevelUpModal = closeLevelUpModal;
