@@ -200,28 +200,28 @@
 
                 <div class="faq-list">
                     <details class="faq-item">
-                        <summary>Como criar meu primeiro site?</summary>
-                        <p>Clique em "Novo Projeto" no menu, preencha suas informações, personalize as cores e clique em
-                            "Publicar".</p>
+                        <summary>Como criar um site para meu cliente?</summary>
+                        <p>Clique em "Novo Projeto" no menu, preencha as informações do cliente, personalize as cores e
+                            clique em "Publicar". Escolha o subdomínio único e pronto!</p>
                     </details>
                     <details class="faq-item">
-                        <summary>Quanto custa para publicar?</summary>
-                        <p>A primeira publicação custa R$147 (pagamento único). Depois, cada site adicional custa 50
-                            créditos.</p>
+                        <summary>Quanto custa para publicar um site?</summary>
+                        <p>Cada publicação custa 50 créditos. Atualizações no mesmo site são gratuitas.</p>
                     </details>
                     <details class="faq-item">
                         <summary>Como funcionam os créditos?</summary>
-                        <p>Créditos são usados para publicar sites. Você pode comprar pacotes: 100 créditos por R$100,
-                            com bônus nos pacotes maiores.</p>
+                        <p>Créditos são usados para publicar sites. Cada site = 50 créditos. Você pode comprar pacotes
+                            na seção "Minha Carteira".</p>
                     </details>
                     <details class="faq-item">
-                        <summary>Posso editar meu site depois de publicar?</summary>
-                        <p>Sim! Edições são gratuitas. Só a primeira publicação tem custo.</p>
+                        <summary>Posso mudar o subdomínio depois de publicar?</summary>
+                        <p>Não. O subdomínio é definido na primeira publicação e não pode ser alterado, mas você pode
+                            atualizar o conteúdo quantas vezes quiser.</p>
                     </details>
                     <details class="faq-item">
-                        <summary>Como ganho XP e subo de nível?</summary>
-                        <p>Você ganha XP ao comprar créditos (2.5x o valor). Níveis mais altos dão descontos e badges
-                            exclusivos!</p>
+                        <summary>Qual será a URL do site?</summary>
+                        <p>Os sites ficam em projeto.rafaeldemeni.com, onde "projeto" é o subdomínio que você escolher.
+                        </p>
                     </details>
                     <details class="faq-item">
                         <summary>Preciso de ajuda, como falo com vocês?</summary>
@@ -277,51 +277,27 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <!-- Login Form -->
-                <div id="login-form">
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="login-email" placeholder="seu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Senha</label>
-                        <input type="password" id="login-password" placeholder="Sua senha">
-                    </div>
-                    <p id="login-error" class="error-text" style="display: none;"></p>
-                    <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="doLogin()">
-                        <i class="fas fa-sign-in-alt"></i> Entrar
-                    </button>
-                    <p style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
-                        Não tem conta? <a href="#" onclick="showRegisterForm()"
-                            style="color: var(--gold);">Cadastre-se</a>
-                    </p>
+            <!-- Login Form -->
+            <div id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="seu@email.com">
                 </div>
-
-                <!-- Register Form -->
-                <div id="register-form" style="display: none;">
-                    <div class="form-group">
-                        <label>Nome</label>
-                        <input type="text" id="register-name" placeholder="Seu nome">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="register-email" placeholder="seu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Senha</label>
-                        <input type="password" id="register-password" placeholder="Mínimo 6 caracteres">
-                    </div>
-                    <p id="register-error" class="error-text" style="display: none;"></p>
-                    <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="doRegister()">
-                        <i class="fas fa-user-plus"></i> Criar Conta
-                    </button>
-                    <p style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
-                        Já tem conta? <a href="#" onclick="showLoginForm()" style="color: var(--gold);">Fazer login</a>
-                    </p>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-password" placeholder="Sua senha">
                 </div>
+                <p id="login-error" class="error-text" style="display: none;"></p>
+                <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="doLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                <p style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                    Esqueceu a senha? <a href="#" onclick="showForgotPassword()" style="color: var(--gold);">Recuperar
+                        acesso</a>
+                </p>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Scripts -->

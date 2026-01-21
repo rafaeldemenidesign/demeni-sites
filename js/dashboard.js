@@ -440,14 +440,35 @@ function closeLoginModal() {
 
 function showLoginForm() {
     document.getElementById('login-form').style.display = 'block';
-    document.getElementById('register-form').style.display = 'none';
     document.getElementById('login-error').style.display = 'none';
 }
 
-function showRegisterForm() {
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('register-form').style.display = 'block';
-    document.getElementById('register-error').style.display = 'none';
+async function showForgotPassword() {
+    const email = document.getElementById('login-email').value;
+
+    if (!email) {
+        alert('Digite seu email primeiro para recuperar a senha.');
+        document.getElementById('login-email').focus();
+        return;
+    }
+
+    try {
+        if (SupabaseClient && SupabaseClient.getClient()) {
+            const { error } = await SupabaseClient.getClient().auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/app.html'
+            });
+
+            if (error) {
+                alert('Erro: ' + error.message);
+            } else {
+                alert('Email de recuperação enviado! Verifique sua caixa de entrada.');
+            }
+        } else {
+            alert('Entre em contato com o suporte: (83) 99635-3619');
+        }
+    } catch (e) {
+        alert('Erro ao enviar email. Entre em contato com o suporte.');
+    }
 }
 
 async function doLogin() {
@@ -565,9 +586,8 @@ function testLogin() {
 window.showLoginModal = showLoginModal;
 window.closeLoginModal = closeLoginModal;
 window.showLoginForm = showLoginForm;
-window.showRegisterForm = showRegisterForm;
+window.showForgotPassword = showForgotPassword;
 window.doLogin = doLogin;
-window.doRegister = doRegister;
 window.doLogout = doLogout;
 window.testLogin = testLogin;
 
