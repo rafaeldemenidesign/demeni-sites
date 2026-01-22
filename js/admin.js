@@ -549,3 +549,275 @@ window.toggleSiteStatus = toggleSiteStatus;
 window.filterUsers = filterUsers;
 window.toggleSidebar = toggleSidebar;
 window.doLogout = doLogout;
+
+// ========== PHASE 2: SUPPORT TICKETS ==========
+let tickets = [];
+let currentTicketId = null;
+
+async function loadTickets() {
+    // Demo data
+    tickets = [
+        { id: '1', user_id: '2', subject: 'Não consigo publicar', category: 'Técnico', status: 'pending', created_at: '2026-01-22T14:00:00', profiles: { name: 'João Silva' }, messages: [{ sender: 'user', content: 'Olá, estou tentando publicar mas dá erro.' }] },
+        { id: '2', user_id: '3', subject: 'Como adicionar créditos?', category: 'Dúvida', status: 'resolved', created_at: '2026-01-21T10:00:00', profiles: { name: 'Maria Santos' }, messages: [{ sender: 'user', content: 'Gostaria de saber como comprar mais créditos.' }, { sender: 'admin', content: 'Vá em Minha Carteira e escolha um pacote.' }] }
+    ];
+    renderTickets();
+    updateTicketStats();
+}
+
+function renderTickets() {
+    const tbody = document.getElementById('support-table');
+    if (!tbody) return;
+
+    tbody.innerHTML = tickets.map(t => `
+        <tr>
+            <td>${formatDateTime(t.created_at)}</td>
+            <td>${t.profiles?.name || 'Usuário'}</td>
+            <td>${t.category || 'Geral'}</td>
+            <td>${t.subject}</td>
+            <td><span class="status-badge ${t.status}">${getTicketStatusLabel(t.status)}</span></td>
+            <td>
+                <button class="action-btn" onclick="openTicketModal('${t.id}')" title="Responder">
+                    <i class="fas fa-reply"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function getTicketStatusLabel(status) {
+    const labels = { pending: 'Pendente', in_progress: 'Em Andamento', resolved: 'Resolvido' };
+    return labels[status] || status;
+}
+
+function updateTicketStats() {
+    const pending = tickets.filter(t => t.status === 'pending').length;
+    const inProgress = tickets.filter(t => t.status === 'in_progress').length;
+    const resolved = tickets.filter(t => t.status === 'resolved').length;
+
+    const statPending = document.getElementById('stat-pending');
+    const statProgress = document.getElementById('stat-progress');
+    const statResolved = document.getElementById('stat-resolved');
+    const pendingBadge = document.getElementById('pending-tickets');
+
+    if (statPending) statPending.textContent = pending;
+    if (statProgress) statProgress.textContent = inProgress;
+    if (statResolved) statResolved.textContent = resolved;
+    if (pendingBadge) pendingBadge.textContent = `${pending} pendentes`;
+}
+
+function openTicketModal(ticketId) {
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    currentTicketId = ticketId;
+
+    document.getElementById('ticket-info').innerHTML = `
+        <h4>${ticket.subject}</h4>
+        <p>De: ${ticket.profiles?.name || 'Usuário'} | ${ticket.category} | ${formatDateTime(ticket.created_at)}</p>
+    `;
+
+    document.getElementById('ticket-history').innerHTML = (ticket.messages || []).map(m => `
+        <div class="ticket-message ${m.sender}">
+            <div class="sender">${m.sender === 'admin' ? '🛡️ Admin' : '👤 Usuário'}</div>
+            <div class="content">${m.content}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('ticket-status').value = ticket.status;
+    document.getElementById('ticket-reply').value = '';
+    document.getElementById('modal-ticket').classList.add('active');
+}
+
+function closeTicketModal() {
+    document.getElementById('modal-ticket').classList.remove('active');
+    currentTicketId = null;
+}
+
+async function sendTicketReply() {
+    if (!currentTicketId) return;
+
+    const reply = document.getElementById('ticket-reply').value.trim();
+    const newStatus = document.getElementById('ticket-status').value;
+
+    const ticket = tickets.find(t => t.id === currentTicketId);
+    if (!ticket) return;
+
+    if (reply) {
+        ticket.messages = ticket.messages || [];
+        ticket.messages.push({ sender: 'admin', content: reply });
+    }
+    ticket.status = newStatus;
+
+    renderTickets();
+    updateTicketStats();
+    closeTicketModal();
+    logActivity(`Respondeu ticket: ${ticket.subject}`);
+    alert('✅ Resposta enviada!');
+}
+
+function filterTickets() {
+    const status = document.getElementById('filter-ticket-status')?.value;
+    const filtered = status ? tickets.filter(t => t.status === status) : tickets;
+
+    const tbody = document.getElementById('support-table');
+    if (!tbody) return;
+
+    tbody.innerHTML = filtered.map(t => `
+        <tr>
+            <td>${formatDateTime(t.created_at)}</td>
+            <td>${t.profiles?.name || 'Usuário'}</td>
+            <td>${t.category || 'Geral'}</td>
+            <td>${t.subject}</td>
+            <td><span class="status-badge ${t.status}">${getTicketStatusLabel(t.status)}</span></td>
+            <td>
+                <button class="action-btn" onclick="openTicketModal('${t.id}')" title="Responder">
+                    <i class="fas fa-reply"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ========== ANNOUNCEMENTS ==========
+let announcements = [];
+
+function loadAnnouncements() {
+    announcements = [
+        { id: '1', title: 'Bem-vindos à plataforma!', message: 'Estamos felizes em tê-los conosco.', target: 'all', created_at: '2026-01-20T10:00:00' }
+    ];
+    renderAnnouncements();
+}
+
+function renderAnnouncements() {
+    const container = document.getElementById('announcements-history');
+    if (!container) return;
+
+    container.innerHTML = announcements.length ? announcements.map(a => `
+        <div class="announcement-item">
+            <h4>${a.title}</h4>
+            <p>${a.message}</p>
+            <span class="meta">Enviado para: ${a.target === 'all' ? 'Todos' : a.target} | ${formatDateTime(a.created_at)}</span>
+        </div>
+    `).join('') : '<p style="color: var(--text-muted)">Nenhum comunicado enviado.</p>';
+}
+
+async function sendAnnouncement(e) {
+    e.preventDefault();
+
+    const title = document.getElementById('ann-title').value;
+    const message = document.getElementById('ann-message').value;
+    const target = document.getElementById('ann-target').value;
+
+    announcements.unshift({
+        id: Date.now().toString(),
+        title,
+        message,
+        target,
+        created_at: new Date().toISOString()
+    });
+
+    renderAnnouncements();
+    e.target.reset();
+    logActivity(`Enviou comunicado: ${title}`);
+    alert('✅ Comunicado enviado!');
+}
+
+// ========== SETTINGS ==========
+function loadPackageSettings() {
+    const container = document.getElementById('packages-settings');
+    if (!container) return;
+
+    const packages = [
+        { id: 'starter', name: 'Primeira Compra', price: 1, credits: 40 },
+        { id: 'essencial', name: 'Essencial', price: 200, credits: 200 },
+        { id: 'profissional', name: 'Profissional', price: 400, credits: 600 },
+        { id: 'empresarial', name: 'Empresarial', price: 600, credits: 1000 }
+    ];
+
+    container.innerHTML = packages.map(p => `
+        <div class="package-setting" data-package-id="${p.id}">
+            <div class="form-group">
+                <label>Pacote</label>
+                <input type="text" value="${p.name}" disabled>
+            </div>
+            <div class="form-group">
+                <label>Preço (R$)</label>
+                <input type="number" class="pkg-price" value="${p.price}" min="0">
+            </div>
+            <div class="form-group">
+                <label>Créditos</label>
+                <input type="number" class="pkg-credits" value="${p.credits}" min="0">
+            </div>
+            <div class="form-group">
+                <label>Sites</label>
+                <input type="number" value="${Math.floor(p.credits / 40)}" disabled>
+            </div>
+        </div>
+    `).join('');
+}
+
+function savePackageSettings() {
+    // Collect all package settings
+    const settings = [];
+    document.querySelectorAll('.package-setting').forEach(el => {
+        settings.push({
+            id: el.dataset.packageId,
+            price: parseFloat(el.querySelector('.pkg-price').value),
+            credits: parseInt(el.querySelector('.pkg-credits').value)
+        });
+    });
+
+    console.log('Package settings to save:', settings);
+    logActivity('Atualizou configurações de pacotes');
+    alert('✅ Configurações salvas!');
+}
+
+function saveSystemSettings() {
+    const siteCost = document.getElementById('setting-site-cost')?.value;
+    const initialCredits = document.getElementById('setting-initial-credits')?.value;
+    const maintenance = document.getElementById('setting-maintenance')?.checked;
+
+    console.log('System settings:', { siteCost, initialCredits, maintenance });
+    logActivity('Atualizou configurações do sistema');
+    alert('✅ Configurações do sistema salvas!');
+}
+
+// ========== ACTIVITY LOG ==========
+let adminLogs = [];
+
+function logActivity(action) {
+    adminLogs.unshift({
+        time: new Date().toLocaleTimeString('pt-BR'),
+        action
+    });
+    renderAdminLogs();
+}
+
+function renderAdminLogs() {
+    const container = document.getElementById('admin-logs');
+    if (!container) return;
+
+    container.innerHTML = adminLogs.length ? adminLogs.slice(0, 10).map(l => `
+        <div class="log-item">
+            <span class="log-time">${l.time}</span>
+            <span class="log-action">${l.action}</span>
+        </div>
+    `).join('') : '<p style="color: var(--text-muted)">Nenhuma atividade registrada.</p>';
+}
+
+// Load Phase 2 data on init
+setTimeout(() => {
+    loadTickets();
+    loadAnnouncements();
+    loadPackageSettings();
+    renderAdminLogs();
+}, 100);
+
+// Expose Phase 2 functions
+window.openTicketModal = openTicketModal;
+window.closeTicketModal = closeTicketModal;
+window.sendTicketReply = sendTicketReply;
+window.filterTickets = filterTickets;
+window.sendAnnouncement = sendAnnouncement;
+window.savePackageSettings = savePackageSettings;
+window.saveSystemSettings = saveSystemSettings;

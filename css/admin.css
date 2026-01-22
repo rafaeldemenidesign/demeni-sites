@@ -826,6 +826,246 @@ body {
     border-color: var(--gold);
 }
 
+/* Support Stats */
+.support-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.support-stat {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.support-stat i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.support-stat .count {
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: block;
+}
+
+.support-stat .label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.support-stat.pending i,
+.support-stat.pending .count {
+    color: var(--warning);
+}
+
+.support-stat.progress i,
+.support-stat.progress .count {
+    color: var(--info);
+}
+
+.support-stat.resolved i,
+.support-stat.resolved .count {
+    color: var(--success);
+}
+
+/* Badge Counter */
+.badge-counter {
+    background: var(--warning);
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Settings Rows */
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.settings-row:last-of-type {
+    border-bottom: none;
+    margin-bottom: 20px;
+}
+
+.settings-row input {
+    width: 150px;
+    padding: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    transition: 0.3s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 3px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+input:checked+.slider {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+input:checked+.slider:before {
+    transform: translateX(22px);
+    background: #000;
+}
+
+/* Activity Log */
+.activity-log {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.log-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-time {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.log-action {
+    color: var(--text-primary);
+}
+
+/* Ticket Info */
+.ticket-info {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.ticket-info h4 {
+    margin-bottom: 8px;
+    color: var(--gold);
+}
+
+.ticket-info p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.ticket-history {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+}
+
+.ticket-message {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.ticket-message.user {
+    background: var(--bg-card);
+}
+
+.ticket-message.admin {
+    background: rgba(212, 175, 55, 0.1);
+    border-left: 3px solid var(--gold);
+}
+
+.ticket-message .sender {
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+.ticket-message .content {
+    font-size: 0.9rem;
+}
+
+/* Announcement History */
+.announcement-item {
+    background: var(--bg-panel);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.announcement-item h4 {
+    margin-bottom: 8px;
+}
+
+.announcement-item p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.announcement-item .meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Status badges for tickets */
+.status-badge.in_progress {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--info);
+}
+
+.status-badge.resolved {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .charts-grid {

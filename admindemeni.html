@@ -38,6 +38,9 @@
                 <a href="#" class="nav-link" data-page="support">
                     <i class="fas fa-headset"></i> Suporte
                 </a>
+                <a href="#" class="nav-link" data-page="announcements">
+                    <i class="fas fa-bullhorn"></i> Comunicados
+                </a>
                 <a href="#" class="nav-link" data-page="settings">
                     <i class="fas fa-cog"></i> Configurações
                 </a>
@@ -238,6 +241,38 @@
             <section id="page-support" class="page">
                 <div class="page-header">
                     <h2>Suporte</h2>
+                    <div class="header-actions">
+                        <span class="badge-counter" id="pending-tickets">0 pendentes</span>
+                    </div>
+                </div>
+
+                <!-- Support Stats -->
+                <div class="support-stats">
+                    <div class="support-stat pending">
+                        <i class="fas fa-clock"></i>
+                        <span class="count" id="stat-pending">0</span>
+                        <span class="label">Pendentes</span>
+                    </div>
+                    <div class="support-stat progress">
+                        <i class="fas fa-sync"></i>
+                        <span class="count" id="stat-progress">0</span>
+                        <span class="label">Em Andamento</span>
+                    </div>
+                    <div class="support-stat resolved">
+                        <i class="fas fa-check"></i>
+                        <span class="count" id="stat-resolved">0</span>
+                        <span class="label">Resolvidos</span>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-bar">
+                    <select id="filter-ticket-status" onchange="filterTickets()">
+                        <option value="">Todos</option>
+                        <option value="pending">Pendentes</option>
+                        <option value="in_progress">Em Andamento</option>
+                        <option value="resolved">Resolvidos</option>
+                    </select>
                 </div>
 
                 <!-- Support Tickets -->
@@ -260,6 +295,51 @@
                 </div>
             </section>
 
+            <!-- Announcements Page -->
+            <section id="page-announcements" class="page">
+                <div class="page-header">
+                    <h2>Comunicados</h2>
+                </div>
+
+                <!-- New Announcement Form -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-bullhorn"></i> Novo Comunicado</h3>
+                    <form id="announcement-form" onsubmit="sendAnnouncement(event)">
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" id="ann-title" placeholder="Título do comunicado" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mensagem</label>
+                            <textarea id="ann-message" rows="4" placeholder="Escreva sua mensagem..."
+                                required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Enviar para</label>
+                            <select id="ann-target">
+                                <option value="all">Todos os usuários</option>
+                                <option value="bronze">Bronze</option>
+                                <option value="silver">Prata</option>
+                                <option value="gold">Ouro</option>
+                                <option value="turmalina">Turmalina</option>
+                                <option value="fire">Fire</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Enviar Comunicado
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Announcement History -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-history"></i> Histórico de Comunicados</h3>
+                    <div id="announcements-history">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
             <!-- Settings Page -->
             <section id="page-settings" class="page">
                 <div class="page-header">
@@ -269,13 +349,44 @@
                 <!-- Package Settings -->
                 <div class="settings-card">
                     <h3><i class="fas fa-box"></i> Pacotes de Créditos</h3>
-                    <p class="settings-desc">Configure os valores e créditos de cada pacote.</p>
+                    <p class="settings-desc">Configure os valores e créditos de cada pacote. 1 crédito = R$ 1</p>
                     <div id="packages-settings">
                         <!-- Populated by JS -->
                     </div>
                     <button class="btn-primary" onclick="savePackageSettings()">
                         <i class="fas fa-save"></i> Salvar Alterações
                     </button>
+                </div>
+
+                <!-- System Settings -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-cog"></i> Sistema</h3>
+                    <div class="settings-row">
+                        <label>Custo por site (créditos)</label>
+                        <input type="number" id="setting-site-cost" value="40" min="1">
+                    </div>
+                    <div class="settings-row">
+                        <label>Créditos iniciais novos usuários</label>
+                        <input type="number" id="setting-initial-credits" value="40" min="0">
+                    </div>
+                    <div class="settings-row toggle">
+                        <label>Modo Manutenção</label>
+                        <label class="switch">
+                            <input type="checkbox" id="setting-maintenance">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <button class="btn-primary" onclick="saveSystemSettings()">
+                        <i class="fas fa-save"></i> Salvar Sistema
+                    </button>
+                </div>
+
+                <!-- Activity Logs -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-list-alt"></i> Log de Atividades</h3>
+                    <div class="activity-log" id="admin-logs">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </section>
         </main>
@@ -338,6 +449,41 @@
                 </div>
                 <button class="btn-primary btn-full" onclick="saveCredits()">
                     <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Reply Ticket -->
+    <div class="modal" id="modal-ticket">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-reply"></i> Responder Ticket</h2>
+                <button class="modal-close" onclick="closeTicketModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-info" id="ticket-info">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="ticket-history" id="ticket-history">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="form-group">
+                    <label>Sua Resposta</label>
+                    <textarea id="ticket-reply" rows="4" placeholder="Digite sua resposta..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Alterar Status</label>
+                    <select id="ticket-status">
+                        <option value="pending">Pendente</option>
+                        <option value="in_progress">Em Andamento</option>
+                        <option value="resolved">Resolvido</option>
+                    </select>
+                </div>
+                <button class="btn-primary btn-full" onclick="sendTicketReply()">
+                    <i class="fas fa-paper-plane"></i> Enviar Resposta
                 </button>
             </div>
         </div>
