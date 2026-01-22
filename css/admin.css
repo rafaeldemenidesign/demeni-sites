@@ -1066,6 +1066,141 @@ input:checked+.slider:before {
     color: var(--success);
 }
 
+/* Phase 3: Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.metric-item {
+    background: var(--bg-panel);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+/* Top/Inactive Users List */
+.user-rank-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.user-rank-item:last-child {
+    border-bottom: none;
+}
+
+.user-rank-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-rank-info img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.user-rank-position {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.user-rank-value {
+    font-weight: 600;
+    color: var(--gold);
+}
+
+/* Affiliate Link */
+.affiliate-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.affiliate-link button {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+.affiliate-link button:hover {
+    background: var(--gold);
+    color: #000;
+}
+
+/* Webhook Status Colors */
+.webhook-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.webhook-status.success {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success);
+}
+
+.webhook-status.pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--warning);
+}
+
+.webhook-status.failed {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+}
+
+/* Export Button Styles */
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.header-actions select {
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .charts-grid {

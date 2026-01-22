@@ -821,3 +821,326 @@ window.filterTickets = filterTickets;
 window.sendAnnouncement = sendAnnouncement;
 window.savePackageSettings = savePackageSettings;
 window.saveSystemSettings = saveSystemSettings;
+
+// ========== PHASE 3: AFFILIATES ==========
+let affiliates = [];
+
+function loadAffiliates() {
+    // Demo data
+    affiliates = [
+        { id: '1', name: 'Rafael Demeni', code: 'rafael123', referrals: 5, commission: 250, active: true },
+        { id: '2', name: 'João Silva', code: 'joao456', referrals: 3, commission: 150, active: true },
+        { id: '3', name: 'Maria Santos', code: 'maria789', referrals: 0, commission: 0, active: false }
+    ];
+    renderAffiliates();
+    updateAffiliateStats();
+}
+
+function renderAffiliates() {
+    const tbody = document.getElementById('affiliates-table');
+    if (!tbody) return;
+
+    tbody.innerHTML = affiliates.map(a => `
+        <tr>
+            <td>
+                <div class="user-cell">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(a.name)}&background=D4AF37&color=000&size=36" alt="">
+                    <span>${a.name}</span>
+                </div>
+            </td>
+            <td>
+                <div class="affiliate-link">
+                    <span>rafaeldemeni.com/?ref=${a.code}</span>
+                    <button onclick="copyLink('${a.code}')"><i class="fas fa-copy"></i></button>
+                </div>
+            </td>
+            <td>${a.referrals}</td>
+            <td><strong>R$ ${a.commission.toLocaleString('pt-BR')}</strong></td>
+            <td><span class="status-badge ${a.active ? 'active' : 'inactive'}">${a.active ? 'Ativo' : 'Inativo'}</span></td>
+        </tr>
+    `).join('');
+}
+
+function updateAffiliateStats() {
+    const activeCount = affiliates.filter(a => a.active).length;
+    const totalReferrals = affiliates.reduce((sum, a) => sum + a.referrals, 0);
+
+    const statAffiliates = document.getElementById('stat-affiliates');
+    const statReferrals = document.getElementById('stat-referrals');
+
+    if (statAffiliates) statAffiliates.textContent = activeCount;
+    if (statReferrals) statReferrals.textContent = totalReferrals;
+}
+
+function copyLink(code) {
+    navigator.clipboard.writeText(`https://rafaeldemeni.com/?ref=${code}`);
+    alert('Link copiado!');
+}
+
+function saveAffiliateSettings() {
+    const commission = document.getElementById('affiliate-commission')?.value;
+    const bonus = document.getElementById('affiliate-bonus')?.value;
+    console.log('Affiliate settings:', { commission, bonus });
+    logActivity('Atualizou configurações de afiliados');
+    alert('✅ Configurações de afiliados salvas!');
+}
+
+// ========== PHASE 3: ANALYTICS ==========
+function loadAnalytics() {
+    initAnalyticsCharts();
+    loadTopFranchisees();
+    loadInactiveFranchisees();
+    updateMetrics();
+}
+
+function initAnalyticsCharts() {
+    // Funnel Chart
+    const funnelCtx = document.getElementById('funnel-chart')?.getContext('2d');
+    if (funnelCtx) {
+        new Chart(funnelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Visitantes', 'Cadastros', 'Primeiro Pagamento', 'Recorrentes'],
+                datasets: [{
+                    label: 'Conversão',
+                    data: [1000, 150, 80, 45],
+                    backgroundColor: ['#3b82f6', '#22c55e', '#D4AF37', '#f59e0b']
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                    y: { grid: { display: false }, ticks: { color: '#64748b' } }
+                }
+            }
+        });
+    }
+
+    // Package Chart (Pie)
+    const packageCtx = document.getElementById('package-chart')?.getContext('2d');
+    if (packageCtx) {
+        new Chart(packageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Primeira Compra', 'Essencial', 'Profissional', 'Empresarial'],
+                datasets: [{
+                    data: [20, 35, 30, 15],
+                    backgroundColor: ['#3b82f6', '#22c55e', '#D4AF37', '#f59e0b']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+                }
+            }
+        });
+    }
+}
+
+function loadTopFranchisees() {
+    const container = document.getElementById('top-franchisees');
+    if (!container) return;
+
+    const top = franchisees.slice(0, 5).map((f, i) => `
+        <div class="user-rank-item">
+            <div class="user-rank-info">
+                <span class="user-rank-position">${i + 1}</span>
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || 'U')}&background=D4AF37&color=000&size=32" alt="">
+                <span>${f.name || f.email}</span>
+            </div>
+            <span class="user-rank-value">${f.sites_count || 0} sites</span>
+        </div>
+    `).join('');
+
+    container.innerHTML = top || '<p style="color: var(--text-muted)">Nenhum dado</p>';
+}
+
+function loadInactiveFranchisees() {
+    const container = document.getElementById('inactive-franchisees');
+    if (!container) return;
+
+    // Demo: users without activity
+    const inactive = franchisees.filter(f => !f.is_active || (f.credits === 0 && f.sites_count === 0));
+
+    container.innerHTML = inactive.length ? inactive.slice(0, 5).map(f => `
+        <div class="user-rank-item">
+            <div class="user-rank-info">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || 'U')}&background=ef4444&color=fff&size=32" alt="">
+                <span>${f.name || f.email}</span>
+            </div>
+            <span style="color: var(--text-muted)">30+ dias</span>
+        </div>
+    `).join('') : '<p style="color: var(--text-muted)">Todos os usuários estão ativos!</p>';
+}
+
+function updateMetrics() {
+    const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const avgLTV = franchisees.length > 0 ? totalRevenue / franchisees.length : 0;
+    const churn = 5; // Demo
+    const conversion = 15; // Demo
+
+    const mrrEl = document.getElementById('metric-mrr');
+    const ltvEl = document.getElementById('metric-ltv');
+    const churnEl = document.getElementById('metric-churn');
+    const convEl = document.getElementById('metric-conversion');
+
+    if (mrrEl) mrrEl.textContent = `R$ ${totalRevenue.toLocaleString('pt-BR')}`;
+    if (ltvEl) ltvEl.textContent = `R$ ${avgLTV.toFixed(0)}`;
+    if (churnEl) churnEl.textContent = `${churn}%`;
+    if (convEl) convEl.textContent = `${conversion}%`;
+}
+
+// ========== PHASE 3: WEBHOOKS ==========
+let webhooks = [];
+
+function loadWebhooks() {
+    // Demo data
+    webhooks = [
+        { id: 'MP123456', type: 'payment', user: 'Rafael Demeni', status: 'success', created_at: '2026-01-22T10:30:00' },
+        { id: 'MP123457', type: 'payment', user: 'João Silva', status: 'success', created_at: '2026-01-21T15:45:00' },
+        { id: 'MP123458', type: 'refund', user: 'Maria Santos', status: 'pending', created_at: '2026-01-20T09:00:00' },
+        { id: 'MP123459', type: 'payment', user: 'Teste', status: 'failed', created_at: '2026-01-19T14:20:00' }
+    ];
+    renderWebhooks();
+    updateWebhookStats();
+}
+
+function renderWebhooks() {
+    const tbody = document.getElementById('webhooks-table');
+    if (!tbody) return;
+
+    tbody.innerHTML = webhooks.map(w => `
+        <tr>
+            <td>${formatDateTime(w.created_at)}</td>
+            <td>${w.type === 'payment' ? '💰 Pagamento' : '↩️ Reembolso'}</td>
+            <td style="font-family: monospace; font-size: 0.8rem">${w.id}</td>
+            <td>${w.user}</td>
+            <td><span class="webhook-status ${w.status}">${getWebhookStatusLabel(w.status)}</span></td>
+            <td>
+                ${w.status === 'failed' || w.status === 'pending' ? `
+                    <button class="action-btn" onclick="reprocessWebhook('${w.id}')" title="Reprocessar">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                ` : ''}
+                <button class="action-btn" onclick="viewWebhookDetails('${w.id}')" title="Detalhes">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function getWebhookStatusLabel(status) {
+    const labels = { success: '✓ Sucesso', pending: '⏳ Pendente', failed: '✗ Falha' };
+    return labels[status] || status;
+}
+
+function updateWebhookStats() {
+    const success = webhooks.filter(w => w.status === 'success').length;
+    const pending = webhooks.filter(w => w.status === 'pending').length;
+    const failed = webhooks.filter(w => w.status === 'failed').length;
+
+    const successEl = document.getElementById('webhook-success');
+    const pendingEl = document.getElementById('webhook-pending');
+    const failedEl = document.getElementById('webhook-failed');
+
+    if (successEl) successEl.textContent = success;
+    if (pendingEl) pendingEl.textContent = pending;
+    if (failedEl) failedEl.textContent = failed;
+}
+
+function reprocessWebhook(id) {
+    const webhook = webhooks.find(w => w.id === id);
+    if (!webhook) return;
+
+    if (confirm(`Reprocessar webhook ${id}?`)) {
+        webhook.status = 'success';
+        renderWebhooks();
+        updateWebhookStats();
+        logActivity(`Reprocessou webhook: ${id}`);
+        alert('✅ Webhook reprocessado!');
+    }
+}
+
+function viewWebhookDetails(id) {
+    const webhook = webhooks.find(w => w.id === id);
+    if (webhook) {
+        alert(`Detalhes do Webhook\n\nID: ${webhook.id}\nTipo: ${webhook.type}\nUsuário: ${webhook.user}\nStatus: ${webhook.status}\nData: ${formatDateTime(webhook.created_at)}`);
+    }
+}
+
+function refreshWebhooks() {
+    loadWebhooks();
+    logActivity('Atualizou lista de webhooks');
+    alert('✅ Webhooks atualizados!');
+}
+
+// ========== PHASE 3: EXPORT ==========
+function exportReport(type) {
+    let data, filename;
+
+    if (type === 'all' || type === 'franchisees') {
+        data = franchisees.map(f => ({
+            Nome: f.name || '',
+            Email: f.email || '',
+            Creditos: f.credits || 0,
+            Sites: f.sites_count || 0,
+            Status: f.is_active !== false ? 'Ativo' : 'Inativo',
+            Criado: formatDate(f.created_at)
+        }));
+        filename = 'franqueados.csv';
+    } else if (type === 'payments') {
+        data = payments.map(p => ({
+            Data: formatDateTime(p.created_at),
+            Usuario: p.profiles?.name || '',
+            Pacote: p.package_name || '',
+            Valor: p.amount || 0,
+            Status: p.status,
+            ID_MP: p.mp_payment_id || ''
+        }));
+        filename = 'pagamentos.csv';
+    }
+
+    if (data && data.length) {
+        downloadCSV(data, filename);
+        logActivity(`Exportou relatório: ${filename}`);
+    } else {
+        alert('Nenhum dado para exportar');
+    }
+}
+
+function downloadCSV(data, filename) {
+    const headers = Object.keys(data[0]);
+    const csv = [
+        headers.join(','),
+        ...data.map(row => headers.map(h => `"${row[h]}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Load Phase 3 data
+setTimeout(() => {
+    loadAffiliates();
+    loadAnalytics();
+    loadWebhooks();
+}, 200);
+
+// Expose Phase 3 functions
+window.copyLink = copyLink;
+window.saveAffiliateSettings = saveAffiliateSettings;
+window.loadAnalytics = loadAnalytics;
+window.exportReport = exportReport;
+window.refreshWebhooks = refreshWebhooks;
+window.reprocessWebhook = reprocessWebhook;
+window.viewWebhookDetails = viewWebhookDetails;
