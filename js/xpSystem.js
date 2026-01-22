@@ -15,23 +15,22 @@ const XPSystem = (function () {
         // Level growth factor (each level = previous + previous/2)
         GROWTH_FACTOR: 1.5,
 
-        // Border colors by level range
+        // Border colors by level range - Sistema de Tiers
         BORDERS: [
-            { minLevel: 1, maxLevel: 4, color: 'default', name: 'Iniciante', hex: '#6B7280' },
-            { minLevel: 5, maxLevel: 9, color: 'bronze', name: 'Bronze', hex: '#CD7F32' },
-            { minLevel: 10, maxLevel: 14, color: 'silver', name: 'Prata', hex: '#C0C0C0' },
-            { minLevel: 15, maxLevel: 19, color: 'gold', name: 'Ouro', hex: '#D4AF37' },
-            { minLevel: 20, maxLevel: 24, color: 'turmaline', name: 'Turmalina', hex: '#40E0D0' },
-            { minLevel: 25, maxLevel: 999, color: 'fire', name: 'Fire', hex: '#FF4500' }
+            { minLevel: 1, maxLevel: 4, color: 'bronze', name: 'Bronze', hex: '#CD7F32' },
+            { minLevel: 5, maxLevel: 9, color: 'silver', name: 'Prata', hex: '#C0C0C0' },
+            { minLevel: 10, maxLevel: 14, color: 'gold', name: 'Ouro', hex: '#D4AF37' },
+            { minLevel: 15, maxLevel: 19, color: 'turmaline', name: 'Turmalina', hex: '#40E0D0' },
+            { minLevel: 20, maxLevel: 999, color: 'fire', name: 'Fire', hex: '#FF4500' }
         ],
 
-        // Level benefits (discounts, features)
+        // Level benefits (discounts, features) - Corresponde aos tiers
         BENEFITS: {
-            5: { discount: 5, feature: 'Badge Bronze' },
-            10: { discount: 10, feature: 'Badge Prata' },
-            15: { discount: 15, feature: 'Badge Ouro' },
-            20: { discount: 20, feature: 'Badge Turmalina' },
-            25: { discount: 25, feature: 'Badge Fire + Suporte VIP' }
+            1: { discount: 0, feature: 'Bronze - Começo' },
+            5: { discount: 5, feature: 'Prata - 5% desconto' },
+            10: { discount: 10, feature: 'Ouro - 10% desconto' },
+            15: { discount: 15, feature: 'Turmalina - 15% desconto' },
+            20: { discount: 20, feature: 'Fire - 20% desconto + Suporte VIP' }
         }
     };
 

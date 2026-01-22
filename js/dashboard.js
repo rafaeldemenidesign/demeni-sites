@@ -9,6 +9,7 @@ function init() {
     setupNavigation();
     setupMobileMenu();
     setupButtons();
+    setupSupportForm();
 
     // Load data
     refreshUserCard();
@@ -217,6 +218,9 @@ async function loadPackages() {
 
     // Check if Payments module is available
     if (window.Payments && typeof Payments.getPackages === 'function') {
+        // Wait for Payments to init
+        await new Promise(resolve => setTimeout(resolve, 600));
+
         const pkgs = Payments.getPackages();
         const discount = Payments.getUserDiscount ? Payments.getUserDiscount() : 0;
 
@@ -231,38 +235,37 @@ async function loadPackages() {
             `;
         }
 
-        grid.innerHTML = discountBanner + pkgs.map((pkg, i) => `
-            <div class="credit-package ${i === 1 ? 'popular' : ''}" data-package-id="${pkg.id}">
-                ${i === 1 ? '<span class="package-badge">Mais Popular</span>' : ''}
+        grid.innerHTML = discountBanner + pkgs.map((pkg, i) => {
+            const isStarter = pkg.is_promotional;
+            const isPopular = pkg.id === 'profissional';
+            const sitesCount = pkg.sites || Math.floor(pkg.totalCredits / 40);
+
+            return `
+            <div class="credit-package ${isPopular ? 'popular' : ''} ${isStarter ? 'starter' : ''}" data-package-id="${pkg.id}">
+                ${isPopular ? '<span class="package-badge">Mais Popular</span>' : ''}
+                ${isStarter ? '<span class="package-badge starter-badge">Oferta Única!</span>' : ''}
                 <h3 class="package-name">${pkg.name}</h3>
+                <div class="package-sites">
+                    <span class="sites-amount">${sitesCount}</span>
+                    <span class="sites-label">${sitesCount === 1 ? 'site' : 'sites'}</span>
+                </div>
                 <div class="package-credits">
                     <span class="credits-amount">${pkg.totalCredits}</span>
                     <span class="credits-label">créditos</span>
                 </div>
                 ${pkg.bonus_credits > 0 ? `<div class="package-bonus">+${pkg.bonus_credits} bônus</div>` : ''}
                 <div class="package-price">
-                    ${pkg.discountPercent > 0 ? `
-                        <span class="original-price">R$ ${pkg.originalPrice.toFixed(2)}</span>
-                        <span class="discount-badge">-${pkg.discountPercent}%</span>
-                    ` : ''}
-                    <span class="final-price">R$ ${pkg.finalPrice.toFixed(2)}</span>
+                    <span class="final-price">R$ ${pkg.finalPrice.toFixed(2).replace('.', ',')}</span>
                 </div>
+                ${pkg.description ? `<p class="package-description">${pkg.description}</p>` : ''}
                 <button class="btn-buy" onclick="buyPackageMP('${pkg.id}')">
                     <i class="fab fa-pix"></i> Comprar
                 </button>
             </div>
-        `).join('');
+        `}).join('');
     } else {
-        // Fallback to old Credits system
-        const packages = Credits.getPackages();
-        grid.innerHTML = packages.map((pkg, i) => `
-            <div class="package-card ${i === 1 ? 'popular' : ''}" onclick="buyPackage('${pkg.id}')">
-                <p class="package-name">${pkg.label}</p>
-                <p class="package-credits">${pkg.credits}</p>
-                <p class="package-bonus">${pkg.bonus > 0 ? `+${pkg.bonus} bônus` : '&nbsp;'}</p>
-                <p class="package-price">${Credits.formatPrice(pkg.price)}</p>
-            </div>
-        `).join('');
+        // Fallback - show loading message
+        grid.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Carregando pacotes...</p>';
     }
 }
 
@@ -597,3 +600,84 @@ setTimeout(() => {
         showLoginModal();
     }
 }, 100);
+
+// ========== SUPPORT FORM ==========
+function setupSupportForm() {
+    const form = document.getElementById('supportForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const category = document.getElementById('supportCategory').value;
+        const subject = document.getElementById('supportSubject').value.trim();
+        const message = document.getElementById('supportMessage').value.trim();
+
+        if (!category || !subject || !message) {
+            alert('Por favor, preencha todos os campos.');
+            return;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+        try {
+            const user = UserData.getUser();
+            let saved = false;
+
+            // Try to save to Supabase if configured
+            if (window.SupabaseClient && SupabaseClient.isConfigured()) {
+                const client = SupabaseClient.getClient();
+                const { error } = await client
+                    .from('support_tickets')
+                    .insert({
+                        user_id: user.id,
+                        user_email: user.email,
+                        user_name: user.name || 'Franqueado',
+                        category: category,
+                        subject: subject,
+                        message: message,
+                        status: 'pending',
+                        created_at: new Date().toISOString()
+                    });
+
+                if (!error) {
+                    saved = true;
+                } else {
+                    console.error('Support ticket error:', error);
+                }
+            }
+
+            // Fallback: send via WhatsApp if not saved
+            if (!saved) {
+                const whatsappMessage = encodeURIComponent(
+                    `*Suporte Demeni Sites*\n\n` +
+                    `📧 ${user.email}\n` +
+                    `📂 ${category}\n` +
+                    `📋 ${subject}\n\n` +
+                    `${message}`
+                );
+                window.open(`https://wa.me/5583996353619?text=${whatsappMessage}`, '_blank');
+            }
+
+            // Show success
+            form.style.display = 'none';
+            document.getElementById('supportSuccess').style.display = 'block';
+
+            // Reset form after 5 seconds
+            setTimeout(() => {
+                form.reset();
+                form.style.display = 'block';
+                document.getElementById('supportSuccess').style.display = 'none';
+            }, 5000);
+
+        } catch (err) {
+            console.error('Support form error:', err);
+            alert('Erro ao enviar. Tente novamente ou use o WhatsApp.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Solicitação';
+        }
+    });
+}

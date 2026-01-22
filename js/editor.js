@@ -925,17 +925,209 @@ function compressImage(file, maxKB, callback) {
 
 function closePublishModal() {
     document.getElementById('modal-publish').classList.remove('active');
+    // Reset to step 1
+    hideAllPublishSteps();
+    document.getElementById('publish-step-subdomain').style.display = 'block';
 }
 
-// ========== PUBLISH ==========
+// ========== PUBLISH SYSTEM ==========
+const PUBLISH_COST = 50; // credits required for first publish
+
 function setupPublishButton() {
     const btn = document.getElementById('btn-publish');
-    btn.addEventListener('click', () => {
-        document.getElementById('modal-publish').classList.add('active');
-    });
+    btn.addEventListener('click', openPublishModal);
 
     // Preview button
     document.getElementById('btn-preview').addEventListener('click', openFullPreview);
+
+    // Subdomain input validation
+    const subdomainInput = document.getElementById('subdomain-input');
+    if (subdomainInput) {
+        let debounceTimer;
+        subdomainInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(validateSubdomain, 500);
+        });
+    }
+
+    // Confirm publish button
+    document.getElementById('btn-confirm-publish')?.addEventListener('click', confirmPublish);
+
+    // Update site button  
+    document.getElementById('btn-update-site')?.addEventListener('click', updateExistingSite);
+}
+
+function openPublishModal() {
+    const modal = document.getElementById('modal-publish');
+    const currentProject = UserData?.getCurrentProject?.() || {};
+
+    // Check if already published (has subdomain)
+    if (currentProject.subdomain) {
+        // Show update step
+        hideAllPublishSteps();
+        document.getElementById('publish-step-update').style.display = 'block';
+        const url = `https://${currentProject.subdomain}.rafaeldemeni.com`;
+        document.getElementById('published-url').href = url;
+        document.getElementById('published-url').textContent = url;
+    } else {
+        // Show subdomain selection step
+        hideAllPublishSteps();
+        document.getElementById('publish-step-subdomain').style.display = 'block';
+
+        // Check credits
+        const credits = Credits?.getCredits?.() || 0;
+        if (credits < PUBLISH_COST) {
+            hideAllPublishSteps();
+            document.getElementById('publish-step-nocredits').style.display = 'block';
+            document.getElementById('nocredits-balance').textContent = credits;
+        } else {
+            document.getElementById('publish-credits-balance').textContent = credits;
+        }
+    }
+
+    modal.classList.add('active');
+}
+
+function hideAllPublishSteps() {
+    document.getElementById('publish-step-subdomain').style.display = 'none';
+    document.getElementById('publish-step-update').style.display = 'none';
+    document.getElementById('publish-step-success').style.display = 'none';
+    document.getElementById('publish-step-nocredits').style.display = 'none';
+}
+
+async function validateSubdomain() {
+    const input = document.getElementById('subdomain-input');
+    const errorEl = document.getElementById('subdomain-error');
+    const availableEl = document.getElementById('subdomain-available');
+    const confirmBtn = document.getElementById('btn-confirm-publish');
+
+    const slug = input.value.trim().toLowerCase();
+
+    // Reset
+    errorEl.style.display = 'none';
+    availableEl.style.display = 'none';
+    confirmBtn.disabled = true;
+
+    if (!slug) return;
+
+    // Basic validation
+    if (slug.length < 3) {
+        errorEl.textContent = 'Mínimo 3 caracteres';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+        errorEl.textContent = 'Apenas letras minúsculas, números e hífens';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (slug.startsWith('-') || slug.endsWith('-')) {
+        errorEl.textContent = 'Não pode começar ou terminar com hífen';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    // Reserved slugs
+    const reserved = ['www', 'admin', 'api', 'app', 'mail', 'ftp', 'test', 'demo'];
+    if (reserved.includes(slug)) {
+        errorEl.textContent = 'Este nome está reservado';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    // Check availability (TODO: implement database check)
+    // For now, assume available if it passes validation
+    availableEl.style.display = 'block';
+    confirmBtn.disabled = false;
+}
+
+async function confirmPublish() {
+    const confirmBtn = document.getElementById('btn-confirm-publish');
+    const slug = document.getElementById('subdomain-input').value.trim().toLowerCase();
+
+    if (!slug) return;
+
+    // Show loading
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+
+    try {
+        // Deduct credits
+        if (Credits && typeof Credits.useCredits === 'function') {
+            const result = Credits.useCredits(PUBLISH_COST, 'Publicação de site');
+            if (!result.success) {
+                alert('Créditos insuficientes');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
+                return;
+            }
+        }
+
+        // Save subdomain to project
+        const currentProjectId = UserData?.getCurrentProjectId?.();
+        if (currentProjectId) {
+            const project = UserData.getProject(currentProjectId);
+            if (project) {
+                project.subdomain = slug;
+                project.published = true;
+                project.publishedAt = new Date().toISOString();
+                project.publishedUrl = `https://${slug}.rafaeldemeni.com`;
+                UserData.saveProject(currentProjectId, project);
+            }
+        }
+
+        // Show success
+        hideAllPublishSteps();
+        document.getElementById('publish-step-success').style.display = 'block';
+        const url = `https://${slug}.rafaeldemeni.com`;
+        document.getElementById('success-url').href = url;
+        document.getElementById('success-url').textContent = url;
+
+    } catch (error) {
+        console.error('Publish error:', error);
+        alert('Erro ao publicar. Tente novamente.');
+    } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
+    }
+}
+
+async function updateExistingSite() {
+    const updateBtn = document.getElementById('btn-update-site');
+
+    // Show loading
+    updateBtn.disabled = true;
+    updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+
+    try {
+        // Update project timestamp
+        const currentProjectId = UserData?.getCurrentProjectId?.();
+        if (currentProjectId) {
+            const project = UserData.getProject(currentProjectId);
+            if (project) {
+                project.updatedAt = new Date().toISOString();
+                UserData.saveProject(currentProjectId, project);
+            }
+        }
+
+        // Show success message
+        hideAllPublishSteps();
+        document.getElementById('publish-step-success').style.display = 'block';
+
+        const currentProject = UserData?.getCurrentProject?.() || {};
+        const url = `https://${currentProject.subdomain}.rafaeldemeni.com`;
+        document.getElementById('success-url').href = url;
+        document.getElementById('success-url').textContent = url;
+
+    } catch (error) {
+        console.error('Update error:', error);
+        alert('Erro ao atualizar. Tente novamente.');
+    } finally {
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Conteúdo (Grátis)';
+    }
 }
 
 function openFullPreview() {

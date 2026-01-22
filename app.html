@@ -39,7 +39,7 @@
                     <h3 id="user-name">Usuário</h3>
                     <div class="user-level">
                         <span class="level-tag" id="level-tag">Nível 1</span>
-                        <span class="border-tag" id="border-tag">Iniciante</span>
+                        <span class="border-tag" id="border-tag">Bronze</span>
                     </div>
                 </div>
                 <div class="xp-bar">
@@ -206,12 +206,12 @@
                     </details>
                     <details class="faq-item">
                         <summary>Quanto custa para publicar um site?</summary>
-                        <p>Cada publicação custa 50 créditos. Atualizações no mesmo site são gratuitas.</p>
+                        <p>Cada publicação custa 40 créditos (R$ 40). Atualizações no mesmo site são gratuitas.</p>
                     </details>
                     <details class="faq-item">
                         <summary>Como funcionam os créditos?</summary>
-                        <p>Créditos são usados para publicar sites. Cada site = 50 créditos. Você pode comprar pacotes
-                            na seção "Minha Carteira".</p>
+                        <p>1 crédito = R$ 1. Cada site custa 40 créditos para publicar. Compre pacotes na seção "Minha
+                            Carteira".</p>
                     </details>
                     <details class="faq-item">
                         <summary>Posso mudar o subdomínio depois de publicar?</summary>
@@ -229,8 +229,50 @@
                     </details>
                 </div>
 
+                <!-- Support Form -->
+                <div class="support-form-container">
+                    <h4><i class="fas fa-headset"></i> Enviar Solicitação de Suporte</h4>
+                    <p class="support-subtitle">Descreva seu problema ou dúvida e responderemos em até 24h.</p>
+
+                    <form id="supportForm" class="support-form">
+                        <div class="form-group">
+                            <label for="supportCategory">Categoria</label>
+                            <select id="supportCategory" required>
+                                <option value="">Selecione uma categoria</option>
+                                <option value="tecnico">Problema Técnico</option>
+                                <option value="creditos">Créditos e Pagamentos</option>
+                                <option value="publicacao">Publicação de Sites</option>
+                                <option value="conta">Minha Conta</option>
+                                <option value="sugestao">Sugestão</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supportSubject">Assunto</label>
+                            <input type="text" id="supportSubject" placeholder="Resumo do problema" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supportMessage">Mensagem</label>
+                            <textarea id="supportMessage" rows="5"
+                                placeholder="Descreva detalhadamente seu problema ou dúvida..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit-support">
+                            <i class="fas fa-paper-plane"></i> Enviar Solicitação
+                        </button>
+                    </form>
+
+                    <div id="supportSuccess" class="support-success" style="display: none;">
+                        <i class="fas fa-check-circle"></i>
+                        <h5>Solicitação Enviada!</h5>
+                        <p>Recebemos sua mensagem e responderemos em breve.</p>
+                    </div>
+                </div>
+
                 <div class="help-cta">
-                    <h4>Ainda tem dúvidas?</h4>
+                    <h4>Prefere falar diretamente?</h4>
                     <a href="https://wa.me/5583996353619" target="_blank" class="btn-whatsapp">
                         <i class="fab fa-whatsapp"></i> Falar no WhatsApp
                     </a>

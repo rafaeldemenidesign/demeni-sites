@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Demeni Sites</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <style>
+        /* Admin-specific styles */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-header h1 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .admin-header h1 span {
+            color: var(--danger);
+        }
+
+        .admin-content {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .admin-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .admin-card h2 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-card h2 i {
+            color: var(--gold);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Franchisees Table */
+        .franchisees-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .franchisees-table th,
+        .franchisees-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .franchisees-table th {
+            background: var(--bg-panel);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .franchisees-table td {
+            color: var(--text-primary);
+        }
+
+        .franchisees-table tr:hover td {
+            background: var(--bg-glass);
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-small {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .credits-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-edit-credits {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit-credits:hover {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+        }
+
+        /* Create Franchisee Form */
+        .create-form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .admin-btn {
+            background: linear-gradient(135deg, var(--gold) 0%, #c19b2e 100%);
+            color: #000;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Login Required */
+        .login-required {
+            text-align: center;
+            padding: 100px 30px;
+        }
+
+        .login-required i {
+            font-size: 4rem;
+            color: var(--danger);
+            margin-bottom: 20px;
+        }
+
+        .login-required h2 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .login-required p {
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="app-container">
+        <!-- Admin Header -->
+        <header class="admin-header">
+            <h1><i class="fas fa-shield-alt"></i> Demeni <span>Admin</span></h1>
+            <div>
+                <span id="admin-email" style="color: var(--text-secondary); margin-right: 20px;"></span>
+                <button class="btn-secondary" onclick="doLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </header>
+
+        <!-- Login Required State -->
+        <div id="login-required" class="login-required" style="display: none;">
+            <i class="fas fa-lock"></i>
+            <h2>Acesso Restrito</h2>
+            <p>Você precisa estar logado como administrador para acessar esta página.</p>
+            <a href="app.html" class="btn-primary" style="margin-top: 20px; display: inline-flex;">
+                <i class="fas fa-arrow-left"></i> Voltar ao App
+            </a>
+        </div>
+
+        <!-- Admin Content -->
+        <main id="admin-content" class="admin-content">
+            <!-- Stats Grid -->
+            <div class="admin-grid">
+                <div class="admin-card">
+                    <h2><i class="fas fa-users"></i> Franqueados</h2>
+                    <div class="stat-value" id="stat-franchisees">0</div>
+                    <div class="stat-label">Total de franqueados</div>
+                </div>
+                <div class="admin-card">
+                    <h2><i class="fas fa-coins"></i> Créditos Ativos</h2>
+                    <div class="stat-value" id="stat-credits">0</div>
+                    <div class="stat-label">Créditos em circulação</div>
+                </div>
+                <div class="admin-card">
+                    <h2><i class="fas fa-globe"></i> Sites Publicados</h2>
+                    <div class="stat-value" id="stat-sites">0</div>
+                    <div class="stat-label">Sites ativos</div>
+                </div>
+            </div>
+
+            <!-- Create Franchisee -->
+            <div class="admin-card" style="margin-bottom: 30px;">
+                <h2><i class="fas fa-user-plus"></i> Criar Novo Franqueado</h2>
+                <form class="create-form" id="create-franchisee-form" onsubmit="createFranchisee(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome</label>
+                            <input type="text" id="new-name" placeholder="Nome completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="new-email" placeholder="email@exemplo.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Senha</label>
+                            <input type="password" id="new-password" placeholder="Mínimo 6 caracteres" required
+                                minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>Créditos Iniciais</label>
+                            <input type="number" id="new-credits" value="300" min="0">
+                        </div>
+                    </div>
+                    <button type="submit" class="admin-btn">
+                        <i class="fas fa-plus"></i> Criar Franqueado
+                    </button>
+                </form>
+            </div>
+
+            <!-- Franchisees List -->
+            <div class="admin-card">
+                <h2><i class="fas fa-list"></i> Lista de Franqueados</h2>
+                <table class="franchisees-table">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Email</th>
+                            <th>Créditos</th>
+                            <th>Sites</th>
+                            <th>Criado em</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="franchisees-list">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Edit Credits -->
+    <div class="modal" id="modal-edit-credits">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2><i class="fas fa-coins"></i> Editar Créditos</h2>
+                <button class="modal-close" onclick="closeEditCreditsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="edit-credits-user" style="margin-bottom: 16px; color: var(--text-secondary);"></p>
+                <div class="form-group">
+                    <label>Novo Saldo de Créditos</label>
+                    <input type="number" id="edit-credits-value" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Motivo (opcional)</label>
+                    <input type="text" id="edit-credits-reason" placeholder="Ex: Bônus, correção, etc.">
+                </div>
+                <button class="admin-btn" style="width: 100%;" onclick="saveCredits()">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Admin Dashboard Logic
+        const ADMIN_EMAILS = ['rafaeldemenidesign@gmail.com']; // Add your admin email(s)
+        let franchisees = [];
+        let editingUserId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if logged in
+            if (!Auth.isLoggedIn()) {
+                showLoginRequired();
+                return;
+            }
+
+            // Check if admin
+            const user = Auth.getCurrentUser();
+            if (!user || !ADMIN_EMAILS.includes(user.email)) {
+                showLoginRequired();
+                return;
+            }
+
+            document.getElementById('admin-email').textContent = user.email;
+            await loadDashboard();
+        });
+
+        function showLoginRequired() {
+            document.getElementById('login-required').style.display = 'block';
+            document.getElementById('admin-content').style.display = 'none';
+        }
+
+        async function loadDashboard() {
+            await loadFranchisees();
+            updateStats();
+        }
+
+        async function loadFranchisees() {
+            if (!SupabaseClient.isConfigured()) {
+                // Demo data
+                franchisees = [
+                    { id: '1', name: 'Demo User', email: 'demo@example.com', credits: 300, sites_count: 2, created_at: new Date().toISOString() }
+                ];
+            } else {
+                const { data } = await SupabaseClient.getClient()
+                    .from('profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                franchisees = data || [];
+            }
+
+            renderFranchisees();
+        }
+
+        function renderFranchisees() {
+            const tbody = document.getElementById('franchisees-list');
+
+            tbody.innerHTML = franchisees.map(f => `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || 'User')}&background=D4AF37&color=000&size=36" 
+                                 class="user-avatar-small" alt="">
+                            <span>${f.name || 'Sem nome'}</span>
+                        </div>
+                    </td>
+                    <td>${f.email || '-'}</td>
+                    <td>
+                        <div class="credits-cell">
+                            <span>${f.credits || 0}</span>
+                            <button class="btn-edit-credits" onclick="openEditCredits('${f.id}', '${f.name || f.email}', ${f.credits || 0})">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td>${f.sites_count || 0}</td>
+                    <td>${formatDate(f.created_at)}</td>
+                    <td>
+                        <button class="btn-secondary" style="padding: 8px 12px;" onclick="viewDetails('${f.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('stat-franchisees').textContent = franchisees.length;
+            document.getElementById('stat-credits').textContent = franchisees.reduce((sum, f) => sum + (f.credits || 0), 0).toLocaleString();
+            document.getElementById('stat-sites').textContent = franchisees.reduce((sum, f) => sum + (f.sites_count || 0), 0);
+        }
+
+        async function createFranchisee(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('new-name').value;
+            const email = document.getElementById('new-email').value;
+            const password = document.getElementById('new-password').value;
+            const credits = parseInt(document.getElementById('new-credits').value) || 300;
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+
+            try {
+                if (SupabaseClient.isConfigured()) {
+                    // Create user via Supabase Admin API (requires service role key)
+                    const { data, error } = await SupabaseClient.getClient().auth.admin.createUser({
+                        email: email,
+                        password: password,
+                        email_confirm: true,
+                        user_metadata: { name: name }
+                    });
+
+                    if (error) throw error;
+
+                    // Update profile with credits
+                    await SupabaseClient.getClient()
+                        .from('profiles')
+                        .upsert({
+                            id: data.user.id,
+                            name: name,
+                            email: email,
+                            credits: credits,
+                            created_at: new Date().toISOString()
+                        });
+
+                    alert(`✅ Franqueado criado!\nEmail: ${email}\nSenha: ${password}\nCréditos: ${credits}`);
+                } else {
+                    alert(`Demo: Franqueado ${name} seria criado com ${credits} créditos.`);
+                }
+
+                // Reset form
+                e.target.reset();
+                document.getElementById('new-credits').value = '300';
+
+                await loadFranchisees();
+                updateStats();
+
+            } catch (error) {
+                console.error('Error creating franchisee:', error);
+                alert('Erro ao criar franqueado: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus"></i> Criar Franqueado';
+            }
+        }
+
+        function openEditCredits(userId, userName, currentCredits) {
+            editingUserId = userId;
+            document.getElementById('edit-credits-user').textContent = `Usuário: ${userName}`;
+            document.getElementById('edit-credits-value').value = currentCredits;
+            document.getElementById('edit-credits-reason').value = '';
+            document.getElementById('modal-edit-credits').classList.add('active');
+        }
+
+        function closeEditCreditsModal() {
+            document.getElementById('modal-edit-credits').classList.remove('active');
+            editingUserId = null;
+        }
+
+        async function saveCredits() {
+            if (!editingUserId) return;
+
+            const newCredits = parseInt(document.getElementById('edit-credits-value').value) || 0;
+            const reason = document.getElementById('edit-credits-reason').value;
+
+            try {
+                if (SupabaseClient.isConfigured()) {
+                    await SupabaseClient.getClient()
+                        .from('profiles')
+                        .update({ credits: newCredits })
+                        .eq('id', editingUserId);
+                }
+
+                // Update local data
+                const user = franchisees.find(f => f.id === editingUserId);
+                if (user) user.credits = newCredits;
+
+                renderFranchisees();
+                updateStats();
+                closeEditCreditsModal();
+
+                alert('✅ Créditos atualizados!');
+            } catch (error) {
+                console.error('Error updating credits:', error);
+                alert('Erro ao atualizar créditos');
+            }
+        }
+
+        function viewDetails(userId) {
+            const user = franchisees.find(f => f.id === userId);
+            if (user) {
+                alert(`Detalhes de ${user.name || user.email}\n\nEmail: ${user.email}\nCréditos: ${user.credits}\nSites: ${user.sites_count || 0}\nCriado: ${formatDate(user.created_at)}`);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            return new Date(dateString).toLocaleDateString('pt-BR');
+        }
+
+        function doLogout() {
+            Auth.logout();
+            window.location.href = 'app.html';
+        }
+    </script>
+</body>
+
+</html>

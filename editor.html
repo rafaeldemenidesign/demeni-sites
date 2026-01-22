@@ -638,21 +638,86 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="modal-body center">
-                    <div class="publish-icon">
-                        <i class="fas fa-check-circle"></i>
+                <div class="modal-body">
+                    <!-- Step 1: Subdomain Selection (first publish) -->
+                    <div id="publish-step-subdomain">
+                        <h3>Escolha o subdomínio</h3>
+                        <p class="publish-text">O endereço do site não poderá ser alterado depois.</p>
+
+                        <div class="subdomain-input-wrapper">
+                            <input type="text" id="subdomain-input" placeholder="meuprojeto" pattern="[a-z0-9-]+"
+                                maxlength="30"
+                                oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')">
+                            <span class="subdomain-suffix">.rafaeldemeni.com</span>
+                        </div>
+                        <p id="subdomain-error" class="error-text" style="display: none;"></p>
+                        <p id="subdomain-available" class="success-text" style="display: none;">
+                            <i class="fas fa-check"></i> Disponível!
+                        </p>
+
+                        <div class="publish-cost">
+                            <span class="cost-label">Custo:</span>
+                            <span class="cost-value">50 créditos</span>
+                        </div>
+
+                        <div class="publish-balance">
+                            <span>Seu saldo:</span>
+                            <span id="publish-credits-balance">0</span> créditos
+                        </div>
+
+                        <button class="btn-gold" id="btn-confirm-publish" disabled>
+                            <i class="fas fa-rocket"></i> Publicar Agora
+                        </button>
+
+                        <p class="publish-note">
+                            Atualizações futuras são gratuitas
+                        </p>
                     </div>
-                    <h3>Seu site está pronto!</h3>
-                    <p class="publish-text">
-                        Por apenas <strong>R$ 147</strong> você pode publicar<br>
-                        e colocar no seu Instagram agora mesmo.
-                    </p>
-                    <a href="https://pay.kiwify.com.br/DzGxIEZ" target="_blank" class="btn-gold" id="btn-pay">
-                        <i class="fab fa-pix"></i> Publicar Agora
-                    </a>
-                    <p class="publish-note">
-                        Pagamento único • Site vitalício
-                    </p>
+
+                    <!-- Step 2: Update existing site (already published) -->
+                    <div id="publish-step-update" style="display: none;">
+                        <div class="publish-icon success">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h3>Atualizar Site</h3>
+                        <p class="publish-text">
+                            Seu site já está publicado em:<br>
+                            <a id="published-url" href="#" target="_blank" class="site-url"></a>
+                        </p>
+                        <button class="btn-gold" id="btn-update-site">
+                            <i class="fas fa-sync-alt"></i> Atualizar Conteúdo (Grátis)
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Success -->
+                    <div id="publish-step-success" style="display: none;">
+                        <div class="publish-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Site Publicado!</h3>
+                        <p class="publish-text">
+                            Seu site está no ar em:<br>
+                            <a id="success-url" href="#" target="_blank" class="site-url"></a>
+                        </p>
+                        <button class="btn-secondary" onclick="closePublishModal()">
+                            <i class="fas fa-times"></i> Fechar
+                        </button>
+                    </div>
+
+                    <!-- No credits -->
+                    <div id="publish-step-nocredits" style="display: none;">
+                        <div class="publish-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3>Créditos Insuficientes</h3>
+                        <p class="publish-text">
+                            Você precisa de 50 créditos para publicar.<br>
+                            Saldo atual: <strong id="nocredits-balance">0</strong> créditos
+                        </p>
+                        <a href="app.html#wallet" class="btn-gold">
+                            <i class="fas fa-coins"></i> Comprar Créditos
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -663,6 +728,7 @@
 
     <!-- Data Modules -->
     <script src="js/userData.js"></script>
+    <script src="js/credits.js"></script>
 
     <!-- Editor JS -->
     <script src="js/editor.js"></script>

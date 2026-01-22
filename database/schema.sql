@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     xp INTEGER DEFAULT 0,
     level INTEGER DEFAULT 1,
     border_color TEXT DEFAULT 'default',
+    used_starter_promo BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

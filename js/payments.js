@@ -42,26 +42,75 @@ const Payments = (function () {
     }
 
     // ========== PACKAGES ==========
+    // ========== CONFIGURAÇÃO ==========
+    const CREDITS_PER_SITE = 40; // 1 site = 40 créditos
+
+    // Starter Pack promotional package (one-time offer for new users)
+    const STARTER_PACK = {
+        id: 'starter-promo',
+        name: '🎁 Primeira Compra',
+        credits: 40,
+        price: 1.00,
+        bonus_credits: 0,
+        is_promotional: true,
+        sites: 1,
+        description: 'Oferta exclusiva para novos usuários - 1 site completo!'
+    };
+
+    let hasUsedStarterPack = false;
+
     async function loadPackages() {
-        if (!window.SupabaseClient || !SupabaseClient.isConfigured()) {
-            // Fallback packages
-            packages = [
-                { id: '1', name: 'Starter', credits: 50, price: 9.90, bonus_credits: 0 },
-                { id: '2', name: 'Popular', credits: 150, price: 24.90, bonus_credits: 15 },
-                { id: '3', name: 'Pro', credits: 500, price: 69.90, bonus_credits: 75 },
-                { id: '4', name: 'Business', credits: 1500, price: 179.90, bonus_credits: 300 }
-            ];
-            return packages;
+        // Check if user has used Starter Pack
+        await checkStarterPackUsage();
+
+        // 1 crédito = R$ 1, 1 site = 40 créditos
+        const basePackages = [
+            { id: 'essencial', name: 'Essencial', credits: 200, price: 200.00, bonus_credits: 0, sites: 5 },
+            { id: 'profissional', name: 'Profissional', credits: 400, price: 400.00, bonus_credits: 200, sites: 15 },
+            { id: 'empresarial', name: 'Empresarial', credits: 600, price: 600.00, bonus_credits: 400, sites: 25 }
+        ];
+
+        // Add Starter Pack at the beginning if user hasn't used it
+        packages = hasUsedStarterPack ? basePackages : [STARTER_PACK, ...basePackages];
+        return packages;
+    }
+
+    async function checkStarterPackUsage() {
+        const user = Auth?.getCurrentUser?.();
+        if (!user) {
+            hasUsedStarterPack = false;
+            return;
         }
 
-        const { data, error } = await SupabaseClient.getClient()
-            .from('credit_packages')
-            .select('*')
-            .eq('is_active', true)
-            .order('sort_order');
+        // Check from user profile or localStorage
+        if (window.SupabaseClient && SupabaseClient.isConfigured()) {
+            const { data } = await SupabaseClient.getClient()
+                .from('profiles')
+                .select('used_starter_promo')
+                .eq('id', user.id)
+                .single();
 
-        if (data) packages = data;
-        return packages;
+            hasUsedStarterPack = data?.used_starter_promo || false;
+        } else {
+            // Fallback to localStorage
+            hasUsedStarterPack = localStorage.getItem(`starter_pack_${user.id}`) === 'true';
+        }
+    }
+
+    async function markStarterPackUsed() {
+        const user = Auth?.getCurrentUser?.();
+        if (!user) return;
+
+        if (window.SupabaseClient && SupabaseClient.isConfigured()) {
+            await SupabaseClient.getClient()
+                .from('profiles')
+                .update({ used_starter_promo: true })
+                .eq('id', user.id);
+        }
+
+        // Also save to localStorage as backup
+        localStorage.setItem(`starter_pack_${user.id}`, 'true');
+        hasUsedStarterPack = true;
     }
 
     async function loadUserDiscount() {
@@ -111,7 +160,8 @@ const Payments = (function () {
         const user = Auth.getCurrentUser();
         if (!user) throw new Error('Usuário não autenticado');
 
-        const finalPrice = calculateFinalPrice(pkg.price);
+        // For promotional packages (Starter Pack), don't apply discounts
+        const finalPrice = pkg.is_promotional ? pkg.price : calculateFinalPrice(pkg.price);
         const totalCredits = pkg.credits + (pkg.bonus_credits || 0);
 
         // Create preference via Edge Function
@@ -128,12 +178,18 @@ const Payments = (function () {
                 price: finalPrice,
                 user_id: user.id,
                 user_email: user.email,
-                discount_percent: userDiscount
+                discount_percent: pkg.is_promotional ? 0 : userDiscount,
+                is_starter_pack: pkg.id === 'starter-promo'
             })
         });
 
         if (!response.ok) {
             throw new Error('Erro ao criar checkout');
+        }
+
+        // If this is the Starter Pack, mark it as used
+        if (pkg.id === 'starter-promo') {
+            await markStarterPackUsed();
         }
 
         const data = await response.json();
@@ -213,27 +269,34 @@ const Payments = (function () {
 
         const pkgs = getPackages();
 
-        container.innerHTML = pkgs.map((pkg, index) => `
-            <div class="credit-package ${index === 1 ? 'popular' : ''}" data-package-id="${pkg.id}">
-                ${index === 1 ? '<span class="package-badge">Mais Popular</span>' : ''}
+        container.innerHTML = pkgs.map((pkg, index) => {
+            const isStarter = pkg.is_promotional;
+            const isPopular = pkg.id === 'profissional';
+            const sitesCount = pkg.sites || Math.floor(pkg.totalCredits / 50);
+
+            return `
+            <div class="credit-package ${isPopular ? 'popular' : ''} ${isStarter ? 'starter' : ''}" data-package-id="${pkg.id}">
+                ${isPopular ? '<span class="package-badge">Mais Popular</span>' : ''}
+                ${isStarter ? '<span class="package-badge starter-badge">Oferta Única!</span>' : ''}
                 <h3 class="package-name">${pkg.name}</h3>
+                <div class="package-sites">
+                    <span class="sites-amount">${sitesCount}</span>
+                    <span class="sites-label">${sitesCount === 1 ? 'site' : 'sites'}</span>
+                </div>
                 <div class="package-credits">
                     <span class="credits-amount">${pkg.totalCredits}</span>
                     <span class="credits-label">créditos</span>
                 </div>
                 ${pkg.bonus_credits > 0 ? `<div class="package-bonus">+${pkg.bonus_credits} bônus</div>` : ''}
                 <div class="package-price">
-                    ${pkg.discountPercent > 0 ? `
-                        <span class="original-price">R$ ${pkg.originalPrice.toFixed(2)}</span>
-                        <span class="discount-badge">-${pkg.discountPercent}%</span>
-                    ` : ''}
-                    <span class="final-price">R$ ${pkg.finalPrice.toFixed(2)}</span>
+                    <span class="final-price">R$ ${pkg.finalPrice.toFixed(2).replace('.', ',')}</span>
                 </div>
+                ${pkg.description ? `<p class="package-description">${pkg.description}</p>` : ''}
                 <button class="btn-buy" onclick="Payments.openCheckout('${pkg.id}')">
                     <i class="fab fa-pix"></i> Comprar
                 </button>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     // ========== PUBLIC API ==========

@@ -9,8 +9,8 @@ const Credits = (function () {
         // First purchase (includes platform access)
         FIRST_SITE: 147,
 
-        // Cost per site (in credits)
-        SITE_COST: 50,
+        // Cost per site (in credits) - 1 crédito = R$1
+        SITE_COST: 40,
 
         // Credit packages
         PACKAGES: [

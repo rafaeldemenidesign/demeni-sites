@@ -912,6 +912,125 @@ body {
     margin-bottom: 16px;
 }
 
+/* Support Form */
+.support-form-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.support-form-container h4 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.support-form-container h4 i {
+    color: var(--accent);
+}
+
+.support-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.support-form .form-group {
+    margin-bottom: 16px;
+}
+
+.support-form label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.support-form select,
+.support-form input,
+.support-form textarea {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+
+.support-form select:focus,
+.support-form input:focus,
+.support-form textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.support-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.support-form select option {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+}
+
+.btn-submit-support {
+    width: 100%;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-submit-support:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-purple);
+}
+
+.btn-submit-support:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.support-success {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.support-success i {
+    font-size: 3rem;
+    color: var(--success);
+    margin-bottom: 16px;
+}
+
+.support-success h5 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: var(--success);
+}
+
+.support-success p {
+    color: var(--text-secondary);
+}
+
 /* Modals */
 .modal {
     position: fixed;

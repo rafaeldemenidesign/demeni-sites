@@ -66,6 +66,46 @@
     letter-spacing: 0.5px;
 }
 
+/* Starter Badge */
+.package-badge.starter-badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+/* Starter Package */
+.credit-package.starter {
+    border: 2px solid #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent);
+}
+
+/* Sites Count Display */
+.package-sites {
+    margin: 0.5rem 0;
+}
+
+.sites-amount {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #D4AF37, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.sites-label {
+    display: block;
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Package Description */
+.package-description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 1rem;
+    font-style: italic;
+}
+
 /* Package Name */
 .package-name {
     font-size: 1.25rem;

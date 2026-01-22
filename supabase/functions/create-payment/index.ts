@@ -37,6 +37,9 @@ serve(async (req) => {
             throw new Error('Missing required fields')
         }
 
+        // Use origin header if available, otherwise fallback to production URL
+        const origin = req.headers.get('origin') || 'https://rafaeldemeni.com'
+
         // Create Mercado Pago preference
         const preference = {
             items: [{
@@ -51,9 +54,9 @@ serve(async (req) => {
                 email: user_email
             },
             back_urls: {
-                success: `${req.headers.get('origin')}/app.html?payment=success`,
-                failure: `${req.headers.get('origin')}/app.html?payment=failure`,
-                pending: `${req.headers.get('origin')}/app.html?payment=pending`
+                success: `${origin}/app.html?payment=success`,
+                failure: `${origin}/app.html?payment=failure`,
+                pending: `${origin}/app.html?payment=pending`
             },
             auto_return: 'approved',
             external_reference: JSON.stringify({
