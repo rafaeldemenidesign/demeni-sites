@@ -1,5 +1,9 @@
 # Demeni Sites - Informações do Projeto
 
+## 👤 Administrador
+- **Email**: rafaeldemenidesign@gmail.com
+- **Senha**: JoR@Ju25
+
 ## 🔐 Plataformas e Acessos
 
 ### Supabase
