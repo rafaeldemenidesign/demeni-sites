@@ -307,6 +307,8 @@ function setupImageUploads() {
                 cropTarget = 'bg';
                 openCropModal(file);
             }
+            // Reset input to allow re-selecting same file
+            e.target.value = '';
         });
     }
 
@@ -318,6 +320,40 @@ function setupImageUploads() {
             saveToStorage();
         });
     }
+
+    // Edit existing background image
+    const bgEditBtn = document.getElementById('btn-edit-bg');
+    if (bgEditBtn) {
+        bgEditBtn.addEventListener('click', () => {
+            if (state.style.bgImage) {
+                cropTarget = 'bg';
+                openCropModalFromDataUrl(state.style.bgImage);
+            }
+        });
+    }
+}
+
+// Open crop modal with existing image (data URL)
+function openCropModalFromDataUrl(dataUrl) {
+    const modal = document.getElementById('modal-crop');
+    const cropImage = document.getElementById('crop-image');
+
+    cropImage.src = dataUrl;
+    modal.classList.add('active');
+
+    cropImage.onload = () => {
+        if (cropper) cropper.destroy();
+
+        const aspectRatio = cropTarget === 'avatar' ? 1 : 9 / 16;
+        cropper = new Cropper(cropImage, {
+            aspectRatio: aspectRatio,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 1,
+            cropBoxResizable: true,
+            background: false
+        });
+    };
 }
 
 function openCropModal(file) {
@@ -333,7 +369,7 @@ function openCropModal(file) {
         cropImage.onload = () => {
             if (cropper) cropper.destroy();
 
-            const aspectRatio = cropTarget === 'avatar' ? 1 : 16 / 9;
+            const aspectRatio = cropTarget === 'avatar' ? 1 : 9 / 16; // 9:16 portrait for mobile background
             cropper = new Cropper(cropImage, {
                 aspectRatio: aspectRatio,
                 viewMode: 1,
@@ -383,6 +419,7 @@ function applyCrop() {
 function updateBgPreview() {
     const bgPreview = document.getElementById('bg-preview');
     const bgRemoveBtn = document.getElementById('btn-remove-bg');
+    const bgEditBtn = document.getElementById('btn-edit-bg');
 
     // Safety check - element may not exist
     if (!bgPreview) return;
@@ -390,9 +427,11 @@ function updateBgPreview() {
     if (state.style.bgImage) {
         bgPreview.innerHTML = `<img src="${state.style.bgImage}" alt="Background">`;
         if (bgRemoveBtn) bgRemoveBtn.disabled = false;
+        if (bgEditBtn) bgEditBtn.disabled = false;
     } else {
         bgPreview.innerHTML = '<span>Sem imagem</span>';
         if (bgRemoveBtn) bgRemoveBtn.disabled = true;
+        if (bgEditBtn) bgEditBtn.disabled = true;
     }
 }
 
@@ -931,7 +970,7 @@ function closePublishModal() {
 }
 
 // ========== PUBLISH SYSTEM ==========
-const PUBLISH_COST = 50; // credits required for first publish
+const PUBLISH_COST = 40; // credits required for first publish
 
 function setupPublishButton() {
     const btn = document.getElementById('btn-publish');
@@ -1055,8 +1094,8 @@ async function confirmPublish() {
 
     try {
         // Deduct credits
-        if (Credits && typeof Credits.useCredits === 'function') {
-            const result = Credits.useCredits(PUBLISH_COST, 'Publicação de site');
+        if (Credits && typeof Credits.deductCredits === 'function') {
+            const result = Credits.deductCredits(PUBLISH_COST, 'Publicação de site');
             if (!result.success) {
                 alert('Créditos insuficientes');
                 confirmBtn.disabled = false;
@@ -1215,7 +1254,7 @@ function renderPreview() {
     // Background style
     let bgStyle = `background: ${state.style.bgColor};`;
     if (state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${state.style.bgImage}'); background-size: cover; background-position: center; background-attachment: fixed;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: scroll;`;
     }
 
     // Smart contrast: detect if background is light
@@ -1271,12 +1310,12 @@ function renderPreview() {
             
             .preview-online-badge {
                 position: absolute;
-                bottom: 5px;
-                right: 5px;
-                width: 16px;
-                height: 16px;
+                bottom: 2px;
+                right: 2px;
+                width: 18px;
+                height: 18px;
                 background: #22C55E;
-                border: 3px solid #000;
+                border: 3px solid #0a0a1a;
                 border-radius: 50%;
                 animation: pulse 2s infinite;
             }
@@ -2185,6 +2224,44 @@ function adjustColor(hex, percent) {
 
 // ========== PROJECT-BASED STORAGE ==========
 let currentProjectId = null;
+let thumbnailCaptureTimeout = null;
+
+// Capture preview thumbnail using html2canvas
+async function capturePreviewThumbnail() {
+    const frame = document.getElementById('preview-frame');
+    if (!frame || typeof html2canvas === 'undefined') return null;
+
+    try {
+        const canvas = await html2canvas(frame, {
+            width: 280,
+            height: 500,
+            scale: 2, // Higher scale = better resolution
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#0a0a1a'
+        });
+
+        return canvas.toDataURL('image/jpeg', 0.85); // Higher quality
+    } catch (error) {
+        console.warn('Could not capture thumbnail:', error);
+        return null;
+    }
+}
+
+// Schedule thumbnail capture (debounced to avoid too many captures)
+function scheduleThumbnailCapture() {
+    if (thumbnailCaptureTimeout) {
+        clearTimeout(thumbnailCaptureTimeout);
+    }
+    thumbnailCaptureTimeout = setTimeout(async () => {
+        if (currentProjectId && window.UserData) {
+            const thumbnail = await capturePreviewThumbnail();
+            if (thumbnail) {
+                UserData.updateProject(currentProjectId, { thumbnail });
+            }
+        }
+    }, 2000); // Capture 2 seconds after last change
+}
 
 function saveToStorage() {
     // Save to project if we have a current project
@@ -2204,6 +2281,9 @@ function saveToStorage() {
             name: state.projectName,
             data: projectData
         });
+
+        // Schedule thumbnail capture
+        scheduleThumbnailCapture();
     }
     // Also save to local backup
     localStorage.setItem('demeni-editor-state', JSON.stringify(state));

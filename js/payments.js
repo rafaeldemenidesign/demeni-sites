@@ -8,10 +8,8 @@ const Payments = (function () {
     // Get from: https://www.mercadopago.com.br/developers/panel/app
     const MP_PUBLIC_KEY = 'APP_USR-a3a0d7e7-0cdd-4f62-b526-c2e535838a4b';
 
-    // API endpoint for creating preferences (will be Supabase Edge Function)
-    const API_URL = window.location.hostname === 'localhost'
-        ? 'http://localhost:54321/functions/v1'  // Supabase local
-        : 'https://aeyxdqggngapczohqvbo.supabase.co/functions/v1';
+    // API endpoint for creating preferences (Supabase Edge Function)
+    const API_URL = 'https://aeyxdqggngapczohqvbo.supabase.co/functions/v1';
 
     let mp = null;
     let packages = [];
@@ -45,17 +43,68 @@ const Payments = (function () {
     // ========== CONFIGURAÇÃO ==========
     const CREDITS_PER_SITE = 40; // 1 site = 40 créditos
 
-    // Starter Pack promotional package (one-time offer for new users)
+    // Start Pack promotional package (one-time offer for new users)
     const STARTER_PACK = {
-        id: 'starter-promo',
-        name: '🎁 Primeira Compra',
+        id: 'start',
+        name: 'Start',
+        icon: 'fa-rocket',
         credits: 40,
         price: 1.00,
         bonus_credits: 0,
         is_promotional: true,
-        sites: 1,
-        description: 'Oferta exclusiva para novos usuários - 1 site completo!'
+        description: 'Oferta exclusiva de boas-vindas!',
+        features: [
+            'Crie seu primeiro site',
+            'Suporte por WhatsApp'
+        ]
     };
+
+    // Base packages - Estilo Clicksign
+    const BASE_PACKAGES = [
+        {
+            id: 'one',
+            name: 'One',
+            icon: 'fa-star',
+            credits: 200,
+            price: 200.00,
+            bonus_credits: 0,
+            features: [
+                '5 sites para criar',
+                'Ideal para iniciantes',
+                'Suporte por WhatsApp'
+            ]
+        },
+        {
+            id: 'plus',
+            name: 'Plus',
+            icon: 'fa-crown',
+            credits: 400,
+            price: 400.00,
+            bonus_credits: 200,
+            is_featured: true,
+            features: [
+                '15 sites para criar',
+                '+200 créditos bônus',
+                'Suporte prioritário',
+                'Templates exclusivos'
+            ]
+        },
+        {
+            id: 'master',
+            name: 'Master',
+            icon: 'fa-trophy',
+            credits: 600,
+            price: 600.00,
+            bonus_credits: 400,
+            features: [
+                '25 sites para criar',
+                '+400 créditos bônus',
+                'Suporte VIP',
+                'Templates exclusivos',
+                'Consultoria 30min'
+            ]
+        }
+    ];
 
     let hasUsedStarterPack = false;
 
@@ -63,37 +112,43 @@ const Payments = (function () {
         // Check if user has used Starter Pack
         await checkStarterPackUsage();
 
-        // 1 crédito = R$ 1, 1 site = 40 créditos
-        const basePackages = [
-            { id: 'essencial', name: 'Essencial', credits: 200, price: 200.00, bonus_credits: 0, sites: 5 },
-            { id: 'profissional', name: 'Profissional', credits: 400, price: 400.00, bonus_credits: 200, sites: 15 },
-            { id: 'empresarial', name: 'Empresarial', credits: 600, price: 600.00, bonus_credits: 400, sites: 25 }
-        ];
-
-        // Add Starter Pack at the beginning if user hasn't used it
-        packages = hasUsedStarterPack ? basePackages : [STARTER_PACK, ...basePackages];
+        // Add Start Pack at the beginning if user hasn't used it
+        packages = hasUsedStarterPack ? BASE_PACKAGES : [STARTER_PACK, ...BASE_PACKAGES];
         return packages;
     }
 
     async function checkStarterPackUsage() {
         const user = Auth?.getCurrentUser?.();
         if (!user) {
+            console.log('🎁 Starter Pack: usuário não logado, mostrando promo');
             hasUsedStarterPack = false;
             return;
         }
 
-        // Check from user profile or localStorage
-        if (window.SupabaseClient && SupabaseClient.isConfigured()) {
-            const { data } = await SupabaseClient.getClient()
-                .from('profiles')
-                .select('used_starter_promo')
-                .eq('id', user.id)
-                .single();
+        try {
+            // Check from user profile or localStorage
+            if (window.SupabaseClient && SupabaseClient.isConfigured()) {
+                const { data, error } = await SupabaseClient.getClient()
+                    .from('profiles')
+                    .select('used_starter_promo')
+                    .eq('id', user.id)
+                    .single();
 
-            hasUsedStarterPack = data?.used_starter_promo || false;
-        } else {
-            // Fallback to localStorage
-            hasUsedStarterPack = localStorage.getItem(`starter_pack_${user.id}`) === 'true';
+                if (error) {
+                    console.log('🎁 Starter Pack: erro ao verificar, mostrando promo', error);
+                    hasUsedStarterPack = false;
+                } else {
+                    hasUsedStarterPack = data?.used_starter_promo || false;
+                    console.log('🎁 Starter Pack usado:', hasUsedStarterPack);
+                }
+            } else {
+                // Fallback to localStorage
+                hasUsedStarterPack = localStorage.getItem(`starter_pack_${user.id}`) === 'true';
+                console.log('🎁 Starter Pack (localStorage):', hasUsedStarterPack);
+            }
+        } catch (e) {
+            console.log('🎁 Starter Pack: exceção, mostrando promo', e);
+            hasUsedStarterPack = false;
         }
     }
 
@@ -114,6 +169,10 @@ const Payments = (function () {
     }
 
     async function loadUserDiscount() {
+        if (!window.Auth || typeof Auth.getCurrentUser !== 'function') {
+            userDiscount = 0;
+            return;
+        }
         const user = Auth.getCurrentUser();
         if (!user) {
             userDiscount = 0;
@@ -139,7 +198,18 @@ const Payments = (function () {
     }
 
     function getPackages() {
-        return packages.map(pkg => ({
+        // Fallback: se packages estiver vazio, usar pacotes base
+        let pkgs = packages;
+        if (!pkgs || pkgs.length === 0) {
+            console.warn('⚠️ Packages vazio, usando fallback');
+            pkgs = [
+                { id: 'one', name: 'One', icon: 'fa-star', credits: 200, price: 200.00, bonus_credits: 0, features: ['5 sites para criar', 'Suporte WhatsApp'] },
+                { id: 'plus', name: 'Plus', icon: 'fa-crown', credits: 400, price: 400.00, bonus_credits: 200, is_featured: true, features: ['15 sites', '+200 bônus'] },
+                { id: 'master', name: 'Master', icon: 'fa-trophy', credits: 600, price: 600.00, bonus_credits: 400, features: ['25 sites', '+400 bônus'] }
+            ];
+        }
+
+        return pkgs.map(pkg => ({
             ...pkg,
             originalPrice: pkg.price,
             finalPrice: calculateFinalPrice(pkg.price),
@@ -187,10 +257,8 @@ const Payments = (function () {
             throw new Error('Erro ao criar checkout');
         }
 
-        // If this is the Starter Pack, mark it as used
-        if (pkg.id === 'starter-promo') {
-            await markStarterPackUsed();
-        }
+        // NOTA: Starter Pack só deve ser marcado como usado APÓS o pagamento ser confirmado
+        // Isso acontece no webhook (mp-webhook) quando o MP confirma o pagamento
 
         const data = await response.json();
         return data;
@@ -272,22 +340,19 @@ const Payments = (function () {
         container.innerHTML = pkgs.map((pkg, index) => {
             const isStarter = pkg.is_promotional;
             const isPopular = pkg.id === 'profissional';
-            const sitesCount = pkg.sites || Math.floor(pkg.totalCredits / 50);
+            const baseCredits = pkg.credits || pkg.totalCredits;
+            const bonusCredits = pkg.bonus_credits || 0;
 
             return `
             <div class="credit-package ${isPopular ? 'popular' : ''} ${isStarter ? 'starter' : ''}" data-package-id="${pkg.id}">
                 ${isPopular ? '<span class="package-badge">Mais Popular</span>' : ''}
                 ${isStarter ? '<span class="package-badge starter-badge">Oferta Única!</span>' : ''}
                 <h3 class="package-name">${pkg.name}</h3>
-                <div class="package-sites">
-                    <span class="sites-amount">${sitesCount}</span>
-                    <span class="sites-label">${sitesCount === 1 ? 'site' : 'sites'}</span>
-                </div>
-                <div class="package-credits">
-                    <span class="credits-amount">${pkg.totalCredits}</span>
+                <div class="package-credits-main">
+                    <span class="credits-amount">${baseCredits}</span>
                     <span class="credits-label">créditos</span>
                 </div>
-                ${pkg.bonus_credits > 0 ? `<div class="package-bonus">+${pkg.bonus_credits} bônus</div>` : ''}
+                ${bonusCredits > 0 ? `<div class="package-bonus">+${bonusCredits} bônus</div>` : ''}
                 <div class="package-price">
                     <span class="final-price">R$ ${pkg.finalPrice.toFixed(2).replace('.', ',')}</span>
                 </div>

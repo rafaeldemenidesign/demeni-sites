@@ -108,13 +108,13 @@ function refreshUserCard() {
     }
 
     document.getElementById('level-tag').textContent = `Nível ${stats.level}`;
-    document.getElementById('border-tag').textContent = stats.border.name;
+    document.getElementById('border-tag').textContent = stats.patente.name;
 
-    // Update avatar border
+    // Update avatar border with patente class
     const avatarWrapper = document.querySelector('.user-avatar');
     avatarWrapper.className = 'user-avatar';
-    if (stats.border.color !== 'default') {
-        avatarWrapper.classList.add(stats.border.color);
+    if (stats.patente.id !== 'default') {
+        avatarWrapper.classList.add(stats.patente.id);
     }
 
     // Update XP bar
@@ -136,58 +136,143 @@ function refreshCredits() {
 // ========== PROJECTS ==========
 function loadProjects() {
     const projects = UserData.getProjects();
-    const grid = document.getElementById('projects-grid');
+    const activeGrid = document.getElementById('active-projects-grid');
+    const draftGrid = document.getElementById('draft-projects-grid');
+    const activeSection = document.getElementById('active-section');
+    const draftsSection = document.getElementById('drafts-section');
     const empty = document.getElementById('empty-projects');
 
+    // Separar publicados e rascunhos
+    const published = projects.filter(p => p.published);
+    const drafts = projects.filter(p => !p.published);
+
+    // Atualizar contadores
+    document.getElementById('active-count').textContent = published.length;
+    document.getElementById('drafts-count').textContent = drafts.length;
+
     if (projects.length === 0) {
-        grid.style.display = 'none';
+        activeSection.style.display = 'none';
+        draftsSection.style.display = 'none';
+        activeGrid.style.display = 'none';
+        draftGrid.style.display = 'none';
         empty.style.display = 'block';
         return;
     }
 
-    grid.style.display = 'grid';
     empty.style.display = 'none';
 
-    grid.innerHTML = projects.map(project => `
-        <div class="project-card" data-id="${project.id}">
+    // Mostrar/esconder seções conforme necessário
+    activeSection.style.display = published.length > 0 ? 'block' : 'none';
+    activeGrid.style.display = published.length > 0 ? 'grid' : 'none';
+    draftsSection.style.display = drafts.length > 0 ? 'block' : 'none';
+    draftGrid.style.display = drafts.length > 0 ? 'grid' : 'none';
+
+    // Renderizar sites ativos (com botão copiar link)
+    activeGrid.innerHTML = published.map(project => `
+        <div class="project-card published" data-id="${project.id}">
             <div class="project-preview">
                 <img src="${project.data?.profile?.avatar || 'https://ui-avatars.com/api/?name=Site&background=D4AF37&color=000'}" alt="${project.name}">
-                <span class="project-status ${project.published ? 'published' : 'draft'}">
-                    ${project.published ? 'Publicado' : 'Rascunho'}
+                <span class="project-status published">
+                    <i class="fas fa-check-circle"></i> Ativo
                 </span>
+            </div>
+            <div class="project-info">
+                <h3 class="project-name">${project.name}</h3>
+                <p class="project-url">${project.publishedUrl || ''}</p>
+                <div class="project-actions">
+                    <button class="btn-secondary" onclick="editProject('${project.id}')">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-secondary" onclick="copyProjectLink('${project.publishedUrl}')" title="Copiar link">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <a href="${project.publishedUrl}" target="_blank" class="btn-secondary">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Renderizar rascunhos (sem badge pois já está na seção de rascunhos)
+    draftGrid.innerHTML = drafts.map(project => {
+        // Use thumbnail if available, otherwise fallback to avatar
+        const previewImage = project.thumbnail
+            || project.data?.profile?.avatar
+            || 'https://ui-avatars.com/api/?name=Site&background=666&color=fff';
+        const previewClass = project.thumbnail ? 'project-thumbnail' : '';
+
+        // Use profile name if available, otherwise project name
+        const displayName = project.data?.profile?.name || project.name || 'Novo Site';
+
+        return `
+        <div class="project-card draft" data-id="${project.id}">
+            <div class="project-preview">
+                <img src="${previewImage}" alt="${displayName}" class="${previewClass}">
                 <button class="btn-delete-project" onclick="deleteProjectConfirm('${project.id}')" title="Excluir">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
             <div class="project-info">
-                <h3 class="project-name">${project.name}</h3>
+                <h3 class="project-name">${displayName}</h3>
                 <p class="project-date">${formatDate(project.updatedAt)}</p>
                 <div class="project-actions">
-                    <button class="btn-secondary" onclick="editProject('${project.id}')">
+                    <button class="btn-action" onclick="editProject('${project.id}')">
                         <i class="fas fa-edit"></i> Editar
                     </button>
-                    ${project.published ? `
-                        <a href="${project.publishedUrl}" target="_blank" class="btn-secondary">
-                            <i class="fas fa-external-link-alt"></i> Ver
-                        </a>
-                    ` : `
-                        <button class="btn-primary" onclick="publishProject('${project.id}')">
-                            <i class="fas fa-rocket"></i> Publicar
-                        </button>
-                    `}
+                    <button class="btn-action publish" onclick="publishProject('${project.id}')">
+                        <i class="fas fa-rocket"></i> Publicar
+                    </button>
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function createNewProject() {
+    // Open model selection modal
+    showModelSelectionModal();
+}
+
+function showModelSelectionModal() {
+    const modal = document.getElementById('modal-model-selection');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+function closeModelSelectionModal() {
+    const modal = document.getElementById('modal-model-selection');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function selectModel(modelType) {
+    // Model costs
+    const modelCosts = {
+        'modelo-1': 40,
+        'modelo-2': 60,
+        'modelo-3': 80
+    };
+
+    // Create project with model type
     const project = UserData.createProject('Novo Site');
+    project.modelType = modelType;
+    project.publishCost = modelCosts[modelType];
+    UserData.updateProject(project.id, { modelType, publishCost: modelCosts[modelType] });
     UserData.setCurrentProject(project.id);
+
+    closeModelSelectionModal();
 
     // Redirect to editor
     window.location.href = 'editor.html';
 }
+
+// Expose functions
+window.showModelSelectionModal = showModelSelectionModal;
+window.closeModelSelectionModal = closeModelSelectionModal;
+window.selectModel = selectModel;
 
 function editProject(id) {
     UserData.setCurrentProject(id);
@@ -211,61 +296,89 @@ function publishProject(id) {
     }
 }
 
-// ========== PACKAGES ==========
+// ========== PACKAGES - ESTILO CLICKSIGN ==========
 async function loadPackages() {
     const grid = document.getElementById('packages-grid');
     if (!grid) return;
 
-    // Check if Payments module is available
-    if (window.Payments && typeof Payments.getPackages === 'function') {
-        // Wait for Payments to init
-        await new Promise(resolve => setTimeout(resolve, 600));
+    // Show loading state
+    grid.innerHTML = '<p style="text-align: center; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>';
 
-        const pkgs = Payments.getPackages();
-        const discount = Payments.getUserDiscount ? Payments.getUserDiscount() : 0;
-
-        // Show discount banner if user has a discount
-        let discountBanner = '';
-        if (discount > 0) {
-            discountBanner = `
-                <div class="discount-banner">
-                    <i class="fas fa-star"></i>
-                    Seu nível te dá <strong>${discount}% de desconto</strong> em todos os pacotes!
-                </div>
-            `;
+    // Wait for Payments module to be ready AND have packages loaded
+    let attempts = 0;
+    let pkgs = [];
+    while (attempts < 30) {
+        if (window.Payments && typeof Payments.getPackages === 'function') {
+            pkgs = Payments.getPackages();
+            if (pkgs && pkgs.length > 0) break;
         }
+        await new Promise(resolve => setTimeout(resolve, 200));
+        attempts++;
+    }
 
-        grid.innerHTML = discountBanner + pkgs.map((pkg, i) => {
-            const isStarter = pkg.is_promotional;
-            const isPopular = pkg.id === 'profissional';
-            const sitesCount = pkg.sites || Math.floor(pkg.totalCredits / 40);
+    if (pkgs && pkgs.length > 0) {
+        const CREDITS_PER_SITE = 40;
+
+        grid.innerHTML = pkgs.map((pkg) => {
+            const isFeatured = pkg.is_featured || pkg.id === 'plus';
+            const isPromo = pkg.is_promotional;
+            const totalCredits = pkg.totalCredits || (pkg.credits + (pkg.bonus_credits || 0));
+            const bonusCredits = pkg.bonus_credits || 0;
+            const sitesCount = Math.floor(totalCredits / CREDITS_PER_SITE);
+            const icon = pkg.icon || 'fa-box';
+            const features = pkg.features || [];
+
+            // Card classes
+            const cardClasses = [
+                'credit-package-clicksign',
+                isFeatured ? 'featured' : '',
+                isPromo ? 'promo' : ''
+            ].filter(Boolean).join(' ');
+
+            // Build features list
+            const featuresHTML = features.map(f =>
+                `<li><i class="fas fa-check"></i> ${f}</li>`
+            ).join('');
 
             return `
-            <div class="credit-package ${isPopular ? 'popular' : ''} ${isStarter ? 'starter' : ''}" data-package-id="${pkg.id}">
-                ${isPopular ? '<span class="package-badge">Mais Popular</span>' : ''}
-                ${isStarter ? '<span class="package-badge starter-badge">Oferta Única!</span>' : ''}
-                <h3 class="package-name">${pkg.name}</h3>
-                <div class="package-sites">
-                    <span class="sites-amount">${sitesCount}</span>
-                    <span class="sites-label">${sitesCount === 1 ? 'site' : 'sites'}</span>
+            <div class="${cardClasses}" data-package-id="${pkg.id}">
+                ${isFeatured ? '<div class="featured-badge">Destaque</div>' : ''}
+                
+                <div class="pkg-header">
+                    <i class="fas ${icon} pkg-icon"></i>
+                    <h3 class="pkg-name">${pkg.name}</h3>
                 </div>
-                <div class="package-credits">
-                    <span class="credits-amount">${pkg.totalCredits}</span>
-                    <span class="credits-label">créditos</span>
+
+                <div class="pkg-price">
+                    <span class="price-currency">R$</span>
+                    <span class="price-value">${Math.floor(pkg.finalPrice)}</span>
                 </div>
-                ${pkg.bonus_credits > 0 ? `<div class="package-bonus">+${pkg.bonus_credits} bônus</div>` : ''}
-                <div class="package-price">
-                    <span class="final-price">R$ ${pkg.finalPrice.toFixed(2).replace('.', ',')}</span>
+
+                <div class="pkg-sites">
+                    <select class="sites-select" disabled>
+                        <option>${sitesCount}</option>
+                    </select>
+                    <span class="sites-label">Sites para criar</span>
                 </div>
-                ${pkg.description ? `<p class="package-description">${pkg.description}</p>` : ''}
-                <button class="btn-buy" onclick="buyPackageMP('${pkg.id}')">
+
+                <div class="pkg-credits">
+                    <span class="credits-total">${totalCredits} créditos</span>
+                    ${bonusCredits > 0 ? `<span class="credits-bonus">+${bonusCredits} bônus inclusos</span>` : ''}
+                </div>
+
+                <button class="btn-buy-clicksign" onclick="buyPackageMP('${pkg.id}')">
                     <i class="fab fa-pix"></i> Comprar
                 </button>
+
+                ${pkg.description ? `<p class="pkg-description">${pkg.description}</p>` : ''}
+
+                <ul class="pkg-features">
+                    ${featuresHTML}
+                </ul>
             </div>
         `}).join('');
     } else {
-        // Fallback - show loading message
-        grid.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Carregando pacotes...</p>';
+        grid.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Erro ao carregar pacotes. Recarregue a página.</p>';
     }
 }
 
@@ -407,9 +520,23 @@ function deleteProjectConfirm(id) {
     }
 }
 
+// ========== COPY PROJECT LINK ==========
+function copyProjectLink(url) {
+    if (!url) {
+        showNotification('Link não disponível');
+        return;
+    }
+    navigator.clipboard.writeText(url).then(() => {
+        showNotification('✅ Link copiado!');
+    }).catch(() => {
+        showNotification('Erro ao copiar link');
+    });
+}
+
 // Expose functions globally
 window.editProject = editProject;
 window.publishProject = publishProject;
+window.copyProjectLink = copyProjectLink;
 window.buyPackage = buyPackage;
 window.buyPackageMP = buyPackageMP;
 window.deleteProjectConfirm = deleteProjectConfirm;
@@ -438,7 +565,10 @@ function showLoginModal() {
 }
 
 function closeLoginModal() {
-    document.getElementById('modal-login').classList.remove('active');
+    // Só permite fechar o modal se o usuário estiver autenticado
+    if (Auth.isLoggedIn()) {
+        document.getElementById('modal-login').classList.remove('active');
+    }
 }
 
 function showLoginForm() {

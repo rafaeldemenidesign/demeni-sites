@@ -19,9 +19,6 @@
     <div id="app" class="app-container">
         <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h1 class="logo">Demeni <span>Sites</span></h1>
-            </div>
 
             <!-- User Profile Card -->
             <div class="user-card" id="user-card">
@@ -89,11 +86,17 @@
                 <button class="menu-toggle" id="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                <h2 id="page-title">Meus Projetos</h2>
+                <h1 class="logo header-logo">Demeni <span>Sites</span></h1>
                 <div class="header-actions">
-                    <div class="credits-display">
-                        <i class="fas fa-coins"></i>
-                        <span id="header-credits">0</span> créditos
+                    <div class="credits-pill">
+                        <div class="credits-info">
+                            <span class="credits-label-tiny">Seu Saldo</span>
+                            <span class="credits-amount-big" id="header-credits">0</span>
+                            <span class="credits-unit-small">créditos</span>
+                        </div>
+                        <a href="#" class="btn-topup-pill" data-page="wallet">
+                            <i class="fas fa-plus"></i> Comprar
+                        </a>
                     </div>
                 </div>
             </header>
@@ -107,8 +110,22 @@
                     </button>
                 </div>
 
-                <div class="projects-grid" id="projects-grid">
-                    <!-- Projects rendered here -->
+                <!-- Sites Ativos (Publicados) -->
+                <div class="section-divider" id="active-section">
+                    <h3 class="section-label"><i class="fas fa-globe"></i> Sites Ativos <span class="count-badge"
+                            id="active-count">0</span></h3>
+                </div>
+                <div class="projects-grid" id="active-projects-grid">
+                    <!-- Published projects rendered here -->
+                </div>
+
+                <!-- Rascunhos -->
+                <div class="section-divider" id="drafts-section">
+                    <h3 class="section-label"><i class="fas fa-edit"></i> Rascunhos <span class="count-badge"
+                            id="drafts-count">0</span></h3>
+                </div>
+                <div class="projects-grid" id="draft-projects-grid">
+                    <!-- Draft projects rendered here -->
                 </div>
 
                 <div class="empty-state" id="empty-projects">
@@ -123,17 +140,29 @@
 
             <!-- Page: Wallet -->
             <section class="page" id="page-wallet">
-                <div class="wallet-header">
-                    <div class="wallet-balance">
-                        <span class="balance-label">Saldo Atual</span>
-                        <span class="balance-amount" id="wallet-balance">0</span>
-                        <span class="balance-unit">créditos</span>
-                    </div>
+                <!-- Banner para promoções -->
+                <div class="wallet-banner" id="wallet-banner">
+                    <!-- Espaço para banner promocional -->
                 </div>
 
-                <h3 class="section-title">Comprar Créditos</h3>
-                <div class="packages-grid" id="packages-grid">
-                    <!-- Packages rendered here -->
+                <!-- Container: Saldo + Planos -->
+                <div class="wallet-content">
+                    <!-- Saldo à esquerda -->
+                    <div class="wallet-sidebar">
+                        <div class="wallet-balance-card">
+                            <span class="balance-label">SEU SALDO</span>
+                            <span class="balance-amount" id="wallet-balance">0</span>
+                            <span class="balance-unit">créditos</span>
+                        </div>
+                    </div>
+
+                    <!-- Planos à direita -->
+                    <div class="wallet-packages">
+                        <h3 class="section-title">Comprar Créditos</h3>
+                        <div class="packages-grid" id="packages-grid">
+                            <!-- Packages rendered here -->
+                        </div>
+                    </div>
                 </div>
 
                 <h3 class="section-title">Histórico de Transações</h3>
@@ -225,7 +254,7 @@
                     </details>
                     <details class="faq-item">
                         <summary>Preciso de ajuda, como falo com vocês?</summary>
-                        <p>Entre em contato pelo WhatsApp: (83) 99635-3619</p>
+                        <p>Utilize o formulário de suporte abaixo. Responderemos em até 24 horas úteis.</p>
                     </details>
                 </div>
 
@@ -272,10 +301,9 @@
                 </div>
 
                 <div class="help-cta">
-                    <h4>Prefere falar diretamente?</h4>
-                    <a href="https://wa.me/5583996353619" target="_blank" class="btn-whatsapp">
-                        <i class="fab fa-whatsapp"></i> Falar no WhatsApp
-                    </a>
+                    <h4>Dúvidas?</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Use o formulário acima para entrar em
+                        contato. Nossa equipe responderá o mais breve possível.</p>
                 </div>
             </section>
         </main>
@@ -315,9 +343,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-user"></i> Acesse sua conta</h2>
-                <button class="modal-close" onclick="closeLoginModal()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <!-- Botão X removido para impedir bypass de login -->
             </div>
             <!-- Login Form -->
             <div id="login-form">
@@ -340,6 +366,79 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Modal: Model Selection -->
+    <div class="modal" id="modal-model-selection">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2><i class="fas fa-layer-group"></i> Escolha o Modelo</h2>
+                <button class="modal-close" onclick="closeModelSelectionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Selecione o template para o seu novo projeto</p>
+
+                <div class="models-grid">
+                    <!-- Modelo 1 -->
+                    <div class="model-card" onclick="selectModel('modelo-1')">
+                        <div class="model-preview">
+                            <div class="model-preview-content">
+                                <div class="preview-avatar"></div>
+                                <div class="preview-lines"></div>
+                            </div>
+                        </div>
+                        <div class="model-info">
+                            <h3>Modelo 1</h3>
+                            <p class="model-desc">Template padrão com todas as funcionalidades essenciais</p>
+                            <div class="model-price">
+                                <span class="price">40</span>
+                                <span class="unit">créditos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modelo 2 -->
+                    <div class="model-card" onclick="selectModel('modelo-2')">
+                        <div class="model-preview premium">
+                            <div class="model-preview-content">
+                                <div class="preview-avatar"></div>
+                                <div class="preview-lines"></div>
+                            </div>
+                            <span class="model-badge">Premium</span>
+                        </div>
+                        <div class="model-info">
+                            <h3>Modelo 2</h3>
+                            <p class="model-desc">Layout premium com recursos avançados</p>
+                            <div class="model-price">
+                                <span class="price">60</span>
+                                <span class="unit">créditos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modelo 3 (Indisponível) -->
+                    <div class="model-card disabled">
+                        <div class="model-preview">
+                            <div class="model-preview-content">
+                                <div class="preview-avatar"></div>
+                                <div class="preview-lines"></div>
+                            </div>
+                            <span class="model-badge coming-soon">Em breve</span>
+                        </div>
+                        <div class="model-info">
+                            <h3>Modelo 3</h3>
+                            <p class="model-desc">Ultra premium - em desenvolvimento</p>
+                            <div class="model-price">
+                                <span class="price">80</span>
+                                <span class="unit">créditos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->

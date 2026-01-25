@@ -135,12 +135,59 @@ async function loadSites() {
 }
 
 async function loadActivity() {
-    const activities = [
-        { type: 'payment', text: 'Rafael Demeni comprou Profissional', time: 'há 2 horas' },
-        { type: 'user', text: 'Novo usuário: Maria Santos', time: 'há 5 horas' },
-        { type: 'site', text: 'Site "Meu Negócio" publicado', time: 'há 1 dia' },
-        { type: 'payment', text: 'João Silva comprou Essencial', time: 'há 2 dias' }
-    ];
+    let activities = [];
+
+    if (SupabaseClient?.isConfigured()) {
+        try {
+            // Buscar pagamentos recentes
+            const { data: recentPayments } = await SupabaseClient.getClient()
+                .from('payments')
+                .select('*, profiles(name)')
+                .eq('status', 'approved')
+                .order('created_at', { ascending: false })
+                .limit(3);
+
+            if (recentPayments) {
+                recentPayments.forEach(p => {
+                    activities.push({
+                        type: 'payment',
+                        text: `${p.profiles?.name || 'Usuário'} comprou ${p.package_name || 'pacote'}`,
+                        time: getTimeAgo(p.created_at)
+                    });
+                });
+            }
+
+            // Buscar novos usuários
+            const { data: recentUsers } = await SupabaseClient.getClient()
+                .from('profiles')
+                .select('name, created_at')
+                .order('created_at', { ascending: false })
+                .limit(2);
+
+            if (recentUsers) {
+                recentUsers.forEach(u => {
+                    activities.push({
+                        type: 'user',
+                        text: `Novo usuário: ${u.name || 'Sem nome'}`,
+                        time: getTimeAgo(u.created_at)
+                    });
+                });
+            }
+        } catch (e) {
+            console.log('📊 Activity: fallback', e);
+        }
+    }
+
+    // Fallback se não houver atividades
+    if (activities.length === 0) {
+        activities = [
+            { type: 'payment', text: 'Sistema iniciado', time: 'agora' }
+        ];
+    }
+
+    // Ordenar por tempo e limitar
+    activities.sort((a, b) => a.time.localeCompare(b.time));
+    activities = activities.slice(0, 5);
 
     document.getElementById('activity-list').innerHTML = activities.map(a => `
         <div class="activity-item">
@@ -153,6 +200,22 @@ async function loadActivity() {
             </div>
         </div>
     `).join('');
+}
+
+// Função auxiliar para calcular "há quanto tempo"
+function getTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'agora';
+    if (diffMins < 60) return `há ${diffMins} min`;
+    if (diffHours < 24) return `há ${diffHours}h`;
+    if (diffDays === 1) return 'há 1 dia';
+    return `há ${diffDays} dias`;
 }
 
 // ========== STATS ==========
@@ -251,7 +314,11 @@ function renderSites() {
 }
 
 // ========== CHARTS ==========
-function initCharts() {
+async function initCharts() {
+    // Buscar dados reais
+    const revenueData = await getRealRevenueData(30);
+    const usersData = await getRealNewUsersData(7);
+
     // Revenue Chart
     const revenueCtx = document.getElementById('revenue-chart')?.getContext('2d');
     if (revenueCtx) {
@@ -260,8 +327,8 @@ function initCharts() {
             data: {
                 labels: getLast30Days(),
                 datasets: [{
-                    label: 'Receita',
-                    data: generateDemoData(30, 0, 500),
+                    label: 'Receita (R$)',
+                    data: revenueData,
                     borderColor: '#22c55e',
                     backgroundColor: 'rgba(34, 197, 94, 0.1)',
                     fill: true,
@@ -288,7 +355,7 @@ function initCharts() {
                 labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
                 datasets: [{
                     label: 'Novos usuários',
-                    data: [3, 5, 2, 8, 4, 6, 3],
+                    data: usersData,
                     backgroundColor: 'rgba(212, 175, 55, 0.8)',
                     borderRadius: 6
                 }]
@@ -310,9 +377,58 @@ function getLast30Days() {
     for (let i = 29; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        days.push(d.getDate().toString());
+        days.push(d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
     }
     return days;
+}
+
+// Dados reais de receita do Supabase
+async function getRealRevenueData(days) {
+    const revenueByDay = Array(days).fill(0);
+    try {
+        if (SupabaseClient?.isConfigured()) {
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+            const { data: transactions } = await SupabaseClient.getClient()
+                .from('transactions')
+                .select('created_at, price_paid')
+                .eq('type', 'purchase')
+                .eq('payment_status', 'approved')
+                .gte('created_at', startDate.toISOString());
+            if (transactions) {
+                transactions.forEach(tx => {
+                    const txDate = new Date(tx.created_at);
+                    const daysAgo = Math.floor((new Date() - txDate) / (1000 * 60 * 60 * 24));
+                    const index = days - 1 - daysAgo;
+                    if (index >= 0 && index < days) revenueByDay[index] += (tx.price_paid || 0);
+                });
+            }
+        }
+    } catch (e) { console.log('📊 Chart: fallback', e); }
+    return revenueByDay;
+}
+
+// Dados reais de novos usuários
+async function getRealNewUsersData(days) {
+    const usersByDay = Array(7).fill(0);
+    try {
+        if (SupabaseClient?.isConfigured()) {
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            const { data: users } = await SupabaseClient.getClient()
+                .from('profiles')
+                .select('created_at')
+                .gte('created_at', startDate.toISOString());
+            if (users) {
+                users.forEach(u => {
+                    const dayOfWeek = new Date(u.created_at).getDay();
+                    const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    usersByDay[adjustedDay]++;
+                });
+            }
+        }
+    } catch (e) { console.log('📊 Users chart: fallback', e); }
+    return usersByDay;
 }
 
 function generateDemoData(count, min, max) {
@@ -555,11 +671,32 @@ let tickets = [];
 let currentTicketId = null;
 
 async function loadTickets() {
-    // Demo data
-    tickets = [
-        { id: '1', user_id: '2', subject: 'Não consigo publicar', category: 'Técnico', status: 'pending', created_at: '2026-01-22T14:00:00', profiles: { name: 'João Silva' }, messages: [{ sender: 'user', content: 'Olá, estou tentando publicar mas dá erro.' }] },
-        { id: '2', user_id: '3', subject: 'Como adicionar créditos?', category: 'Dúvida', status: 'resolved', created_at: '2026-01-21T10:00:00', profiles: { name: 'Maria Santos' }, messages: [{ sender: 'user', content: 'Gostaria de saber como comprar mais créditos.' }, { sender: 'admin', content: 'Vá em Minha Carteira e escolha um pacote.' }] }
-    ];
+    if (SupabaseClient?.isConfigured()) {
+        try {
+            const { data, error } = await SupabaseClient.getClient()
+                .from('support_tickets')
+                .select('*, profiles:user_id(name, email)')
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (!error && data) {
+                tickets = data.map(t => ({
+                    ...t,
+                    profiles: t.profiles || { name: t.user_name || 'Usuário', email: t.user_email },
+                    messages: t.messages || [{ sender: 'user', content: t.message || '' }]
+                }));
+            }
+        } catch (e) {
+            console.log('📩 Tickets: fallback to demo', e);
+        }
+    }
+
+    // Demo data fallback if no tickets
+    if (!tickets || tickets.length === 0) {
+        tickets = [
+            { id: '1', user_id: '2', subject: 'Não consigo publicar', category: 'Técnico', status: 'pending', created_at: '2026-01-22T14:00:00', profiles: { name: 'João Silva' }, messages: [{ sender: 'user', content: 'Olá, estou tentando publicar mas dá erro.' }] }
+        ];
+    }
     renderTickets();
     updateTicketStats();
 }

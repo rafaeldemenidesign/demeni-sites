@@ -3,12 +3,234 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=/app.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Demeni Sites</title>
+
+    <!-- Liebling Font -->
+    <style>
+        @font-face {
+            font-family: 'Liebling';
+            src: url('fonts/Liebling.otf') format('opentype');
+            font-weight: 400;
+        }
+
+        @font-face {
+            font-family: 'Liebling';
+            src: url('fonts/Liebling Medium.otf') format('opentype');
+            font-weight: 500;
+        }
+
+        @font-face {
+            font-family: 'Liebling';
+            src: url('fonts/Liebling Bold.otf') format('opentype');
+            font-weight: 700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Liebling', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            background: #fafafa;
+            color: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #635bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <!-- Supabase (para buscar sites publicados) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-    <p>Redirecting to <a href="/app.html">Dashboard</a>...</p>
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <script>
+        // Configuração Supabase
+        const SUPABASE_URL = 'https://aeyxdqggngapczohqvbo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleXhkcWdnbmdhcGN6b2hxdmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTc3MTcsImV4cCI6MjA4NDU5MzcxN30.eq9Feo9dj6T1KUO-F4AN7j4x7HECb8f0B9WddFLD9C4';
+
+        const PLATFORM_SUBDOMAINS = ['www', 'sites', 'demeni-sites', 'localhost'];
+
+        // Detectar subdomínio
+        function getClientSubdomain() {
+            const hostname = window.location.hostname;
+
+            // Localhost ou IP - não rotear
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return null;
+            }
+
+            // Vercel preview URLs - não rotear
+            if (hostname.includes('vercel.app')) {
+                return null;
+            }
+
+            // Extrair subdomínio
+            const parts = hostname.split('.');
+            if (parts.length < 2) return null;
+
+            const subdomain = parts[0].toLowerCase();
+
+            // Se for subdomínio da plataforma, não rotear
+            if (PLATFORM_SUBDOMAINS.includes(subdomain)) {
+                return null;
+            }
+
+            return subdomain;
+        }
+
+        // Carregar site do cliente
+        async function loadClientSite(slug) {
+            try {
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                const { data: site, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('slug', slug)
+                    .eq('published', true)
+                    .single();
+
+                if (error || !site) {
+                    show404(slug);
+                    return;
+                }
+
+                renderSite(site);
+            } catch (err) {
+                console.error('Error:', err);
+                show404(slug);
+            }
+        }
+
+        // Renderizar site do cliente
+        function renderSite(site) {
+            const data = site.data || {};
+            const profile = data.profile || {};
+            const theme = data.theme || {};
+            const links = data.links || [];
+
+            document.documentElement.innerHTML = `
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${profile.name || site.name || 'Site'}</title>
+                    <meta name="description" content="${profile.bio || ''}">
+                    <link rel="icon" href="${profile.avatar || ''}">
+                    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: 'Montserrat', sans-serif;
+                            min-height: 100vh;
+                            background: ${theme.backgroundColor || '#1a1a2e'};
+                            color: ${theme.textColor || '#fff'};
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            padding: 40px 20px;
+                        }
+                        .photo {
+                            width: 120px; height: 120px;
+                            border-radius: 50%;
+                            border: 4px solid ${theme.accentColor || '#D4AF37'};
+                            object-fit: cover;
+                            margin-bottom: 16px;
+                        }
+                        .name { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+                        .bio { font-size: 0.9rem; opacity: 0.8; text-align: center; max-width: 400px; margin-bottom: 32px; }
+                        .links { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
+                        .link-btn {
+                            display: flex; align-items: center; justify-content: center; gap: 12px;
+                            padding: 16px 24px;
+                            background: ${theme.buttonColor || 'rgba(255,255,255,0.1)'};
+                            border-radius: ${theme.buttonRadius || 12}px;
+                            text-decoration: none;
+                            color: ${theme.textColor || '#fff'};
+                            font-weight: 600;
+                            transition: all 0.2s;
+                        }
+                        .link-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+                        .watermark { margin-top: auto; padding-top: 40px; font-size: 0.75rem; opacity: 0.5; }
+                        .watermark a { color: inherit; text-decoration: none; }
+                    </style>
+                </head>
+                <body>
+                    ${profile.avatar ? `<img src="${profile.avatar}" alt="${profile.name}" class="photo">` : ''}
+                    <h1 class="name">${profile.name || site.name}</h1>
+                    ${profile.bio ? `<p class="bio">${profile.bio}</p>` : ''}
+                    <div class="links">
+                        ${links.map(l => `
+                            <a href="${l.url}" target="_blank" class="link-btn">
+                                ${l.icon ? `<i class="${l.icon}"></i>` : ''}
+                                ${l.title}
+                            </a>
+                        `).join('')}
+                    </div>
+                    <div class="watermark">
+                        Criado com <a href="https://sites.rafaeldemeni.com" target="_blank">Demeni Sites</a>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+
+        // Página 404
+        function show404(slug) {
+            document.body.innerHTML = `
+                <div style="text-align: center;">
+                    <h1 style="font-size: 4rem; margin-bottom: 16px;">404</h1>
+                    <p style="opacity: 0.8; margin-bottom: 32px;">Site "${slug}" não encontrado</p>
+                    <a href="https://sites.rafaeldemeni.com" style="padding: 12px 24px; background: #1B97C0; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">Criar meu site</a>
+                </div>
+            `;
+        }
+
+        // Iniciar roteamento
+        (function () {
+            const slug = getClientSubdomain();
+
+            if (slug) {
+                // É um site de cliente
+                loadClientSite(slug);
+            } else {
+                // É a plataforma - redirecionar para dashboard
+                window.location.href = '/app.html';
+            }
+        })();
+    </script>
 </body>
 
 </html>

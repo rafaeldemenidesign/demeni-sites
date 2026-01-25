@@ -1,9 +1,219 @@
 /* ===========================
    DEMENI SITES - PAYMENTS CSS
-   Credit Packages & Checkout
+   Estilo Clicksign
    =========================== */
 
-/* Packages Container */
+/* ========== NOVO LAYOUT CLICKSIGN ========== */
+
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Card Base - Clicksign Style */
+.credit-package-clicksign {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: left;
+    position: relative;
+    transition: box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.credit-package-clicksign:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Featured Card - Destaque */
+.credit-package-clicksign.featured {
+    border: 2px solid #9333ea;
+    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.15);
+}
+
+.featured-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #9333ea;
+    color: white;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Promo Card */
+.credit-package-clicksign.promo {
+    border: 2px solid #22c55e;
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.05) 0%, #ffffff 30%);
+}
+
+/* Package Header */
+.pkg-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.pkg-icon {
+    font-size: 1.2rem;
+    color: #9333ea;
+}
+
+.pkg-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary, #1f2937);
+    margin: 0;
+}
+
+/* Price - Grande e destacado */
+.pkg-price {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    margin-bottom: 16px;
+}
+
+.price-currency {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #9333ea;
+}
+
+.price-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #9333ea;
+    line-height: 1;
+}
+
+/* Sites selector */
+.pkg-sites {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.sites-select {
+    width: 60px;
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+    background: #f9fafb;
+    cursor: default;
+}
+
+.sites-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #6b7280);
+}
+
+/* Credits display */
+.pkg-credits {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.credits-total {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+}
+
+.credits-bonus {
+    font-size: 0.8rem;
+    color: #22c55e;
+    font-weight: 500;
+}
+
+/* Buy Button - Verde */
+.btn-buy-clicksign {
+    width: 100%;
+    padding: 12px 20px;
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.btn-buy-clicksign:hover {
+    background: #16a34a;
+    transform: scale(1.02);
+}
+
+/* Description */
+.pkg-description {
+    font-size: 0.8rem;
+    color: var(--text-muted, #9ca3af);
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+/* Features List */
+.pkg-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pkg-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary, #6b7280);
+    padding: 6px 0;
+}
+
+.pkg-features li i {
+    color: #22c55e;
+    font-size: 0.75rem;
+}
+
+/* Responsivo */
+@media (max-width: 1100px) {
+    .packages-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .packages-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========== FIM NOVO LAYOUT ========== */
+
+/* Packages Container - Legacy */
 .packages-section {
     padding: 2rem;
 }
@@ -11,7 +221,7 @@
 .packages-section h2 {
     text-align: center;
     margin-bottom: 0.5rem;
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 .packages-section .section-subtitle {
@@ -20,55 +230,80 @@
     margin-bottom: 2rem;
 }
 
-.packages-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-/* Individual Package Card */
+/* Individual Package Card - Premium Style */
 .credit-package {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
+    background: #ffffff;
+    border: 1px dashed var(--border, #e5e7eb);
+    border-radius: 20px;
     padding: 1.5rem;
     text-align: center;
     position: relative;
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.credit-package:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    border-color: var(--accent-color);
-}
-
-.credit-package.popular {
-    border: 2px solid var(--accent-color);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent);
-}
-
-/* Popular Badge */
-.package-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, var(--accent-color), #2563eb);
+/* Essencial - Azul degradê */
+.credit-package[data-package-id="essencial"] {
+    background: linear-gradient(180deg, #635bff 0%, #4f46e5 100%);
+    border: none;
     color: white;
-    padding: 4px 16px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-/* Starter Badge */
-.package-badge.starter-badge {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+.credit-package[data-package-id="essencial"] .package-name,
+.credit-package[data-package-id="essencial"] .credits-amount,
+.credit-package[data-package-id="essencial"] .credits-label,
+.credit-package[data-package-id="essencial"] .final-price {
+    color: white;
+}
+
+/* Profissional - Roxo degradê (Destacado) */
+.credit-package[data-package-id="profissional"],
+.credit-package.popular {
+    background: linear-gradient(180deg, #9333ea 0%, #7c3aed 100%);
+    border: none;
+    color: white;
+    transform: scale(1.02);
+    box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+}
+
+.credit-package[data-package-id="profissional"] .package-name,
+.credit-package[data-package-id="profissional"] .credits-amount,
+.credit-package[data-package-id="profissional"] .credits-label,
+.credit-package[data-package-id="profissional"] .final-price,
+.credit-package.popular .package-name,
+.credit-package.popular .credits-amount,
+.credit-package.popular .credits-label,
+.credit-package.popular .final-price {
+    color: white;
+}
+
+/* Empresarial - Black degradê */
+.credit-package[data-package-id="empresarial"] {
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    border: none;
+    color: white;
+}
+
+.credit-package[data-package-id="empresarial"] .package-name,
+.credit-package[data-package-id="empresarial"] .credits-amount,
+.credit-package[data-package-id="empresarial"] .credits-label,
+.credit-package[data-package-id="empresarial"] .final-price {
+    color: white;
+}
+
+/* Botão Verde - destaca no hover */
+.btn-buy {
+    background: #22c55e !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-buy:hover {
+    background: #16a34a !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
 }
 
 /* Starter Package */
@@ -110,7 +345,7 @@
 .package-name {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
@@ -121,17 +356,18 @@
 
 .credits-amount {
     font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--accent-color), #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-weight: 800;
+    color: var(--accent-color, #3b82f6);
+    display: block;
+    line-height: 1;
 }
 
 .credits-label {
     display: block;
     font-size: 0.9rem;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* Bonus Credits */
@@ -175,14 +411,14 @@
 .final-price {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 /* Buy Button */
 .btn-buy {
     width: 100%;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
+    background: linear-gradient(135deg, #9333ea, #7c3aed);
     color: white;
     border: none;
     border-radius: 10px;
@@ -194,11 +430,12 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    margin-top: auto;
 }
 
 .btn-buy:hover {
     transform: scale(1.02);
-    box-shadow: 0 5px 20px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 5px 20px rgba(27, 151, 192, 0.4);
 }
 
 .btn-buy i {
@@ -229,7 +466,7 @@
 
 /* Transaction History */
 .transactions-list {
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: 12px;
     overflow: hidden;
 }
@@ -238,7 +475,7 @@
     display: flex;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border);
     gap: 1rem;
 }
 
@@ -277,7 +514,7 @@
 
 .transaction-description {
     font-weight: 500;
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 .transaction-date {
@@ -317,14 +554,14 @@
 #payment-loader .spinner {
     width: 50px;
     height: 50px;
-    border: 4px solid var(--border-color);
+    border: 4px solid var(--border);
     border-top-color: var(--accent-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
 #payment-loader p {
-    color: var(--text-color);
+    color: var(--text-primary);
     font-size: 1.1rem;
 }
 
@@ -347,5 +584,144 @@
 
     .credits-amount {
         font-size: 2rem;
+    }
+}
+
+/* ========================================
+   NOVO LAYOUT DA CARTEIRA
+   ======================================== */
+
+/* Banner Rotativo */
+.wallet-banner {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(135deg, rgba(27, 151, 192, 0.15), rgba(147, 51, 234, 0.1));
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    position: relative;
+}
+
+.wallet-banner .banner-slide {
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+.wallet-banner .banner-slide.active {
+    display: block;
+}
+
+.wallet-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Container Saldo + Planos */
+.wallet-content {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+/* Sidebar do Saldo */
+.wallet-sidebar {
+    flex: 0 0 180px;
+}
+
+.wallet-balance-card {
+    background: transparent;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wallet-balance-card .balance-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.wallet-balance-card .balance-amount {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1b97c0;
+    line-height: 1;
+}
+
+.wallet-balance-card .balance-unit {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Container dos Planos */
+.wallet-packages {
+    flex: 1;
+}
+
+.wallet-packages .section-title {
+    margin-bottom: 16px;
+}
+
+/* Grid de Pacotes Compacto */
+.wallet-packages .packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    max-width: none;
+}
+
+/* Cards menores */
+.wallet-packages .credit-package {
+    min-height: 260px;
+    padding: 1rem;
+}
+
+.wallet-packages .credits-amount {
+    font-size: 1.8rem;
+}
+
+.wallet-packages .package-name {
+    font-size: 0.95rem;
+}
+
+.wallet-packages .final-price {
+    font-size: 1.1rem;
+}
+
+.wallet-packages .btn-buy {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+    .wallet-content {
+        flex-direction: column;
+    }
+
+    .wallet-sidebar {
+        flex: 0 0 auto;
+    }
+
+    .wallet-balance-card {
+        flex-direction: row;
+        justify-content: center;
+        align-items: baseline;
+        gap: 12px;
+    }
+
+    .wallet-packages .packages-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .wallet-packages .packages-grid {
+        grid-template-columns: 1fr;
     }
 }

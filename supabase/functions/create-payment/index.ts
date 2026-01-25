@@ -54,9 +54,9 @@ serve(async (req) => {
                 email: user_email
             },
             back_urls: {
-                success: `${origin}/app.html?payment=success`,
-                failure: `${origin}/app.html?payment=failure`,
-                pending: `${origin}/app.html?payment=pending`
+                success: `${origin}/demeni-sites/app.html?payment=success`,
+                failure: `${origin}/demeni-sites/app.html?payment=failure`,
+                pending: `${origin}/demeni-sites/app.html?payment=pending`
             },
             auto_return: 'approved',
             external_reference: JSON.stringify({
@@ -69,7 +69,8 @@ serve(async (req) => {
             statement_descriptor: 'DEMENI SITES',
             payment_methods: {
                 excluded_payment_types: [],
-                installments: 1
+                excluded_payment_methods: [],
+                installments: 12
             }
         }
 

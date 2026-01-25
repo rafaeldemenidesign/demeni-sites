@@ -1,37 +1,74 @@
 /* ===========================
    DEMENI SITES - XP SYSTEM MODULE
-   Manages experience points and levels
+   Sistema de Níveis 1-100 com Patentes
    =========================== */
 
 const XPSystem = (function () {
     // ========== LEVEL CONFIGURATION ==========
     const CONFIG = {
         // XP multiplier for purchases (credits * multiplier)
-        XP_MULTIPLIER: 2.5,
+        XP_MULTIPLIER: 3,
 
-        // Base XP for level 2
-        BASE_XP: 200,
+        // XP required per level (linear progression)
+        XP_PER_LEVEL: 50,
 
-        // Level growth factor (each level = previous + previous/2)
-        GROWTH_FACTOR: 1.5,
+        // Max level
+        MAX_LEVEL: 100,
 
-        // Border colors by level range - Sistema de Tiers
-        BORDERS: [
-            { minLevel: 1, maxLevel: 4, color: 'bronze', name: 'Bronze', hex: '#CD7F32' },
-            { minLevel: 5, maxLevel: 9, color: 'silver', name: 'Prata', hex: '#C0C0C0' },
-            { minLevel: 10, maxLevel: 14, color: 'gold', name: 'Ouro', hex: '#D4AF37' },
-            { minLevel: 15, maxLevel: 19, color: 'turmaline', name: 'Turmalina', hex: '#40E0D0' },
-            { minLevel: 20, maxLevel: 999, color: 'fire', name: 'Fire', hex: '#FF4500' }
-        ],
-
-        // Level benefits (discounts, features) - Corresponde aos tiers
-        BENEFITS: {
-            1: { discount: 0, feature: 'Bronze - Começo' },
-            5: { discount: 5, feature: 'Prata - 5% desconto' },
-            10: { discount: 10, feature: 'Ouro - 10% desconto' },
-            15: { discount: 15, feature: 'Turmalina - 15% desconto' },
-            20: { discount: 20, feature: 'Fire - 20% desconto + Suporte VIP' }
-        }
+        // Patente ranges and discounts
+        PATENTES: [
+            {
+                minLevel: 1,
+                maxLevel: 20,
+                id: 'bronze',
+                name: 'Bronze',
+                hex: '#CD7F32',
+                gradient: 'linear-gradient(135deg, #CD7F32 0%, #8B5A2B 50%, #CD7F32 100%)',
+                discount: 0,
+                sitePrice: 40
+            },
+            {
+                minLevel: 21,
+                maxLevel: 40,
+                id: 'prata',
+                name: 'Prata',
+                hex: '#C0C0C0',
+                gradient: 'linear-gradient(135deg, #E8E8E8 0%, #A8A8A8 50%, #E8E8E8 100%)',
+                discount: 5,
+                sitePrice: 38
+            },
+            {
+                minLevel: 41,
+                maxLevel: 60,
+                id: 'ouro',
+                name: 'Ouro',
+                hex: '#FFD700',
+                gradient: 'linear-gradient(135deg, #FFD700 0%, #B8860B 50%, #FFD700 100%)',
+                discount: 12,
+                sitePrice: 35
+            },
+            {
+                minLevel: 61,
+                maxLevel: 80,
+                id: 'turmalina',
+                name: 'Turmalina',
+                hex: '#40E0D0',
+                gradient: 'linear-gradient(135deg, #40E0D0 0%, #00CED1 50%, #48D1CC 100%)',
+                discount: 18,
+                sitePrice: 33
+            },
+            {
+                minLevel: 81,
+                maxLevel: 100,
+                id: 'fire',
+                name: 'Fire',
+                hex: '#FF4500',
+                gradient: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #FF4500 50%, #FF0000 75%, #FF4500 100%)',
+                discount: 25,
+                sitePrice: 30,
+                animated: true
+            }
+        ]
     };
 
     // ========== XP CALCULATIONS ==========
@@ -70,31 +107,15 @@ const XPSystem = (function () {
         return user.level || 1;
     }
 
+    // Linear progression: each level = 50 XP
     function calculateLevel(xp) {
-        if (xp < CONFIG.BASE_XP) return 1;
-
-        let level = 1;
-        let threshold = CONFIG.BASE_XP;
-        let increment = CONFIG.BASE_XP / 2;
-
-        while (xp >= threshold) {
-            level++;
-            increment = threshold / 2;
-            threshold += increment;
-        }
-
-        return level;
+        const level = Math.floor(xp / CONFIG.XP_PER_LEVEL) + 1;
+        return Math.min(level, CONFIG.MAX_LEVEL);
     }
 
     function getXPForLevel(level) {
         if (level <= 1) return 0;
-        if (level === 2) return CONFIG.BASE_XP;
-
-        let threshold = CONFIG.BASE_XP;
-        for (let i = 2; i < level; i++) {
-            threshold += threshold / 2;
-        }
-        return Math.floor(threshold);
+        return (level - 1) * CONFIG.XP_PER_LEVEL;
     }
 
     function getXPProgress() {
@@ -121,10 +142,10 @@ const XPSystem = (function () {
         const currentLevel = getLevel();
 
         if (newLevel !== currentLevel) {
-            const borderInfo = getBorderForLevel(newLevel);
+            const patente = getPatenteForLevel(newLevel);
             UserData.updateUser({
                 level: newLevel,
-                borderColor: borderInfo.color
+                borderColor: patente.id
             });
 
             // Return level up info
@@ -133,8 +154,8 @@ const XPSystem = (function () {
                     leveledUp: true,
                     oldLevel: currentLevel,
                     newLevel: newLevel,
-                    border: borderInfo,
-                    benefits: CONFIG.BENEFITS[newLevel] || null
+                    patente: patente,
+                    newPatente: getPatenteForLevel(currentLevel).id !== patente.id
                 };
             }
         }
@@ -142,81 +163,80 @@ const XPSystem = (function () {
         return { leveledUp: false };
     }
 
-    // ========== BORDERS ==========
-    function getBorderForLevel(level) {
-        for (const border of CONFIG.BORDERS) {
-            if (level >= border.minLevel && level <= border.maxLevel) {
-                return border;
+    // ========== PATENTES ==========
+    function getPatenteForLevel(level) {
+        for (const patente of CONFIG.PATENTES) {
+            if (level >= patente.minLevel && level <= patente.maxLevel) {
+                return patente;
             }
         }
-        return CONFIG.BORDERS[0]; // Default
+        return CONFIG.PATENTES[0]; // Default Bronze
     }
 
-    function getCurrentBorder() {
-        return getBorderForLevel(getLevel());
+    function getCurrentPatente() {
+        return getPatenteForLevel(getLevel());
     }
 
-    function getAllBorders() {
-        return CONFIG.BORDERS;
+    function getAllPatentes() {
+        return CONFIG.PATENTES;
     }
 
-    // ========== BENEFITS ==========
-    function getCurrentBenefits() {
-        const level = getLevel();
-        const benefits = [];
-
-        for (const [lvl, benefit] of Object.entries(CONFIG.BENEFITS)) {
-            if (level >= parseInt(lvl)) {
-                benefits.push({
-                    level: parseInt(lvl),
-                    ...benefit
-                });
-            }
-        }
-
-        return benefits;
-    }
-
+    // ========== DISCOUNTS & PRICING ==========
     function getCurrentDiscount() {
-        const benefits = getCurrentBenefits();
-        if (benefits.length === 0) return 0;
-        return benefits[benefits.length - 1].discount || 0;
+        return getCurrentPatente().discount;
     }
 
-    function getNextBenefit() {
-        const level = getLevel();
-        const benefitLevels = Object.keys(CONFIG.BENEFITS).map(Number).sort((a, b) => a - b);
+    function getCurrentSitePrice() {
+        return getCurrentPatente().sitePrice;
+    }
 
-        for (const lvl of benefitLevels) {
-            if (lvl > level) {
-                return {
-                    level: lvl,
-                    ...CONFIG.BENEFITS[lvl]
-                };
-            }
+    function getNextPatente() {
+        const currentPatente = getCurrentPatente();
+        const currentIndex = CONFIG.PATENTES.findIndex(p => p.id === currentPatente.id);
+
+        if (currentIndex < CONFIG.PATENTES.length - 1) {
+            return CONFIG.PATENTES[currentIndex + 1];
         }
-
-        return null; // Max level reached
+        return null; // Already at Fire
     }
 
     // ========== STATS ==========
     function getStats() {
         const xp = getXP();
         const level = getLevel();
-        const border = getCurrentBorder();
+        const patente = getCurrentPatente();
         const progress = getXPProgress();
-        const benefits = getCurrentBenefits();
         const discount = getCurrentDiscount();
+        const sitePrice = getCurrentSitePrice();
 
         return {
             xp: xp,
             level: level,
-            border: border,
+            patente: patente,
             progress: progress,
-            benefits: benefits,
             discount: discount,
-            nextBenefit: getNextBenefit()
+            sitePrice: sitePrice,
+            nextPatente: getNextPatente()
         };
+    }
+
+    // ========== SPENDING CALCULATOR ==========
+    // How much BRL spent to reach a level
+    function getSpendingForLevel(level) {
+        const xpNeeded = getXPForLevel(level);
+        // XP = credits * 3, credits = BRL (1:1)
+        return Math.ceil(xpNeeded / CONFIG.XP_MULTIPLIER);
+    }
+
+    // Table showing spending milestones
+    function getSpendingTable() {
+        return CONFIG.PATENTES.map(p => ({
+            patente: p.name,
+            levelRange: `${p.minLevel}-${p.maxLevel}`,
+            minSpending: getSpendingForLevel(p.minLevel),
+            discount: `${p.discount}%`,
+            sitePrice: `R$ ${p.sitePrice}`
+        }));
     }
 
     // ========== FORMAT HELPERS ==========
@@ -228,14 +248,14 @@ const XPSystem = (function () {
     }
 
     // ========== LEVEL TABLE (for display) ==========
-    function getLevelTable(maxLevel = 25) {
+    function getLevelTable(maxLevel = 100) {
         const table = [];
         for (let i = 1; i <= maxLevel; i++) {
             table.push({
                 level: i,
                 xpRequired: getXPForLevel(i),
-                border: getBorderForLevel(i),
-                benefit: CONFIG.BENEFITS[i] || null
+                patente: getPatenteForLevel(i),
+                spending: getSpendingForLevel(i)
             });
         }
         return table;
@@ -254,18 +274,25 @@ const XPSystem = (function () {
         getXPForLevel,
         getXPProgress,
 
-        // Borders
-        getBorderForLevel,
-        getCurrentBorder,
-        getAllBorders,
+        // Patentes (replacing Borders)
+        getPatenteForLevel,
+        getCurrentPatente,
+        getAllPatentes,
 
-        // Benefits
-        getCurrentBenefits,
+        // Backwards compatibility
+        getBorderForLevel: getPatenteForLevel,
+        getCurrentBorder: getCurrentPatente,
+        getAllBorders: getAllPatentes,
+
+        // Discounts & Pricing
         getCurrentDiscount,
-        getNextBenefit,
+        getCurrentSitePrice,
+        getNextPatente,
 
         // Stats
         getStats,
+        getSpendingForLevel,
+        getSpendingTable,
 
         // Formatting
         formatXP,

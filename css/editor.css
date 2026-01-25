@@ -1,46 +1,47 @@
 /* ===========================
    DEMENI SITES - EDITOR CSS
-   SaaS Professional Theme
+   Tema Claro - Fidelidade ao Dashboard
    =========================== */
 
 :root {
-    /* Primary Accent - Purple (Mídia para Vender) */
-    --purple: #5692FA;
-    --purple-light: #7EB3FF;
-    --purple-dark: #3D6FD9;
+    /* Primary Accent - Roxo Mídia para Vender */
+    --purple: #9333ea;
+    --purple-light: #a855f7;
+    --purple-dark: #7c3aed;
 
-    /* Secondary Accent - Teal/Cyan */
-    --accent: #1B97C0;
-    --accent-light: #23b8e8;
-    --accent-dark: #157a9c;
+    /* Secondary Accent */
+    --accent: #9333ea;
+    --accent-light: #f3e8ff;
+    --accent-dark: #7c3aed;
 
-    /* Dark Blue Backgrounds */
-    --bg-dark: #001935;
-    --bg-panel: #00254d;
-    --bg-card: #003366;
-    --bg-glass: rgba(86, 146, 250, 0.08);
-    --bg-hover: rgba(86, 146, 250, 0.12);
+    /* Light Backgrounds */
+    --bg-dark: #e8eef8;
+    --bg-panel: #f4f7fc;
+    --bg-card: #ffffff;
+    --bg-glass: rgba(147, 51, 234, 0.04);
+    --bg-hover: rgba(147, 51, 234, 0.08);
 
-    /* Text Colors */
-    --text-primary: #FFFFFF;
-    --text-secondary: #a8c5d8;
-    --text-muted: #6b8fa8;
+    /* Text Colors - Dark on Light */
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
 
     /* Borders */
-    --border: rgba(86, 146, 250, 0.15);
-    --border-light: rgba(86, 146, 250, 0.25);
+    --border: #e5e7eb;
+    --border-light: #d1d5db;
 
     /* Status Colors */
-    --success: #34C759;
-    --danger: #FF3B30;
-    --warning: #FF9500;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --info: #1b97c0;
 
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 30px rgba(86, 146, 250, 0.3);
-    --shadow-purple: 0 4px 20px rgba(86, 146, 250, 0.35);
+    /* Shadows - Light Theme */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px rgba(147, 51, 234, 0.15);
+    --shadow-purple: 0 4px 16px rgba(147, 51, 234, 0.2);
 }
 
 * {
@@ -51,7 +52,7 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(135deg, #001935 0%, #00254d 50%, #001935 100%);
+    background: linear-gradient(135deg, #e8eef8 0%, #dce4f2 50%, #e8eef8 100%);
     color: var(--text-primary);
     min-height: 100vh;
     overflow: hidden;
@@ -234,8 +235,7 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 16px 8px;
-    background: rgba(0, 25, 53, 0.4);
-    backdrop-filter: blur(10px);
+    background: #f4f7fc;
     border-right: 1px solid var(--border);
     gap: 12px;
 }
@@ -797,7 +797,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 40px 30px;
-    background: linear-gradient(180deg, #00254d 0%, #001935 100%);
+    background: linear-gradient(180deg, #dce4f2 0%, #e8eef8 100%);
     min-height: 100%;
     min-width: 400px;
 }

@@ -526,6 +526,9 @@
                                 <button class="btn-text" id="btn-upload-bg">
                                     <i class="fas fa-upload"></i> Enviar
                                 </button>
+                                <button class="btn-text" id="btn-edit-bg" disabled>
+                                    <i class="fas fa-crop-alt"></i> Editar
+                                </button>
                                 <button class="btn-text btn-danger" id="btn-remove-bg">
                                     <i class="fas fa-trash"></i> Remover
                                 </button>
@@ -657,7 +660,7 @@
 
                         <div class="publish-cost">
                             <span class="cost-label">Custo:</span>
-                            <span class="cost-value">50 créditos</span>
+                            <span class="cost-value">40 créditos</span>
                         </div>
 
                         <div class="publish-balance">
@@ -711,7 +714,7 @@
                         </div>
                         <h3>Créditos Insuficientes</h3>
                         <p class="publish-text">
-                            Você precisa de 50 créditos para publicar.<br>
+                            Você precisa de 40 créditos para publicar.<br>
                             Saldo atual: <strong id="nocredits-balance">0</strong> créditos
                         </p>
                         <a href="app.html#wallet" class="btn-gold">
@@ -726,8 +729,17 @@
     <!-- Cropper.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
+    <!-- html2canvas for preview screenshots -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+
     <!-- Data Modules -->
     <script src="js/userData.js"></script>
+    <script src="js/xp.js"></script>
     <script src="js/credits.js"></script>
 
     <!-- Editor JS -->
