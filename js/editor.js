@@ -1379,6 +1379,18 @@ function renderPreview() {
     const glassOverlay = isLightBg ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)';
     const glassBorder = isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
 
+    // Button customization
+    const buttonCorners = state.style.buttonCorners || 12;
+    const shadowMap = {
+        none: 'none',
+        subtle: '0 2px 8px rgba(0,0,0,0.15)',
+        strong: '0 4px 16px rgba(0,0,0,0.25)',
+        hard: '4px 4px 0 rgba(0,0,0,0.3)'
+    };
+    const buttonShadow = shadowMap[state.style.buttonShadow] || 'none';
+    const buttonColor = state.style.buttonColor || accent;
+    const buttonTextColor = state.style.buttonTextColor || textColor;
+
     // Button style
     let buttonClass = 'preview-btn';
     if (state.style.buttonStyle === 'solid') buttonClass += ' solid';
@@ -1406,7 +1418,7 @@ function renderPreview() {
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
-                font-family: 'Montserrat', sans-serif;
+                font-family: '${state.style.fontFamily || 'Montserrat'}', sans-serif;
                 ${bgStyle}
                 color: ${textColor};
             }
@@ -1435,7 +1447,7 @@ function renderPreview() {
             }
             
             .preview-name {
-                font-size: 1.5rem;
+                font-size: ${state.profile.nameSize || 24}px;
                 font-weight: 700;
                 margin-bottom: 4px;
                 max-width: 280px;
@@ -1446,7 +1458,7 @@ function renderPreview() {
             }
             
             .preview-role {
-                font-size: 0.8rem;
+                font-size: ${state.profile.roleSize || 16}px;
                 color: ${accent};
                 text-transform: uppercase;
                 letter-spacing: 2px;
@@ -1459,7 +1471,7 @@ function renderPreview() {
             }
             
             .preview-bio {
-                font-size: 0.85rem;
+                font-size: ${state.profile.bioSize || 14}px;
                 color: ${textMuted};
                 width: 100%;
                 min-width: 200px;
@@ -1489,38 +1501,40 @@ function renderPreview() {
                 background: ${glassOverlay};
                 backdrop-filter: blur(8px);
                 border: 1px solid ${glassBorder};
-                border-radius: 12px;
-                color: ${textColor};
+                border-radius: ${buttonCorners}px;
+                color: ${buttonTextColor};
                 text-decoration: none;
                 font-size: 0.75rem;
                 transition: all 0.2s;
+                box-shadow: ${buttonShadow};
             }
             
             .preview-btn:hover {
                 background: rgba(255,255,255,0.15);
-                border-color: ${accent}50;
+                border-color: ${buttonColor}50;
                 transform: translateY(-2px);
             }
             
             .preview-btn i {
                 font-size: 1.3rem;
+                color: ${buttonColor};
             }
             
             .preview-btn:hover {
                 transform: translateY(-3px);
-                box-shadow: 0 8px 25px ${accent}40;
-                border-color: ${accent};
+                box-shadow: 0 8px 25px ${buttonColor}40;
+                border-color: ${buttonColor};
             }
             
             .preview-btn.solid {
-                background: ${accent};
-                color: #000;
+                background: ${buttonColor};
+                color: ${buttonTextColor};
                 border-color: transparent;
             }
             
             .preview-btn.outline {
                 background: transparent;
-                border: 2px solid ${accent};
+                border: 2px solid ${buttonColor};
             }
             
             .preview-cta {
