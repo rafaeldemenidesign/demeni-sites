@@ -14,7 +14,9 @@ const state = {
         whatsapp: '',
         nameSize: 24,
         roleSize: 16,
-        bioSize: 14
+        bioSize: 14,
+        avatarSize: 100,
+        headerLayout: 'classic' // classic, hero
     },
     links: [
         { id: 1, label: 'Instagram', url: '', icon: 'instagram' },
@@ -124,6 +126,7 @@ function init() {
     setupButtonCustomization();
     setupTextSizes();
     setupWallpaper();
+    setupHeaderLayout();
 
     // Initial render
     renderLinksList();
@@ -761,6 +764,40 @@ function setupWallpaper() {
 
     // Initialize sections
     updateSections(state.style.bgType || 'fill');
+}
+
+// ========== HEADER LAYOUT (4.1-4.2) ==========
+function setupHeaderLayout() {
+    // 4.1 Layout Options
+    const layoutOptions = document.querySelectorAll('.layout-option');
+    layoutOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            layoutOptions.forEach(o => o.classList.remove('active'));
+            option.classList.add('active');
+            state.profile.headerLayout = option.dataset.layout;
+            renderPreview();
+            saveToStorage();
+        });
+    });
+
+    // 4.2 Avatar Size (using existing size-btn with data-target="avatar")
+    document.querySelectorAll('.size-btn[data-target="avatar"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.action;
+            let current = state.profile.avatarSize || 100;
+
+            if (action === 'plus' && current < 150) current += 10;
+            if (action === 'minus' && current > 60) current -= 10;
+
+            state.profile.avatarSize = current;
+
+            const display = document.getElementById('avatar-size');
+            if (display) display.textContent = current;
+
+            renderPreview();
+            saveToStorage();
+        });
+    });
 }
 
 // ========== LINKS PANEL ==========
@@ -1471,8 +1508,8 @@ function renderPreview() {
             }
             
             .preview-avatar {
-                width: 100px;
-                height: 100px;
+                width: ${state.profile.avatarSize || 100}px;
+                height: ${state.profile.avatarSize || 100}px;
                 border-radius: 50%;
                 object-fit: cover;
                 border: 3px solid ${accent};

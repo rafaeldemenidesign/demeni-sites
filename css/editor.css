@@ -952,6 +952,62 @@ body {
     background: linear-gradient(180deg, #000000 0%, #434343 100%);
 }
 
+/* ========== LAYOUT OPTIONS ========== */
+.layout-options {
+    display: flex;
+    gap: 12px;
+}
+
+.layout-option {
+    flex: 1;
+    padding: 16px 12px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+    font-family: inherit;
+}
+
+.layout-option i {
+    font-size: 1.5rem;
+}
+
+.layout-option span {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.layout-option small {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.layout-option:hover {
+    background: var(--border);
+}
+
+.layout-option.active {
+    border-color: var(--accent);
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--accent);
+}
+
+/* ========== AVATAR SIZE CONTROL ========== */
+.avatar-size-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
 /* Links List */
 .links-list {
     display: flex;
