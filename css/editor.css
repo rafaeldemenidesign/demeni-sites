@@ -775,6 +775,54 @@ body {
     color: var(--text-secondary);
 }
 
+/* ========== SIZE CONTROL (+/-) ========== */
+.size-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.size-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.size-btn {
+    width: 28px;
+    height: 28px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.size-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.size-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.size-unit {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 /* Links List */
 .links-list {
     display: flex;

@@ -11,7 +11,10 @@ const state = {
         role: 'Sua Profissão',
         bio: 'Uma breve descrição sobre você e seu trabalho.',
         avatar: 'https://ui-avatars.com/api/?name=User&background=1B97C0&color=fff&size=200&bold=true',
-        whatsapp: ''
+        whatsapp: '',
+        nameSize: 24,
+        roleSize: 16,
+        bioSize: 14
     },
     links: [
         { id: 1, label: 'Instagram', url: '', icon: 'instagram' },
@@ -116,6 +119,7 @@ function init() {
     setupBackgroundImage();
     setupBlockOrder();
     setupButtonCustomization();
+    setupTextSizes();
 
     // Initial render
     renderLinksList();
@@ -666,6 +670,43 @@ function setupButtonCustomization() {
             saveToStorage();
         });
     }
+}
+
+// ========== TEXT SIZES (2.1-2.3) ==========
+function setupTextSizes() {
+    const STEP = 7;
+    const MIN_SIZE = 10;
+    const MAX_SIZE = 42;
+
+    const sizeMap = {
+        name: { default: 24, field: 'nameSize' },
+        role: { default: 16, field: 'roleSize' },
+        bio: { default: 14, field: 'bioSize' }
+    };
+
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.target; // 'name', 'role', 'bio'
+            const action = btn.dataset.action; // 'plus', 'minus'
+            const config = sizeMap[target];
+
+            if (!config) return;
+
+            let current = state.profile[config.field] || config.default;
+
+            if (action === 'plus' && current < MAX_SIZE) current += STEP;
+            if (action === 'minus' && current > MIN_SIZE) current -= STEP;
+
+            state.profile[config.field] = current;
+
+            // Update display
+            const display = document.getElementById(`${target}-size`);
+            if (display) display.textContent = current;
+
+            renderPreview();
+            saveToStorage();
+        });
+    });
 }
 
 // ========== LINKS PANEL ==========

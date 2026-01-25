@@ -92,14 +92,35 @@
                         <div class="form-group">
                             <label for="input-name">Nome</label>
                             <input type="text" id="input-name" placeholder="Seu nome completo">
+                            <div class="size-control">
+                                <span class="size-label">Tamanho:</span>
+                                <button class="size-btn" data-target="name" data-action="minus">−</button>
+                                <span class="size-value" id="name-size">24</span>
+                                <span class="size-unit">px</span>
+                                <button class="size-btn" data-target="name" data-action="plus">+</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="input-role">Cargo / Profissão</label>
                             <input type="text" id="input-role" placeholder="Ex: Designer & Consultor">
+                            <div class="size-control">
+                                <span class="size-label">Tamanho:</span>
+                                <button class="size-btn" data-target="role" data-action="minus">−</button>
+                                <span class="size-value" id="role-size">16</span>
+                                <span class="size-unit">px</span>
+                                <button class="size-btn" data-target="role" data-action="plus">+</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="input-bio">Bio</label>
                             <textarea id="input-bio" rows="3" placeholder="Uma breve descrição sobre você"></textarea>
+                            <div class="size-control">
+                                <span class="size-label">Tamanho:</span>
+                                <button class="size-btn" data-target="bio" data-action="minus">−</button>
+                                <span class="size-value" id="bio-size">14</span>
+                                <span class="size-unit">px</span>
+                                <button class="size-btn" data-target="bio" data-action="plus">+</button>
+                            </div>
                         </div>
                     </div>
 
