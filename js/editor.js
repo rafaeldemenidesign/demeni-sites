@@ -31,7 +31,8 @@ const state = {
         buttonCorners: 10, // 0-50 px border-radius
         buttonShadow: 'none', // none, subtle, strong, hard
         buttonColor: '#D4AF37',
-        buttonTextColor: '#000000'
+        buttonTextColor: '#000000',
+        fontFamily: 'Montserrat'
     },
     banner: {
         active: false,
@@ -707,6 +708,16 @@ function setupTextSizes() {
             saveToStorage();
         });
     });
+
+    // 2.4 Font Select
+    const fontSelect = document.getElementById('font-select');
+    if (fontSelect) {
+        fontSelect.addEventListener('change', (e) => {
+            state.style.fontFamily = e.target.value;
+            renderPreview();
+            saveToStorage();
+        });
+    }
 }
 
 // ========== LINKS PANEL ==========
