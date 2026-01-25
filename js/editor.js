@@ -24,7 +24,11 @@ const state = {
         accentGradient: null,
         bgColor: '#000000',
         bgImage: null,
-        buttonStyle: 'glass' // glass, solid, outline
+        buttonStyle: 'glass', // glass, solid, outline
+        buttonCorners: 10, // 0-50 px border-radius
+        buttonShadow: 'none', // none, subtle, strong, hard
+        buttonColor: '#D4AF37',
+        buttonTextColor: '#000000'
     },
     banner: {
         active: false,
@@ -111,6 +115,7 @@ function init() {
     setupVideoPanel();
     setupBackgroundImage();
     setupBlockOrder();
+    setupButtonCustomization();
 
     // Initial render
     renderLinksList();
@@ -604,6 +609,63 @@ function setupStylePresets() {
             saveToStorage();
         });
     });
+}
+
+// ========== BUTTON CUSTOMIZATION (1.1-1.4) ==========
+function setupButtonCustomization() {
+    // 1.1 Corners Slider
+    const cornersSlider = document.getElementById('btn-corners');
+    const cornersValue = document.getElementById('corners-value');
+
+    if (cornersSlider && cornersValue) {
+        cornersSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            cornersValue.textContent = value + 'px';
+            state.style.buttonCorners = parseInt(value);
+            renderPreview();
+            saveToStorage();
+        });
+    }
+
+    // 1.2 Shadow Pills
+    const shadowPills = document.querySelectorAll('.shadow-pill');
+    shadowPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            shadowPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            state.style.buttonShadow = pill.dataset.shadow;
+            renderPreview();
+            saveToStorage();
+        });
+    });
+
+    // 1.3 Button Color
+    const btnColorInput = document.getElementById('btn-color');
+    const btnColorHex = document.getElementById('btn-color-hex');
+
+    if (btnColorInput && btnColorHex) {
+        btnColorInput.addEventListener('input', (e) => {
+            const color = e.target.value;
+            btnColorHex.textContent = color.toUpperCase();
+            state.style.buttonColor = color;
+            renderPreview();
+            saveToStorage();
+        });
+    }
+
+    // 1.4 Button Text Color
+    const btnTextColorInput = document.getElementById('btn-text-color');
+    const btnTextColorHex = document.getElementById('btn-text-color-hex');
+
+    if (btnTextColorInput && btnTextColorHex) {
+        btnTextColorInput.addEventListener('input', (e) => {
+            const color = e.target.value;
+            btnTextColorHex.textContent = color.toUpperCase();
+            state.style.buttonTextColor = color;
+            renderPreview();
+            saveToStorage();
+        });
+    }
 }
 
 // ========== LINKS PANEL ==========
