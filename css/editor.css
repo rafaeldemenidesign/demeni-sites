@@ -852,6 +852,106 @@ body {
     color: var(--text-primary);
 }
 
+/* ========== WALLPAPER TYPES ========== */
+.wallpaper-types {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.wallpaper-type {
+    flex: 1;
+    padding: 12px 8px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+    font-family: inherit;
+}
+
+.wallpaper-type i {
+    font-size: 1.2rem;
+}
+
+.wallpaper-type span {
+    font-size: 0.7rem;
+}
+
+.wallpaper-type:hover {
+    background: var(--border);
+}
+
+.wallpaper-type.active {
+    border-color: var(--accent);
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--accent);
+}
+
+/* ========== GRADIENT PRESETS GRID ========== */
+.gradient-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.gradient-preset-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gradient-preset-btn:hover {
+    transform: scale(1.05);
+}
+
+.gradient-preset-btn.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+}
+
+/* Set gradient backgrounds via data attribute */
+.gradient-preset-btn[data-gradient*="667eea"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-preset-btn[data-gradient*="f093fb"] {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.gradient-preset-btn[data-gradient*="4facfe"] {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.gradient-preset-btn[data-gradient*="43e97b"] {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.gradient-preset-btn[data-gradient*="fa709a"] {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.gradient-preset-btn[data-gradient*="a18cd1"] {
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+}
+
+.gradient-preset-btn[data-gradient*="0a0a1a"] {
+    background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+.gradient-preset-btn[data-gradient*="000000 0%, #434343"] {
+    background: linear-gradient(180deg, #000000 0%, #434343 100%);
+}
+
 /* Links List */
 .links-list {
     display: flex;

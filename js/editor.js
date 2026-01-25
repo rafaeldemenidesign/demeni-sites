@@ -27,6 +27,8 @@ const state = {
         accentGradient: null,
         bgColor: '#000000',
         bgImage: null,
+        bgGradient: null,
+        bgType: 'fill', // fill, gradient, image
         buttonStyle: 'glass', // glass, solid, outline
         buttonCorners: 10, // 0-50 px border-radius
         buttonShadow: 'none', // none, subtle, strong, hard
@@ -121,6 +123,7 @@ function init() {
     setupBlockOrder();
     setupButtonCustomization();
     setupTextSizes();
+    setupWallpaper();
 
     // Initial render
     renderLinksList();
@@ -718,6 +721,46 @@ function setupTextSizes() {
             saveToStorage();
         });
     }
+}
+
+// ========== WALLPAPER (3.1) ==========
+function setupWallpaper() {
+    const types = document.querySelectorAll('.wallpaper-type');
+    const gradientsSection = document.getElementById('wallpaper-gradients');
+    const imageSection = document.getElementById('wallpaper-image');
+    const gradientPresets = document.querySelectorAll('.gradient-preset-btn');
+
+    // Show/hide sections based on type
+    function updateSections(type) {
+        if (gradientsSection) gradientsSection.style.display = type === 'gradient' ? 'block' : 'none';
+        if (imageSection) imageSection.style.display = type === 'image' ? 'block' : 'none';
+    }
+
+    // Wallpaper type selection
+    types.forEach(type => {
+        type.addEventListener('click', () => {
+            types.forEach(t => t.classList.remove('active'));
+            type.classList.add('active');
+            state.style.bgType = type.dataset.type;
+            updateSections(type.dataset.type);
+            renderPreview();
+            saveToStorage();
+        });
+    });
+
+    // Gradient presets
+    gradientPresets.forEach(preset => {
+        preset.addEventListener('click', () => {
+            gradientPresets.forEach(p => p.classList.remove('active'));
+            preset.classList.add('active');
+            state.style.bgGradient = preset.dataset.gradient;
+            renderPreview();
+            saveToStorage();
+        });
+    });
+
+    // Initialize sections
+    updateSections(state.style.bgType || 'fill');
 }
 
 // ========== LINKS PANEL ==========
@@ -1365,9 +1408,13 @@ function renderPreview() {
     // Support for gradients
     const accentStyle = state.style.accentGradient || accent;
 
-    // Background style
+    // Background style based on type
     let bgStyle = `background: ${state.style.bgColor};`;
-    if (state.style.bgImage) {
+    if (state.style.bgType === 'gradient' && state.style.bgGradient) {
+        bgStyle = `background: ${state.style.bgGradient};`;
+    } else if (state.style.bgType === 'image' && state.style.bgImage) {
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: scroll;`;
+    } else if (state.style.bgImage) {
         bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: scroll;`;
     }
 

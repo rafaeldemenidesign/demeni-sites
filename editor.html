@@ -550,23 +550,73 @@
                                 title="Azul Escuro"></button>
                         </div>
 
-                        <!-- Background Image -->
-                        <p class="color-section-label">Imagem de Fundo</p>
-                        <div class="bg-image-upload">
-                            <div class="bg-preview" id="bg-preview">
-                                <span>Sem imagem</span>
+                        <!-- 3.1 WALLPAPER TYPE -->
+                        <p class="color-section-label">Tipo de Fundo</p>
+                        <div class="wallpaper-types">
+                            <button class="wallpaper-type active" data-type="fill">
+                                <i class="fas fa-fill-drip"></i>
+                                <span>Cor</span>
+                            </button>
+                            <button class="wallpaper-type" data-type="gradient">
+                                <i class="fas fa-paint-brush"></i>
+                                <span>Gradiente</span>
+                            </button>
+                            <button class="wallpaper-type" data-type="image">
+                                <i class="fas fa-image"></i>
+                                <span>Imagem</span>
+                            </button>
+                        </div>
+
+                        <!-- Gradient Presets (hidden by default) -->
+                        <div class="wallpaper-gradients" id="wallpaper-gradients" style="display: none;">
+                            <p class="color-section-label">Escolha um Gradiente</p>
+                            <div class="gradient-presets-grid">
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                                    title="Roxo"></button>
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                                    title="Rosa"></button>
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+                                    title="Azul"></button>
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                                    title="Verde"></button>
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+                                    title="Sunset"></button>
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)"
+                                    title="Lavender"></button>
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%)"
+                                    title="Dark Blue"></button>
+                                <button class="gradient-preset-btn"
+                                    data-gradient="linear-gradient(180deg, #000000 0%, #434343 100%)"
+                                    title="Dark"></button>
                             </div>
-                            <input type="file" id="bg-input" accept="image/*" hidden>
-                            <div class="bg-actions">
-                                <button class="btn-text" id="btn-upload-bg">
-                                    <i class="fas fa-upload"></i> Enviar
-                                </button>
-                                <button class="btn-text" id="btn-edit-bg" disabled>
-                                    <i class="fas fa-crop-alt"></i> Editar
-                                </button>
-                                <button class="btn-text btn-danger" id="btn-remove-bg">
-                                    <i class="fas fa-trash"></i> Remover
-                                </button>
+                        </div>
+
+                        <!-- Image Upload (hidden by default) -->
+                        <div class="wallpaper-image" id="wallpaper-image" style="display: none;">
+                            <p class="color-section-label">Imagem de Fundo</p>
+                            <div class="bg-image-upload">
+                                <div class="bg-preview" id="bg-preview">
+                                    <span>Sem imagem</span>
+                                </div>
+                                <input type="file" id="bg-input" accept="image/*" hidden>
+                                <div class="bg-actions">
+                                    <button class="btn-text" id="btn-upload-bg">
+                                        <i class="fas fa-upload"></i> Enviar
+                                    </button>
+                                    <button class="btn-text" id="btn-edit-bg" disabled>
+                                        <i class="fas fa-crop-alt"></i> Editar
+                                    </button>
+                                    <button class="btn-text btn-danger" id="btn-remove-bg">
+                                        <i class="fas fa-trash"></i> Remover
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
