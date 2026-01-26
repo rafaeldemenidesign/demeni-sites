@@ -2922,3 +2922,18 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(syncLayoutPills, 100);
 }
+
+// ========== TOGGLE BOLINHA ONLINE ==========
+const onlineBadgeToggle = document.getElementById('toggle-online-badge');
+if (onlineBadgeToggle) {
+    // Sync checkbox on load
+    setTimeout(() => {
+        onlineBadgeToggle.checked = state.profile.showOnlineBadge !== false;
+    }, 100);
+
+    onlineBadgeToggle.addEventListener('change', () => {
+        state.profile.showOnlineBadge = onlineBadgeToggle.checked;
+        renderPreview();
+        saveToStorage();
+    });
+}
