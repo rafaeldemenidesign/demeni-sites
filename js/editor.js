@@ -681,9 +681,9 @@ function setupButtonCustomization() {
 
 // ========== TEXT SIZES (2.1-2.3) ==========
 function setupTextSizes() {
-    const STEP = 7;
+    const STEP = 1;  // Ajuste fino de 1 em 1px
     const MIN_SIZE = 10;
-    const MAX_SIZE = 42;
+    const MAX_SIZE = 48;
 
     const sizeMap = {
         name: { default: 24, field: 'nameSize' },

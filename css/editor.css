@@ -50,6 +50,18 @@
     box-sizing: border-box;
 }
 
+/* Ocultar scrollbar globalmente - Estilo Apple minimalista */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
 body {
     font-family: 'Montserrat', sans-serif;
     background: linear-gradient(135deg, #e8eef8 0%, #dce4f2 50%, #e8eef8 100%);
