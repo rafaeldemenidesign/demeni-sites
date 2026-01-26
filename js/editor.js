@@ -731,12 +731,14 @@ function setupTextSizes() {
 // ========== WALLPAPER (3.1) ==========
 function setupWallpaper() {
     const types = document.querySelectorAll('.wallpaper-type');
+    const colorsSection = document.getElementById('wallpaper-colors');
     const gradientsSection = document.getElementById('wallpaper-gradients');
     const imageSection = document.getElementById('wallpaper-image');
     const gradientPresets = document.querySelectorAll('.gradient-preset-btn');
 
     // Show/hide sections based on type
     function updateSections(type) {
+        if (colorsSection) colorsSection.style.display = type === 'fill' ? 'block' : 'none';
         if (gradientsSection) gradientsSection.style.display = type === 'gradient' ? 'block' : 'none';
         if (imageSection) imageSection.style.display = type === 'image' ? 'block' : 'none';
     }

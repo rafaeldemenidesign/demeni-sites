@@ -2161,3 +2161,29 @@ textarea::placeholder {
 .style-section.active {
     display: block;
 }
+
+/* ========== BG COLORS LARGE ========== */
+.bg-colors-large .color-preset {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+}
+
+/* ========== GRADIENT SMALL ========== */
+.gradient-small .gradient-preset-btn {
+    width: 100%;
+    aspect-ratio: 1.2;
+}
+
+/* ========== HINT TEXT ========== */
+.hint-text {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.hint-text i {
+    margin-right: 4px;
+    color: var(--warning);
+}
