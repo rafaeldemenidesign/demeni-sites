@@ -9,14 +9,15 @@ const state = {
     profile: {
         name: 'Seu Nome',
         role: 'Sua Profissão',
-        bio: 'Uma breve descrição sobre você e seu trabalho.',
-        avatar: 'https://ui-avatars.com/api/?name=User&background=1B97C0&color=fff&size=200&bold=true',
+        bio: 'Sua bio aqui ♡',
+        avatar: 'https://ui-avatars.com/api/?name=Seu+Nome&background=D4AF37&color=000&size=200',
         whatsapp: '',
-        nameSize: 24,
+        nameSize: 22,
         roleSize: 16,
-        bioSize: 14,
-        avatarSize: 100,
-        headerLayout: 'classic' // classic, hero
+        bioSize: 13,
+        avatarSize: 95,
+        headerLayout: 'classic', // classic, hero
+        showOnlineBadge: true
     },
     links: [
         { id: 1, label: 'Instagram', url: '', icon: 'instagram' },
@@ -1359,10 +1360,10 @@ function renderPreview() {
             
             .preview-online-badge {
                 position: absolute;
-                bottom: 2px;
-                right: 2px;
-                width: 18px;
-                height: 18px;
+                bottom: -4px;
+                right: -4px;
+                width: 16px;
+                height: 16px;
                 background: #22C55E;
                 border: 3px solid #0a0a1a;
                 border-radius: 50%;
@@ -1762,7 +1763,7 @@ function renderPreview() {
         <div class="preview-container">
             <div style="position: relative; display: inline-block;">
                 <img src="${state.profile.avatar}" alt="${state.profile.name}" class="preview-avatar">
-                <div class="preview-online-badge"></div>
+                ${state.profile.showOnlineBadge !== false ? '<div class="preview-online-badge"></div>' : ''}
             </div>
             <h1 class="preview-name">${state.profile.name}</h1>
             <p class="preview-role">${state.profile.role}</p>
