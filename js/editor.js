@@ -8,10 +8,14 @@ const state = {
     projectName: 'Meu Site',
     profile: {
         name: 'Seu Nome',
-        role: 'Sua Profiss├úo',
-        bio: 'Uma breve descri├º├úo sobre voc├¬ e seu trabalho.',
+        role: 'Sua Profissão',
+        bio: 'Uma breve descrição sobre você e seu trabalho.',
         avatar: 'https://ui-avatars.com/api/?name=User&background=1B97C0&color=fff&size=200&bold=true',
         whatsapp: '',
+        phone: '',
+        email: '',
+        location: '', // Endereço para Google Maps
+        locationActive: false, // Mostrar seção de localização
         nameSize: 24,
         roleSize: 16,
         bioSize: 14,
@@ -67,7 +71,7 @@ const state = {
         ctaLink: '',
         isVertical: false
     },
-    blockOrder: ['banners', 'links', 'video'] // ordem dos blocos arrast├íveis
+    blockOrder: ['banners', 'links', 'video', 'location'] // ordem dos blocos arrastáveis
 };
 
 let linkIdCounter = 5;
@@ -171,6 +175,10 @@ function setupProfileInputs() {
     const roleInput = document.getElementById('input-role');
     const bioInput = document.getElementById('input-bio');
     const whatsappInput = document.getElementById('input-whatsapp');
+    const phoneInput = document.getElementById('input-phone');
+    const emailInput = document.getElementById('input-email');
+    const locationInput = document.getElementById('input-location');
+    const locationToggle = document.getElementById('location-toggle');
     const projectNameInput = document.getElementById('project-name');
 
     nameInput.addEventListener('input', (e) => {
@@ -180,7 +188,7 @@ function setupProfileInputs() {
     });
 
     roleInput.addEventListener('input', (e) => {
-        state.profile.role = e.target.value || 'Sua Profiss├úo';
+        state.profile.role = e.target.value || 'Sua Profissão';
         renderPreview();
         saveToStorage();
     });
@@ -196,6 +204,38 @@ function setupProfileInputs() {
         renderPreview();
         saveToStorage();
     });
+
+    if (phoneInput) {
+        phoneInput.addEventListener('input', (e) => {
+            state.profile.phone = e.target.value;
+            renderPreview();
+            saveToStorage();
+        });
+    }
+
+    if (emailInput) {
+        emailInput.addEventListener('input', (e) => {
+            state.profile.email = e.target.value;
+            renderPreview();
+            saveToStorage();
+        });
+    }
+
+    if (locationInput) {
+        locationInput.addEventListener('input', (e) => {
+            state.profile.location = e.target.value;
+            renderPreview();
+            saveToStorage();
+        });
+    }
+
+    if (locationToggle) {
+        locationToggle.addEventListener('change', (e) => {
+            state.profile.locationActive = e.target.checked;
+            renderPreview();
+            saveToStorage();
+        });
+    }
 
     projectNameInput.addEventListener('input', (e) => {
         state.projectName = e.target.value || 'Meu Site';
@@ -1767,6 +1807,93 @@ function renderPreview() {
                 text-decoration: none;
                 text-align: center;
             }
+            
+            /* Map Container */
+            .preview-map-container {
+                display: block;
+                width: 100%;
+                text-decoration: none;
+                color: inherit;
+                margin-bottom: 20px;
+            }
+            
+            .preview-map-embed {
+                position: relative;
+                width: 100%;
+                height: 150px;
+                border-radius: 12px;
+                overflow: hidden;
+                border: 1px solid ${glassBorder};
+            }
+            
+            .preview-map-embed iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+                pointer-events: none;
+            }
+            
+            .preview-map-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                color: white;
+                font-size: 0.8rem;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            
+            .preview-map-container:hover .preview-map-overlay {
+                opacity: 1;
+            }
+            
+            .preview-map-overlay i {
+                font-size: 1.5rem;
+                color: ${accent};
+            }
+            
+            .preview-map-address {
+                font-size: 0.7rem;
+                color: ${textMuted};
+                margin-top: 8px;
+                text-align: center;
+            }
+            
+            /* Save Contact Button */
+            .preview-save-contact {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                padding: 12px 16px;
+                margin-top: 10px;
+                background: ${glassOverlay};
+                border: 1px solid ${glassBorder};
+                border-radius: 10px;
+                color: ${textColor};
+                font-size: 0.8rem;
+                text-decoration: none;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .preview-save-contact:hover {
+                background: ${accent}20;
+                border-color: ${accent};
+            }
+            
+            .preview-save-contact i {
+                color: ${accent};
+            }
         </style>
         
         <div class="preview-container">
@@ -1808,7 +1935,7 @@ function renderPreview() {
                     ` : '',
                 links: `
                         <div class="preview-section-divider">
-                            <span>LINKS ├ÜTEIS</span>
+                            <span>LINKS ÚTEIS</span>
                         </div>
                         <div class="preview-links">
                             ${linksHtml}
@@ -1817,6 +1944,12 @@ function renderPreview() {
                             <a href="https://wa.me/${state.profile.whatsapp}" target="_blank" class="preview-cta">
                                 <i class="fab fa-whatsapp"></i>
                                 Fale Comigo
+                            </a>
+                        ` : ''}
+                        ${(state.profile.phone || state.profile.email) ? `
+                            <a href="javascript:void(0)" onclick="downloadVCard()" class="preview-save-contact">
+                                <i class="fas fa-user-plus"></i>
+                                Salvar Contato
                             </a>
                         ` : ''}
                     `,
@@ -1835,10 +1968,29 @@ function renderPreview() {
                                 </a>
                             ` : ''}
                         </div>
+                    ` : '',
+                location: state.profile.locationActive && state.profile.location ? `
+                        <div class="preview-section-divider">
+                            <span>LOCALIZAÇÃO</span>
+                        </div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(state.profile.location)}" target="_blank" class="preview-map-container">
+                            <div class="preview-map-embed">
+                                <iframe 
+                                    src="https://maps.google.com/maps?q=${encodeURIComponent(state.profile.location)}&output=embed&z=15" 
+                                    allowfullscreen 
+                                    loading="lazy">
+                                </iframe>
+                                <div class="preview-map-overlay">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Abrir no Maps</span>
+                                </div>
+                            </div>
+                            <p class="preview-map-address">${state.profile.location}</p>
+                        </a>
                     ` : ''
             };
 
-            return state.blockOrder.map(block => blockHtml[block]).join('');
+            return state.blockOrder.map(block => blockHtml[block] || '').join('');
         })()}
             
             <div class="preview-footer">
@@ -2901,3 +3053,43 @@ function setupDragDropEvents(container, itemSelector) {
         });
     });
 }
+
+// ========== DOWNLOAD VCARD ==========
+function downloadVCard() {
+    const name = state.profile.name || 'Contato';
+    const phone = state.profile.phone || state.profile.whatsapp || '';
+    const email = state.profile.email || '';
+    const role = state.profile.role || '';
+    const location = state.profile.location || '';
+
+    // Clean phone number
+    const cleanPhone = phone.replace(/\D/g, '');
+    const formattedPhone = cleanPhone ? `+55${cleanPhone}` : '';
+
+    // Generate vCard content
+    const vcard = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `FN:${name}`,
+        `N:${name};;;`,
+        role ? `TITLE:${role}` : '',
+        formattedPhone ? `TEL;TYPE=CELL:${formattedPhone}` : '',
+        email ? `EMAIL:${email}` : '',
+        location ? `ADR;TYPE=WORK:;;${location};;;;` : '',
+        'END:VCARD'
+    ].filter(line => line).join('\n');
+
+    // Create and download file
+    const blob = new Blob([vcard], { type: 'text/vcard' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name.replace(/\s+/g, '_')}.vcf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Expose downloadVCard globally for onclick
+window.downloadVCard = downloadVCard;
