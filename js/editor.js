@@ -1364,6 +1364,7 @@ function renderPreview() {
     const buttonShadow = shadowMap[state.style.buttonShadow] || 'none';
     const buttonColor = state.style.buttonColor || accent;
     const buttonTextColor = state.style.buttonTextColor || textColor;
+    const buttonLayout = state.style.buttonLayout || 'list'; // fallback para projetos antigos
 
     // Button style
     let buttonClass = 'preview-btn';
@@ -1459,7 +1460,7 @@ function renderPreview() {
             
             .preview-links {
                 display: grid;
-                grid-template-columns: ${state.style.buttonLayout === 'grid' ? '1fr 1fr' : '1fr'};
+                grid-template-columns: ${buttonLayout === 'grid' ? '1fr 1fr' : '1fr'};
                 gap: 10px;
                 width: 100%;
                 margin-bottom: 20px;
@@ -1467,18 +1468,18 @@ function renderPreview() {
             
             .preview-btn {
                 display: flex;
-                flex-direction: ${state.style.buttonLayout === 'grid' ? 'column' : 'row'};
+                flex-direction: ${buttonLayout === 'grid' ? 'column' : 'row'};
                 align-items: center;
-                justify-content: ${state.style.buttonLayout === 'grid' ? 'center' : 'flex-start'};
+                justify-content: ${buttonLayout === 'grid' ? 'center' : 'flex-start'};
                 gap: 8px;
-                padding: ${state.style.buttonLayout === 'grid' ? '16px 12px' : '14px 18px'};
+                padding: ${buttonLayout === 'grid' ? '16px 12px' : '14px 18px'};
                 background: ${glassOverlay};
                 backdrop-filter: blur(8px);
                 border: 1px solid ${glassBorder};
                 border-radius: ${buttonCorners}px;
                 color: ${buttonTextColor};
                 text-decoration: none;
-                font-size: ${state.style.buttonLayout === 'grid' ? '0.75rem' : '0.85rem'};
+                font-size: ${buttonLayout === 'grid' ? '0.75rem' : '0.85rem'};
                 transition: all 0.2s;
                 box-shadow: ${buttonShadow};
             }
