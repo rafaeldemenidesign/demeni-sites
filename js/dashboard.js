@@ -54,7 +54,8 @@ function navigateTo(page) {
         lessons: 'Aulas',
         help: 'Ajuda'
     };
-    document.getElementById('page-title')?.textContent = titles[page] || 'Dashboard';
+    const pageTitle = document.getElementById('page-title');
+    if (pageTitle) pageTitle.textContent = titles[page] || 'Dashboard';
 
     // Close mobile menu
     document.getElementById('sidebar').classList.remove('open');
