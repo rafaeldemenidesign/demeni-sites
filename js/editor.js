@@ -40,6 +40,7 @@ const state = {
         buttonShadow: 'none', // none, subtle, strong, hard
         buttonColor: '#D4AF37',
         buttonTextColor: '#000000',
+        buttonLayout: 'list', // list ou grid
         fontFamily: 'Montserrat'
     },
     banner: {
