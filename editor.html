@@ -47,7 +47,39 @@
 
         <!-- MAIN CONTENT -->
         <main class="editor-main">
-            <!-- SIDEBAR NAVIGATION -->
+            <!-- GLOBAL SIDEBAR (sempre visível) -->
+            <aside class="global-sidebar">
+                <div class="sidebar-profile">
+                    <div class="sidebar-avatar" id="sidebar-avatar">
+                        <span>US</span>
+                    </div>
+                    <span class="sidebar-username" id="sidebar-username">Usuário</span>
+                    <span class="sidebar-level">NÍVEL 1 • BRONZE</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="app.html" class="sidebar-link">
+                        <i class="fas fa-folder"></i> Meus Projetos
+                    </a>
+                    <a href="editor.html" class="sidebar-link active">
+                        <i class="fas fa-plus-circle"></i> Novo Projeto
+                    </a>
+                    <a href="app.html#carteira" class="sidebar-link">
+                        <i class="fas fa-wallet"></i> Minha Carteira
+                        <span class="sidebar-badge">0</span>
+                    </a>
+                    <a href="#" class="sidebar-link">
+                        <i class="fas fa-graduation-cap"></i> Aulas
+                    </a>
+                    <a href="#" class="sidebar-link">
+                        <i class="fas fa-question-circle"></i> Ajuda
+                    </a>
+                </nav>
+                <a href="#" class="sidebar-link sidebar-logout" id="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+            </aside>
+
+            <!-- EDITOR NAVIGATION -->
             <nav class="tab-nav">
                 <button class="tab-btn active" data-tab="perfil">
                     <i class="fas fa-user"></i> Perfil
