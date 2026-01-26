@@ -1,4 +1,4 @@
-/* ===========================
+﻿/* ===========================
    DEMENI SITES - EDITOR JS
    Core functionality for site builder
    =========================== */
@@ -8,8 +8,8 @@ const state = {
     projectName: 'Meu Site',
     profile: {
         name: 'Seu Nome',
-        role: 'Sua Profissão',
-        bio: 'Uma breve descrição sobre você e seu trabalho.',
+        role: 'Sua Profiss├úo',
+        bio: 'Uma breve descri├º├úo sobre voc├¬ e seu trabalho.',
         avatar: 'https://ui-avatars.com/api/?name=User&background=1B97C0&color=fff&size=200&bold=true',
         whatsapp: '',
         nameSize: 24,
@@ -67,7 +67,7 @@ const state = {
         ctaLink: '',
         isVertical: false
     },
-    blockOrder: ['banners', 'links', 'video'] // ordem dos blocos arrastáveis
+    blockOrder: ['banners', 'links', 'video'] // ordem dos blocos arrast├íveis
 };
 
 let linkIdCounter = 5;
@@ -180,7 +180,7 @@ function setupProfileInputs() {
     });
 
     roleInput.addEventListener('input', (e) => {
-        state.profile.role = e.target.value || 'Sua Profissão';
+        state.profile.role = e.target.value || 'Sua Profiss├úo';
         renderPreview();
         saveToStorage();
     });
@@ -677,6 +677,18 @@ function setupButtonCustomization() {
             saveToStorage();
         });
     }
+
+    // 1.5 Layout Pills (Grid/Lista)
+    const layoutPills = document.querySelectorAll('.layout-pill');
+    layoutPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            layoutPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            state.style.buttonLayout = pill.dataset.layout;
+            renderPreview();
+            saveToStorage();
+        });
+    });
 }
 
 // ========== TEXT SIZES (2.1-2.3) ==========
@@ -952,7 +964,7 @@ function renderLinksList() {
                 </div>
                 <input type="text" 
                        value="${link.label}" 
-                       placeholder="Título do link"
+                       placeholder="T├¡tulo do link"
                        onchange="updateLinkLabel(${link.id}, this.value)"
                        oninput="updateLinkLabel(${link.id}, this.value)">
                 <button class="link-item-delete" onclick="removeLink(${link.id})">
@@ -1082,19 +1094,19 @@ async function validateSubdomain() {
 
     // Basic validation
     if (slug.length < 3) {
-        errorEl.textContent = 'Mínimo 3 caracteres';
+        errorEl.textContent = 'M├¡nimo 3 caracteres';
         errorEl.style.display = 'block';
         return;
     }
 
     if (!/^[a-z0-9-]+$/.test(slug)) {
-        errorEl.textContent = 'Apenas letras minúsculas, números e hífens';
+        errorEl.textContent = 'Apenas letras min├║sculas, n├║meros e h├¡fens';
         errorEl.style.display = 'block';
         return;
     }
 
     if (slug.startsWith('-') || slug.endsWith('-')) {
-        errorEl.textContent = 'Não pode começar ou terminar com hífen';
+        errorEl.textContent = 'N├úo pode come├ºar ou terminar com h├¡fen';
         errorEl.style.display = 'block';
         return;
     }
@@ -1102,7 +1114,7 @@ async function validateSubdomain() {
     // Reserved slugs
     const reserved = ['www', 'admin', 'api', 'app', 'mail', 'ftp', 'test', 'demo'];
     if (reserved.includes(slug)) {
-        errorEl.textContent = 'Este nome está reservado';
+        errorEl.textContent = 'Este nome est├í reservado';
         errorEl.style.display = 'block';
         return;
     }
@@ -1126,9 +1138,9 @@ async function confirmPublish() {
     try {
         // Deduct credits
         if (Credits && typeof Credits.deductCredits === 'function') {
-            const result = Credits.deductCredits(PUBLISH_COST, 'Publicação de site');
+            const result = Credits.deductCredits(PUBLISH_COST, 'Publica├º├úo de site');
             if (!result.success) {
-                alert('Créditos insuficientes');
+                alert('Cr├®ditos insuficientes');
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
                 return;
@@ -1196,7 +1208,7 @@ async function updateExistingSite() {
         alert('Erro ao atualizar. Tente novamente.');
     } finally {
         updateBtn.disabled = false;
-        updateBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Conteúdo (Grátis)';
+        updateBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Conte├║do (Gr├ítis)';
     }
 }
 
@@ -1287,9 +1299,9 @@ function renderPreview() {
     if (state.style.bgType === 'gradient' && state.style.bgGradient) {
         bgStyle = `background: ${state.style.bgGradient};`;
     } else if (state.style.bgType === 'image' && state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: scroll;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: fixed;`;
     } else if (state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: scroll;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: fixed;`;
     }
 
     // Smart contrast: detect if background is light
@@ -1406,7 +1418,7 @@ function renderPreview() {
             
             .preview-links {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: ${state.style.buttonLayout === 'grid' ? '1fr 1fr' : '1fr'};
                 gap: 10px;
                 width: 100%;
                 margin-bottom: 20px;
@@ -1414,18 +1426,18 @@ function renderPreview() {
             
             .preview-btn {
                 display: flex;
-                flex-direction: column;
+                flex-direction: ${state.style.buttonLayout === 'grid' ? 'column' : 'row'};
                 align-items: center;
-                justify-content: center;
+                justify-content: ${state.style.buttonLayout === 'grid' ? 'center' : 'flex-start'};
                 gap: 8px;
-                padding: 16px 12px;
+                padding: ${state.style.buttonLayout === 'grid' ? '16px 12px' : '14px 18px'};
                 background: ${glassOverlay};
                 backdrop-filter: blur(8px);
                 border: 1px solid ${glassBorder};
                 border-radius: ${buttonCorners}px;
                 color: ${buttonTextColor};
                 text-decoration: none;
-                font-size: 0.75rem;
+                font-size: ${state.style.buttonLayout === 'grid' ? '0.75rem' : '0.85rem'};
                 transition: all 0.2s;
                 box-shadow: ${buttonShadow};
             }
@@ -1773,7 +1785,7 @@ function renderPreview() {
                     <div class="preview-banner-content">
                         <div class="preview-banner-title">${state.banner.title}</div>
                         ${state.banner.description ? `<div class="preview-banner-desc">${state.banner.description}</div>` : ''}
-                        <span class="preview-banner-cta">${state.banner.cta || 'Saiba Mais'} →</span>
+                        <span class="preview-banner-cta">${state.banner.cta || 'Saiba Mais'} ÔåÆ</span>
                     </div>
                 </a>
             ` : ''}
@@ -1783,7 +1795,7 @@ function renderPreview() {
             const blockHtml = {
                 banners: state.bannersActive && state.banners.some(b => b.image) ? `
                         <div class="preview-section-divider">
-                            <span>CONHEÇA</span>
+                            <span>CONHE├çA</span>
                         </div>
                         <div class="preview-carousel ${state.banners.some(b => b.orientation === 'vertical') ? 'has-vertical' : ''}">
                             ${state.banners.filter(b => b.image).map(b => `
@@ -1796,7 +1808,7 @@ function renderPreview() {
                     ` : '',
                 links: `
                         <div class="preview-section-divider">
-                            <span>LINKS ÚTEIS</span>
+                            <span>LINKS ├ÜTEIS</span>
                         </div>
                         <div class="preview-links">
                             ${linksHtml}
@@ -1833,10 +1845,10 @@ function renderPreview() {
                 ${state.footer.logo ? `<img src="${state.footer.logo}" class="preview-footer-logo" alt="">` : ''}
                 ${state.footer.link ? `
                     <a href="${state.footer.link}" target="_blank">
-                        ${state.footer.text || 'Feito com ♥ por DEMENI'}
+                        ${state.footer.text || 'Feito com ÔÖÑ por DEMENI'}
                     </a>
                 ` : `
-                    <span>${state.footer.text || 'Feito com ♥ por DEMENI'}</span>
+                    <span>${state.footer.text || 'Feito com ÔÖÑ por DEMENI'}</span>
                 `}
             </div>
             
@@ -1858,7 +1870,7 @@ function generateFinalHTML() {
 
     let bgStyle = `background: ${state.style.bgColor};`;
     if (state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${state.style.bgImage}'); background-size: cover; background-position: center;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${state.style.bgImage}'); background-size: cover; background-position: center; background-attachment: fixed;`;
     }
 
     let buttonClass = 'link-btn';
@@ -1877,7 +1889,7 @@ function generateFinalHTML() {
     // Generate ordered blocks HTML
     const blockHtml = {
         banners: state.bannersActive && state.banners.some(b => b.image) ? `
-            <div class="section-label">CONHEÇA</div>
+            <div class="section-label">CONHE├çA</div>
             <div class="carousel">
                 ${state.banners.filter(b => b.image).map(b => `
                     <a href="${b.link || '#'}" class="carousel-slide ${b.orientation || 'horizontal'}" target="_blank">
@@ -1888,7 +1900,7 @@ function generateFinalHTML() {
             </div>
         ` : '',
         links: `
-            <div class="section-label">LINKS ÚTEIS</div>
+            <div class="section-label">LINKS ├ÜTEIS</div>
             <div class="links">
                 ${linksHtml}
             </div>
@@ -2233,7 +2245,7 @@ function generateFinalHTML() {
                 <div class="banner-content">
                     <div class="banner-title">${state.banner.title}</div>
                     ${state.banner.description ? `<div class="banner-desc">${state.banner.description}</div>` : ''}
-                    <span class="banner-cta">${state.banner.cta || 'Saiba Mais'} →</span>
+                    <span class="banner-cta">${state.banner.cta || 'Saiba Mais'} ÔåÆ</span>
                 </div>
             </a>
         ` : ''}
@@ -2248,7 +2260,7 @@ function generateFinalHTML() {
         ` : ''}
         
         <div class="footer">
-            © ${new Date().getFullYear()} ${state.profile.name} • Feito com ♥ por DEMENI
+            ┬® ${new Date().getFullYear()} ${state.profile.name} ÔÇó Feito com ÔÖÑ por DEMENI
         </div>
     </div>
     
@@ -2488,8 +2500,8 @@ function resetToDefaults() {
     state.projectName = 'Meu Site';
     state.profile = {
         name: 'Seu Nome',
-        role: 'Sua Profissão',
-        bio: 'Uma breve descrição sobre você.',
+        role: 'Sua Profiss├úo',
+        bio: 'Uma breve descri├º├úo sobre voc├¬.',
         avatar: 'https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=200&bold=true',
         whatsapp: ''
     };
@@ -2613,7 +2625,7 @@ function setupVideoPanel() {
                 previewBox.classList.remove('vertical');
             }
         } else if (previewBox) {
-            previewBox.innerHTML = '<i class="fas fa-play-circle"></i><span>Preview do vídeo aparece aqui</span>';
+            previewBox.innerHTML = '<i class="fas fa-play-circle"></i><span>Preview do v├¡deo aparece aqui</span>';
             previewBox.classList.remove('has-video');
         }
 
@@ -2765,8 +2777,8 @@ function adjustColor(color, amount) {
 // ========== BLOCK ORDER SETUP ==========
 const BLOCK_CONFIG = {
     banners: { name: 'Banners', icon: 'fa-images', desc: 'Destaques' },
-    links: { name: 'Links', icon: 'fa-link', desc: 'Botões' },
-    video: { name: 'Vídeo', icon: 'fa-video', desc: 'YouTube' }
+    links: { name: 'Links', icon: 'fa-link', desc: 'Bot├Áes' },
+    video: { name: 'V├¡deo', icon: 'fa-video', desc: 'YouTube' }
 };
 
 function setupBlockOrder() {
