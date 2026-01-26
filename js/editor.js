@@ -36,6 +36,7 @@ const state = {
         buttonShadow: 'none', // none, subtle, strong, hard
         buttonColor: '#D4AF37',
         buttonTextColor: '#000000',
+        buttonLayout: 'list', // list (coluna) ou grid (2x2)
         fontFamily: 'Montserrat'
     },
     banner: {
@@ -2889,4 +2890,34 @@ function setupDragDropEvents(container, itemSelector) {
             }
         });
     });
+}
+
+// ========== LAYOUT PILLS (GRID/LISTA) ==========
+document.querySelectorAll('.layout-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        const layout = pill.dataset.layout;
+        state.style.buttonLayout = layout;
+
+        // Update active state
+        document.querySelectorAll('.layout-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        renderPreview();
+        saveToStorage();
+    });
+});
+
+// Sync layout pills on load
+function syncLayoutPills() {
+    const currentLayout = state.style.buttonLayout || 'list';
+    document.querySelectorAll('.layout-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.dataset.layout === currentLayout);
+    });
+}
+
+// Call sync after state is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncLayoutPills);
+} else {
+    setTimeout(syncLayoutPills, 100);
 }
