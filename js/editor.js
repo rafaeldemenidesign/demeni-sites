@@ -1,4 +1,4 @@
-/* ===========================
+﻿/* ===========================
    DEMENI SITES - EDITOR JS
    Core functionality for site builder
    =========================== */
@@ -1287,9 +1287,9 @@ function renderPreview() {
     if (state.style.bgType === 'gradient' && state.style.bgGradient) {
         bgStyle = `background: ${state.style.bgGradient};`;
     } else if (state.style.bgType === 'image' && state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: scroll;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: fixed;`;
     } else if (state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: scroll;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: fixed;`;
     }
 
     // Smart contrast: detect if background is light
@@ -1311,6 +1311,7 @@ function renderPreview() {
     const buttonShadow = shadowMap[state.style.buttonShadow] || 'none';
     const buttonColor = state.style.buttonColor || accent;
     const buttonTextColor = state.style.buttonTextColor || textColor;
+    const buttonLayout = state.style.buttonLayout || 'list'; // fallback para lista
 
     // Button style
     let buttonClass = 'preview-btn';
@@ -1406,7 +1407,7 @@ function renderPreview() {
             
             .preview-links {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: ${buttonLayout === 'grid' ? '1fr 1fr' : '1fr'};
                 gap: 10px;
                 width: 100%;
                 margin-bottom: 20px;
@@ -1414,18 +1415,18 @@ function renderPreview() {
             
             .preview-btn {
                 display: flex;
-                flex-direction: column;
+                flex-direction: ${buttonLayout === 'grid' ? 'column' : 'row'};
                 align-items: center;
-                justify-content: center;
+                justify-content: ${buttonLayout === 'grid' ? 'center' : 'flex-start'};
                 gap: 8px;
-                padding: 16px 12px;
+                padding: ${buttonLayout === 'grid' ? '16px 12px' : '14px 18px'};
                 background: ${glassOverlay};
                 backdrop-filter: blur(8px);
                 border: 1px solid ${glassBorder};
                 border-radius: ${buttonCorners}px;
                 color: ${buttonTextColor};
                 text-decoration: none;
-                font-size: 0.75rem;
+                font-size: ${buttonLayout === 'grid' ? '0.75rem' : '0.85rem'};
                 transition: all 0.2s;
                 box-shadow: ${buttonShadow};
             }
