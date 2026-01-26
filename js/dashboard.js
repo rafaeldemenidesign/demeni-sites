@@ -33,6 +33,12 @@ function setupNavigation() {
 }
 
 function navigateTo(page) {
+    // Special case: "new" opens modal instead of navigating to a page
+    if (page === 'new') {
+        createNewProject();
+        return;
+    }
+
     // Update nav
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
@@ -44,17 +50,11 @@ function navigateTo(page) {
     // Update title
     const titles = {
         projects: 'Meus Projetos',
-        new: 'Novo Projeto',
         wallet: 'Minha Carteira',
         lessons: 'Aulas',
         help: 'Ajuda'
     };
-    document.getElementById('page-title').textContent = titles[page] || 'Dashboard';
-
-    // Special actions
-    if (page === 'new') {
-        createNewProject();
-    }
+    document.getElementById('page-title')?.textContent = titles[page] || 'Dashboard';
 
     // Close mobile menu
     document.getElementById('sidebar').classList.remove('open');
