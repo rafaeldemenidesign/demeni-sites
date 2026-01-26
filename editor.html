@@ -531,268 +531,293 @@
 
                 <!-- TAB: ESTILO -->
                 <div class="tab-content" id="tab-estilo">
-                    <div class="control-section">
-                        <h3>Cor de Destaque</h3>
+                    <!-- SUB-TABS DE ESTILO -->
+                    <div class="style-sub-tabs">
+                        <button class="style-sub-btn active" data-section="head">
+                            <i class="fas fa-user-circle"></i> Head
+                        </button>
+                        <button class="style-sub-btn" data-section="links">
+                            <i class="fas fa-link"></i> Links
+                        </button>
+                        <button class="style-sub-btn" data-section="banners">
+                            <i class="fas fa-images"></i> Banners
+                        </button>
+                        <button class="style-sub-btn" data-section="videos">
+                            <i class="fas fa-video"></i> Vídeos
+                        </button>
+                        <button class="style-sub-btn" data-section="footer">
+                            <i class="fas fa-copyright"></i> Footer
+                        </button>
+                    </div>
 
-                        <!-- Solid Colors -->
-                        <div class="form-group">
-                            <label>Cores Sólidas</label>
-                            <div class="color-presets accent-colors">
-                                <button class="color-preset active" data-accent="#D4AF37" style="background:#D4AF37"
-                                    title="Dourado"></button>
-                                <button class="color-preset" data-accent="#C0C0C0" style="background:#C0C0C0"
-                                    title="Prata"></button>
-                                <button class="color-preset" data-accent="#FF6B6B" style="background:#FF6B6B"
-                                    title="Coral"></button>
-                                <button class="color-preset" data-accent="#4ECDC4" style="background:#4ECDC4"
-                                    title="Turquesa"></button>
-                                <button class="color-preset" data-accent="#A855F7" style="background:#A855F7"
-                                    title="Roxo"></button>
-                                <button class="color-preset" data-accent="#3B82F6" style="background:#3B82F6"
-                                    title="Azul"></button>
-                                <button class="color-preset" data-accent="#22C55E" style="background:#22C55E"
-                                    title="Verde"></button>
+                    <!-- HEAD: Cores, Fundo, Avatar -->
+                    <div class="style-section active" id="style-head">
+                        <div class="control-section">
+                            <h3>Cor de Destaque</h3>
+
+                            <!-- Solid Colors -->
+                            <div class="form-group">
+                                <label>Cores Sólidas</label>
+                                <div class="color-presets accent-colors">
+                                    <button class="color-preset active" data-accent="#D4AF37" style="background:#D4AF37"
+                                        title="Dourado"></button>
+                                    <button class="color-preset" data-accent="#C0C0C0" style="background:#C0C0C0"
+                                        title="Prata"></button>
+                                    <button class="color-preset" data-accent="#FF6B6B" style="background:#FF6B6B"
+                                        title="Coral"></button>
+                                    <button class="color-preset" data-accent="#4ECDC4" style="background:#4ECDC4"
+                                        title="Turquesa"></button>
+                                    <button class="color-preset" data-accent="#A855F7" style="background:#A855F7"
+                                        title="Roxo"></button>
+                                    <button class="color-preset" data-accent="#3B82F6" style="background:#3B82F6"
+                                        title="Azul"></button>
+                                    <button class="color-preset" data-accent="#22C55E" style="background:#22C55E"
+                                        title="Verde"></button>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Gradient Colors -->
-                        <div class="form-group">
-                            <label>Degradês</label>
-                            <div class="color-presets gradient-colors">
-                                <button class="gradient-preset"
-                                    data-gradient="linear-gradient(135deg, #D4AF37 0%, #F5D75A 100%)"
-                                    style="background:linear-gradient(135deg, #D4AF37, #F5D75A)"
-                                    title="Dourado"></button>
-                                <button class="gradient-preset"
-                                    data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                                    style="background:linear-gradient(135deg, #667eea, #764ba2)"
-                                    title="Violeta"></button>
-                                <button class="gradient-preset"
-                                    data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
-                                    style="background:linear-gradient(135deg, #f093fb, #f5576c)" title="Rosa"></button>
-                                <button class="gradient-preset"
-                                    data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
-                                    style="background:linear-gradient(135deg, #4facfe, #00f2fe)" title="Ciano"></button>
-                                <button class="gradient-preset"
-                                    data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
-                                    style="background:linear-gradient(135deg, #43e97b, #38f9d7)" title="Verde"></button>
-                                <button class="gradient-preset"
-                                    data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
-                                    style="background:linear-gradient(135deg, #fa709a, #fee140)"
-                                    title="Sunset"></button>
-                                <button class="gradient-preset"
-                                    data-gradient="linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"
-                                    style="background:linear-gradient(135deg, #a8edea, #fed6e3)"
-                                    title="Pastel"></button>
+                            <!-- Gradient Colors -->
+                            <div class="form-group">
+                                <label>Degradês</label>
+                                <div class="color-presets gradient-colors">
+                                    <button class="gradient-preset"
+                                        data-gradient="linear-gradient(135deg, #D4AF37 0%, #F5D75A 100%)"
+                                        style="background:linear-gradient(135deg, #D4AF37, #F5D75A)"
+                                        title="Dourado"></button>
+                                    <button class="gradient-preset"
+                                        data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                                        style="background:linear-gradient(135deg, #667eea, #764ba2)"
+                                        title="Violeta"></button>
+                                    <button class="gradient-preset"
+                                        data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                                        style="background:linear-gradient(135deg, #f093fb, #f5576c)"
+                                        title="Rosa"></button>
+                                    <button class="gradient-preset"
+                                        data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+                                        style="background:linear-gradient(135deg, #4facfe, #00f2fe)"
+                                        title="Ciano"></button>
+                                    <button class="gradient-preset"
+                                        data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                                        style="background:linear-gradient(135deg, #43e97b, #38f9d7)"
+                                        title="Verde"></button>
+                                    <button class="gradient-preset"
+                                        data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+                                        style="background:linear-gradient(135deg, #fa709a, #fee140)"
+                                        title="Sunset"></button>
+                                    <button class="gradient-preset"
+                                        data-gradient="linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"
+                                        style="background:linear-gradient(135deg, #a8edea, #fed6e3)"
+                                        title="Pastel"></button>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Advanced Color Picker -->
-                        <div class="form-group">
-                            <button class="btn-advanced-toggle" id="btn-advanced-color">
-                                <i class="fas fa-sliders-h"></i> Avançado
-                            </button>
-                            <div class="advanced-color-picker" id="advanced-color-picker" style="display:none;">
-                                <div class="color-input-wrapper">
-                                    <input type="color" id="color-accent" value="#D4AF37">
-                                    <span class="color-value">#D4AF37</span>
+                            <!-- Advanced Color Picker -->
+                            <div class="form-group">
+                                <button class="btn-advanced-toggle" id="btn-advanced-color">
+                                    <i class="fas fa-sliders-h"></i> Avançado
+                                </button>
+                                <div class="advanced-color-picker" id="advanced-color-picker" style="display:none;">
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="color-accent" value="#D4AF37">
+                                        <span class="color-value">#D4AF37</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="color-bg">Fundo</label>
+                        <div class="form-group">
+                            <label for="color-bg">Fundo</label>
 
-                        <!-- Light Colors -->
-                        <p class="color-section-label">Cores Claras</p>
-                        <div class="color-presets bg-colors">
-                            <button class="color-preset" data-color="#ffffff"
-                                style="background:#ffffff; border: 1px solid #ccc" title="Branco"></button>
-                            <button class="color-preset" data-color="#f8f9fa"
-                                style="background:#f8f9fa; border: 1px solid #ccc" title="Cinza Claro"></button>
-                            <button class="color-preset" data-color="#e8f5e9"
-                                style="background:#e8f5e9; border: 1px solid #ccc" title="Verde Claro"></button>
-                            <button class="color-preset" data-color="#e3f2fd"
-                                style="background:#e3f2fd; border: 1px solid #ccc" title="Azul Claro"></button>
-                            <button class="color-preset" data-color="#f3e5f5"
-                                style="background:#f3e5f5; border: 1px solid #ccc" title="Roxo Claro"></button>
-                            <button class="color-preset" data-color="#fff3e0"
-                                style="background:#fff3e0; border: 1px solid #ccc" title="Laranja Claro"></button>
-                            <button class="color-preset" data-color="#fce4ec"
-                                style="background:#fce4ec; border: 1px solid #ccc" title="Rosa Claro"></button>
-                        </div>
+                            <!-- Light Colors -->
+                            <p class="color-section-label">Cores Claras</p>
+                            <div class="color-presets bg-colors">
+                                <button class="color-preset" data-color="#ffffff"
+                                    style="background:#ffffff; border: 1px solid #ccc" title="Branco"></button>
+                                <button class="color-preset" data-color="#f8f9fa"
+                                    style="background:#f8f9fa; border: 1px solid #ccc" title="Cinza Claro"></button>
+                                <button class="color-preset" data-color="#e8f5e9"
+                                    style="background:#e8f5e9; border: 1px solid #ccc" title="Verde Claro"></button>
+                                <button class="color-preset" data-color="#e3f2fd"
+                                    style="background:#e3f2fd; border: 1px solid #ccc" title="Azul Claro"></button>
+                                <button class="color-preset" data-color="#f3e5f5"
+                                    style="background:#f3e5f5; border: 1px solid #ccc" title="Roxo Claro"></button>
+                                <button class="color-preset" data-color="#fff3e0"
+                                    style="background:#fff3e0; border: 1px solid #ccc" title="Laranja Claro"></button>
+                                <button class="color-preset" data-color="#fce4ec"
+                                    style="background:#fce4ec; border: 1px solid #ccc" title="Rosa Claro"></button>
+                            </div>
 
-                        <!-- Dark Colors -->
-                        <p class="color-section-label">Cores Escuras</p>
-                        <div class="color-presets bg-colors">
-                            <button class="color-preset active" data-color="#000000" style="background:#000000"
-                                title="Preto"></button>
-                            <button class="color-preset" data-color="#1a1a2e" style="background:#1a1a2e"
-                                title="Índigo Escuro"></button>
-                            <button class="color-preset" data-color="#1f1f1f" style="background:#1f1f1f"
-                                title="Cinza Escuro"></button>
-                            <button class="color-preset" data-color="#1a1f1a" style="background:#1a1f1a"
-                                title="Verde Escuro"></button>
-                            <button class="color-preset" data-color="#2d1f1f" style="background:#2d1f1f"
-                                title="Vinho Escuro"></button>
-                            <button class="color-preset" data-color="#1f1a2d" style="background:#1f1a2d"
-                                title="Roxo Escuro"></button>
-                            <button class="color-preset" data-color="#0f172a" style="background:#0f172a"
-                                title="Azul Escuro"></button>
-                        </div>
+                            <!-- Dark Colors -->
+                            <p class="color-section-label">Cores Escuras</p>
+                            <div class="color-presets bg-colors">
+                                <button class="color-preset active" data-color="#000000" style="background:#000000"
+                                    title="Preto"></button>
+                                <button class="color-preset" data-color="#1a1a2e" style="background:#1a1a2e"
+                                    title="Índigo Escuro"></button>
+                                <button class="color-preset" data-color="#1f1f1f" style="background:#1f1f1f"
+                                    title="Cinza Escuro"></button>
+                                <button class="color-preset" data-color="#1a1f1a" style="background:#1a1f1a"
+                                    title="Verde Escuro"></button>
+                                <button class="color-preset" data-color="#2d1f1f" style="background:#2d1f1f"
+                                    title="Vinho Escuro"></button>
+                                <button class="color-preset" data-color="#1f1a2d" style="background:#1f1a2d"
+                                    title="Roxo Escuro"></button>
+                                <button class="color-preset" data-color="#0f172a" style="background:#0f172a"
+                                    title="Azul Escuro"></button>
+                            </div>
 
-                        <!-- 3.1 WALLPAPER TYPE -->
-                        <p class="color-section-label">Tipo de Fundo</p>
-                        <div class="wallpaper-types">
-                            <button class="wallpaper-type active" data-type="fill">
-                                <i class="fas fa-fill-drip"></i>
-                                <span>Cor</span>
-                            </button>
-                            <button class="wallpaper-type" data-type="gradient">
-                                <i class="fas fa-paint-brush"></i>
-                                <span>Gradiente</span>
-                            </button>
-                            <button class="wallpaper-type" data-type="image">
-                                <i class="fas fa-image"></i>
-                                <span>Imagem</span>
-                            </button>
-                        </div>
+                            <!-- 3.1 WALLPAPER TYPE -->
+                            <p class="color-section-label">Tipo de Fundo</p>
+                            <div class="wallpaper-types">
+                                <button class="wallpaper-type active" data-type="fill">
+                                    <i class="fas fa-fill-drip"></i>
+                                    <span>Cor</span>
+                                </button>
+                                <button class="wallpaper-type" data-type="gradient">
+                                    <i class="fas fa-paint-brush"></i>
+                                    <span>Gradiente</span>
+                                </button>
+                                <button class="wallpaper-type" data-type="image">
+                                    <i class="fas fa-image"></i>
+                                    <span>Imagem</span>
+                                </button>
+                            </div>
 
-                        <!-- Gradient Presets (hidden by default) -->
-                        <div class="wallpaper-gradients" id="wallpaper-gradients" style="display: none;">
-                            <p class="color-section-label">Escolha um Gradiente</p>
-                            <div class="gradient-presets-grid">
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                                    title="Roxo"></button>
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
-                                    title="Rosa"></button>
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
-                                    title="Azul"></button>
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
-                                    title="Verde"></button>
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
-                                    title="Sunset"></button>
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)"
-                                    title="Lavender"></button>
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%)"
-                                    title="Dark Blue"></button>
-                                <button class="gradient-preset-btn"
-                                    data-gradient="linear-gradient(180deg, #000000 0%, #434343 100%)"
-                                    title="Dark"></button>
+                            <!-- Gradient Presets (hidden by default) -->
+                            <div class="wallpaper-gradients" id="wallpaper-gradients" style="display: none;">
+                                <p class="color-section-label">Escolha um Gradiente</p>
+                                <div class="gradient-presets-grid">
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                                        title="Roxo"></button>
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                                        title="Rosa"></button>
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+                                        title="Azul"></button>
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                                        title="Verde"></button>
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+                                        title="Sunset"></button>
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)"
+                                        title="Lavender"></button>
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%)"
+                                        title="Dark Blue"></button>
+                                    <button class="gradient-preset-btn"
+                                        data-gradient="linear-gradient(180deg, #000000 0%, #434343 100%)"
+                                        title="Dark"></button>
+                                </div>
+                            </div>
+
+                            <!-- Image Upload (hidden by default) -->
+                            <div class="wallpaper-image" id="wallpaper-image" style="display: none;">
+                                <p class="color-section-label">Imagem de Fundo</p>
+                                <div class="bg-image-upload">
+                                    <div class="bg-preview" id="bg-preview">
+                                        <span>Sem imagem</span>
+                                    </div>
+                                    <input type="file" id="bg-input" accept="image/*" hidden>
+                                    <div class="bg-actions">
+                                        <button class="btn-text" id="btn-upload-bg">
+                                            <i class="fas fa-upload"></i> Enviar
+                                        </button>
+                                        <button class="btn-text" id="btn-edit-bg" disabled>
+                                            <i class="fas fa-crop-alt"></i> Editar
+                                        </button>
+                                        <button class="btn-text btn-danger" id="btn-remove-bg">
+                                            <i class="fas fa-trash"></i> Remover
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Image Upload (hidden by default) -->
-                        <div class="wallpaper-image" id="wallpaper-image" style="display: none;">
-                            <p class="color-section-label">Imagem de Fundo</p>
-                            <div class="bg-image-upload">
-                                <div class="bg-preview" id="bg-preview">
-                                    <span>Sem imagem</span>
-                                </div>
-                                <input type="file" id="bg-input" accept="image/*" hidden>
-                                <div class="bg-actions">
-                                    <button class="btn-text" id="btn-upload-bg">
-                                        <i class="fas fa-upload"></i> Enviar
-                                    </button>
-                                    <button class="btn-text" id="btn-edit-bg" disabled>
-                                        <i class="fas fa-crop-alt"></i> Editar
-                                    </button>
-                                    <button class="btn-text btn-danger" id="btn-remove-bg">
-                                        <i class="fas fa-trash"></i> Remover
-                                    </button>
-                                </div>
+                        <div class="control-section">
+                            <h3>Estilo dos Botões</h3>
+                            <div class="button-styles">
+                                <button class="style-preset active" data-style="glass">
+                                    <div class="style-demo glass"></div>
+                                    <span>Glass</span>
+                                </button>
+                                <button class="style-preset" data-style="solid">
+                                    <div class="style-demo solid"></div>
+                                    <span>Sólido</span>
+                                </button>
+                                <button class="style-preset" data-style="outline">
+                                    <div class="style-demo outline"></div>
+                                    <span>Contorno</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="control-section">
-                        <h3>Estilo dos Botões</h3>
-                        <div class="button-styles">
-                            <button class="style-preset active" data-style="glass">
-                                <div class="style-demo glass"></div>
-                                <span>Glass</span>
-                            </button>
-                            <button class="style-preset" data-style="solid">
-                                <div class="style-demo solid"></div>
-                                <span>Sólido</span>
-                            </button>
-                            <button class="style-preset" data-style="outline">
-                                <div class="style-demo outline"></div>
-                                <span>Contorno</span>
-                            </button>
+                        <!-- 1.0 LAYOUT DOS BOTÕES -->
+                        <div class="control-section">
+                            <h3>Layout dos Botões</h3>
+                            <div class="layout-pills" id="layout-pills">
+                                <button class="layout-pill active" data-layout="list">
+                                    <i class="fas fa-list"></i> Lista
+                                </button>
+                                <button class="layout-pill" data-layout="grid">
+                                    <i class="fas fa-th-large"></i> Grid
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- 1.0 LAYOUT DOS BOTÕES -->
-                    <div class="control-section">
-                        <h3>Layout dos Botões</h3>
-                        <div class="layout-pills" id="layout-pills">
-                            <button class="layout-pill active" data-layout="list">
-                                <i class="fas fa-list"></i> Lista
-                            </button>
-                            <button class="layout-pill" data-layout="grid">
-                                <i class="fas fa-th-large"></i> Grid
-                            </button>
+                        <!-- 1.1 CORNERS SLIDER -->
+                        <div class="control-section">
+                            <h3>Bordas dos Botões</h3>
+                            <div class="corners-control">
+                                <span class="corner-label">Quadrado</span>
+                                <input type="range" id="btn-corners" min="0" max="50" value="10" step="2">
+                                <span class="corner-label">Pílula</span>
+                            </div>
+                            <span class="corners-value" id="corners-value">10px</span>
                         </div>
-                    </div>
 
-                    <!-- 1.1 CORNERS SLIDER -->
-                    <div class="control-section">
-                        <h3>Bordas dos Botões</h3>
-                        <div class="corners-control">
-                            <span class="corner-label">Quadrado</span>
-                            <input type="range" id="btn-corners" min="0" max="50" value="10" step="2">
-                            <span class="corner-label">Pílula</span>
+                        <!-- 1.2 SHADOWS PILLS -->
+                        <div class="control-section">
+                            <h3>Sombra dos Botões</h3>
+                            <div class="shadow-pills" id="shadow-pills">
+                                <button class="shadow-pill active" data-shadow="none">None</button>
+                                <button class="shadow-pill" data-shadow="subtle">Subtle</button>
+                                <button class="shadow-pill" data-shadow="strong">Strong</button>
+                                <button class="shadow-pill" data-shadow="hard">Hard</button>
+                            </div>
                         </div>
-                        <span class="corners-value" id="corners-value">10px</span>
-                    </div>
 
-                    <!-- 1.2 SHADOWS PILLS -->
-                    <div class="control-section">
-                        <h3>Sombra dos Botões</h3>
-                        <div class="shadow-pills" id="shadow-pills">
-                            <button class="shadow-pill active" data-shadow="none">None</button>
-                            <button class="shadow-pill" data-shadow="subtle">Subtle</button>
-                            <button class="shadow-pill" data-shadow="strong">Strong</button>
-                            <button class="shadow-pill" data-shadow="hard">Hard</button>
+                        <!-- 1.3 COR DO BOTÃO -->
+                        <div class="control-section">
+                            <h3>Cor do Botão</h3>
+                            <div class="color-input-row">
+                                <input type="color" id="btn-color" value="#D4AF37">
+                                <span class="color-hex" id="btn-color-hex">#D4AF37</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- 1.3 COR DO BOTÃO -->
-                    <div class="control-section">
-                        <h3>Cor do Botão</h3>
-                        <div class="color-input-row">
-                            <input type="color" id="btn-color" value="#D4AF37">
-                            <span class="color-hex" id="btn-color-hex">#D4AF37</span>
+                        <!-- 1.4 COR DO TEXTO DO BOTÃO -->
+                        <div class="control-section">
+                            <h3>Cor do Texto do Botão</h3>
+                            <div class="color-input-row">
+                                <input type="color" id="btn-text-color" value="#000000">
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- 1.4 COR DO TEXTO DO BOTÃO -->
-                    <div class="control-section">
-                        <h3>Cor do Texto do Botão</h3>
-                        <div class="color-input-row">
-                            <input type="color" id="btn-text-color" value="#000000">
+                        <!-- TOGGLE BOLINHA VERDE (ONLINE) -->
+                        <div class="control-section">
+                            <h3>Indicador Online</h3>
+                            <p class="section-desc">Bolinha verde ao lado da foto de perfil</p>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toggle-online-badge" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Mostrar bolinha online</span>
+                            </label>
                         </div>
-                    </div>
-
-                    <!-- TOGGLE BOLINHA VERDE (ONLINE) -->
-                    <div class="control-section">
-                        <h3>Indicador Online</h3>
-                        <p class="section-desc">Bolinha verde ao lado da foto de perfil</p>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="toggle-online-badge" checked>
-                            <span class="toggle-slider"></span>
-                            <span class="toggle-label">Mostrar bolinha online</span>
-                        </label>
-                    </div>
-                </div>
+                    </div><!-- fim style-head -->
+                </div><!-- fim tab-estilo -->
 
                 <!-- TAB: ORDEM -->
                 <div class="tab-content" id="tab-ordem">

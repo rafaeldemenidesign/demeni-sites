@@ -69,7 +69,7 @@ const state = {
         ctaLink: '',
         isVertical: false
     },
-    blockOrder: ['banners', 'links', 'video'] // ordem dos blocos arrastáveis
+    blockOrder: ['links', 'banners', 'video'] // ordem dos blocos arrastáveis
 };
 
 let linkIdCounter = 5;
@@ -1360,12 +1360,12 @@ function renderPreview() {
             
             .preview-online-badge {
                 position: absolute;
-                bottom: -4px;
-                right: -4px;
-                width: 16px;
-                height: 16px;
+                bottom: 5px;
+                right: 5px;
+                width: 14px;
+                height: 14px;
                 background: #22C55E;
-                border: 3px solid #0a0a1a;
+                border: 2px solid #0a0a1a;
                 border-radius: 50%;
                 animation: pulse 2s infinite;
             }
@@ -2937,3 +2937,19 @@ if (onlineBadgeToggle) {
         saveToStorage();
     });
 }
+
+// ========== STYLE SUB-TABS ==========
+document.querySelectorAll('.style-sub-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const section = btn.dataset.section;
+
+        // Update buttons
+        document.querySelectorAll('.style-sub-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Update sections
+        document.querySelectorAll('.style-section').forEach(s => s.classList.remove('active'));
+        const targetSection = document.getElementById(`style-${section}`);
+        if (targetSection) targetSection.classList.add('active');
+    });
+});
