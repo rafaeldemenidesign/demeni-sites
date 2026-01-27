@@ -1315,9 +1315,17 @@ function openFullPreview() {
 function generateFinalHTML() {
     // Capture the current preview content
     const frame = document.getElementById('preview-frame');
-    if (!frame) return '';
+    console.log('🔍 generateFinalHTML - frame:', frame);
+    console.log('🔍 generateFinalHTML - frame.innerHTML length:', frame?.innerHTML?.length);
+
+    if (!frame) {
+        console.error('❌ preview-frame not found!');
+        return '';
+    }
 
     const previewContent = frame.innerHTML;
+    console.log('🔍 previewContent length:', previewContent?.length);
+    console.log('🔍 previewContent preview:', previewContent?.substring(0, 200));
 
     // Get background style from state
     const accent = state.style.accentColor;
@@ -1390,6 +1398,7 @@ function generateFinalHTML() {
 </body>
 </html>`;
 
+    console.log('✅ Generated HTML length:', htmlContent?.length);
     return htmlContent;
 }
 
