@@ -185,18 +185,37 @@ const SupabaseClient = (function () {
     }
 
     // ========== PUBLISH SITE ==========
-    async function publishSite(projectId, slug) {
-        if (!supabase) return null;
+    async function publishSite(projectId, slug, htmlContent) {
+        if (!supabase) return { error: { message: 'Supabase not configured' } };
 
+        // Get current user
+        const user = await getUser();
+        if (!user) return { error: { message: 'User not authenticated' } };
+
+        // Get project name from local storage
+        const localProject = window.UserData?.getProject?.(projectId);
+        const projectName = localProject?.name || 'Meu Site';
+        const projectData = localProject?.data || {};
+
+        // Use UPSERT: Insert if new, Update if exists (based on slug)
         const { data, error } = await supabase
             .from('projects')
-            .update({
-                published: true,
+            .upsert({
+                user_id: user.id,
+                name: projectName,
                 slug: slug,
+                data: projectData,
+                html_content: htmlContent,
+                published: true,
                 published_url: `https://${slug}.rafaeldemeni.com`,
-                published_at: new Date().toISOString()
+                published_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'slug',
+                ignoreDuplicates: false
             })
-            .eq('id', projectId);
+            .select()
+            .single();
 
         return { data, error };
     }
