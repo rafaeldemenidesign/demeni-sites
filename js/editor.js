@@ -28,7 +28,7 @@ const state = {
     style: {
         accentColor: '#1B97C0',
         accentGradient: null,
-        bgColor: '#000000',
+        bgColor: '#FFFFFF',
         bgImage: null,
         bgGradient: null,
         bgType: 'fill', // fill, gradient, image
@@ -443,7 +443,7 @@ function updateBgPreview() {
     if (!bgPreview) return;
 
     if (state.style.bgImage) {
-        bgPreview.innerHTML = `<img src="${state.style.bgImage}" alt="Background">`;
+        bgPreview.innerHTML = `<img src="${state.style.bgImage}" alt="Background" style="width:100%;height:100%;object-fit:cover;">`;
         if (bgRemoveBtn) bgRemoveBtn.disabled = false;
         if (bgEditBtn) bgEditBtn.disabled = false;
     } else {
@@ -1128,36 +1128,70 @@ async function confirmPublish() {
     confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
 
     try {
-        // Deduct credits
-        if (Credits && typeof Credits.deductCredits === 'function') {
-            const result = Credits.deductCredits(PUBLISH_COST, 'Publicação de site');
-            if (!result.success) {
-                alert('Créditos insuficientes');
+        // 1. Verificar se usuário está logado no Supabase
+        const user = await SupabaseClient?.getUser?.();
+        if (!user) {
+            alert('Você precisa estar logado para publicar. Faça login novamente.');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
+            return;
+        }
+
+        // 2. Verificar se é primeira publicação (precisa pagar) ou atualização (grátis)
+        const currentProjectId = UserData?.getCurrentProjectId?.();
+        const localProject = currentProjectId ? UserData.getProject(currentProjectId) : null;
+        const isFirstPublish = !localProject?.published;
+
+        // 3. Cobrar créditos APENAS na primeira publicação
+        if (isFirstPublish) {
+            if (Credits && typeof Credits.deductCredits === 'function') {
+                const result = Credits.deductCredits(PUBLISH_COST, 'Publicação de site');
+                if (!result.success) {
+                    alert('Créditos insuficientes para primeira publicação.');
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
+                    return;
+                }
+            }
+        }
+
+        // 4. Gerar HTML final do site
+        const htmlContent = generateFinalHTML();
+
+        // 5. Publicar no Supabase (salvar HTML + marcar como publicado)
+        if (SupabaseClient?.isConfigured?.()) {
+            const result = await SupabaseClient.publishSite(currentProjectId, slug, htmlContent);
+            if (result?.error) {
+                console.error('Supabase publish error:', result.error);
+                // Se falhar e era primeira publicação, devolver créditos
+                if (isFirstPublish && Credits) {
+                    Credits.addCredits(PUBLISH_COST, 'Reembolso - erro na publicação');
+                }
+                alert('Erro ao publicar no servidor: ' + (result.error.message || 'Tente novamente'));
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
                 return;
             }
         }
 
-        // Save subdomain to project
-        const currentProjectId = UserData?.getCurrentProjectId?.();
-        if (currentProjectId) {
-            const project = UserData.getProject(currentProjectId);
-            if (project) {
-                project.subdomain = slug;
-                project.published = true;
-                project.publishedAt = new Date().toISOString();
-                project.publishedUrl = `https://${slug}.rafaeldemeni.com`;
-                UserData.saveProject(currentProjectId, project);
-            }
+        // 6. Salvar localmente também (backup)
+        if (localProject) {
+            localProject.subdomain = slug;
+            localProject.published = true;
+            localProject.publishedAt = new Date().toISOString();
+            localProject.publishedUrl = `https://${slug}.rafaeldemeni.com`;
+            localProject.htmlContent = htmlContent;
+            UserData.saveProject(currentProjectId, localProject);
         }
 
-        // Show success
+        // 7. Mostrar sucesso
         hideAllPublishSteps();
         document.getElementById('publish-step-success').style.display = 'block';
         const url = `https://${slug}.rafaeldemeni.com`;
         document.getElementById('success-url').href = url;
         document.getElementById('success-url').textContent = url;
+
+        console.log('✅ Site publicado com sucesso:', url);
 
     } catch (error) {
         console.error('Publish error:', error);
@@ -1228,7 +1262,7 @@ function openFullPreview() {
     <title>${state.profile.name} | Site na Bio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1273,6 +1307,88 @@ function openFullPreview() {
     const blob = new Blob([fullHtml], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
+}
+
+// ========== GENERATE FINAL HTML FOR PUBLISH ==========
+function generateFinalHTML() {
+    // Capture the current preview content
+    const frame = document.getElementById('preview-frame');
+    if (!frame) return '';
+
+    const previewContent = frame.innerHTML;
+
+    // Get background style from state
+    const accent = state.style.accentColor;
+    let phoneBgStyle = `background: ${state.style.bgColor};`;
+
+    if (state.style.bgType === 'gradient' && state.style.bgGradient) {
+        phoneBgStyle = `background: ${state.style.bgGradient};`;
+    } else if (state.style.bgImage) {
+        phoneBgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center;`;
+    }
+
+    // Generate complete HTML for standalone page
+    const htmlContent = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${state.profile.name} | Bio</title>
+    <meta name="description" content="${state.profile.bio || state.profile.name}">
+    <meta property="og:title" content="${state.profile.name}">
+    <meta property="og:description" content="${state.profile.bio || state.profile.role}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            font-family: '${state.style.fontFamily || 'Montserrat'}', sans-serif; 
+            min-height: 100vh; 
+            ${phoneBgStyle}
+        }
+        .site-wrapper { 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            padding: 0;
+        }
+        .site-content { 
+            width: 100%; 
+            max-width: 480px; 
+            min-height: 100vh; 
+        }
+        .preview-container { 
+            background: transparent !important; 
+        }
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.5; } 
+        }
+        /* Mobile First - No phone mockup */
+        @media (min-width: 768px) {
+            .site-wrapper { 
+                padding: 40px 20px; 
+                align-items: flex-start;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            }
+            .site-content {
+                border-radius: 20px;
+                max-height: none;
+                box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="site-wrapper">
+        <div class="site-content">${previewContent}</div>
+    </div>
+</body>
+</html>`;
+
+    return htmlContent;
 }
 
 // ========== PREVIEW RENDER ==========
@@ -1349,26 +1465,41 @@ function renderPreview() {
                 color: ${textColor};
             }
             
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.15); opacity: 0.85; }
+            }
+            
+            .avatar-wrapper {
+                position: relative;
+                display: inline-block;
+                margin-bottom: 16px;
+            }
+            
             .preview-avatar {
                 width: ${state.profile.avatarSize || 100}px;
                 height: ${state.profile.avatarSize || 100}px;
                 border-radius: 50%;
                 object-fit: cover;
-                border: 3px solid ${accent};
-                box-shadow: 0 0 30px ${accent}60, 0 4px 20px ${accent}40;
-                margin-bottom: 16px;
-                position: relative;
+                border: none;
+                box-shadow: 
+                    inset 0 0 0 3px ${accent},
+                    0 0 30px ${accent}60, 
+                    0 4px 20px ${accent}40;
+                display: block;
             }
             
             .preview-online-badge {
                 position: absolute;
                 bottom: 5px;
                 right: 5px;
-                width: 14px;
-                height: 14px;
+                width: 18px;
+                height: 18px;
                 background: #22C55E;
-                border: 2px solid #0a0a1a;
+                border: 3px solid #000;
                 border-radius: 50%;
+                z-index: 100;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.4);
                 animation: pulse 2s infinite;
             }
             
@@ -1461,6 +1592,7 @@ function renderPreview() {
             .preview-btn.outline {
                 background: transparent;
                 border: 2px solid ${buttonColor};
+                color: ${buttonTextColor};
             }
             
             .preview-cta {
@@ -1763,7 +1895,7 @@ function renderPreview() {
         </style>
         
         <div class="preview-container">
-            <div style="position: relative; display: inline-block;">
+            <div class="avatar-wrapper">
                 <img src="${state.profile.avatar}" alt="${state.profile.name}" class="preview-avatar">
                 ${state.profile.showOnlineBadge !== false ? '<div class="preview-online-badge"></div>' : ''}
             </div>
@@ -1924,13 +2056,13 @@ function generateFinalHTML() {
     <title>${state.profile.name} | Site na Bio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: '${state.style.fontFamily || 'Montserrat'}', sans-serif;
             min-height: 100vh;
             ${bgStyle}
             color: ${textColor};
