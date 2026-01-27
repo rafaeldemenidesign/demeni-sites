@@ -1121,60 +1121,98 @@ async function confirmPublish() {
     const confirmBtn = document.getElementById('btn-confirm-publish');
     const slug = document.getElementById('subdomain-input').value.trim().toLowerCase();
 
-    if (!slug) return;
+    if (!slug) {
+        alert('Por favor, digite um subdomínio.');
+        return;
+    }
 
     // Show loading
     confirmBtn.disabled = true;
     confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
 
+    console.log('🚀 Iniciando publicação...');
+    console.log('📝 Slug:', slug);
+
     try {
-        // 1. Verificar se usuário está logado no Supabase
+        // 1. Verificar se usuário está logado
+        console.log('1️⃣ Verificando usuário...');
         const user = await SupabaseClient?.getUser?.();
+        console.log('👤 User ID:', user?.id);
+
         if (!user) {
             alert('Você precisa estar logado para publicar. Faça login novamente.');
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
-            return;
+            throw new Error('User not logged in');
         }
 
-        // 2. Verificar se é primeira publicação (precisa pagar) ou atualização (grátis)
+        // 2. Verificar projeto atual
+        console.log('2️⃣ Verificando projeto...');
         const currentProjectId = UserData?.getCurrentProjectId?.();
-        const localProject = currentProjectId ? UserData.getProject(currentProjectId) : null;
-        const isFirstPublish = !localProject?.published;
+        console.log('📁 Project ID:', currentProjectId);
 
-        // 3. Cobrar créditos APENAS na primeira publicação
-        if (isFirstPublish) {
-            if (Credits && typeof Credits.deductCredits === 'function') {
-                const result = Credits.deductCredits(PUBLISH_COST, 'Publicação de site');
-                if (!result.success) {
-                    alert('Créditos insuficientes para primeira publicação.');
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
-                    return;
-                }
+        const localProject = currentProjectId ? UserData.getProject(currentProjectId) : null;
+        console.log('📋 Local project:', localProject?.name, 'published:', localProject?.published);
+
+        const isFirstPublish = !localProject?.published;
+        console.log('🆕 Primeira publicação?', isFirstPublish);
+
+        // 3. Gerar HTML ANTES de cobrar (para verificar se está ok)
+        console.log('3️⃣ Gerando HTML...');
+        const htmlContent = generateFinalHTML();
+        console.log('📄 HTML length:', htmlContent?.length);
+
+        if (!htmlContent || htmlContent.length < 500) {
+            alert('Erro: Não foi possível gerar o conteúdo do site. O preview está vazio?');
+            throw new Error('HTML content is empty or too short');
+        }
+
+        // 4. Cobrar créditos APENAS na primeira publicação
+        console.log('4️⃣ Verificando créditos...');
+        if (isFirstPublish && typeof PUBLISH_COST !== 'undefined') {
+            console.log('💰 Custo:', PUBLISH_COST);
+            const currentCredits = Credits?.getCredits?.() || 0;
+            console.log('💳 Créditos atuais:', currentCredits);
+
+            if (currentCredits < PUBLISH_COST) {
+                alert(`Créditos insuficientes. Você tem ${currentCredits} e precisa de ${PUBLISH_COST}.`);
+                throw new Error('Insufficient credits');
+            }
+
+            // Debitar créditos
+            const deductResult = Credits?.deductCredits?.(PUBLISH_COST, 'Publicação de site');
+            console.log('💸 Resultado da dedução:', deductResult);
+
+            if (!deductResult?.success) {
+                alert('Erro ao debitar créditos: ' + (deductResult?.message || 'Tente novamente'));
+                throw new Error('Credit deduction failed');
+            }
+
+            // Sincronizar créditos com Supabase
+            if (Auth?.updateCurrentUser) {
+                await Auth.updateCurrentUser({ credits: deductResult.balance });
+                console.log('☁️ Créditos sincronizados com Supabase:', deductResult.balance);
             }
         }
 
-        // 4. Gerar HTML final do site
-        const htmlContent = generateFinalHTML();
-
-        // 5. Publicar no Supabase (salvar HTML + marcar como publicado)
+        // 5. Publicar no Supabase
+        console.log('5️⃣ Publicando no Supabase...');
         if (SupabaseClient?.isConfigured?.()) {
             const result = await SupabaseClient.publishSite(currentProjectId, slug, htmlContent);
+            console.log('☁️ Resultado Supabase:', { data: !!result?.data, error: result?.error });
+
             if (result?.error) {
-                console.error('Supabase publish error:', result.error);
-                // Se falhar e era primeira publicação, devolver créditos
+                console.error('❌ Supabase error:', result.error);
+                // Devolver créditos se falhou
                 if (isFirstPublish && Credits) {
                     Credits.addCredits(PUBLISH_COST, 'Reembolso - erro na publicação');
+                    console.log('↩️ Créditos devolvidos');
                 }
-                alert('Erro ao publicar no servidor: ' + (result.error.message || 'Tente novamente'));
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
-                return;
+                alert('Erro no servidor: ' + (result.error.message || JSON.stringify(result.error)));
+                throw new Error('Supabase publish failed');
             }
         }
 
-        // 6. Salvar localmente também (atualizar estado do projeto)
+        // 6. Atualizar projeto local
+        console.log('6️⃣ Atualizando projeto local...');
         if (currentProjectId && UserData?.updateProject) {
             const updateData = {
                 subdomain: slug,
@@ -1182,24 +1220,22 @@ async function confirmPublish() {
                 publishedAt: new Date().toISOString(),
                 publishedUrl: `https://${slug}.rafaeldemeni.com`
             };
-            UserData.updateProject(currentProjectId, updateData);
-            console.log('✅ Projeto local atualizado:', updateData);
+            const updated = UserData.updateProject(currentProjectId, updateData);
+            console.log('💾 Projeto atualizado:', updated);
         }
 
         // 7. Mostrar sucesso
+        console.log('7️⃣ Publicação concluída! ✅');
         hideAllPublishSteps();
         document.getElementById('publish-step-success').style.display = 'block';
         const url = `https://${slug}.rafaeldemeni.com`;
         document.getElementById('success-url').href = url;
         document.getElementById('success-url').textContent = url;
 
-        console.log('✅ Site publicado com sucesso:', url);
+        alert('✅ Site publicado com sucesso!\n\nURL: ' + url + '\n\nO site pode levar alguns segundos para ficar disponível.');
 
     } catch (error) {
-        console.error('Publish error:', error);
-        // Mostrar mais detalhes do erro
-        const errorMsg = error?.message || error?.error?.message || JSON.stringify(error) || 'Erro desconhecido';
-        alert('Erro ao publicar: ' + errorMsg);
+        console.error('❌ Publish error:', error);
     } finally {
         confirmBtn.disabled = false;
         confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
