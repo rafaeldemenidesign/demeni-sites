@@ -1174,14 +1174,16 @@ async function confirmPublish() {
             }
         }
 
-        // 6. Salvar localmente também (backup)
-        if (localProject) {
-            localProject.subdomain = slug;
-            localProject.published = true;
-            localProject.publishedAt = new Date().toISOString();
-            localProject.publishedUrl = `https://${slug}.rafaeldemeni.com`;
-            localProject.htmlContent = htmlContent;
-            UserData.saveProject(currentProjectId, localProject);
+        // 6. Salvar localmente também (atualizar estado do projeto)
+        if (currentProjectId && UserData?.updateProject) {
+            const updateData = {
+                subdomain: slug,
+                published: true,
+                publishedAt: new Date().toISOString(),
+                publishedUrl: `https://${slug}.rafaeldemeni.com`
+            };
+            UserData.updateProject(currentProjectId, updateData);
+            console.log('✅ Projeto local atualizado:', updateData);
         }
 
         // 7. Mostrar sucesso
