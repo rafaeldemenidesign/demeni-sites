@@ -186,38 +186,55 @@ const SupabaseClient = (function () {
 
     // ========== PUBLISH SITE ==========
     async function publishSite(projectId, slug, htmlContent) {
-        if (!supabase) return { error: { message: 'Supabase not configured' } };
+        console.log('📤 publishSite called:', { projectId, slug, htmlContentLength: htmlContent?.length });
+
+        if (!supabase) {
+            console.error('❌ Supabase not configured');
+            return { error: { message: 'Supabase not configured' } };
+        }
 
         // Get current user
         const user = await getUser();
-        if (!user) return { error: { message: 'User not authenticated' } };
+        console.log('👤 User:', user?.id);
+        if (!user) {
+            console.error('❌ User not authenticated');
+            return { error: { message: 'User not authenticated' } };
+        }
 
         // Get project name from local storage
         const localProject = window.UserData?.getProject?.(projectId);
         const projectName = localProject?.name || 'Meu Site';
         const projectData = localProject?.data || {};
+        console.log('📁 Project:', { projectName, hasData: !!projectData });
 
-        // Use UPSERT: Insert if new, Update if exists (based on slug)
-        const { data, error } = await supabase
-            .from('projects')
-            .upsert({
-                user_id: user.id,
-                name: projectName,
-                slug: slug,
-                data: projectData,
-                html_content: htmlContent,
-                published: true,
-                published_url: `https://${slug}.rafaeldemeni.com`,
-                published_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'slug',
-                ignoreDuplicates: false
-            })
-            .select()
-            .single();
+        try {
+            // Use UPSERT: Insert if new, Update if exists (based on slug)
+            console.log('⏳ Calling Supabase upsert...');
+            const { data, error } = await supabase
+                .from('projects')
+                .upsert({
+                    user_id: user.id,
+                    name: projectName,
+                    slug: slug,
+                    data: projectData,
+                    html_content: htmlContent,
+                    published: true,
+                    published_url: `https://${slug}.rafaeldemeni.com`,
+                    published_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'slug',
+                    ignoreDuplicates: false
+                })
+                .select()
+                .single();
 
-        return { data, error };
+            console.log('✅ Supabase result:', { data: !!data, error });
+            return { data, error };
+        } catch (e) {
+            console.error('❌ Supabase exception:', e);
+            return { error: { message: e.message || 'Database error' } };
+        }
     }
 
     async function getPublishedSite(slug) {

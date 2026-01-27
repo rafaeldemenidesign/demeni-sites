@@ -1195,7 +1195,9 @@ async function confirmPublish() {
 
     } catch (error) {
         console.error('Publish error:', error);
-        alert('Erro ao publicar. Tente novamente.');
+        // Mostrar mais detalhes do erro
+        const errorMsg = error?.message || error?.error?.message || JSON.stringify(error) || 'Erro desconhecido';
+        alert('Erro ao publicar: ' + errorMsg);
     } finally {
         confirmBtn.disabled = false;
         confirmBtn.innerHTML = '<i class="fas fa-rocket"></i> Publicar Agora';
