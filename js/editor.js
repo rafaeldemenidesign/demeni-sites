@@ -1387,7 +1387,7 @@ function generateFinalHTML() {
     if (state.style.bgType === 'gradient' && state.style.bgGradient) {
         phoneBgStyle = `background: ${state.style.bgGradient};`;
     } else if (state.style.bgImage) {
-        phoneBgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat;`;
+        phoneBgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat; background-attachment: fixed;`;
     }
 
     // Generate complete HTML for standalone page
@@ -1471,9 +1471,9 @@ function renderPreview() {
     if (state.style.bgType === 'gradient' && state.style.bgGradient) {
         bgStyle = `background: ${state.style.bgGradient};`;
     } else if (state.style.bgType === 'image' && state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat; background-attachment: fixed;`;
     } else if (state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat; background-attachment: fixed;`;
     }
 
     // Smart contrast: detect if background is light
@@ -2059,7 +2059,7 @@ function generateFinalHTML() {
 
     let bgStyle = `background: ${state.style.bgColor};`;
     if (state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${state.style.bgImage}'); background-size: cover; background-position: center;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${state.style.bgImage}'); background-size: cover; background-position: center; background-attachment: fixed;`;
     }
 
     let buttonClass = 'link-btn';
