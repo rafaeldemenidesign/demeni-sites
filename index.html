@@ -226,7 +226,14 @@
                 // É um site de cliente
                 loadClientSite(slug);
             } else {
-                // É a plataforma - redirecionar para dashboard
+                // É a plataforma - capturar referral code se existir
+                const urlParams = new URLSearchParams(window.location.search);
+                const refCode = urlParams.get('ref');
+                if (refCode) {
+                    localStorage.setItem('demeni_referral_code', refCode);
+                    console.log('Referral code saved:', refCode);
+                }
+                // Redirecionar para dashboard
                 window.location.href = '/app.html';
             }
         })();

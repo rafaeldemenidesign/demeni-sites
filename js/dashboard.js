@@ -52,6 +52,7 @@ function navigateTo(page) {
         projects: 'Meus Projetos',
         wallet: 'Minha Carteira',
         lessons: 'Aulas',
+        affiliates: 'Afiliados',
         help: 'Ajuda'
     };
     const pageTitle = document.getElementById('page-title');
@@ -230,6 +231,9 @@ function loadProjects() {
                     <button class="btn-action" onclick="editProject('${project.id}')">
                         <i class="fas fa-edit"></i> Editar
                     </button>
+                    <button class="btn-action duplicate" onclick="duplicateProject('${project.id}')" title="Duplicar projeto">
+                        <i class="fas fa-copy"></i>
+                    </button>
                     <button class="btn-action publish" onclick="publishProject('${project.id}')">
                         <i class="fas fa-rocket"></i> Publicar
                     </button>
@@ -286,6 +290,38 @@ window.selectModel = selectModel;
 
 function editProject(id) {
     UserData.setCurrentProject(id);
+    window.location.href = 'editor.html';
+}
+
+function duplicateProject(id) {
+    const original = UserData.getProject(id);
+    if (!original) {
+        showNotification('❌ Projeto não encontrado', 'error');
+        return;
+    }
+
+    // Create a new project with copied data
+    const newProject = UserData.createProject(original.name + ' (Cópia)');
+
+    // Copy all project data
+    newProject.data = JSON.parse(JSON.stringify(original.data));
+    newProject.modelType = original.modelType;
+    newProject.publishCost = original.publishCost;
+    newProject.thumbnail = original.thumbnail;
+
+    // Save the updated project
+    UserData.updateProject(newProject.id, {
+        data: newProject.data,
+        modelType: newProject.modelType,
+        publishCost: newProject.publishCost,
+        thumbnail: newProject.thumbnail,
+        name: newProject.name
+    });
+
+    showNotification('✅ Projeto duplicado com sucesso!');
+
+    // Set as current and open in editor
+    UserData.setCurrentProject(newProject.id);
     window.location.href = 'editor.html';
 }
 
@@ -821,3 +857,171 @@ function setupSupportForm() {
         }
     });
 }
+
+// ========== AFFILIATES PAGE ==========
+
+// Initialize affiliates page when navigated to
+function initAffiliatePage() {
+    setupAffiliateTabs();
+    loadAffiliateStats();
+    setupAffiliateConfigToggle();
+}
+
+// Setup tab switching
+function setupAffiliateTabs() {
+    const tabs = document.querySelectorAll('.affiliate-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+
+            // Update tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.affiliate-tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${targetTab}`)?.classList.add('active');
+        });
+    });
+}
+
+// Load affiliate stats
+async function loadAffiliateStats() {
+    if (!window.Affiliates) return;
+
+    try {
+        const stats = await Affiliates.getMyStats();
+        if (stats) {
+            document.getElementById('aff-total-referrals').textContent = stats.totalReferrals || 0;
+            document.getElementById('aff-total-earned').textContent = stats.totalEarned || 0;
+            document.getElementById('aff-pending').textContent = stats.pendingReferrals || 0;
+        }
+
+        const link = await Affiliates.getReferralLink();
+        if (link) {
+            document.getElementById('aff-referral-link').value = link;
+        }
+
+        // Load referrals list
+        const referrals = await Affiliates.getMyReferrals();
+        renderReferralsList(referrals);
+
+        // Load affiliate config
+        const config = await Affiliates.getMyAffiliateConfig();
+        if (config) {
+            document.getElementById('aff-program-enabled').checked = config.enabled;
+            document.getElementById('comm-d1').value = config.d1_commission || 20;
+            document.getElementById('comm-d2').value = config.d2_commission || 40;
+            document.getElementById('comm-prime').value = config.prime_commission || 80;
+            document.getElementById('comm-nfc').value = config.nfc_commission || 10;
+
+            if (config.enabled) {
+                document.getElementById('commission-config').style.display = 'block';
+            }
+        }
+    } catch (e) {
+        console.error('Error loading affiliate stats:', e);
+    }
+}
+
+// Render referrals list
+function renderReferralsList(referrals) {
+    const container = document.getElementById('referrals-list');
+    if (!container) return;
+
+    if (!referrals || referrals.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state small">
+                <i class="fas fa-user-plus"></i>
+                <p>Nenhuma indicação ainda. Compartilhe seu link!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = referrals.map(ref => {
+        const statusClass = ref.status;
+        const statusText = {
+            pending: 'Pendente',
+            converted: 'Convertido',
+            paid: 'Pago'
+        }[ref.status] || ref.status;
+
+        const name = ref.referred_user?.name || ref.referred_email || 'Usuário';
+        const initial = name.charAt(0).toUpperCase();
+        const date = new Date(ref.created_at).toLocaleDateString('pt-BR');
+
+        return `
+            <div class="referral-item">
+                <div class="referral-user">
+                    <div class="referral-avatar">${initial}</div>
+                    <div class="referral-info">
+                        <h5>${name}</h5>
+                        <p>${date}</p>
+                    </div>
+                </div>
+                <span class="referral-status ${statusClass}">${statusText}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// Setup config toggle
+function setupAffiliateConfigToggle() {
+    const toggle = document.getElementById('aff-program-enabled');
+    const configPanel = document.getElementById('commission-config');
+
+    if (toggle && configPanel) {
+        toggle.addEventListener('change', () => {
+            configPanel.style.display = toggle.checked ? 'block' : 'none';
+        });
+    }
+}
+
+// Copy affiliate link
+async function copyAffiliateLink() {
+    const input = document.getElementById('aff-referral-link');
+    const link = input?.value;
+
+    if (link && link !== 'Carregando...') {
+        try {
+            await navigator.clipboard.writeText(link);
+            showNotification('✅ Link copiado!');
+        } catch (e) {
+            // Fallback
+            input.select();
+            document.execCommand('copy');
+            showNotification('✅ Link copiado!');
+        }
+    }
+}
+
+// Save affiliate config
+async function saveAffiliateConfig() {
+    if (!window.Affiliates) return;
+
+    const config = {
+        enabled: document.getElementById('aff-program-enabled').checked,
+        d1_commission: parseFloat(document.getElementById('comm-d1').value) || 20,
+        d2_commission: parseFloat(document.getElementById('comm-d2').value) || 40,
+        prime_commission: parseFloat(document.getElementById('comm-prime').value) || 80,
+        nfc_commission: parseFloat(document.getElementById('comm-nfc').value) || 10
+    };
+
+    const result = await Affiliates.saveAffiliateConfig(config);
+    if (result) {
+        showNotification('✅ Configurações salvas!');
+    } else {
+        showNotification('❌ Erro ao salvar', 'error');
+    }
+}
+
+// Override navigateTo to handle affiliates page initialization
+const originalNavigateTo = navigateTo;
+navigateTo = function (page) {
+    originalNavigateTo(page);
+
+    if (page === 'affiliates') {
+        initAffiliatePage();
+    }
+};
