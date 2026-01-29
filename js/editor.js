@@ -141,13 +141,27 @@ function init() {
 // ========== BACK BUTTON ==========
 function setupBackButton() {
     const backBtn = document.getElementById('btn-back');
-    backBtn.addEventListener('click', () => {
+    backBtn.addEventListener('click', async () => {
         // Save before leaving
         saveToStorage();
+
+        // Capture thumbnail before leaving (don't wait for debounce)
+        if (currentProjectId && window.UserData && typeof html2canvas !== 'undefined') {
+            try {
+                const thumbnail = await capturePreviewThumbnail();
+                if (thumbnail) {
+                    UserData.updateProject(currentProjectId, { thumbnail });
+                }
+            } catch (e) {
+                console.warn('Could not capture thumbnail on exit:', e);
+            }
+        }
+
         // Go back to dashboard
         window.location.href = 'app.html';
     });
 }
+
 
 // ========== TAB NAVIGATION ==========
 function setupTabNavigation() {
@@ -387,12 +401,13 @@ function openCropModal(file) {
         cropImage.onload = () => {
             if (cropper) cropper.destroy();
 
-            const aspectRatio = cropTarget === 'avatar' ? 1 : 9 / 16; // 9:16 portrait for mobile background
+            // Avatar: quadrado 1:1, Background: livre (usuário escolhe)
+            const aspectRatio = cropTarget === 'avatar' ? 1 : NaN; // NaN = livre
             cropper = new Cropper(cropImage, {
                 aspectRatio: aspectRatio,
                 viewMode: 1,
                 dragMode: 'move',
-                autoCropArea: 1,
+                autoCropArea: 0.9, // Área inicial menor para ajuste
                 cropBoxResizable: true,
                 background: false
             });
@@ -419,7 +434,7 @@ function applyCrop() {
         imageSmoothingQuality: 'high'
     });
 
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const dataUrl = canvas.toDataURL('image/webp', 0.85);
 
     if (cropTarget === 'avatar') {
         state.profile.avatar = dataUrl;
@@ -604,7 +619,7 @@ function compressImage(file, maxKB, quality, callback) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            callback(canvas.toDataURL('image/jpeg', quality));
+            callback(canvas.toDataURL('image/webp', quality));
         };
     };
 }
@@ -1372,7 +1387,7 @@ function generateFinalHTML() {
     if (state.style.bgType === 'gradient' && state.style.bgGradient) {
         phoneBgStyle = `background: ${state.style.bgGradient};`;
     } else if (state.style.bgImage) {
-        phoneBgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center;`;
+        phoneBgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat;`;
     }
 
     // Generate complete HTML for standalone page
@@ -1456,9 +1471,9 @@ function renderPreview() {
     if (state.style.bgType === 'gradient' && state.style.bgGradient) {
         bgStyle = `background: ${state.style.bgGradient};`;
     } else if (state.style.bgType === 'image' && state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: fixed;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat;`;
     } else if (state.style.bgImage) {
-        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('${state.style.bgImage}'); background-size: cover; background-position: center top; background-attachment: fixed;`;
+        bgStyle = `background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${state.style.bgImage}'); background-size: cover; background-position: center center; background-repeat: no-repeat;`;
     }
 
     // Smart contrast: detect if background is light
@@ -2476,7 +2491,7 @@ async function capturePreviewThumbnail() {
             backgroundColor: '#0a0a1a'
         });
 
-        return canvas.toDataURL('image/jpeg', 0.85); // Higher quality
+        return canvas.toDataURL('image/webp', 0.85); // Higher quality, smaller size
     } catch (error) {
         console.warn('Could not capture thumbnail:', error);
         return null;
