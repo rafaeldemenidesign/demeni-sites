@@ -45,7 +45,7 @@ const UserData = (function () {
             ],
             style: {
                 accentColor: '#D4AF37',
-                bgColor: '#000000',
+                bgColor: '#FFFFFF',
                 bgImage: null,
                 buttonStyle: 'glass'
             }
@@ -130,7 +130,7 @@ const UserData = (function () {
     function createProject(name = 'Meu Site') {
         const projects = getProjects();
         const newProject = createDefaultProject(name);
-        projects.push(newProject);
+        projects.unshift(newProject); // Adiciona no INÍCIO (mais recente primeiro)
         save(KEYS.PROJECTS, projects);
         return newProject;
     }

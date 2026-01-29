@@ -136,7 +136,15 @@ function refreshCredits() {
 
 // ========== PROJECTS ==========
 function loadProjects() {
-    const projects = UserData.getProjects();
+    let projects = UserData.getProjects();
+
+    // Ordenar por data de atualização (mais recentes primeiro)
+    projects = projects.sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.createdAt || 0);
+        const dateB = new Date(b.updatedAt || b.createdAt || 0);
+        return dateB - dateA; // Decrescente (mais recente primeiro)
+    });
+
     const activeGrid = document.getElementById('active-projects-grid');
     const draftGrid = document.getElementById('draft-projects-grid');
     const activeSection = document.getElementById('active-section');
@@ -197,11 +205,12 @@ function loadProjects() {
 
     // Renderizar rascunhos (sem badge pois já está na seção de rascunhos)
     draftGrid.innerHTML = drafts.map(project => {
-        // Use thumbnail if available, otherwise fallback to avatar
+        // Use thumbnail first, then bgImage, then avatar
         const previewImage = project.thumbnail
+            || project.data?.style?.bgImage
             || project.data?.profile?.avatar
             || 'https://ui-avatars.com/api/?name=Site&background=666&color=fff';
-        const previewClass = project.thumbnail ? 'project-thumbnail' : '';
+        const previewClass = (project.thumbnail || project.data?.style?.bgImage) ? 'project-thumbnail' : '';
 
         // Use profile name if available, otherwise project name
         const displayName = project.data?.profile?.name || project.name || 'Novo Site';
