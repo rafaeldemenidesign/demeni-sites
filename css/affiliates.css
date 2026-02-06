@@ -1,0 +1,398 @@
+/* ===========================
+   DEMENI SITES - AFFILIATES CSS
+   Estilos para página de afiliados
+   =========================== */
+
+/* Affiliate Tabs */
+.affiliate-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.affiliate-tab {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.affiliate-tab:hover {
+    color: var(--text-primary);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.affiliate-tab.active {
+    color: var(--gold);
+    background: rgba(212, 175, 55, 0.15);
+}
+
+.affiliate-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gold);
+}
+
+/* Tab Content */
+.affiliate-tab-content {
+    display: none;
+}
+
+.affiliate-tab-content.active {
+    display: block;
+}
+
+/* Stats Card */
+.affiliate-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.affiliate-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 16px;
+    background: rgba(212, 175, 55, 0.05);
+    border-radius: 12px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* Share Box */
+.affiliate-share-box {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.affiliate-share-box h4 {
+    margin: 0 0 16px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.affiliate-share-box h4 i {
+    color: var(--gold);
+    margin-right: 8px;
+}
+
+.share-link-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.share-link-container input {
+    flex: 1;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.btn-copy {
+    padding: 12px 16px;
+    background: var(--gold);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-copy:hover {
+    background: #f4d03f;
+    transform: scale(1.05);
+}
+
+.share-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.share-info strong {
+    color: var(--gold);
+}
+
+/* Referrals List */
+.referrals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.referral-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.referral-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.referral-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 600;
+}
+
+.referral-info h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.referral-info p {
+    margin: 2px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.referral-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.referral-status.pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.referral-status.converted {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+}
+
+.referral-status.paid {
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--gold);
+}
+
+/* Config Box */
+.affiliate-config-box {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.config-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.config-header h4 i {
+    color: var(--gold);
+    margin-right: 8px;
+}
+
+.config-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 0 16px;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border-color);
+    border-radius: 28px;
+    transition: 0.3s;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.toggle-switch input:checked+.toggle-slider {
+    background: var(--gold);
+}
+
+.toggle-switch input:checked+.toggle-slider::before {
+    transform: translateX(22px);
+}
+
+/* Commission Config */
+.commission-config {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.commission-config h5 {
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.commission-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.commission-item label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.commission-item .input-group {
+    display: flex;
+    align-items: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.commission-item .input-group span {
+    padding: 10px 12px;
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold);
+    font-weight: 500;
+}
+
+.commission-item .input-group input {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    width: 60px;
+}
+
+/* Empty State Small */
+.empty-state.small {
+    padding: 40px 20px;
+    text-align: center;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px dashed var(--border-color);
+}
+
+.empty-state.small i {
+    font-size: 2rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.empty-state.small p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Affiliates List */
+.affiliates-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .affiliate-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .commission-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .affiliate-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .affiliate-tab {
+        white-space: nowrap;
+    }
+}

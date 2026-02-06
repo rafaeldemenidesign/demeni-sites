@@ -1,0 +1,14 @@
+<!-- D2 Categorias Section Template -->
+<section class="categorias" data-section="categorias">
+    <span class="section-label">{{categorias_label}}</span>
+    <div class="categorias-grid">
+        {{#each categorias}}
+        <a href="{{link}}" class="categoria-item">
+            <div class="categoria-icon">
+                <img src="{{icon}}" alt="{{nome}}">
+            </div>
+            <span>{{nome}}</span>
+        </a>
+        {{/each}}
+    </div>
+</section>

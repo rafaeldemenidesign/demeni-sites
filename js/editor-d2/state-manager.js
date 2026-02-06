@@ -1,0 +1,627 @@
+/* ============================================
+   EDITOR D2 - STATE MANAGER
+   Gerenciador de estado centralizado para o Editor D2
+   ============================================ */
+
+/**
+ * D2 Editor State Manager
+ * Gerencia todo o estado do editor e notifica listeners de mudanças
+ */
+class D2StateManager {
+    constructor() {
+        // Estado inicial do editor
+        this.state = this.getDefaultState();
+
+        // Listeners para mudanças de estado
+        this.listeners = new Set();
+
+        // Debounce para preview
+        this.previewDebounceTimer = null;
+        this.previewDebounceMs = 50;
+
+        console.log('[D2 State Manager] Initialized');
+    }
+
+    /**
+     * Retorna o estado padrão para um novo projeto D2
+     */
+    getDefaultState() {
+        return {
+            // Metadados do projeto
+            projectId: null,
+            projectName: 'Novo Projeto D2',
+            projectStatus: 'draft',
+
+            // Seção selecionada no editor
+            selectedSection: 'hero',
+
+            // Dados do perfil (usados no Hero e CTA)
+            profile: {
+                name: 'TechCell Store',
+                role: 'Loja de Celulares e Acessórios',
+                logo: null
+            },
+
+            // Ordem e visibilidade das seções
+            d2Sections: [
+                { id: 'hero', name: 'Hero', icon: 'fa-image', enabled: true, locked: true },
+                { id: 'categorias', name: 'Categorias', icon: 'fa-th-large', enabled: true, locked: false },
+                { id: 'produtos', name: 'Produtos', icon: 'fa-shopping-bag', enabled: true, locked: false },
+                { id: 'feedbacks', name: 'Feedbacks', icon: 'fa-comments', enabled: true, locked: false },
+                { id: 'cta', name: 'CTA', icon: 'fa-bullhorn', enabled: true, locked: false },
+                { id: 'footer', name: 'Footer', icon: 'fa-copyright', enabled: true, locked: true }
+            ],
+
+            // Produtos para a seção de produtos
+            d2Products: [
+                { id: 1, title: 'iPhone 15 Pro', price: 'R$ 7.499,00', image: 'http://localhost:8081/produto-1.png', link: '' },
+                { id: 2, title: 'Samsung Galaxy S24', price: 'R$ 5.999,00', image: 'http://localhost:8081/produto-2.png', link: '' },
+                { id: 3, title: 'Kit Acessórios', price: 'R$ 299,90', image: 'http://localhost:8081/produto-3.png', link: '' },
+                { id: 4, title: 'Smartwatch Pro', price: 'R$ 1.299,00', image: 'http://localhost:8081/produto-4.png', link: '' }
+            ],
+
+            // Feedbacks/depoimentos
+            d2Feedbacks: [
+                { id: 1, name: 'Carla Fernandes', text: 'Comprei meu iPhone aqui e foi a melhor decisão! Atendimento excelente e preço justo.', avatar: 'http://localhost:8081/avatar-1.png', link: '' },
+                { id: 2, name: 'Roberto Almeida', text: 'Troca de tela super rápida e profissional. Recomendo demais!', avatar: 'http://localhost:8081/avatar-2.png', link: '' }
+            ],
+
+            // === AJUSTES VISUAIS GRANULARES ===
+            d2Adjustments: {
+                // Header
+                header: {
+                    logo: { size: 28, color: 'white' },
+                    logoPosition: 'left', // 'left', 'center', 'right'
+                    height: 80,
+                    bgColor: '#2d2d2d',
+                    textColor: '#ffffff'
+                },
+
+                hero: {
+                    sectionHeight: 56, // vh - altura da seção (max ~16:9)
+                    contentPadding: 60, // px - padding do conteúdo (embaixo)
+                    textPosition: 'bottom', // 'top', 'center', 'bottom' - posição vertical do texto
+                    bgImage: 'hero-bg.webp', // Imagem pré-carregada do template
+                    bgColor: '#1a1a2e', // Cor de fundo quando sem imagem
+                    gradient: {
+                        enabled: true,
+                        intensity: 60, // 0-100 - intensidade do degradê
+                        position: 50, // 0-100 - onde começa o degradê (% do topo)
+                        colorStart: 'transparent',
+                        colorMid: 'rgba(10,10,10,0.6)',
+                        colorEnd: '#0a0a0a'
+                    },
+                    scrollIndicator: {
+                        enabled: true,
+                        color: '#ffffff'
+                    },
+                    title: {
+                        text: '',  // Se vazio, usa profile.name
+                        size: 56,
+                        spacing: 4,
+                        weight: 400,
+                        color: '#ffffff',
+                        font: 'Liebling',
+                        padding: { top: 0, bottom: 0, left: 0, right: 0 }
+                    },
+                    subtitle: {
+                        text: '',  // Se vazio, usa profile.role
+                        size: 22,
+                        spacing: 32,
+                        weight: 300,
+                        color: '#ffffff',
+                        font: 'Liebling',
+                        padding: { top: 0, bottom: 0, left: 0, right: 0 }
+                    },
+                    btn: {
+                        text: 'QUERO SABER MAIS',
+                        link: '#',
+                        textStyle: {
+                            size: 16,
+                            spacing: 1,
+                            weight: 600,
+                            color: '#ffffff',
+                            font: 'Liebling'
+                        },
+                        paddingInner: { vertical: 12, horizontal: 40 },
+                        paddingOuter: { top: 0, bottom: 0, left: 0, right: 0 },
+                        bgType: 'gradient',  // 'solid' ou 'gradient'
+                        bgColor: '#5167E7',
+                        bgPreset: 'blue', // 'blue', 'yellow', 'red', 'green', 'pink', 'purple', 'gray', 'black', 'offwhite', 'orange', 'brown'
+                        bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)',
+                        borderColor: 'transparent',
+                        borderRadius: 30
+                    }
+                },
+
+                // Categorias
+                categorias: {
+                    sectionSpacing: 40,
+                    bgColor: '#ffffff',
+                    icon: { size: 80, radius: 18 },
+                    label: { size: 12, weight: 500, color: '#222222' },
+                    items: [
+                        { id: 1, label: 'PRODUTOS', icon: 'Pen Tool.png', customIcon: null },
+                        { id: 2, label: 'SERVIÇOS', icon: 'Engrenagem.png', customIcon: null },
+                        { id: 3, label: 'EDUCAÇÃO', icon: 'Aulas.png', customIcon: null },
+                        { id: 4, label: 'SOBRE', icon: 'Sobre.png', customIcon: null }
+                    ]
+                },
+
+                // Produtos
+                produtos: {
+                    sectionSpacing: 30,
+                    bgColor: '#1a365d',
+                    sectionTitle: { text: 'Produtos Demeni', size: 36, color: '#ffffff' },
+                    gridGap: 16,
+                    card: {
+                        bgColor: '#ffffff',
+                        borderRadius: 20,
+                        shadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    },
+                    title: { size: 15, weight: 500, color: '#333333' },
+                    preco: { size: 16, weight: 800, color: '#333333' },
+                    btn: { size: 13, bgColor: '#25D366', color: '#ffffff', borderRadius: 20 }
+                },
+
+                // Feedbacks
+                feedbacks: {
+                    sectionSpacing: 30,
+                    bgColor: '#e8e8e8',
+                    sectionTitle: { text: 'O que estão dizendo?', size: 28, color: '#333333' },
+                    avatar: { size: 60, radius: 8 },
+                    name: { size: 16, weight: 500, color: '#1a365d' },
+                    text: { size: 13, color: '#666666' },
+                    card: { bgColor: '#f5f5f5', borderRadius: 12 }
+                },
+
+                // CTA Secundário
+                cta: {
+                    bgImage: null,  // Usa a mesma do Hero se null
+                    brightness: 0.5,
+                    height: 250,
+                    title: {
+                        text: '',  // Se vazio, usa profile.name
+                        size: 52,
+                        color: '#ffffff'
+                    },
+                    subtitle: {
+                        text: '',  // Se vazio, usa profile.role
+                        size: 22,
+                        color: '#ffffff',
+                        opacity: 0.8
+                    },
+                    btn: {
+                        text: 'QUERO SABER MAIS',
+                        link: '#',
+                        bgType: 'gradient',
+                        bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)',
+                        borderRadius: 30
+                    }
+                },
+
+                // Footer
+                footer: {
+                    sectionSpacing: 40,
+                    bgColor: '#1a365d',
+                    logo: { size: 28, opacity: 0.8 },
+                    title: { text: 'Invista no seu negócio!', size: 24, color: '#ffffff' },
+                    subtitle: { text: '', size: 14, opacity: 0.6 },
+                    info: {
+                        email: 'contato@exemplo.com',
+                        phone: '(00) 0000-0000',
+                        cnpj: ''
+                    },
+                    text: { size: 13, opacity: 0.8 },
+                    social: {
+                        size: 36,
+                        gap: 18,
+                        instagram: '',
+                        facebook: '',
+                        whatsapp: ''
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * Obtém o estado atual
+     */
+    getState() {
+        return this.state;
+    }
+
+    /**
+     * Obtém um valor específico do estado usando caminho de string
+     * Ex: get('d2Adjustments.hero.title.size') 
+     */
+    get(path, defaultValue = null) {
+        const keys = path.split('.');
+        let value = this.state;
+
+        for (const key of keys) {
+            if (value === null || value === undefined || typeof value !== 'object') {
+                return defaultValue;
+            }
+            value = value[key];
+        }
+
+        return value !== undefined ? value : defaultValue;
+    }
+
+    /**
+     * Define um valor no estado usando caminho de string
+     * Ex: set('d2Adjustments.hero.title.size', 48)
+     */
+    set(path, value) {
+        const keys = path.split('.');
+        const lastKey = keys.pop();
+        let obj = this.state;
+
+        // Navega até o objeto pai, criando objetos se necessário
+        for (const key of keys) {
+            if (obj[key] === undefined || obj[key] === null) {
+                obj[key] = {};
+            }
+            obj = obj[key];
+        }
+
+        // Define o valor
+        const oldValue = obj[lastKey];
+        obj[lastKey] = value;
+
+        // Notifica listeners se o valor mudou
+        if (oldValue !== value) {
+            this.notifyListeners(path, value, oldValue);
+            this.schedulePreviewUpdate();
+        }
+
+        return this;
+    }
+
+    /**
+     * Atualiza múltiplos valores de uma vez
+     * Ex: update({ 'd2Adjustments.hero.title.size': 48, 'd2Adjustments.hero.title.color': '#fff' })
+     */
+    update(updates) {
+        for (const [path, value] of Object.entries(updates)) {
+            this.set(path, value);
+        }
+        return this;
+    }
+
+    /**
+     * Atualiza um objeto inteiro fazendo merge
+     */
+    merge(path, partialValue) {
+        const currentValue = this.get(path, {});
+        const newValue = { ...currentValue, ...partialValue };
+        this.set(path, newValue);
+        return this;
+    }
+
+    /**
+     * Adiciona um listener para mudanças de estado
+     */
+    subscribe(callback) {
+        this.listeners.add(callback);
+        return () => this.listeners.delete(callback);
+    }
+
+    /**
+     * Notifica todos os listeners sobre uma mudança
+     */
+    notifyListeners(path, newValue, oldValue) {
+        for (const listener of this.listeners) {
+            try {
+                listener({ path, newValue, oldValue, state: this.state });
+            } catch (error) {
+                console.error('[D2 State Manager] Error in listener:', error);
+            }
+        }
+
+        // Auto-save após cada mudança (com debounce)
+        this.scheduleSave();
+    }
+
+    /**
+     * Agenda salvamento com debounce para evitar salvamentos excessivos
+     */
+    scheduleSave() {
+        if (this.saveDebounceTimer) {
+            clearTimeout(this.saveDebounceTimer);
+        }
+
+        this.saveDebounceTimer = setTimeout(() => {
+            this.saveToStorage();
+        }, 500); // Salva 500ms após a última mudança
+    }
+
+    /**
+     * Salva o estado atual no localStorage via UserData
+     */
+    saveToStorage() {
+        if (!window.UserData) {
+            console.warn('[D2 State Manager] UserData not available');
+            return;
+        }
+
+        const projectId = UserData.getCurrentProjectId();
+        if (!projectId) {
+            console.warn('[D2 State Manager] No current project to save');
+            return;
+        }
+
+        const stateData = this.exportState();
+        UserData.updateProject(projectId, { data: stateData });
+        console.log('[D2 State Manager] Auto-saved to storage');
+    }
+
+    /**
+     * Agenda atualização do preview com debounce
+     */
+    schedulePreviewUpdate() {
+        if (this.previewDebounceTimer) {
+            clearTimeout(this.previewDebounceTimer);
+        }
+
+        this.previewDebounceTimer = setTimeout(() => {
+            this.updatePreview();
+        }, this.previewDebounceMs);
+    }
+
+    /**
+     * Atualiza o preview do site
+     */
+    updatePreview() {
+        const frame = document.getElementById('preview-frame');
+        if (frame && typeof window.renderPreviewD2New === 'function') {
+            window.renderPreviewD2New(frame, this.state);
+        }
+    }
+
+    /**
+     * Reordena as seções
+     */
+    reorderSections(fromIndex, toIndex) {
+        const sections = [...this.state.d2Sections];
+        const [moved] = sections.splice(fromIndex, 1);
+        sections.splice(toIndex, 0, moved);
+
+        this.state.d2Sections = sections;
+        this.notifyListeners('d2Sections', sections, null);
+        this.schedulePreviewUpdate();
+    }
+
+    /**
+     * Seleciona uma seção para edição
+     */
+    selectSection(sectionId) {
+        const oldValue = this.state.selectedSection;
+        this.state.selectedSection = sectionId;
+        this.notifyListeners('selectedSection', sectionId, oldValue);
+    }
+
+    /**
+     * Adiciona uma nova seção
+     */
+    addSection(sectionType) {
+        // Definições de seções disponíveis
+        const sectionDefs = {
+            categorias: { id: 'categorias', name: 'Categorias', icon: 'fa-th-large' },
+            produtos: { id: 'produtos', name: 'Produtos', icon: 'fa-shopping-bag' },
+            feedbacks: { id: 'feedbacks', name: 'Feedbacks', icon: 'fa-comments' },
+            cta: { id: 'cta', name: 'CTA', icon: 'fa-bullhorn' }
+        };
+
+        const def = sectionDefs[sectionType];
+        if (!def) return null;
+
+        // Verifica se já existe uma seção desse tipo
+        const exists = this.state.d2Sections.some(s => s.id === def.id);
+        if (exists) {
+            console.warn(`[D2 State Manager] Seção ${sectionType} já existe`);
+            return null;
+        }
+
+        // Encontra o índice do Footer (sempre deve ser o último)
+        const footerIndex = this.state.d2Sections.findIndex(s => s.id === 'footer');
+        const insertIndex = footerIndex !== -1 ? footerIndex : this.state.d2Sections.length;
+
+        // Cria a nova seção
+        const newSection = {
+            id: def.id,
+            name: def.name,
+            icon: def.icon,
+            enabled: true,
+            locked: false
+        };
+
+        // Insere antes do Footer
+        this.state.d2Sections.splice(insertIndex, 0, newSection);
+        this.notifyListeners('d2Sections', this.state.d2Sections, null);
+        this.schedulePreviewUpdate();
+
+        console.log(`[D2 State Manager] Seção ${sectionType} adicionada`);
+        return newSection;
+    }
+
+    /**
+     * Remove uma seção
+     */
+    removeSection(sectionId) {
+        const section = this.state.d2Sections.find(s => s.id === sectionId);
+        if (!section || section.locked) {
+            console.warn(`[D2 State Manager] Não é possível remover seção ${sectionId}`);
+            return false;
+        }
+
+        this.state.d2Sections = this.state.d2Sections.filter(s => s.id !== sectionId);
+        this.notifyListeners('d2Sections', this.state.d2Sections, null);
+        this.schedulePreviewUpdate();
+
+        // Se a seção removida estava selecionada, seleciona o Hero
+        if (this.state.selectedSection === sectionId) {
+            this.selectSection('hero');
+        }
+
+        console.log(`[D2 State Manager] Seção ${sectionId} removida`);
+        return true;
+    }
+
+    /**
+     * Toggle visibilidade de uma seção
+     */
+    toggleSectionVisibility(sectionId) {
+        const index = this.state.d2Sections.findIndex(s => s.id === sectionId);
+        if (index === -1) return false;
+
+        const section = this.state.d2Sections[index];
+        if (section.locked) return false;
+
+        this.state.d2Sections[index].enabled = !section.enabled;
+        this.notifyListeners('d2Sections', this.state.d2Sections, null);
+        this.schedulePreviewUpdate();
+
+        return this.state.d2Sections[index].enabled;
+    }
+
+    /**
+     * Adiciona um novo produto
+     */
+    addProduct(product = {}) {
+        const id = Date.now();
+        const newProduct = {
+            id,
+            title: product.title || 'Novo Produto',
+            price: product.price || 'R$ 0,00',
+            image: product.image || null,
+            link: product.link || ''
+        };
+
+        this.state.d2Products.push(newProduct);
+        this.notifyListeners('d2Products', this.state.d2Products, null);
+        this.schedulePreviewUpdate();
+
+        return newProduct;
+    }
+
+    /**
+     * Remove um produto
+     */
+    removeProduct(productId) {
+        this.state.d2Products = this.state.d2Products.filter(p => p.id !== productId);
+        this.notifyListeners('d2Products', this.state.d2Products, null);
+        this.schedulePreviewUpdate();
+    }
+
+    /**
+     * Atualiza um produto
+     */
+    updateProduct(productId, updates) {
+        const index = this.state.d2Products.findIndex(p => p.id === productId);
+        if (index !== -1) {
+            this.state.d2Products[index] = { ...this.state.d2Products[index], ...updates };
+            this.notifyListeners('d2Products', this.state.d2Products, null);
+            this.schedulePreviewUpdate();
+        }
+    }
+
+    /**
+     * Adiciona um novo feedback
+     */
+    addFeedback(feedback = {}) {
+        const id = Date.now();
+        const newFeedback = {
+            id,
+            name: feedback.name || 'Novo Cliente',
+            text: feedback.text || 'Texto do depoimento...',
+            avatar: feedback.avatar || null,
+            link: feedback.link || ''
+        };
+
+        this.state.d2Feedbacks.push(newFeedback);
+        this.notifyListeners('d2Feedbacks', this.state.d2Feedbacks, null);
+        this.schedulePreviewUpdate();
+
+        return newFeedback;
+    }
+
+    /**
+     * Remove um feedback
+     */
+    removeFeedback(feedbackId) {
+        this.state.d2Feedbacks = this.state.d2Feedbacks.filter(f => f.id !== feedbackId);
+        this.notifyListeners('d2Feedbacks', this.state.d2Feedbacks, null);
+        this.schedulePreviewUpdate();
+    }
+
+    /**
+     * Atualiza um feedback
+     */
+    updateFeedback(feedbackId, updates) {
+        const index = this.state.d2Feedbacks.findIndex(f => f.id === feedbackId);
+        if (index !== -1) {
+            this.state.d2Feedbacks[index] = { ...this.state.d2Feedbacks[index], ...updates };
+            this.notifyListeners('d2Feedbacks', this.state.d2Feedbacks, null);
+            this.schedulePreviewUpdate();
+        }
+    }
+
+    /**
+     * Carrega estado de um projeto existente
+     */
+    loadState(savedState) {
+        // Merge com o estado padrão para garantir que todas as propriedades existam
+        this.state = this.deepMerge(this.getDefaultState(), savedState);
+        this.notifyListeners('*', this.state, null);
+        this.updatePreview();
+
+        console.log('[D2 State Manager] State loaded');
+    }
+
+    /**
+     * Exporta o estado atual para salvamento
+     */
+    exportState() {
+        return JSON.parse(JSON.stringify(this.state));
+    }
+
+    /**
+     * Reset para o estado padrão
+     */
+    reset() {
+        this.state = this.getDefaultState();
+        this.notifyListeners('*', this.state, null);
+        this.updatePreview();
+
+        console.log('[D2 State Manager] State reset');
+    }
+
+    /**
+     * Deep merge de dois objetos
+     */
+    deepMerge(target, source) {
+        const result = { ...target };
+
+        for (const key in source) {
+            if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                if (target[key] !== null && typeof target[key] === 'object' && !Array.isArray(target[key])) {
+                    result[key] = this.deepMerge(target[key], source[key]);
+                } else {
+                    result[key] = source[key];
+                }
+            } else {
+                result[key] = source[key];
+            }
+        }
+
+        return result;
+    }
+}
+
+// Exporta uma instância global
+window.d2State = new D2StateManager();
+
+console.log('[D2 State Manager] Module loaded');

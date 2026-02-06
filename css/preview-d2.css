@@ -1,0 +1,554 @@
+/* ========================================
+   LAYOUT D-2 - MOBILE FIRST (CORRIGIDO v2)
+   ======================================== */
+
+/* FONTE LIEBLING */
+@font-face {
+    font-family: 'Liebling';
+    src: url('Liebling.otf') format('opentype');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Liebling';
+    src: url('Liebling Light.otf') format('opentype');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: 'Liebling';
+    src: url('Liebling Medium.otf') format('opentype');
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Liebling';
+    src: url('Liebling Bold.otf') format('opentype');
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Liebling';
+    src: url('Liebling Black.otf') format('opentype');
+    font-weight: 900;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Liebling', sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 20px;
+    /* Respiro lateral */
+}
+
+/* ========================================
+   1. HEADER - Logo PNG
+   ======================================== */
+.header {
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #2d2d2d;
+    margin: 0 -20px;
+    padding: 0 24px;
+}
+
+.logo img {
+    max-height: 28px;
+    width: auto;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* ========================================
+   2. HERO - Degradê suave, botão arredondado
+   ======================================== */
+.hero {
+    aspect-ratio: 1;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 60px;
+    overflow: hidden;
+    margin: 0 -20px;
+    /* Full width */
+}
+
+.hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.hero-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to top, #0a0a0a 0%, rgba(10, 10, 10, 0.6) 50%, transparent 100%);
+    z-index: 2;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 56px;
+    font-weight: 400;
+    margin-bottom: 4px;
+    /* Reduzido */
+}
+
+.hero-content .subtitle {
+    font-size: 22px;
+    font-weight: 300;
+    margin-bottom: 32px;
+    opacity: 0.9;
+}
+
+.cta-btn {
+    display: inline-block;
+    padding: 12px 40px;
+    background: linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%);
+    border: none;
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(81, 103, 231, 0.4);
+}
+
+.cta-btn:hover {
+    box-shadow: 0 6px 25px rgba(81, 103, 231, 0.6);
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   3. CATEGORIAS - Menores, menos espaço
+   ======================================== */
+.categorias {
+    padding: 40px 0;
+    /* Menos padding */
+    text-align: center;
+    background: #ffffff;
+    margin: 0 -20px;
+    color: #333;
+}
+
+.section-label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 3px;
+    opacity: 0.5;
+    margin-bottom: 16px;
+    color: #666;
+}
+
+.categorias-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    /* Reduzido */
+    padding: 0 20px;
+}
+
+.categoria-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.3s ease;
+}
+
+.categoria-item:hover {
+    transform: translateY(-4px);
+}
+
+.categoria-icon {
+    width: 80px;
+    height: 80px;
+    aspect-ratio: 1;
+    border-radius: 18px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.categoria-icon img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.categoria-item span {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    opacity: 1;
+    color: #222;
+    font-weight: 500;
+}
+
+/* ========================================
+   4. PRODUTOS - Cards menores
+   ======================================== */
+.produtos {
+    padding: 30px 0;
+    text-align: center;
+    background: #1a365d;
+    margin: 0 -20px;
+}
+
+.produtos .section-label {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.produtos h2 {
+    font-family: 'Liebling', sans-serif;
+    font-size: 36px;
+    font-weight: 400;
+    margin-bottom: 24px;
+    color: #fff;
+}
+
+.produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 0 32px;
+}
+
+.produto-card {
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 4px;
+    font-family: 'Liebling', sans-serif;
+}
+
+.produto-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.produto-img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.produto-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.produto-card h3 {
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px 6px 6px;
+    line-height: 1.1;
+    text-align: left;
+    color: #333;
+}
+
+.produto-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px 10px;
+}
+
+.preco {
+    `r`n font-size: 16px;
+    font-weight: 800;
+    color: #333;
+}
+
+.produto-btn {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #25D366;
+    color: #fff;
+    font-size: 13px;
+    `r`n font-weight: 500;
+    border-radius: 20px;
+    text-align: center;
+    text-transform: lowercase;
+}
+
+/* ========================================
+   5. FEEDBACKS - Avatar quadrado, traço
+   ======================================== */
+.feedbacks {
+    padding: 30px 0;
+    text-align: center;
+    background: #e8e8e8;
+    margin: 0 -20px;
+    color: #333;
+}
+
+.feedbacks .section-label {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.feedbacks h2 {
+    font-family: 'Liebling', sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 24px;
+    color: #333;
+}
+
+.feedbacks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 32px;
+}
+
+.feedback-card {
+    display: flex;
+    gap: 14px;
+    background: #f5f5f5;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.feedback-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.feedback-content {
+    flex: 1;
+}
+
+.feedback-name {
+    color: #1a365d;
+    font-weight: 500;
+    font-size: 16px;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.feedback-content p {
+    font-size: 13px;
+    line-height: 1.3;
+    color: #666;
+}
+
+/* ========================================
+   6. CTA SECUNDÁRIO - Mesma imagem do Hero
+   ======================================== */
+.cta-secundario {
+    height: 250px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 0 -20px;
+    overflow: hidden;
+}
+
+.cta-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.cta-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.5);
+}
+
+.cta-content {
+    position: relative;
+    z-index: 2;
+    padding: 30px 20px;
+}
+
+.cta-content h2 {
+    font-size: 52px;
+    font-weight: 400;
+    margin-bottom: 4px;
+}
+
+.cta-content p {
+    font-size: 22px;
+    opacity: 0.8;
+    margin-bottom: 20px;
+}
+
+/* ========================================
+   7. FOOTER - Logo e WhatsApp no footer
+   ======================================== */
+.footer {
+    padding: 40px 0;
+    background: #1a365d;
+    text-align: left;
+    margin: 0 -20px;
+}
+
+.footer-inner {
+    padding: 0 32px;
+}
+
+.footer h3 {
+    font-size: 24px;
+    font-weight: 400;
+    font-family: 'Liebling', sans-serif;
+    margin-bottom: 6px;
+}
+
+.footer-subtitle {
+    font-size: 14px;
+    opacity: 0.6;
+    margin-bottom: 20px;
+}
+
+.footer-info {
+    font-size: 13px;
+    line-height: 1.8;
+    opacity: 0.8;
+    margin-bottom: 20px;
+}
+
+.footer-info strong {
+    opacity: 0.6;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-logo img {
+    height: 28px;
+    width: auto;
+    opacity: 0.8;
+}
+
+.footer-social {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.social-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.social-btn:hover {
+    transform: scale(1.05);
+}
+
+.social-btn.instagram {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.social-btn.facebook {
+    background: #1877F2;
+}
+
+.social-btn.whatsapp-chat {
+    width: auto;
+    padding: 0 14px;
+    gap: 6px;
+    background: #25D366;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.social-btn.whatsapp-chat span {
+    color: #fff;
+}
+
+
+
+
+
+.social-btn.facebook svg {
+    transform: translateY(4px);
+}
+
+.social-btn.instagram svg {
+    width: 26px;
+    height: 26px;
+}
+
+
+
+.social-btn.facebook {
+    overflow: hidden;
+}
+
+
+
+

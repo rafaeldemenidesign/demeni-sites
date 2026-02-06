@@ -1,0 +1,58 @@
+<!-- BACKUP: Código de Páginas removido em 2026-02-02 -->
+
+<!-- Tab Button -->
+<button class="tab-btn d2-only" data-tab="pages" style="display: none;">
+    <i class="fas fa-file-alt"></i> Páginas
+</button>
+
+<!-- Tab Content (1087-1246) -->
+<!-- TAB: PÁGINAS (D-2 Only) -->
+<div class="tab-content" id="tab-pages" style="display: none;">
+    <!-- SUB-TABS DE PÁGINAS (dinâmicas) -->
+    <div class="page-sub-tabs" id="page-sub-tabs">
+        <button class="page-sub-btn active" data-page="manager">
+            <i class="fas fa-file-alt"></i> Gerenciar
+        </button>
+    </div>
+
+    <!-- PAINEL: Gerenciador de Páginas -->
+    <div class="page-panel active" id="page-panel-manager">
+        <div class="control-section">
+            <h3><i class="fas fa-file-alt"></i> Páginas Internas</h3>
+            <p class="section-desc">Adicione até 2 páginas extras ao seu site</p>
+
+            <div class="pages-counter">
+                <span id="pages-count">0</span>/2 páginas utilizadas
+            </div>
+
+            <button class="btn-add-page" id="btn-add-page">
+                <i class="fas fa-plus-circle"></i> Nova Página
+            </button>
+
+            <div class="pages-list" id="pages-list">
+                <div class="empty-state-small">
+                    <i class="fas fa-file"></i>
+                    <p>Nenhuma página adicional ainda</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAINEL: Galeria Editor -->
+    <div class="page-panel" id="page-panel-gallery">
+        <div class="control-section">
+            <h3><i class="fas fa-images"></i> Página Galeria</h3>
+            <!-- ... resto do conteúdo ... -->
+        </div>
+    </div>
+
+    <!-- PAINEL: Sobre Editor -->
+    <!-- PAINEL: Serviços Editor -->  
+    <!-- PAINEL: FAQ Editor -->
+    <!-- Modal: Selecionar Tipo de Página -->
+</div>
+
+<!-- JS Array (editor.js linha 435) -->
+// const d2Contents = ['tab-header', 'tab-sections', 'tab-pages'];
+// MUDOU PARA:
+// const d2Contents = ['tab-header', 'tab-sections'];

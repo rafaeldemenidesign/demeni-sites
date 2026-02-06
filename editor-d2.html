@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor D2 | Demeni Sites</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Editor D2 CSS -->
+    <link rel="stylesheet" href="css/editor-d2.css">
+</head>
+
+<body>
+    <div id="app" class="editor-d2-app">
+        <!-- HEADER -->
+        <header class="editor-d2-header">
+            <div class="header-left">
+                <button class="btn-back" id="btn-back" title="Voltar">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="logo">Demeni <span>Sites</span></h1>
+            </div>
+            <div class="header-center">
+                <input type="text" class="project-name-input" id="project-name" value="Novo Projeto D2"
+                    placeholder="Nome do projeto">
+            </div>
+            <div class="header-right">
+                <button class="btn-secondary" id="btn-preview">
+                    <i class="fas fa-eye"></i> Preview
+                </button>
+                <button class="btn-primary" id="btn-publish">
+                    <i class="fas fa-rocket"></i> Publicar
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT: 4 COLUNAS -->
+        <main class="editor-d2-main">
+            <!-- COLUNA 1: MENU PRINCIPAL -->
+            <aside class="editor-d2-menu">
+                <div class="user-card">
+                    <img src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=80" alt="Avatar"
+                        class="user-avatar" id="user-avatar">
+                    <div class="user-name" id="user-name">Usuário</div>
+                    <div class="user-level">
+                        <span class="level-tag">Nível 1</span>
+                        <span>Bronze</span>
+                    </div>
+                </div>
+
+                <nav class="menu-nav">
+                    <a href="app.html" class="menu-link">
+                        <i class="fas fa-folder"></i>
+                        <span>Meus Projetos</span>
+                    </a>
+                    <a href="#" class="menu-link active">
+                        <i class="fas fa-edit"></i>
+                        <span>Editor D2</span>
+                    </a>
+                    <a href="app.html#wallet" class="menu-link">
+                        <i class="fas fa-wallet"></i>
+                        <span>Minha Carteira</span>
+                        <span class="menu-badge" id="credits-badge">0</span>
+                    </a>
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Aulas</span>
+                    </a>
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Ajuda</span>
+                    </a>
+                </nav>
+
+                <div class="menu-footer">
+                    <a href="#" class="menu-link menu-logout" id="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </aside>
+
+            <!-- COLUNA 2: LISTA DE SEÇÕES -->
+            <aside class="editor-d2-sections">
+                <div class="sections-header">
+                    <h3 class="sections-title">Seções do Site</h3>
+                    <button class="btn-add-section" id="btn-add-section">
+                        <i class="fas fa-plus"></i>
+                        <span>Adicionar Seção</span>
+                    </button>
+                </div>
+                <div class="sections-list" id="sections-list">
+                    <!-- Seções renderizadas via JS -->
+                </div>
+            </aside>
+
+            <!-- COLUNA 3: PAINEL DE EDIÇÃO -->
+            <section class="editor-d2-panel" id="edit-panel">
+                <!-- Conteúdo renderizado via JS -->
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fas fa-image"></i> Hero</h2>
+                </div>
+                <div class="panel-content">
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <h3>Carregando...</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COLUNA 4: PREVIEW -->
+            <aside class="editor-d2-preview">
+                <div class="preview-header">
+                    <span class="preview-title">Preview</span>
+                    <div class="preview-device-toggle">
+                        <button class="btn-device active" data-device="mobile" title="Mobile">
+                            <i class="fas fa-mobile-alt"></i>
+                        </button>
+                        <button class="btn-device" data-device="tablet" title="Tablet">
+                            <i class="fas fa-tablet-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="preview-container">
+                    <div class="preview-frame-wrapper">
+                        <div id="preview-frame">
+                            <!-- Preview renderizado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
+    <!-- Preview D2 (renderização do site) -->
+    <script src="js/preview-d2.js"></script>
+
+    <!-- Editor D2 Modules -->
+    <script src="js/editor-d2/state-manager.js"></script>
+    <script src="js/editor-d2/controls.js"></script>
+    <script src="js/editor-d2/section-list.js"></script>
+
+    <!-- Section Editors -->
+    <script src="js/editor-d2/editors/hero-editor.js"></script>
+    <script src="js/editor-d2/editors/categorias-editor.js"></script>
+    <script src="js/editor-d2/editors/produtos-editor.js"></script>
+    <script src="js/editor-d2/editors/feedbacks-editor.js"></script>
+    <script src="js/editor-d2/editors/cta-editor.js"></script>
+    <script src="js/editor-d2/editors/footer-editor.js"></script>
+
+    <!-- Edit Panel (loads after editors) -->
+    <script src="js/editor-d2/edit-panel.js"></script>
+
+    <!-- Modals -->
+    <script src="js/editor-d2/add-section-modal.js"></script>
+
+    <!-- Editor D2 Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[Editor D2] Initializing...');
+
+            // Carrega nome do projeto do localStorage se existir
+            const projectId = new URLSearchParams(window.location.search).get('id');
+            if (projectId) {
+                const projects = JSON.parse(localStorage.getItem('demeni_projects') || '[]');
+                const existingProject = projects.find(p => p.id === projectId);
+                if (existingProject && existingProject.name) {
+                    document.getElementById('project-name').value = existingProject.name;
+                    window.d2State.set('projectName', existingProject.name);
+                }
+            }
+
+            // Inicializa os componentes
+            const sectionsList = document.getElementById('sections-list');
+            const editPanel = document.getElementById('edit-panel');
+
+            // Inicializa a lista de seções
+            const sectionList = new D2SectionList(sectionsList);
+
+            // Inicializa o painel de edição
+            const panel = new D2EditPanel(editPanel);
+
+            // Renderiza o preview inicial
+            const previewFrame = document.getElementById('preview-frame');
+            if (window.renderPreviewD2New) {
+                window.renderPreviewD2New(previewFrame, window.d2State.getState());
+            }
+
+            // === EVENT LISTENERS ===
+
+            // Botão Voltar
+            document.getElementById('btn-back').addEventListener('click', () => {
+                if (confirm('Deseja sair do editor? Alterações não salvas serão perdidas.')) {
+                    window.location.href = 'app.html';
+                }
+            });
+
+            // Nome do projeto - Enhanced
+            const projectNameInput = document.getElementById('project-name');
+            let originalName = projectNameInput.value;
+
+            // Enter confirma e remove foco
+            projectNameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    projectNameInput.blur();
+                }
+            });
+
+            // Input atualiza estado
+            projectNameInput.addEventListener('input', (e) => {
+                window.d2State.set('projectName', e.target.value);
+            });
+
+            // Blur confirma e valida
+            projectNameInput.addEventListener('blur', (e) => {
+                let value = e.target.value.trim();
+
+                // Não pode ficar em branco - mínimo 1 caractere
+                if (value.length === 0) {
+                    value = '.';
+                    e.target.value = value;
+                }
+
+                window.d2State.set('projectName', value);
+                originalName = value;
+
+                // Atualiza no localStorage para refletir em "Meus Projetos"
+                const projectId = new URLSearchParams(window.location.search).get('id');
+                if (projectId) {
+                    const projects = JSON.parse(localStorage.getItem('demeni_projects') || '[]');
+                    const projectIndex = projects.findIndex(p => p.id === projectId);
+                    if (projectIndex !== -1) {
+                        projects[projectIndex].name = value;
+                        localStorage.setItem('demeni_projects', JSON.stringify(projects));
+                    }
+                }
+            });
+
+            // Toggle de dispositivo no preview
+            document.querySelectorAll('.btn-device').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.btn-device').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const wrapper = document.querySelector('.preview-frame-wrapper');
+                    const device = btn.dataset.device;
+
+                    if (device === 'tablet') {
+                        wrapper.style.maxWidth = '768px';
+                    } else {
+                        wrapper.style.maxWidth = '375px';
+                    }
+                });
+            });
+
+            // Botão Preview (abre em nova aba)
+            document.getElementById('btn-preview').addEventListener('click', () => {
+                // TODO: Implementar preview em nova aba
+                alert('Preview em nova aba - Em desenvolvimento');
+            });
+
+            // Botão Publicar
+            document.getElementById('btn-publish').addEventListener('click', () => {
+                // TODO: Implementar publicação
+                alert('Publicação - Em desenvolvimento');
+            });
+
+            // Botão Adicionar Seção - Abre o modal
+            const addSectionModal = new D2AddSectionModal();
+            document.getElementById('btn-add-section').addEventListener('click', () => {
+                addSectionModal.show();
+            });
+
+            // Logout
+            document.getElementById('btn-logout').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('Deseja sair?')) {
+                    // TODO: Implementar logout
+                    window.location.href = 'index.html';
+                }
+            });
+
+            console.log('[Editor D2] Initialized successfully');
+        });
+    </script>
+</body>
+
+</html>

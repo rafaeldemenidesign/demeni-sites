@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Demeni Sites</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-shield-alt"></i> Demeni <span>Admin</span></h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-page="dashboard">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link" data-page="franchisees">
+                    <i class="fas fa-users"></i> Franqueados
+                </a>
+                <a href="#" class="nav-link" data-page="payments">
+                    <i class="fas fa-credit-card"></i> Pagamentos
+                </a>
+                <a href="#" class="nav-link" data-page="sites">
+                    <i class="fas fa-globe"></i> Sites
+                </a>
+                <a href="#" class="nav-link" data-page="affiliates">
+                    <i class="fas fa-handshake"></i> Afiliados
+                </a>
+                <a href="#" class="nav-link" data-page="analytics">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a href="#" class="nav-link" data-page="support">
+                    <i class="fas fa-headset"></i> Suporte
+                </a>
+                <a href="#" class="nav-link" data-page="announcements">
+                    <i class="fas fa-bullhorn"></i> Comunicados
+                </a>
+                <a href="#" class="nav-link" data-page="webhooks">
+                    <i class="fas fa-plug"></i> Webhooks
+                </a>
+                <a href="#" class="nav-link" data-page="settings">
+                    <i class="fas fa-cog"></i> Configurações
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="admin-user">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=D4AF37&color=000" alt="Admin">
+                    <span id="admin-email">admin@demeni.com</span>
+                </div>
+                <button class="btn-logout" onclick="doLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Demeni Admin</h1>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Login Required -->
+            <div id="login-required" class="login-required" style="display: none;">
+                <i class="fas fa-lock"></i>
+                <h2>Acesso Restrito</h2>
+                <p>Você precisa estar logado como administrador.</p>
+                <a href="app.html" class="btn-primary"><i class="fas fa-arrow-left"></i> Voltar ao App</a>
+            </div>
+
+            <!-- Dashboard Page -->
+            <section id="page-dashboard" class="page active">
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                    <span class="date-badge" id="current-date"></span>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon users"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-users">0</div>
+                            <div class="stat-label">Franqueados</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon revenue"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-revenue">R$ 0</div>
+                            <div class="stat-label">Receita Total</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon sites"><i class="fas fa-globe"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-sites">0</div>
+                            <div class="stat-label">Sites Publicados</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon credits"><i class="fas fa-coins"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-credits">0</div>
+                            <div class="stat-label">Créditos Ativos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-area"></i> Receita (Últimos 30 dias)</h3>
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3><i class="fas fa-user-plus"></i> Novos Usuários</h3>
+                        <canvas id="users-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-card">
+                    <h3><i class="fas fa-clock"></i> Atividade Recente</h3>
+                    <div class="activity-list" id="activity-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Franchisees Page -->
+            <section id="page-franchisees" class="page">
+                <div class="page-header">
+                    <h2>Franqueados</h2>
+                    <button class="btn-primary" onclick="openCreateModal()">
+                        <i class="fas fa-plus"></i> Novo Franqueado
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-bar">
+                    <input type="text" id="search-users" placeholder="Buscar por nome ou email..."
+                        onkeyup="filterUsers()">
+                    <select id="filter-status" onchange="filterUsers()">
+                        <option value="">Todos</option>
+                        <option value="active">Ativos</option>
+                        <option value="inactive">Inativos</option>
+                    </select>
+                </div>
+
+                <!-- Users Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Créditos</th>
+                                <th>Sites</th>
+                                <th>Status</th>
+                                <th>Criado</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="franchisees-table">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Payments Page -->
+            <section id="page-payments" class="page">
+                <div class="page-header">
+                    <h2>Pagamentos</h2>
+                    <div class="header-actions">
+                        <select id="payments-period" onchange="loadPayments()">
+                            <option value="7">Últimos 7 dias</option>
+                            <option value="30" selected>Últimos 30 dias</option>
+                            <option value="90">Últimos 90 dias</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Payment Stats -->
+                <div class="payment-stats">
+                    <div class="payment-stat">
+                        <span class="label">Total do Período</span>
+                        <span class="value" id="payments-total">R$ 0,00</span>
+                    </div>
+                    <div class="payment-stat">
+                        <span class="label">Quantidade</span>
+                        <span class="value" id="payments-count">0</span>
+                    </div>
+                    <div class="payment-stat">
+                        <span class="label">Ticket Médio</span>
+                        <span class="value" id="payments-avg">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Payments Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Pacote</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>ID MP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sites Page -->
+            <section id="page-sites" class="page">
+                <div class="page-header">
+                    <h2>Sites Publicados</h2>
+                </div>
+
+                <!-- Sites Grid -->
+                <div class="sites-grid" id="sites-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Affiliates Page -->
+            <section id="page-affiliates" class="page">
+                <div class="page-header">
+                    <h2>Sistema de Afiliados</h2>
+                </div>
+
+                <!-- Affiliate Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon users"><i class="fas fa-user-friends"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-affiliates">0</div>
+                            <div class="stat-label">Afiliados Ativos</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon revenue"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-referrals">0</div>
+                            <div class="stat-label">Indicações</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon credits"><i class="fas fa-percentage"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-commission">10%</div>
+                            <div class="stat-label">Comissão</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commission Settings -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-sliders-h"></i> Configuração de Comissão</h3>
+                    <div class="settings-row">
+                        <label>Porcentagem de comissão</label>
+                        <input type="number" id="affiliate-commission" value="10" min="0" max="50">%
+                    </div>
+                    <div class="settings-row">
+                        <label>Créditos bônus por indicação</label>
+                        <input type="number" id="affiliate-bonus" value="20" min="0">
+                    </div>
+                    <button class="btn-primary" onclick="saveAffiliateSettings()">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+
+                <!-- Affiliates Table -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-list"></i> Top Afiliados</h3>
+                    <div class="table-container" style="border: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Afiliado</th>
+                                    <th>Link</th>
+                                    <th>Indicações</th>
+                                    <th>Comissão Gerada</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="affiliates-table">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Page -->
+            <section id="page-analytics" class="page">
+                <div class="page-header">
+                    <h2>Analytics Avançado</h2>
+                    <div class="header-actions">
+                        <select id="analytics-period" onchange="loadAnalytics()">
+                            <option value="7">7 dias</option>
+                            <option value="30" selected>30 dias</option>
+                            <option value="90">90 dias</option>
+                        </select>
+                        <button class="btn-secondary" onclick="exportReport('all')">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analytics Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3><i class="fas fa-funnel-dollar"></i> Funil de Conversão</h3>
+                        <canvas id="funnel-chart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-pie"></i> Receita por Pacote</h3>
+                        <canvas id="package-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="stats-grid">
+                    <div class="settings-card">
+                        <h3><i class="fas fa-trophy"></i> Top 5 Franqueados</h3>
+                        <div id="top-franchisees">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <h3><i class="fas fa-user-slash"></i> Franqueados Inativos (30+ dias)</h3>
+                        <div id="inactive-franchisees">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-chart-line"></i> Métricas Chave</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">MRR (Receita Mensal)</span>
+                            <span class="metric-value" id="metric-mrr">R$ 0</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">LTV Médio</span>
+                            <span class="metric-value" id="metric-ltv">R$ 0</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Churn Rate</span>
+                            <span class="metric-value" id="metric-churn">0%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Taxa Conversão</span>
+                            <span class="metric-value" id="metric-conversion">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Webhooks Page -->
+            <section id="page-webhooks" class="page">
+                <div class="page-header">
+                    <h2>Webhooks & Logs</h2>
+                    <button class="btn-secondary" onclick="refreshWebhooks()">
+                        <i class="fas fa-sync"></i> Atualizar
+                    </button>
+                </div>
+
+                <!-- Webhook Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon sites"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="webhook-success">0</div>
+                            <div class="stat-label">Sucesso</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon revenue"><i class="fas fa-exclamation-circle"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="webhook-pending">0</div>
+                            <div class="stat-label">Pendentes</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon users"><i class="fas fa-times-circle"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="webhook-failed">0</div>
+                            <div class="stat-label">Falhas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Webhook Logs Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>ID Pagamento</th>
+                                <th>Usuário</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="webhooks-table">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Support Page -->
+            <section id="page-support" class="page">
+                <div class="page-header">
+                    <h2>Suporte</h2>
+                    <div class="header-actions">
+                        <span class="badge-counter" id="pending-tickets">0 pendentes</span>
+                    </div>
+                </div>
+
+                <!-- Support Stats -->
+                <div class="support-stats">
+                    <div class="support-stat pending">
+                        <i class="fas fa-clock"></i>
+                        <span class="count" id="stat-pending">0</span>
+                        <span class="label">Pendentes</span>
+                    </div>
+                    <div class="support-stat progress">
+                        <i class="fas fa-sync"></i>
+                        <span class="count" id="stat-progress">0</span>
+                        <span class="label">Em Andamento</span>
+                    </div>
+                    <div class="support-stat resolved">
+                        <i class="fas fa-check"></i>
+                        <span class="count" id="stat-resolved">0</span>
+                        <span class="label">Resolvidos</span>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-bar">
+                    <select id="filter-ticket-status" onchange="filterTickets()">
+                        <option value="">Todos</option>
+                        <option value="pending">Pendentes</option>
+                        <option value="in_progress">Em Andamento</option>
+                        <option value="resolved">Resolvidos</option>
+                    </select>
+                </div>
+
+                <!-- Support Tickets -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Categoria</th>
+                                <th>Assunto</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="support-table">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Announcements Page -->
+            <section id="page-announcements" class="page">
+                <div class="page-header">
+                    <h2>Comunicados</h2>
+                </div>
+
+                <!-- New Announcement Form -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-bullhorn"></i> Novo Comunicado</h3>
+                    <form id="announcement-form" onsubmit="sendAnnouncement(event)">
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" id="ann-title" placeholder="Título do comunicado" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mensagem</label>
+                            <textarea id="ann-message" rows="4" placeholder="Escreva sua mensagem..."
+                                required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Enviar para</label>
+                            <select id="ann-target">
+                                <option value="all">Todos os usuários</option>
+                                <option value="bronze">Bronze</option>
+                                <option value="silver">Prata</option>
+                                <option value="gold">Ouro</option>
+                                <option value="turmalina">Turmalina</option>
+                                <option value="fire">Fire</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Enviar Comunicado
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Announcement History -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-history"></i> Histórico de Comunicados</h3>
+                    <div id="announcements-history">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Page -->
+            <section id="page-settings" class="page">
+                <div class="page-header">
+                    <h2>Configurações</h2>
+                </div>
+
+                <!-- Package Settings -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-box"></i> Pacotes de Créditos</h3>
+                    <p class="settings-desc">Configure os valores e créditos de cada pacote. 1 crédito = R$ 1</p>
+                    <div id="packages-settings">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="btn-primary" onclick="savePackageSettings()">
+                        <i class="fas fa-save"></i> Salvar Alterações
+                    </button>
+                </div>
+
+                <!-- System Settings -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-cog"></i> Sistema</h3>
+                    <div class="settings-row">
+                        <label>Custo por site (créditos)</label>
+                        <input type="number" id="setting-site-cost" value="40" min="1">
+                    </div>
+                    <div class="settings-row">
+                        <label>Créditos iniciais novos usuários</label>
+                        <input type="number" id="setting-initial-credits" value="40" min="0">
+                    </div>
+                    <div class="settings-row toggle">
+                        <label>Modo Manutenção</label>
+                        <label class="switch">
+                            <input type="checkbox" id="setting-maintenance">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <button class="btn-primary" onclick="saveSystemSettings()">
+                        <i class="fas fa-save"></i> Salvar Sistema
+                    </button>
+                </div>
+
+                <!-- Activity Logs -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-list-alt"></i> Log de Atividades</h3>
+                    <div class="activity-log" id="admin-logs">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: Create Franchisee -->
+    <div class="modal" id="modal-create">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Novo Franqueado</h2>
+                <button class="modal-close" onclick="closeCreateModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="create-form" onsubmit="createFranchisee(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" id="new-name" placeholder="Nome completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="new-email" placeholder="email@exemplo.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="new-password" placeholder="Mínimo 6 caracteres" required
+                            minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Créditos Iniciais</label>
+                        <input type="number" id="new-credits" value="40" min="0">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary btn-full">
+                    <i class="fas fa-plus"></i> Criar Franqueado
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Credits -->
+    <div class="modal" id="modal-credits">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2><i class="fas fa-coins"></i> Editar Créditos</h2>
+                <button class="modal-close" onclick="closeCreditsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="credits-user"></p>
+                <div class="form-group">
+                    <label>Novo Saldo</label>
+                    <input type="number" id="credits-value" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Motivo (opcional)</label>
+                    <input type="text" id="credits-reason" placeholder="Ex: Bônus, correção">
+                </div>
+                <button class="btn-primary btn-full" onclick="saveCredits()">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Reply Ticket -->
+    <div class="modal" id="modal-ticket">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-reply"></i> Responder Ticket</h2>
+                <button class="modal-close" onclick="closeTicketModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-info" id="ticket-info">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="ticket-history" id="ticket-history">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="form-group">
+                    <label>Sua Resposta</label>
+                    <textarea id="ticket-reply" rows="4" placeholder="Digite sua resposta..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Alterar Status</label>
+                    <select id="ticket-status">
+                        <option value="pending">Pendente</option>
+                        <option value="in_progress">Em Andamento</option>
+                        <option value="resolved">Resolvido</option>
+                    </select>
+                </div>
+                <button class="btn-primary btn-full" onclick="sendTicketReply()">
+                    <i class="fas fa-paper-plane"></i> Enviar Resposta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

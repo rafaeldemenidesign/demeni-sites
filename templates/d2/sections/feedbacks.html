@@ -1,0 +1,16 @@
+<!-- D2 Feedbacks Section Template -->
+<section class="feedbacks" data-section="feedbacks">
+    <span class="section-label">{{feedbacks_label}}</span>
+    <h2>{{feedbacks_titulo}}</h2>
+    <div class="feedbacks-list">
+        {{#each feedbacks}}
+        <div class="feedback-card">
+            <img src="{{avatar}}" alt="{{nome}}" class="feedback-avatar">
+            <div class="feedback-content">
+                <a href="{{link}}" class="feedback-name">{{nome}}</a>
+                <p>{{texto}}</p>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</section>

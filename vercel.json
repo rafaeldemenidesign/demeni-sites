@@ -1,0 +1,54 @@
+{
+    "version": 2,
+    "name": "demeni-sites",
+    "public": true,
+    "rewrites": [
+        {
+            "source": "/app",
+            "destination": "/app.html"
+        },
+        {
+            "source": "/editor",
+            "destination": "/editor.html"
+        },
+        {
+            "source": "/about",
+            "destination": "/about.html"
+        },
+        {
+            "source": "/pricing",
+            "destination": "/pricing.html"
+        },
+        {
+            "source": "/ajuda",
+            "destination": "/ajuda.html"
+        },
+        {
+            "source": "/aulas",
+            "destination": "/aulas.html"
+        },
+        {
+            "source": "/s/:slug",
+            "destination": "/site.html?s=:slug"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Content-Type-Options",
+                    "value": "nosniff"
+                },
+                {
+                    "key": "X-Frame-Options",
+                    "value": "SAMEORIGIN"
+                },
+                {
+                    "key": "X-XSS-Protection",
+                    "value": "1; mode=block"
+                }
+            ]
+        }
+    ]
+}

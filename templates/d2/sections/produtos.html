@@ -1,0 +1,19 @@
+<!-- D2 Produtos Section Template -->
+<section class="produtos" data-section="produtos">
+    <span class="section-label">{{produtos_label}}</span>
+    <h2>{{produtos_titulo}}</h2>
+    <div class="produtos-grid">
+        {{#each produtos}}
+        <a href="{{link}}" class="produto-card">
+            <div class="produto-img">
+                <img src="{{imagem}}" alt="{{titulo}}">
+            </div>
+            <h3>{{titulo}}</h3>
+            <div class="produto-footer">
+                <span class="preco">{{preco}}</span>
+                <span class="produto-btn">{{btn_text}}</span>
+            </div>
+        </a>
+        {{/each}}
+    </div>
+</section>

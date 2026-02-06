@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Demeni Sites</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/payments.css">
+    <link rel="stylesheet" href="css/affiliates.css">
+    <link rel="stylesheet" href="css/editor-d2.css">
+</head>
+
+<body>
+    <div id="app" class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+
+            <!-- User Profile Card -->
+            <div class="user-card" id="user-card">
+                <div class="user-card-header">
+                    <button class="btn-edit-profile" id="btn-edit-profile" title="Editar Perfil">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <div class="user-avatar">
+                        <img src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=80"
+                            alt="Avatar" id="user-avatar">
+                        <div class="level-badge" id="level-badge">1</div>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <h3 id="user-name">Usuário</h3>
+                    <div class="user-level">
+                        <span class="level-tag" id="level-tag">Nível 1</span>
+                        <span class="border-tag" id="border-tag">Bronze</span>
+                    </div>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-progress" id="xp-progress" style="width: 0%"></div>
+                </div>
+                <p class="xp-text" id="xp-text">0 / 200 XP</p>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="projects">
+                    <i class="fas fa-folder"></i>
+                    <span>Meus Projetos</span>
+                </a>
+                <a href="#" class="nav-item" data-page="new">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Novo Projeto</span>
+                </a>
+                <a href="#" class="nav-item" data-page="wallet">
+                    <i class="fas fa-wallet"></i>
+                    <span>Minha Carteira</span>
+                    <span class="credits-badge" id="credits-badge">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="lessons">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Aulas</span>
+                </a>
+                <a href="#" class="nav-item" data-page="affiliates">
+                    <i class="fas fa-users"></i>
+                    <span>Afiliados</span>
+                </a>
+                <a href="#" class="nav-item" data-page="help">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Ajuda</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="logo header-logo">Demeni <span>Sites</span></h1>
+
+                <!-- Center: Project Name (only in editor mode) -->
+                <div class="header-center editor-only" style="display: none;">
+                    <input type="text" class="project-name-input" id="project-name-header" placeholder="Nome do Projeto"
+                        value="Novo Site">
+                </div>
+
+                <!-- Right: Credits + Editor Buttons -->
+                <div class="header-actions">
+                    <!-- Credits (always visible) -->
+                    <div class="credits-pill">
+                        <div class="credits-info">
+                            <span class="credits-label-tiny">Seu Saldo</span>
+                            <span class="credits-amount-big" id="header-credits">0</span>
+                            <span class="credits-unit-small">créditos</span>
+                        </div>
+                    </div>
+
+                    <!-- Editor Buttons (only in editor mode) -->
+                    <div class="editor-actions editor-only" style="display: none;">
+                        <button class="btn-secondary" id="btn-preview-header">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                        <button class="btn-primary" id="btn-publish-header">
+                            <i class="fas fa-bolt"></i> Publicar
+                        </button>
+                    </div>
+
+                    <!-- Buy button (only in normal mode) -->
+                    <a href="#" class="btn-topup-pill normal-only" data-page="wallet">
+                        <i class="fas fa-plus"></i> Comprar
+                    </a>
+                </div>
+            </header>
+
+            <!-- Page: Projects -->
+            <section class="page active" id="page-projects">
+                <div class="page-header">
+                    <p class="page-subtitle">Gerencie seus sites criados</p>
+                    <button class="btn-primary" id="btn-new-project">
+                        <i class="fas fa-plus"></i> Novo Projeto
+                    </button>
+                </div>
+
+                <!-- Sites Ativos (Publicados) -->
+                <div class="section-divider" id="active-section">
+                    <h3 class="section-label"><i class="fas fa-globe"></i> Sites Online <span class="count-badge online"
+                            id="active-count">0</span></h3>
+                </div>
+                <div class="projects-grid" id="active-projects-grid">
+                    <!-- Published projects rendered here -->
+                </div>
+
+                <!-- Rascunhos: Bio Link (D-1) -->
+                <div class="section-divider" id="drafts-d1-section">
+                    <h3 class="section-label"><i class="fas fa-mobile-alt"></i> Bio Link (D-1) <span
+                            class="count-badge drafts" id="drafts-d1-count">0</span></h3>
+                </div>
+                <div class="projects-grid" id="drafts-d1-grid">
+                    <!-- D-1 draft projects rendered here -->
+                </div>
+
+                <!-- Rascunhos: Landing Page (D-2) -->
+                <div class="section-divider" id="drafts-d2-section">
+                    <h3 class="section-label"><i class="fas fa-laptop"></i> Landing Page (D-2) <span
+                            class="count-badge drafts" id="drafts-d2-count">0</span></h3>
+                </div>
+                <div class="projects-grid" id="drafts-d2-grid">
+                    <!-- D-2 draft projects rendered here -->
+                </div>
+
+                <!-- Rascunhos: Site Completo (Prime-D) -->
+                <div class="section-divider" id="drafts-prime-section">
+                    <h3 class="section-label"><i class="fas fa-rocket"></i> Site Completo (Prime-D) <span
+                            class="count-badge drafts" id="drafts-prime-count">0</span></h3>
+                </div>
+                <div class="projects-grid" id="drafts-prime-grid">
+                    <!-- Prime-D draft projects rendered here -->
+                </div>
+
+                <div class="empty-state" id="empty-projects">
+                    <i class="fas fa-folder-open"></i>
+                    <h3>Nenhum projeto ainda</h3>
+                    <p>Crie seu primeiro site agora mesmo!</p>
+                    <button class="btn-primary" id="btn-first-project">
+                        <i class="fas fa-rocket"></i> Criar Primeiro Site
+                    </button>
+                </div>
+            </section>
+
+            <!-- Page: Wallet -->
+            <section class="page" id="page-wallet">
+                <!-- Banner para promoções -->
+                <div class="wallet-banner" id="wallet-banner">
+                    <!-- Espaço para banner promocional -->
+                </div>
+
+                <!-- Container: Saldo + Planos -->
+                <div class="wallet-content">
+                    <!-- Saldo à esquerda -->
+                    <div class="wallet-sidebar">
+                        <div class="wallet-balance-card">
+                            <span class="balance-label">SEU SALDO</span>
+                            <span class="balance-amount" id="wallet-balance">0</span>
+                            <span class="balance-unit">créditos</span>
+                        </div>
+
+                        <!-- Trust Badges -->
+                        <div class="trust-badges">
+                            <div class="trust-badge">
+                                <i class="fas fa-lock"></i>
+                                <span>Pagamento Seguro</span>
+                            </div>
+                            <div class="trust-badge">
+                                <i class="fas fa-bolt"></i>
+                                <span>Créditos Instantâneos</span>
+                            </div>
+                            <div class="trust-badge">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Confidencialidade</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Planos à direita -->
+                    <div class="wallet-packages">
+                        <h3 class="section-title">Comprar Créditos</h3>
+                        <div class="packages-grid" id="packages-grid">
+                            <!-- Packages rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Histórico de Transações</h3>
+                <div class="transactions-list" id="transactions-list">
+                    <!-- Transactions rendered here -->
+                </div>
+            </section>
+
+            <!-- Page: Lessons -->
+            <section class="page" id="page-lessons">
+                <div class="page-header">
+                    <p class="page-subtitle">Aprenda a criar sites incríveis</p>
+                </div>
+
+                <!-- Banner Promocional Aulas -->
+                <div class="lessons-banner" id="lessons-banner">
+                    <!-- Espaço para banner promocional 1200x200px -->
+                </div>
+
+                <div class="lessons-grid">
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Bem-vindo à Plataforma</h4>
+                            <p>Aprenda como funciona e comece a criar</p>
+                            <span class="lesson-duration">5 min</span>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Criando seu Primeiro Site</h4>
+                            <p>Passo a passo do editor</p>
+                            <span class="lesson-duration">8 min</span>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Personalizando Cores e Estilo</h4>
+                            <p>Deixe seu site com sua cara</p>
+                            <span class="lesson-duration">6 min</span>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-thumb">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <h4>Publicando e Compartilhando</h4>
+                            <p>Como colocar na bio do Instagram</p>
+                            <span class="lesson-duration">4 min</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Affiliates -->
+            <section class="page" id="page-affiliates">
+                <div class="page-header">
+                    <p class="page-subtitle">Indique e ganhe recompensas</p>
+                </div>
+
+                <!-- Affiliate Tabs -->
+                <div class="affiliate-tabs">
+                    <button class="affiliate-tab active" data-tab="my-referrals">Minhas Indicações</button>
+                    <button class="affiliate-tab" data-tab="my-affiliates">Meus Afiliados</button>
+                </div>
+
+                <!-- Tab: My Referrals (I refer franchisees to Demeni) -->
+                <div class="affiliate-tab-content active" id="tab-my-referrals">
+                    <div class="affiliate-card">
+                        <div class="affiliate-stats">
+                            <div class="stat-item">
+                                <span class="stat-value" id="aff-total-referrals">0</span>
+                                <span class="stat-label">Indicações</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="aff-total-earned">0</span>
+                                <span class="stat-label">Créditos Ganhos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="aff-pending">0</span>
+                                <span class="stat-label">Pendentes</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="affiliate-share-box">
+                        <h4><i class="fas fa-link"></i> Seu Link de Indicação</h4>
+                        <div class="share-link-container">
+                            <input type="text" id="aff-referral-link" readonly placeholder="Carregando...">
+                            <button class="btn-copy" onclick="copyAffiliateLink()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <p class="share-info">Compartilhe este link e ganhe <strong>100 créditos</strong> ou
+                            <strong>R$50</strong> por cada novo franqueado!
+                        </p>
+                    </div>
+
+                    <h4 class="section-title">Histórico de Indicações</h4>
+                    <div class="referrals-list" id="referrals-list">
+                        <div class="empty-state small">
+                            <i class="fas fa-user-plus"></i>
+                            <p>Nenhuma indicação ainda. Compartilhe seu link!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: My Affiliates (others refer clients for me) -->
+                <div class="affiliate-tab-content" id="tab-my-affiliates">
+                    <div class="affiliate-config-box">
+                        <div class="config-header">
+                            <h4><i class="fas fa-cog"></i> Programa de Afiliados</h4>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="aff-program-enabled">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="config-desc">Ative para permitir que outras pessoas indiquem clientes para você.</p>
+
+                        <div class="commission-config" id="commission-config" style="display: none;">
+                            <h5>Comissões por Modelo</h5>
+                            <div class="commission-grid">
+                                <div class="commission-item">
+                                    <label>D-1 (Bio Link)</label>
+                                    <div class="input-group">
+                                        <span>R$</span>
+                                        <input type="number" id="comm-d1" value="20" min="0">
+                                    </div>
+                                </div>
+                                <div class="commission-item">
+                                    <label>D-2 (Landing)</label>
+                                    <div class="input-group">
+                                        <span>R$</span>
+                                        <input type="number" id="comm-d2" value="40" min="0">
+                                    </div>
+                                </div>
+                                <div class="commission-item">
+                                    <label>Prime-D</label>
+                                    <div class="input-group">
+                                        <span>R$</span>
+                                        <input type="number" id="comm-prime" value="80" min="0">
+                                    </div>
+                                </div>
+                                <div class="commission-item">
+                                    <label>NFC</label>
+                                    <div class="input-group">
+                                        <span>R$</span>
+                                        <input type="number" id="comm-nfc" value="10" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn-primary" onclick="saveAffiliateConfig()">
+                                <i class="fas fa-save"></i> Salvar Configurações
+                            </button>
+                        </div>
+                    </div>
+
+                    <h4 class="section-title">Meus Afiliados</h4>
+                    <div class="affiliates-list" id="my-affiliates-list">
+                        <div class="empty-state small">
+                            <i class="fas fa-users"></i>
+                            <p>Ative o programa acima para cadastrar afiliados.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Help -->
+            <section class="page" id="page-help">
+                <div class="page-header">
+                    <p class="page-subtitle">Dúvidas frequentes</p>
+                </div>
+
+                <div class="faq-list">
+                    <details class="faq-item">
+                        <summary>Como criar um site para meu cliente?</summary>
+                        <p>Clique em "Novo Projeto" no menu, preencha as informações do cliente, personalize as cores e
+                            clique em "Publicar". Escolha o subdomínio único e pronto!</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Quanto custa para publicar um site?</summary>
+                        <p>O custo depende do modelo: <strong>D-1 (Bio Link) = 40 créditos</strong>, <strong>D-2
+                                (Landing Page) = 80 créditos</strong>, <strong>Prime-D (Site Completo) = 140
+                                créditos</strong>. Atualizações no mesmo site são gratuitas.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Como funcionam os créditos?</summary>
+                        <p>1 crédito = R$ 1. Escolha o modelo que melhor atende seu cliente. Compre pacotes na seção
+                            "Minha Carteira".</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Posso mudar o subdomínio depois de publicar?</summary>
+                        <p>Não. O subdomínio é definido na primeira publicação e não pode ser alterado, mas você pode
+                            atualizar o conteúdo quantas vezes quiser.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Qual será a URL do site?</summary>
+                        <p>Os sites ficam em projeto.rafaeldemeni.com, onde "projeto" é o subdomínio que você escolher.
+                        </p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Preciso de ajuda, como falo com vocês?</summary>
+                        <p>Utilize o formulário de suporte abaixo. Responderemos em até 24 horas úteis.</p>
+                    </details>
+                </div>
+
+                <!-- Support Form -->
+                <div class="support-form-container">
+                    <h4><i class="fas fa-headset"></i> Enviar Solicitação de Suporte</h4>
+                    <p class="support-subtitle">Descreva seu problema ou dúvida e responderemos em até 24h.</p>
+
+                    <form id="supportForm" class="support-form">
+                        <div class="form-group">
+                            <label for="supportCategory">Categoria</label>
+                            <select id="supportCategory" required>
+                                <option value="">Selecione uma categoria</option>
+                                <option value="tecnico">Problema Técnico</option>
+                                <option value="creditos">Créditos e Pagamentos</option>
+                                <option value="publicacao">Publicação de Sites</option>
+                                <option value="conta">Minha Conta</option>
+                                <option value="sugestao">Sugestão</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supportSubject">Assunto</label>
+                            <input type="text" id="supportSubject" placeholder="Resumo do problema" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supportMessage">Mensagem</label>
+                            <textarea id="supportMessage" rows="5"
+                                placeholder="Descreva detalhadamente seu problema ou dúvida..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit-support">
+                            <i class="fas fa-paper-plane"></i> Enviar Solicitação
+                        </button>
+                    </form>
+
+                    <div id="supportSuccess" class="support-success" style="display: none;">
+                        <i class="fas fa-check-circle"></i>
+                        <h5>Solicitação Enviada!</h5>
+                        <p>Recebemos sua mensagem e responderemos em breve.</p>
+                    </div>
+                </div>
+
+                <div class="help-cta">
+                    <h4>Dúvidas?</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Use o formulário acima para entrar em
+                        contato. Nossa equipe responderá o mais breve possível.</p>
+                </div>
+            </section>
+
+            <!-- Page: Editor D1 -->
+            <section class="page page-editor-d1" id="page-editor-d1">
+                <div class="editor-d1-container">
+                    <!-- Coluna 1: Navegação por Abas -->
+                    <nav class="editor-d1-tabs" id="editor-d1-tabs">
+                        <button class="tab-btn active" data-tab="perfil">
+                            <i class="fas fa-user"></i> Perfil
+                        </button>
+                        <button class="tab-btn" data-tab="links">
+                            <i class="fas fa-link"></i> Links
+                        </button>
+                        <button class="tab-btn" data-tab="banners">
+                            <i class="fas fa-images"></i> Banners
+                        </button>
+                        <button class="tab-btn" data-tab="video">
+                            <i class="fas fa-video"></i> Vídeo
+                        </button>
+                        <button class="tab-btn" data-tab="estilo">
+                            <i class="fas fa-palette"></i> Estilo
+                        </button>
+                        <button class="tab-btn" data-tab="ordem">
+                            <i class="fas fa-layer-group"></i> Ordem
+                        </button>
+                    </nav>
+
+                    <!-- Coluna 2: Painel de Controle -->
+                    <aside class="editor-d1-controls" id="controls-d1">
+                        <div class="panel-content" id="panel-content-d1">
+                            <!-- Conteúdo das tabs renderizado via JS -->
+                            <div class="tab-content active" id="tab-d1-perfil">
+                                <div class="control-section">
+                                    <h3>Foto de Perfil</h3>
+                                    <div class="avatar-upload">
+                                        <div class="avatar-preview" id="avatar-preview-d1">
+                                            <img src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=200"
+                                                alt="Avatar" id="avatar-img-d1">
+                                            <div class="avatar-overlay">
+                                                <i class="fas fa-camera"></i>
+                                            </div>
+                                        </div>
+                                        <input type="file" id="avatar-input-d1" accept="image/*" hidden>
+                                        <button class="btn-text" id="btn-upload-avatar-d1">
+                                            <i class="fas fa-upload"></i> Enviar foto
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="control-section">
+                                    <h3>Informações</h3>
+                                    <div class="form-group">
+                                        <label for="input-name-d1">Nome</label>
+                                        <input type="text" id="input-name-d1" placeholder="Seu nome completo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="input-role-d1">Cargo / Profissão</label>
+                                        <input type="text" id="input-role-d1" placeholder="Ex: Designer & Consultor">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="input-bio-d1">Bio</label>
+                                        <textarea id="input-bio-d1" rows="3"
+                                            placeholder="Uma breve descrição sobre você"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="tab-d1-links">
+                                <div class="control-section">
+                                    <h3>Links Úteis</h3>
+                                    <div id="links-container-d1">
+                                        <!-- Links renderizados via JS -->
+                                    </div>
+                                    <button class="btn-primary btn-add-link" id="btn-add-link-d1">
+                                        <i class="fas fa-plus"></i> Adicionar Link
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="tab-d1-banners">
+                                <div class="control-section">
+                                    <h3>Banners</h3>
+                                    <div id="banners-container-d1">
+                                        <!-- Banners renderizados via JS -->
+                                    </div>
+                                    <button class="btn-primary btn-add-banner" id="btn-add-banner-d1">
+                                        <i class="fas fa-plus"></i> Adicionar Banner
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="tab-d1-video">
+                                <div class="control-section">
+                                    <h3>Vídeo de Apresentação</h3>
+                                    <div class="form-group">
+                                        <label for="input-video-d1">URL do YouTube</label>
+                                        <input type="text" id="input-video-d1"
+                                            placeholder="https://youtube.com/watch?v=...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="tab-d1-estilo">
+                                <!-- 1. COR DE DESTAQUE -->
+                                <div class="control-section">
+                                    <h3><i class="fas fa-palette"></i> Cor de Destaque</h3>
+                                    <div class="color-presets accent-colors-d1" id="accent-colors-d1">
+                                        <button class="color-preset active" data-accent="#D4AF37"
+                                            style="background:#D4AF37" title="Dourado"></button>
+                                        <button class="color-preset" data-accent="#C0C0C0" style="background:#C0C0C0"
+                                            title="Prata"></button>
+                                        <button class="color-preset" data-accent="#FF6B6B" style="background:#FF6B6B"
+                                            title="Coral"></button>
+                                        <button class="color-preset" data-accent="#4ECDC4" style="background:#4ECDC4"
+                                            title="Turquesa"></button>
+                                        <button class="color-preset" data-accent="#A855F7" style="background:#A855F7"
+                                            title="Roxo"></button>
+                                        <button class="color-preset" data-accent="#3B82F6" style="background:#3B82F6"
+                                            title="Azul"></button>
+                                        <button class="color-preset" data-accent="#22C55E" style="background:#22C55E"
+                                            title="Verde"></button>
+                                    </div>
+                                </div>
+
+                                <!-- 2. COR DE FUNDO -->
+                                <div class="control-section">
+                                    <h3><i class="fas fa-fill-drip"></i> Cor de Fundo</h3>
+                                    <p class="section-desc">Cores Claras</p>
+                                    <div class="color-presets bg-colors-d1" id="bg-colors-light-d1">
+                                        <button class="color-preset" data-bg="#ffffff"
+                                            style="background:#ffffff; border:1px solid #ccc" title="Branco"></button>
+                                        <button class="color-preset active" data-bg="#f8f9fa"
+                                            style="background:#f8f9fa; border:1px solid #ccc"
+                                            title="Cinza Claro"></button>
+                                        <button class="color-preset" data-bg="#e8f5e9"
+                                            style="background:#e8f5e9; border:1px solid #ccc"
+                                            title="Verde Claro"></button>
+                                        <button class="color-preset" data-bg="#e3f2fd"
+                                            style="background:#e3f2fd; border:1px solid #ccc"
+                                            title="Azul Claro"></button>
+                                        <button class="color-preset" data-bg="#f3e5f5"
+                                            style="background:#f3e5f5; border:1px solid #ccc"
+                                            title="Roxo Claro"></button>
+                                        <button class="color-preset" data-bg="#fff3e0"
+                                            style="background:#fff3e0; border:1px solid #ccc"
+                                            title="Laranja Claro"></button>
+                                        <button class="color-preset" data-bg="#fce4ec"
+                                            style="background:#fce4ec; border:1px solid #ccc"
+                                            title="Rosa Claro"></button>
+                                    </div>
+                                    <p class="section-desc" style="margin-top: 12px;">Cores Escuras</p>
+                                    <div class="color-presets bg-colors-d1" id="bg-colors-dark-d1">
+                                        <button class="color-preset" data-bg="#000000" style="background:#000000"
+                                            title="Preto"></button>
+                                        <button class="color-preset" data-bg="#1a1a2e" style="background:#1a1a2e"
+                                            title="Índigo"></button>
+                                        <button class="color-preset" data-bg="#1f1f1f" style="background:#1f1f1f"
+                                            title="Cinza Escuro"></button>
+                                        <button class="color-preset" data-bg="#1a1f1a" style="background:#1a1f1a"
+                                            title="Verde Escuro"></button>
+                                        <button class="color-preset" data-bg="#2d1f1f" style="background:#2d1f1f"
+                                            title="Vinho"></button>
+                                        <button class="color-preset" data-bg="#1f1a2d" style="background:#1f1a2d"
+                                            title="Roxo Escuro"></button>
+                                        <button class="color-preset" data-bg="#0f172a" style="background:#0f172a"
+                                            title="Azul Escuro"></button>
+                                    </div>
+                                </div>
+
+                                <!-- 3. ESTILO DE BOTÃO -->
+                                <div class="control-section">
+                                    <h3><i class="fas fa-square"></i> Estilo do Botão</h3>
+                                    <div class="button-styles-d1" id="button-styles-d1">
+                                        <button class="style-preset-d1 active" data-style="glass" title="Glass">
+                                            <div class="style-demo-d1 glass"></div>
+                                            <span>Glass</span>
+                                        </button>
+                                        <button class="style-preset-d1" data-style="solid" title="Sólido">
+                                            <div class="style-demo-d1 solid"></div>
+                                            <span>Sólido</span>
+                                        </button>
+                                        <button class="style-preset-d1" data-style="outline" title="Contorno">
+                                            <div class="style-demo-d1 outline"></div>
+                                            <span>Contorno</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- 4. COR DO BOTÃO -->
+                                <div class="control-section">
+                                    <h3><i class="fas fa-paint-brush"></i> Cor do Botão</h3>
+                                    <div class="color-picker-row-d1">
+                                        <input type="color" id="btn-color-d1" value="#D4AF37">
+                                        <span class="color-hex-d1" id="btn-color-hex-d1">#D4AF37</span>
+                                    </div>
+                                </div>
+
+                                <!-- 5. COR DO TEXTO DO BOTÃO -->
+                                <div class="control-section">
+                                    <h3><i class="fas fa-font"></i> Cor do Texto</h3>
+                                    <div class="color-picker-row-d1">
+                                        <input type="color" id="btn-text-color-d1" value="#000000">
+                                        <span class="color-hex-d1" id="btn-text-color-hex-d1">#000000</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="tab-d1-ordem">
+                                <div class="control-section">
+                                    <h3>Ordem das Seções</h3>
+                                    <p class="hint">Arraste para reordenar</p>
+                                    <div id="order-list-d1" class="order-list">
+                                        <!-- Ordem renderizada via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Coluna 3: Preview -->
+                    <aside class="editor-d1-preview">
+                        <div class="preview-frame-container">
+                            <div class="device-frame">
+                                <div class="device-screen">
+                                    <div class="device-notch"></div>
+                                    <div class="device-content" id="preview-frame-d1">
+                                        <!-- Preview renderizado via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="preview-label"><i class="fas fa-mobile-alt"></i> Preview ao vivo</p>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- Page: Editor D2 -->
+            <section class="page page-editor-d2" id="page-editor-d2">
+                <div class="editor-d2-container">
+                    <!-- Coluna 1: Lista de Seções -->
+                    <aside class="editor-d2-sections">
+                        <div class="sections-header">
+                            <h3><i class="fas fa-layer-group"></i> Seções</h3>
+                            <button class="btn-add-section" id="btn-add-section-d2" title="Adicionar Seção">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="sections-list-d2" class="sections-list">
+                            <!-- Seções renderizadas via JS -->
+                        </div>
+                    </aside>
+
+                    <!-- Coluna 2: Painel de Edição -->
+                    <div class="editor-d2-panel" id="edit-panel-d2">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fas fa-sliders-h"></i> Editar Seção</h2>
+                        </div>
+                        <div class="panel-content" id="panel-content-d2">
+                            <!-- Controles renderizados via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Coluna 3: Preview -->
+                    <aside class="editor-d2-preview">
+                        <div class="preview-frame-container">
+                            <div class="device-frame">
+                                <div class="device-screen">
+                                    <div class="device-notch"></div>
+                                    <div class="device-content" id="preview-frame-d2">
+                                        <!-- Preview renderizado via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="preview-label"><i class="fas fa-mobile-alt"></i> Preview ao vivo</p>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: Buy Credits -->
+    <div class="modal" id="modal-buy">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-coins"></i> Comprar Créditos</h2>
+                <button class="modal-close" onclick="closeBuyModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="buy-modal-body">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Level Up -->
+    <div class="modal" id="modal-levelup">
+        <div class="modal-content modal-small">
+            <div class="modal-body center">
+                <div class="levelup-icon">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <h3>Level Up!</h3>
+                <p id="levelup-text">Você subiu para o Nível X!</p>
+                <button class="btn-primary" onclick="closeLevelUpModal()">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Login -->
+    <div class="modal" id="modal-login">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user"></i> Acesse sua conta</h2>
+                <!-- Botão X removido para impedir bypass de login -->
+            </div>
+            <!-- Login Form -->
+            <div id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-password" placeholder="Sua senha">
+                </div>
+                <p id="login-error" class="error-text" style="display: none;"></p>
+                <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="doLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                <p style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                    Esqueceu a senha? <a href="#" onclick="showForgotPassword()" style="color: var(--gold);">Recuperar
+                        acesso</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal: Model Selection -->
+    <div class="modal" id="modal-model-selection">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2><i class="fas fa-layer-group"></i> Escolha o Modelo</h2>
+                <button class="modal-close" onclick="closeModelSelectionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Selecione o template para o seu novo projeto</p>
+
+                <div class="models-grid">
+                    <!-- D-1: Bio Link -->
+                    <div class="model-card" onclick="selectModel('d1')">
+                        <div class="model-preview">
+                            <div class="model-preview-content">
+                                <div class="preview-avatar"></div>
+                                <div class="preview-lines"></div>
+                            </div>
+                        </div>
+                        <div class="model-info">
+                            <h3>D-1 <small>Bio Link</small></h3>
+                            <p class="model-desc">Página única estilo Linktree com links, redes sociais e perfil</p>
+                            <div class="model-price">
+                                <span class="price">40</span>
+                                <span class="unit">créditos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- D-2: Landing Page -->
+                    <div class="model-card" onclick="selectModel('d2')">
+                        <div class="model-preview premium">
+                            <div class="model-preview-content">
+                                <div class="preview-avatar"></div>
+                                <div class="preview-lines multi"></div>
+                                <div class="preview-sections"></div>
+                            </div>
+                            <span class="model-badge">Novo</span>
+                        </div>
+                        <div class="model-info">
+                            <h3>D-2 <small>Landing Page</small></h3>
+                            <p class="model-desc">Site com múltiplas seções, categorias, depoimentos e navegação</p>
+                            <div class="model-price">
+                                <span class="price">80</span>
+                                <span class="unit">créditos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prime-D: Site Completo (Em breve) -->
+                    <div class="model-card disabled">
+                        <div class="model-preview">
+                            <div class="model-preview-content">
+                                <div class="preview-avatar"></div>
+                                <div class="preview-lines multi"></div>
+                                <div class="preview-sections"></div>
+                            </div>
+                            <span class="model-badge coming-soon">Em breve</span>
+                        </div>
+                        <div class="model-info">
+                            <h3>Prime-D <small>Site Completo</small></h3>
+                            <p class="model-desc">Múltiplas páginas, totalmente responsivo, design premium</p>
+                            <div class="model-price">
+                                <span class="price">140</span>
+                                <span class="unit">créditos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/userData.js"></script>
+    <script src="js/credits.js"></script>
+    <script src="js/xpSystem.js"></script>
+    <script src="js/payments.js"></script>
+    <script src="js/affiliates.js"></script>
+    <script src="js/dashboard.js"></script>
+
+    <!-- Editor D1 Embedded Module -->
+    <script src="js/editor-d1-embedded.js"></script>
+
+    <!-- Editor D2 Modules (loaded on demand) -->
+    <script src="js/preview-d2.js"></script>
+    <script src="js/editor-d2/state-manager.js"></script>
+    <script src="js/editor-d2/controls.js"></script>
+    <script src="js/editor-d2/section-list.js"></script>
+    <script src="js/editor-d2/editors/hero-editor.js"></script>
+    <script src="js/editor-d2/editors/categorias-editor.js"></script>
+    <script src="js/editor-d2/editors/produtos-editor.js"></script>
+    <script src="js/editor-d2/editors/feedbacks-editor.js"></script>
+    <script src="js/editor-d2/editors/cta-editor.js"></script>
+    <script src="js/editor-d2/editors/footer-editor.js"></script>
+    <script src="js/editor-d2/edit-panel.js"></script>
+    <script src="js/editor-d2/add-section-modal.js"></script>
+
+    <!-- Project Name Inline Edit Handler -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const projectNameInput = document.getElementById('project-name-header');
+            if (!projectNameInput) return;
+
+            // Enter confirma e remove foco (sai do modo edição)
+            projectNameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    projectNameInput.blur();
+                }
+            });
+
+            // Blur confirma e valida
+            projectNameInput.addEventListener('blur', (e) => {
+                let value = e.target.value.trim();
+
+                // Não pode ficar em branco - mínimo 1 caractere
+                if (value.length === 0) {
+                    value = '.';
+                    e.target.value = value;
+                }
+
+                // Atualiza estado D2 se disponível
+                if (window.d2State) {
+                    window.d2State.set('projectName', value);
+                }
+
+                // Atualiza no armazenamento para refletir em "Meus Projetos"
+                // Usa UserData.getCurrentProjectId() que usa a chave correta internamente
+                if (window.UserData) {
+                    const projectId = UserData.getCurrentProjectId();
+                    if (projectId) {
+                        const result = UserData.updateProject(projectId, { name: value });
+                        console.log('[Project Name] Saved via UserData:', value, 'for project:', projectId, 'result:', result);
+                    } else {
+                        console.warn('[Project Name] No current project ID found');
+                    }
+                } else {
+                    // Fallback: tenta com chave correta do localStorage
+                    const projectId = sessionStorage.getItem('demeni-current-project');
+                    if (projectId) {
+                        const projects = JSON.parse(localStorage.getItem('demeni-projects') || '[]');
+                        const projectIndex = projects.findIndex(p => p.id === projectId);
+                        if (projectIndex !== -1) {
+                            projects[projectIndex].name = value;
+                            projects[projectIndex].updatedAt = new Date().toISOString();
+                            localStorage.setItem('demeni-projects', JSON.stringify(projects));
+                            console.log('[Project Name] Saved (fallback):', value);
+                        }
+                    }
+                }
+            });
+
+            // Input atualiza estado em tempo real
+            projectNameInput.addEventListener('input', (e) => {
+                if (window.d2State) {
+                    window.d2State.set('projectName', e.target.value);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

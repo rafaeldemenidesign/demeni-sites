@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando...</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; min-height: 100vh; background: #0a0a1a; color: #fff; }
+        .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 20px; }
+        .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #D4AF37; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: rgba(255,255,255,0.6); font-size: 14px; }
+        .error-container { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 20px; text-align: center; padding: 20px; }
+        .error-icon { font-size: 60px; }
+        .error-title { font-size: 24px; font-weight: 700; }
+        .error-message { color: rgba(255,255,255,0.6); max-width: 400px; }
+        .error-btn { padding: 12px 24px; background: #D4AF37; color: #000; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Carregando site...</p>
+    </div>
+    <div id="error" class="error-container">
+        <div class="error-icon"></div>
+        <h1 class="error-title">Site não encontrado</h1>
+        <p class="error-message">O site que você está procurando não existe ou não está publicado.</p>
+        <a href="https://rafaeldemeni.com" class="error-btn">Criar meu site</a>
+    </div>
+    <script>
+        const SUPABASE_URL = 'https://aeyxdqggngapczohqvbo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleXhkcWdnbmdhcGN6b2hxdmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTc3MTcsImV4cCI6MjA4NDU5MzcxN30.eq9Feo9dj6T1KUO-F4AN7j4x7HECb8f0B9WddFLD9C4';
+        function getSlug() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('s')) return params.get('s').toLowerCase().trim();
+            const path = window.location.pathname;
+            const match = path.match(/\/(?:site|s)\/([^\/]+)/);
+            if (match) return match[1].toLowerCase().trim();
+            return null;
+        }
+        async function loadSite() {
+            const slug = getSlug();
+            if (!slug) { showError('Nenhum site especificado na URL.'); return; }
+            try {
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await supabase.from('projects').select('html_content, name, slug').eq('slug', slug).eq('published', true).single();
+                if (error || !data) { showError('Site não encontrado ou não publicado.'); return; }
+                if (!data.html_content) { showError('Este site ainda não tem conteúdo publicado.'); return; }
+                document.open(); document.write(data.html_content); document.close();
+            } catch (err) { console.error('Error:', err); showError('Erro ao carregar o site.'); }
+        }
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            const e = document.getElementById('error'); e.style.display = 'flex'; e.querySelector('.error-message').textContent = msg;
+        }
+        loadSite();
+    </script>
+</body>
+</html>
