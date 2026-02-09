@@ -172,10 +172,12 @@ class D2StateManager {
                     sectionSubtitle: { text: 'Confira nossos destaques', size: 14, color: 'rgba(255,255,255,0.7)', weight: 400, enabled: false },
                     gridGap: 16,
                     gridColumns: 2,
+                    sectionPaddingH: 32,
                     card: {
                         bgColor: '#ffffff',
                         borderRadius: 20,
                         shadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        padding: 6,
                         borderEnabled: false,
                         borderWidth: 1,
                         borderColor: '#e0e0e0'
@@ -188,28 +190,64 @@ class D2StateManager {
                 // Feedbacks
                 feedbacks: {
                     sectionSpacing: 30,
+                    bgMode: 'color',
                     bgColor: '#e8e8e8',
+                    bgColor2: '#d0d0d0',
+                    bgGradient: false,
+                    bgGradientInvert: false,
+                    bgImage: null,
+                    bgOverlay: false,
+                    bgOverlayType: 'solid',
+                    bgOverlayColor: '#000000',
+                    bgOverlayColor2: '#000000',
+                    bgOverlayOpacity: 50,
+                    bgOverlayInvert: false,
+                    bgOverlayPosition: 50,
+                    bgOverlaySpread: 80,
+                    bgImageBlur: 0,
+                    bgImageZoom: 100,
+                    bgImagePosX: 50,
+                    bgImagePosY: 0,
                     sectionTitle: { text: 'O que estão dizendo?', size: 28, color: '#333333', weight: 400, enabled: true, paddingTop: 0, gap: 6, paddingBottom: 24 },
                     sectionSubtitle: { text: 'Depoimentos de nossos clientes', size: 14, color: '#666666', weight: 400, enabled: false },
                     avatar: { size: 60, radius: 8 },
                     name: { size: 16, weight: 500, color: '#1a365d' },
-                    text: { size: 13, color: '#666666' },
-                    card: { bgColor: '#f5f5f5', borderRadius: 12 }
+                    text: { size: 13, weight: 400, color: '#666666' },
+                    card: { bgColor: '#f5f5f5', borderRadius: 12 },
+                    bottomCta: { enabled: false, text: 'Faça parte dos nossos clientes satisfeitos!', size: 16, weight: 400, color: '#333333', paddingTop: 20, paddingBottom: 20 }
                 },
 
                 // CTA Secundário
                 cta: {
-                    bgImage: null,  // Usa a mesma do Hero se null
-                    brightness: 0.5,
+                    bgMode: 'image',
+                    bgColor: '#1a365d',
+                    bgColor2: '#0d1b2a',
+                    bgGradient: false,
+                    bgGradientInvert: false,
+                    bgImage: null,
+                    bgImageBlur: 0,
+                    bgImageZoom: 100,
+                    bgImagePosX: 50,
+                    bgImagePosY: 0,
+                    bgOverlay: true,
+                    bgOverlayType: 'solid',
+                    bgOverlayColor: '#000000',
+                    bgOverlayColor2: '#000000',
+                    bgOverlayOpacity: 50,
+                    bgOverlayInvert: false,
+                    bgOverlayPosition: 50,
+                    bgOverlaySpread: 80,
                     height: 250,
                     title: {
-                        text: '',  // Se vazio, usa profile.name
+                        text: '',
                         size: 52,
+                        weight: 400,
                         color: '#ffffff'
                     },
                     subtitle: {
-                        text: '',  // Se vazio, usa profile.role
+                        text: '',
                         size: 22,
+                        weight: 400,
                         color: '#ffffff',
                         opacity: 0.8
                     },

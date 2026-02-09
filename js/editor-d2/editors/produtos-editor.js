@@ -181,10 +181,24 @@ class D2ProdutosEditor {
                 }));
 
                 container.appendChild(C.createSlider({
-                    label: 'Espaçamento entre cards',
+                    label: 'Respiro lateral',
+                    value: window.d2State.get(`${this.basePath}.sectionPaddingH`, 32),
+                    min: 8, max: 60, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionPaddingH`
+                }));
+
+                container.appendChild(C.createSlider({
+                    label: 'Espaço entre cards',
                     value: window.d2State.get(`${this.basePath}.gridGap`, 16),
                     min: 4, max: 32, step: 2, unit: 'px',
                     path: `${this.basePath}.gridGap`
+                }));
+
+                container.appendChild(C.createSlider({
+                    label: 'Margem interna do card',
+                    value: window.d2State.get(`${this.basePath}.card.padding`, 6),
+                    min: 0, max: 16, step: 1, unit: 'px',
+                    path: `${this.basePath}.card.padding`
                 }));
 
                 return container;

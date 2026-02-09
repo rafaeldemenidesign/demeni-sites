@@ -176,6 +176,8 @@ function renderPreviewD2New(frame, state) {
     const produtosSubtitleWeight = get('produtos.sectionSubtitle.weight', 400);
     const produtosGridGap = get('produtos.gridGap', 16);
     const produtosGridColumns = get('produtos.gridColumns', 2);
+    const produtosSectionPaddingH = get('produtos.sectionPaddingH', 32);
+    const produtoCardPadding = get('produtos.card.padding', 6);
     const produtoCardBgColor = get('produtos.card.bgColor', '#ffffff');
     const produtoCardRadius = get('produtos.card.borderRadius', 20);
     const produtoCardBorderEnabled = get('produtos.card.borderEnabled', false);
@@ -205,7 +207,24 @@ function renderPreviewD2New(frame, state) {
     // =============================================
     // FEEDBACKS - Valores dinâmicos
     // =============================================
+    const feedbacksBgMode = get('feedbacks.bgMode', 'color');
     const feedbacksBgColor = get('feedbacks.bgColor', '#e8e8e8');
+    const feedbacksBgColor2 = get('feedbacks.bgColor2', '#d0d0d0');
+    const feedbacksBgGradient = get('feedbacks.bgGradient', false);
+    const feedbacksBgGradientInvert = get('feedbacks.bgGradientInvert', false);
+    const feedbacksBgImage = get('feedbacks.bgImage', null);
+    const feedbacksBgOverlay = get('feedbacks.bgOverlay', false);
+    const feedbacksBgOverlayType = get('feedbacks.bgOverlayType', 'solid');
+    const feedbacksBgOverlayColor = get('feedbacks.bgOverlayColor', '#000000');
+    const feedbacksBgOverlayColor2 = get('feedbacks.bgOverlayColor2', '#000000');
+    const feedbacksBgOverlayOpacity = get('feedbacks.bgOverlayOpacity', 50);
+    const feedbacksBgOverlayInvert = get('feedbacks.bgOverlayInvert', false);
+    const feedbacksBgOverlayPosition = get('feedbacks.bgOverlayPosition', 50);
+    const feedbacksBgOverlaySpread = get('feedbacks.bgOverlaySpread', 80);
+    const feedbacksBgImageBlur = get('feedbacks.bgImageBlur', 0);
+    const feedbacksBgImageZoom = get('feedbacks.bgImageZoom', 100);
+    const feedbacksBgImagePosX = get('feedbacks.bgImagePosX', 50);
+    const feedbacksBgImagePosY = get('feedbacks.bgImagePosY', 0);
     const feedbacksSpacing = get('feedbacks.sectionSpacing', 30);
     const feedbacksSectionTitle = get('feedbacks.sectionTitle.text', 'O que estão dizendo?');
     const feedbacksSectionTitleSize = get('feedbacks.sectionTitle.size', 28);
@@ -226,21 +245,89 @@ function renderPreviewD2New(frame, state) {
     const feedbackNameWeight = get('feedbacks.name.weight', 500);
     const feedbackNameColor = get('feedbacks.name.color', '#1a365d');
     const feedbackTextSize = get('feedbacks.text.size', 13);
+    const feedbackTextWeight = get('feedbacks.text.weight', 400);
     const feedbackTextColor = get('feedbacks.text.color', '#666666');
     const feedbackCardBgColor = get('feedbacks.card.bgColor', '#f5f5f5');
     const feedbackCardRadius = get('feedbacks.card.borderRadius', 12);
+    const feedbackBottomCtaEnabled = get('feedbacks.bottomCta.enabled', false);
+    const feedbackBottomCtaText = get('feedbacks.bottomCta.text', 'Faça parte dos nossos clientes satisfeitos!');
+    const feedbackBottomCtaSize = get('feedbacks.bottomCta.size', 16);
+    const feedbackBottomCtaWeight = get('feedbacks.bottomCta.weight', 400);
+    const feedbackBottomCtaColor = get('feedbacks.bottomCta.color', '#333333');
+    const feedbackBottomCtaPaddingTop = get('feedbacks.bottomCta.paddingTop', 20);
+    const feedbackBottomCtaPaddingBottom = get('feedbacks.bottomCta.paddingBottom', 20);
+
+    // Compute feedbacks background style
+    let feedbacksBgStyle;
+    const fbBgSize = feedbacksBgImageZoom === 100 ? 'cover' : `${feedbacksBgImageZoom}%`;
+    if (feedbacksBgMode === 'image' && feedbacksBgImage) {
+        feedbacksBgStyle = `url('${feedbacksBgImage}') ${feedbacksBgImagePosX}% ${feedbacksBgImagePosY}% / ${fbBgSize} no-repeat`;
+    } else if (feedbacksBgGradient) {
+        const c1 = feedbacksBgGradientInvert ? feedbacksBgColor2 : feedbacksBgColor;
+        const c2 = feedbacksBgGradientInvert ? feedbacksBgColor : feedbacksBgColor2;
+        feedbacksBgStyle = `linear-gradient(to bottom, ${c1}, ${c2})`;
+    } else {
+        feedbacksBgStyle = feedbacksBgColor;
+    }
+
+    // Compute overlay CSS for feedbacks
+    let feedbacksOverlayCSS = 'display: none;';
+    if (feedbacksBgMode === 'image' && feedbacksBgImage && feedbacksBgOverlay) {
+        const op = feedbacksBgOverlayOpacity / 100;
+        const hexToRgba = (hex, a) => {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r},${g},${b},${a})`;
+        };
+        const dir = feedbacksBgOverlayInvert ? 'to top' : 'to bottom';
+        const pos = feedbacksBgOverlayPosition;
+        const halfSpread = feedbacksBgOverlaySpread / 2;
+        const startFade = Math.max(0, pos - halfSpread);
+        const endFade = Math.min(100, pos + halfSpread);
+
+        if (feedbacksBgOverlayType === 'solid') {
+            feedbacksOverlayCSS = `background: ${hexToRgba(feedbacksBgOverlayColor, op)};`;
+        } else if (feedbacksBgOverlayType === 'gradient') {
+            const c1 = hexToRgba(feedbacksBgOverlayColor, op);
+            const c2 = hexToRgba(feedbacksBgOverlayColor2, op);
+            feedbacksOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, ${c2} ${endFade}%);`;
+        } else {
+            // gradientTransparent
+            const c1 = hexToRgba(feedbacksBgOverlayColor, op);
+            feedbacksOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, transparent ${endFade}%);`;
+        }
+    }
 
     // =============================================
     // CTA SECUNDÁRIO - Valores dinâmicos
     // =============================================
+    const ctaBgMode = get('cta.bgMode', 'image');
+    const ctaBgColor = get('cta.bgColor', '#1a365d');
+    const ctaBgColor2 = get('cta.bgColor2', '#0d1b2a');
+    const ctaBgGradient = get('cta.bgGradient', false);
+    const ctaBgGradientInvert = get('cta.bgGradientInvert', false);
     const ctaBgImage = get('cta.bgImage', null) || heroBgImage;
-    const ctaBrightness = get('cta.brightness', 0.5);
+    const ctaBgImageBlur = get('cta.bgImageBlur', 0);
+    const ctaBgImageZoom = get('cta.bgImageZoom', 100);
+    const ctaBgImagePosX = get('cta.bgImagePosX', 50);
+    const ctaBgImagePosY = get('cta.bgImagePosY', 0);
+    const ctaBgOverlay = get('cta.bgOverlay', true);
+    const ctaBgOverlayType = get('cta.bgOverlayType', 'solid');
+    const ctaBgOverlayColor = get('cta.bgOverlayColor', '#000000');
+    const ctaBgOverlayColor2 = get('cta.bgOverlayColor2', '#000000');
+    const ctaBgOverlayOpacity = get('cta.bgOverlayOpacity', 50);
+    const ctaBgOverlayInvert = get('cta.bgOverlayInvert', false);
+    const ctaBgOverlayPosition = get('cta.bgOverlayPosition', 50);
+    const ctaBgOverlaySpread = get('cta.bgOverlaySpread', 80);
     const ctaHeight = get('cta.height', 250);
     const ctaTitleText = get('cta.title.text', '') || heroTitleText;
     const ctaTitleSize = get('cta.title.size', 52);
+    const ctaTitleWeight = get('cta.title.weight', 400);
     const ctaTitleColor = get('cta.title.color', '#ffffff');
     const ctaSubtitleText = get('cta.subtitle.text', '') || heroSubtitleText;
     const ctaSubtitleSize = get('cta.subtitle.size', 22);
+    const ctaSubtitleWeight = get('cta.subtitle.weight', 400);
     const ctaSubtitleColor = get('cta.subtitle.color', '#ffffff');
     const ctaSubtitleOpacity = get('cta.subtitle.opacity', 0.8);
     const ctaBtnText = get('cta.btn.text', heroBtnText);
@@ -248,6 +335,47 @@ function renderPreviewD2New(frame, state) {
     const ctaBtnBgType = get('cta.btn.bgType', 'gradient');
     const ctaBtnBgGradient = get('cta.btn.bgGradient', heroBtnBgGradient);
     const ctaBtnRadius = get('cta.btn.borderRadius', 30);
+
+    // Compute CTA background style
+    let ctaBgStyle;
+    const ctaBgSize = ctaBgImageZoom === 100 ? 'cover' : `${ctaBgImageZoom}%`;
+    if (ctaBgMode === 'image' && ctaBgImage) {
+        ctaBgStyle = `url('${ctaBgImage}') ${ctaBgImagePosX}% ${ctaBgImagePosY}% / ${ctaBgSize} no-repeat`;
+    } else if (ctaBgGradient) {
+        const c1 = ctaBgGradientInvert ? ctaBgColor2 : ctaBgColor;
+        const c2 = ctaBgGradientInvert ? ctaBgColor : ctaBgColor2;
+        ctaBgStyle = `linear-gradient(to bottom, ${c1}, ${c2})`;
+    } else {
+        ctaBgStyle = ctaBgColor;
+    }
+
+    // Compute CTA overlay CSS
+    let ctaOverlayCSS = 'display: none;';
+    if (ctaBgMode === 'image' && ctaBgImage && ctaBgOverlay) {
+        const op = ctaBgOverlayOpacity / 100;
+        const hexToRgba = (hex, a) => {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r},${g},${b},${a})`;
+        };
+        const dir = ctaBgOverlayInvert ? 'to top' : 'to bottom';
+        const pos = ctaBgOverlayPosition;
+        const halfSpread = ctaBgOverlaySpread / 2;
+        const startFade = Math.max(0, pos - halfSpread);
+        const endFade = Math.min(100, pos + halfSpread);
+
+        if (ctaBgOverlayType === 'solid') {
+            ctaOverlayCSS = `background: ${hexToRgba(ctaBgOverlayColor, op)};`;
+        } else if (ctaBgOverlayType === 'gradient') {
+            const c1 = hexToRgba(ctaBgOverlayColor, op);
+            const c2 = hexToRgba(ctaBgOverlayColor2, op);
+            ctaOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, ${c2} ${endFade}%);`;
+        } else {
+            const c1 = hexToRgba(ctaBgOverlayColor, op);
+            ctaOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, transparent ${endFade}%);`;
+        }
+    }
 
     // =============================================
     // FOOTER - Valores dinâmicos
@@ -599,7 +727,7 @@ function renderPreviewD2New(frame, state) {
 
             /* PRODUTOS */
             .d2-produtos {
-                padding: ${produtosSpacing}px 32px;
+                padding: ${produtosSpacing}px ${produtosSectionPaddingH}px;
                 text-align: center;
                 background: ${produtosBgStyle};
                 margin: 0;
@@ -637,7 +765,7 @@ function renderPreviewD2New(frame, state) {
                 color: #333;
                 display: flex;
                 flex-direction: column;
-                padding: 6px;
+                padding: ${produtoCardPadding}px;
                 width: calc(${100 / produtosGridColumns}% - ${produtosGridGap}px);
                 min-width: 100px;
                 flex-shrink: 0;
@@ -648,7 +776,7 @@ function renderPreviewD2New(frame, state) {
                 width: 100%;
                 aspect-ratio: 4 / 3;
                 overflow: hidden;
-                border-radius: ${Math.max(produtoCardRadius - 6, 0)}px;
+                border-radius: ${Math.max(produtoCardRadius - produtoCardPadding, 0)}px;
             }
             .d2-produto-img img {
                 width: 100%;
@@ -712,15 +840,39 @@ function renderPreviewD2New(frame, state) {
             .d2-feedbacks {
                 padding: ${feedbacksSpacing}px 32px;
                 text-align: center;
-                background: ${feedbacksBgColor};
+                ${feedbacksBgMode === 'image' && feedbacksBgImage && feedbacksBgImageBlur > 0
+            ? 'background: transparent;'
+            : `background: ${feedbacksBgStyle};`}
                 color: #333;
                 margin: 0;
+                position: relative;
+                overflow: hidden;
+            }
+            ${feedbacksBgMode === 'image' && feedbacksBgImage && feedbacksBgImageBlur > 0 ? `
+            .d2-feedbacks::after {
+                content: '';
+                position: absolute;
+                inset: -${feedbacksBgImageBlur * 2}px;
+                background: url('${feedbacksBgImage}') ${feedbacksBgImagePosX}% ${feedbacksBgImagePosY}% / ${fbBgSize} no-repeat;
+                filter: blur(${feedbacksBgImageBlur}px);
+                z-index: 0;
+            }` : ''}
+            .d2-feedbacks::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                ${feedbacksOverlayCSS}
+                pointer-events: none;
+                z-index: 1;
+            }
+            .d2-feedbacks > * {
+                position: relative;
+                z-index: 2;
             }
             .d2-feedbacks .d2-section-label {
                 color: rgba(0, 0, 0, 0.4);
             }
             .d2-feedbacks h2 {
-                font-family: 'Liebling', serif;
                 font-size: ${feedbacksSectionTitleSize}px;
                 font-weight: ${feedbacksTitleWeight};
                 margin-top: ${feedbacksTitlePaddingTop}px;
@@ -750,11 +902,9 @@ function renderPreviewD2New(frame, state) {
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             }
             .d2-feedback-avatar {
-                width: ${feedbackAvatarSize}px;
-                height: ${feedbackAvatarSize}px;
-                border-radius: ${feedbackAvatarRadius}px;
+                width: 100%;
+                height: 100%;
                 object-fit: cover;
-                flex-shrink: 0;
             }
             .d2-feedback-content {
                 flex: 1;
@@ -771,6 +921,15 @@ function renderPreviewD2New(frame, state) {
                 font-size: ${feedbackTextSize}px;
                 line-height: 1.3;
                 color: ${feedbackTextColor};
+                font-weight: ${feedbackTextWeight};
+            }
+            .d2-feedbacks-cta {
+                padding-top: ${feedbackBottomCtaPaddingTop}px;
+                padding-bottom: ${feedbackBottomCtaPaddingBottom}px;
+                font-size: ${feedbackBottomCtaSize}px;
+                font-weight: ${feedbackBottomCtaWeight};
+                color: ${feedbackBottomCtaColor};
+                text-align: center;
             }
 
             /* CTA SECUNDÁRIO */
@@ -783,36 +942,43 @@ function renderPreviewD2New(frame, state) {
                 text-align: center;
                 overflow: hidden;
                 margin: 0;
+                ${ctaBgMode === 'image' && ctaBgImage && ctaBgImageBlur > 0
+            ? 'background: transparent;'
+            : `background: ${ctaBgStyle};`}
             }
-            .d2-cta-secundario .cta-bg {
+            ${ctaBgMode === 'image' && ctaBgImage && ctaBgImageBlur > 0 ? `
+            .d2-cta-secundario::after {
+                content: '';
                 position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
+                inset: -${ctaBgImageBlur * 2}px;
+                background: url('${ctaBgImage}') ${ctaBgImagePosX}% ${ctaBgImagePosY}% / ${ctaBgSize} no-repeat;
+                filter: blur(${ctaBgImageBlur}px);
+                z-index: 0;
+            }` : ''}
+            .d2-cta-secundario::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                ${ctaOverlayCSS}
+                pointer-events: none;
                 z-index: 1;
             }
-            .d2-cta-secundario .cta-bg .cta-bg-image {
-                width: 100%;
-                height: 100%;
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-                filter: brightness(${ctaBrightness});
-            }
-            .d2-cta-secundario .cta-content {
+            .d2-cta-secundario > * {
                 position: relative;
                 z-index: 2;
+            }
+            .d2-cta-secundario .cta-content {
                 padding: 30px 20px;
             }
             .d2-cta-secundario h2 {
                 font-size: ${ctaTitleSize}px;
-                font-weight: 400;
+                font-weight: ${ctaTitleWeight};
                 color: ${ctaTitleColor};
                 margin-bottom: 4px;
             }
             .d2-cta-secundario p {
                 font-size: ${ctaSubtitleSize}px;
+                font-weight: ${ctaSubtitleWeight};
                 color: ${ctaSubtitleColor};
                 opacity: ${ctaSubtitleOpacity};
                 margin-bottom: 20px;
@@ -950,19 +1116,19 @@ function renderPreviewD2New(frame, state) {
                 ${categoriasSectionSubtitleEnabled ? `<p class="section-subtitle">${categoriasSectionSubtitle}</p>` : ''}
                 <div class="d2-categorias-grid">
                     ${categoriasItems.map(cat => {
-        const isFa = cat.icon?.startsWith('fa-');
-        const isUrl = cat.icon?.startsWith('http') || cat.icon?.startsWith('data:');
-        const iconHtml = isFa
-            ? `<i class="fas ${cat.icon}"></i>`
-            : `<img src="${isUrl ? cat.icon : baseUrl + '/' + cat.icon}" alt="${cat.label}">`;
-        return `
+                const isFa = cat.icon?.startsWith('fa-');
+                const isUrl = cat.icon?.startsWith('http') || cat.icon?.startsWith('data:');
+                const iconHtml = isFa
+                    ? `<i class="fas ${cat.icon}"></i>`
+                    : `<img src="${isUrl ? cat.icon : baseUrl + '/' + cat.icon}" alt="${cat.label}">`;
+                return `
                     <a href="${cat.link || '#'}" class="d2-categoria-item">
                         <div class="d2-categoria-icon">
                             ${iconHtml}
                         </div>
                         <span>${cat.label}</span>
                     </a>`;
-    }).join('')}
+            }).join('')}
                 </div>
             </section>
             ` : ''}
@@ -974,19 +1140,19 @@ function renderPreviewD2New(frame, state) {
                 ${produtosSectionSubtitleEnabled ? `<p class="section-subtitle">${produtosSectionSubtitle}</p>` : ''}
                 <div class="d2-produtos-grid">
                     ${(state?.d2Products || []).map(p => {
-        const rawPrice = p.price || 'R$ 0,00';
-        let priceHtml;
-        if (produtoPrecoCurrencyStyle === 'small') {
-            const match = rawPrice.match(/R\$\s*([\d.]+),(\d{2})/);
-            if (match) {
-                priceHtml = `<span class="currency">R$</span><span class="value">${match[1]}</span><span class="cents">,${match[2]}</span>`;
-            } else {
-                priceHtml = rawPrice;
-            }
-        } else {
-            priceHtml = rawPrice;
-        }
-        return `
+                const rawPrice = p.price || 'R$ 0,00';
+                let priceHtml;
+                if (produtoPrecoCurrencyStyle === 'small') {
+                    const match = rawPrice.match(/R\$\s*([\d.]+),(\d{2})/);
+                    if (match) {
+                        priceHtml = `<span class="currency">R$</span><span class="value">${match[1]}</span><span class="cents">,${match[2]}</span>`;
+                    } else {
+                        priceHtml = rawPrice;
+                    }
+                } else {
+                    priceHtml = rawPrice;
+                }
+                return `
                     <a href="${p.link || '#'}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
                         <div class="d2-produto-img">
                             <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}">
@@ -997,7 +1163,7 @@ function renderPreviewD2New(frame, state) {
                             <span class="d2-produto-btn">Comprar</span>
                         </div>
                     </a>`;
-    }).join('')}
+            }).join('')}
                 </div>
             </section>
             ` : ''}
@@ -1008,25 +1174,29 @@ function renderPreviewD2New(frame, state) {
                 ${feedbacksSectionTitleEnabled ? `<h2>${feedbacksSectionTitle}</h2>` : ''}
                 ${feedbacksSectionSubtitleEnabled ? `<p class="section-subtitle">${feedbacksSectionSubtitle}</p>` : ''}
                 <div class="d2-feedbacks-list">
-                    ${(state?.d2Feedbacks || []).map(f => `
+                    ${(state?.d2Feedbacks || []).map(f => {
+                const aZoom = (f.avatarZoom || 100) / 100;
+                const aPosX = f.avatarPosX ?? 50;
+                const aPosY = f.avatarPosY ?? 50;
+                return `
                     <div class="d2-feedback-card">
-                        <img src="${f.avatar || baseUrl + '/avatar.webp'}" alt="${f.name || 'Cliente'}" class="d2-feedback-avatar">
+                        <div style="width:${feedbackAvatarSize}px;height:${feedbackAvatarSize}px;border-radius:${feedbackAvatarRadius}px;overflow:hidden;flex-shrink:0;">
+                            <img src="${f.avatar || baseUrl + '/avatar.webp'}" alt="${f.name || 'Cliente'}" class="d2-feedback-avatar" style="object-position:${aPosX}% ${aPosY}%;transform:scale(${aZoom});">
+                        </div>
                         <div class="d2-feedback-content">
                             ${f.link ? `<a href="${f.link}" class="d2-feedback-name" target="_blank">${f.name || 'Nome do Cliente'}</a>` : `<span class="d2-feedback-name">${f.name || 'Nome do Cliente'}</span>`}
                             <p>${f.text || 'Texto do depoimento aqui...'}</p>
                         </div>
-                    </div>
-                    `).join('')}
+                    </div>`;
+            }).join('')}
                 </div>
+                ${feedbackBottomCtaEnabled ? `<p class="d2-feedbacks-cta">${feedbackBottomCtaText}</p>` : ''}
             </section>
             ` : ''}
 
             <!-- CTA SECUNDÁRIO -->
             ${isSectionEnabled('cta') ? `
             <section class="d2-cta-secundario" id="section-cta">
-                <div class="cta-bg">
-                    <div class="cta-bg-image" style="background-image: url('${ctaBgImage || heroBgImage || baseUrl + '/hero-bg.webp'}')"></div>
-                </div>
                 <div class="cta-content">
                     <h2>${ctaTitleText}</h2>
                     <p>${ctaSubtitleText}</p>
