@@ -933,6 +933,7 @@ body {
     padding: 30px 16px 80px;
     position: relative;
     border-radius: 20px;
+    overflow: hidden;
 }
 
 /* Phone notch style at top */

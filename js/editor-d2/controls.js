@@ -39,7 +39,8 @@ window.D2Controls = {
         }
 
         // Toggle ao clicar no header
-        header.addEventListener('click', () => {
+        header.addEventListener('click', (e) => {
+            e.stopPropagation();
             group.classList.toggle('expanded');
         });
 
@@ -209,7 +210,6 @@ window.D2Controls = {
                 }
             }
         });
-
         return container;
     },
 
@@ -226,7 +226,8 @@ window.D2Controls = {
         let optionsHtml = selectOptions.map(opt => {
             const optValue = typeof opt === 'object' ? opt.value : opt;
             const optLabel = typeof opt === 'object' ? opt.label : opt;
-            return `<option value="${optValue}" ${optValue === value ? 'selected' : ''}>${optLabel}</option>`;
+            // Use == for loose comparison to handle string/number mismatch
+            return `<option value="${optValue}" ${String(optValue) === String(value) ? 'selected' : ''}>${optLabel}</option>`;
         }).join('');
 
         container.innerHTML = `
@@ -239,7 +240,9 @@ window.D2Controls = {
         const select = container.querySelector('select');
         select.addEventListener('change', (e) => {
             if (path && window.d2State) {
-                window.d2State.set(path, e.target.value);
+                // Store as number if numeric
+                const val = e.target.value;
+                window.d2State.set(path, isNaN(val) ? val : Number(val));
             }
         });
 
@@ -469,7 +472,7 @@ window.D2Controls = {
     },
 
     /**
-     * Cria um Weight Selector (300, 400, 500, 600, 700)
+     * Cria um Weight Selector (300-900)
      * @param {Object} options - { label, value, path }
      */
     createWeightSelector(options) {
@@ -478,7 +481,9 @@ window.D2Controls = {
             { value: 400, label: 'Normal' },
             { value: 500, label: 'Medium' },
             { value: 600, label: 'Semibold' },
-            { value: 700, label: 'Bold' }
+            { value: 700, label: 'Bold' },
+            { value: 800, label: 'Extra Bold' },
+            { value: 900, label: 'Black' }
         ];
 
         return this.createSelect({ ...options, options: weights });

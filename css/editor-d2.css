@@ -529,7 +529,6 @@
 /* Control Groups */
 .control-group {
     margin-bottom: 20px;
-    background: var(--d2-bg-panel);
     border-radius: 0;
     overflow: hidden;
 }
@@ -539,20 +538,21 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
-    background: #f8f8f8;
+    background: transparent;
+    border: 1px solid #e0e0e0;
     cursor: pointer;
     transition: var(--d2-transition);
 }
 
 .control-group-header:hover {
-    background: #f0f0f0;
-    box-shadow: inset 0 0 0 1px #ccc;
+    background: #f8f8f8;
+    border-color: #ccc;
 }
 
 /* Expanded/Active state - purple when selected */
 .control-group.expanded .control-group-header {
     background: #f2eff6;
-    box-shadow: inset 0 0 0 1px #8b5cf6;
+    border-color: #8b5cf6;
 }
 
 .control-group-header h4 {
@@ -584,7 +584,7 @@
     border-top: 1px solid var(--d2-border);
 }
 
-.control-group.expanded .control-group-body {
+.control-group.expanded>.control-group-body {
     display: block;
 }
 

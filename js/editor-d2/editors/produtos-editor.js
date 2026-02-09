@@ -25,23 +25,42 @@ class D2ProdutosEditor {
             { title: 'Seção', icon: 'fa-layer-group', expanded: true },
             () => {
                 const container = document.createElement('div');
+                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor de fundo',
-                        value: window.d2State.get(`${this.basePath}.bgColor`, '#1a365d'),
-                        path: `${this.basePath}.bgColor`
-                    })
-                );
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor de fundo',
+                    value: window.d2State.get(`${this.basePath}.bgColor`, '#1a365d'),
+                    path: `${this.basePath}.bgColor`
+                }));
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Espaçamento da seção',
-                        value: window.d2State.get(`${this.basePath}.sectionSpacing`, 30),
-                        min: 20, max: 80, step: 5, unit: 'px',
-                        path: `${this.basePath}.sectionSpacing`
-                    })
-                );
+                // ── DEGRADÊ ──
+                const gradDiv = document.createElement('div');
+                gradDiv.style.cssText = dividerStyle;
+                gradDiv.textContent = 'Degradê';
+                container.appendChild(gradDiv);
+
+                container.appendChild(C.createToggle({
+                    label: 'Ativar degradê',
+                    value: window.d2State.get(`${this.basePath}.bgGradient`, false),
+                    path: `${this.basePath}.bgGradient`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: '2ª cor do degradê',
+                    value: window.d2State.get(`${this.basePath}.bgColor2`, '#0d1b36'),
+                    path: `${this.basePath}.bgColor2`
+                }));
+                container.appendChild(C.createToggle({
+                    label: 'Inverter direção',
+                    value: window.d2State.get(`${this.basePath}.bgGradientInvert`, false),
+                    path: `${this.basePath}.bgGradientInvert`
+                }));
+
+                container.appendChild(C.createSlider({
+                    label: 'Espaçamento da seção',
+                    value: window.d2State.get(`${this.basePath}.sectionSpacing`, 30),
+                    min: 20, max: 80, step: 5, unit: 'px',
+                    path: `${this.basePath}.sectionSpacing`
+                }));
 
                 return container;
             }
@@ -53,32 +72,95 @@ class D2ProdutosEditor {
             { title: 'Título da Seção', icon: 'fa-heading', expanded: true },
             () => {
                 const container = document.createElement('div');
+                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
 
-                container.appendChild(
-                    C.createTextInput({
-                        label: 'Texto do título',
-                        value: window.d2State.get(`${this.basePath}.sectionTitle.text`, 'Produtos Demeni'),
-                        placeholder: 'Ex: Nossos Produtos',
-                        path: `${this.basePath}.sectionTitle.text`
-                    })
-                );
+                // ── TÍTULO ──
+                container.appendChild(C.createToggle({
+                    label: 'Mostrar título',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.enabled`, true),
+                    path: `${this.basePath}.sectionTitle.enabled`
+                }));
+                container.appendChild(C.createTextInput({
+                    label: 'Texto',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.text`, 'Produtos Demeni'),
+                    placeholder: 'Ex: Nossos Produtos',
+                    path: `${this.basePath}.sectionTitle.text`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.size`, 36),
+                    min: 16, max: 60, step: 1, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.size`
+                }));
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.weight`, 400),
+                    path: `${this.basePath}.sectionTitle.weight`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#ffffff'),
+                    path: `${this.basePath}.sectionTitle.color`
+                }));
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Tamanho da fonte',
-                        value: window.d2State.get(`${this.basePath}.sectionTitle.size`, 36),
-                        min: 20, max: 60, step: 2, unit: 'px',
-                        path: `${this.basePath}.sectionTitle.size`
-                    })
-                );
+                // ── SUBTÍTULO ──
+                const subDiv = document.createElement('div');
+                subDiv.style.cssText = dividerStyle;
+                subDiv.textContent = 'Subtítulo';
+                container.appendChild(subDiv);
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor do título',
-                        value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#ffffff'),
-                        path: `${this.basePath}.sectionTitle.color`
-                    })
-                );
+                container.appendChild(C.createToggle({
+                    label: 'Mostrar subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.enabled`, false),
+                    path: `${this.basePath}.sectionSubtitle.enabled`
+                }));
+                container.appendChild(C.createTextInput({
+                    label: 'Texto',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.text`, 'Confira nossos destaques'),
+                    placeholder: 'Ex: Os mais vendidos',
+                    path: `${this.basePath}.sectionSubtitle.text`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.size`, 14),
+                    min: 10, max: 24, step: 1, unit: 'px',
+                    path: `${this.basePath}.sectionSubtitle.size`
+                }));
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.weight`, 400),
+                    path: `${this.basePath}.sectionSubtitle.weight`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, 'rgba(255,255,255,0.7)'),
+                    path: `${this.basePath}.sectionSubtitle.color`
+                }));
+
+                // ── ESPAÇAMENTO ──
+                const spDiv = document.createElement('div');
+                spDiv.style.cssText = dividerStyle;
+                spDiv.textContent = 'Espaçamento';
+                container.appendChild(spDiv);
+
+                container.appendChild(C.createSlider({
+                    label: 'Acima do título',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.paddingTop`, 0),
+                    min: 0, max: 40, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.paddingTop`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Entre título e subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.gap`, 6),
+                    min: 0, max: 30, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.gap`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Abaixo do subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.paddingBottom`, 24),
+                    min: 0, max: 40, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.paddingBottom`
+                }));
 
                 return container;
             }
@@ -91,14 +173,19 @@ class D2ProdutosEditor {
             () => {
                 const container = document.createElement('div');
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Espaçamento entre cards',
-                        value: window.d2State.get(`${this.basePath}.gridGap`, 16),
-                        min: 8, max: 32, step: 2, unit: 'px',
-                        path: `${this.basePath}.gridGap`
-                    })
-                );
+                container.appendChild(C.createSlider({
+                    label: 'Colunas por linha',
+                    value: window.d2State.get(`${this.basePath}.gridColumns`, 2),
+                    min: 1, max: 4, step: 1, unit: '',
+                    path: `${this.basePath}.gridColumns`
+                }));
+
+                container.appendChild(C.createSlider({
+                    label: 'Espaçamento entre cards',
+                    value: window.d2State.get(`${this.basePath}.gridGap`, 16),
+                    min: 4, max: 32, step: 2, unit: 'px',
+                    path: `${this.basePath}.gridGap`
+                }));
 
                 return container;
             }
@@ -110,23 +197,43 @@ class D2ProdutosEditor {
             { title: 'Estilo dos Cards', icon: 'fa-square', expanded: false },
             () => {
                 const container = document.createElement('div');
+                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor de fundo',
-                        value: window.d2State.get(`${this.basePath}.card.bgColor`, '#ffffff'),
-                        path: `${this.basePath}.card.bgColor`
-                    })
-                );
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor de fundo',
+                    value: window.d2State.get(`${this.basePath}.card.bgColor`, '#ffffff'),
+                    path: `${this.basePath}.card.bgColor`
+                }));
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Arredondamento',
-                        value: window.d2State.get(`${this.basePath}.card.borderRadius`, 20),
-                        min: 0, max: 40, step: 2, unit: 'px',
-                        path: `${this.basePath}.card.borderRadius`
-                    })
-                );
+                container.appendChild(C.createSlider({
+                    label: 'Arredondamento',
+                    value: window.d2State.get(`${this.basePath}.card.borderRadius`, 20),
+                    min: 0, max: 40, step: 2, unit: 'px',
+                    path: `${this.basePath}.card.borderRadius`
+                }));
+
+                // ── BORDA ──
+                const borderDiv = document.createElement('div');
+                borderDiv.style.cssText = dividerStyle;
+                borderDiv.textContent = 'Borda';
+                container.appendChild(borderDiv);
+
+                container.appendChild(C.createToggle({
+                    label: 'Mostrar borda',
+                    value: window.d2State.get(`${this.basePath}.card.borderEnabled`, false),
+                    path: `${this.basePath}.card.borderEnabled`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Espessura',
+                    value: window.d2State.get(`${this.basePath}.card.borderWidth`, 1),
+                    min: 1, max: 5, step: 1, unit: 'px',
+                    path: `${this.basePath}.card.borderWidth`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor da borda',
+                    value: window.d2State.get(`${this.basePath}.card.borderColor`, '#e0e0e0'),
+                    path: `${this.basePath}.card.borderColor`
+                }));
 
                 return container;
             }
@@ -139,30 +246,24 @@ class D2ProdutosEditor {
             () => {
                 const container = document.createElement('div');
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Tamanho da fonte',
-                        value: window.d2State.get(`${this.basePath}.title.size`, 15),
-                        min: 10, max: 24, step: 1, unit: 'px',
-                        path: `${this.basePath}.title.size`
-                    })
-                );
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho da fonte',
+                    value: window.d2State.get(`${this.basePath}.title.size`, 15),
+                    min: 10, max: 24, step: 1, unit: 'px',
+                    path: `${this.basePath}.title.size`
+                }));
 
-                container.appendChild(
-                    C.createWeightSelector({
-                        label: 'Peso da fonte',
-                        value: window.d2State.get(`${this.basePath}.title.weight`, 500),
-                        path: `${this.basePath}.title.weight`
-                    })
-                );
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso da fonte',
+                    value: window.d2State.get(`${this.basePath}.title.weight`, 500),
+                    path: `${this.basePath}.title.weight`
+                }));
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor do texto',
-                        value: window.d2State.get(`${this.basePath}.title.color`, '#333333'),
-                        path: `${this.basePath}.title.color`
-                    })
-                );
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor do texto',
+                    value: window.d2State.get(`${this.basePath}.title.color`, '#333333'),
+                    path: `${this.basePath}.title.color`
+                }));
 
                 return container;
             }
@@ -175,30 +276,58 @@ class D2ProdutosEditor {
             () => {
                 const container = document.createElement('div');
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Tamanho da fonte',
-                        value: window.d2State.get(`${this.basePath}.preco.size`, 16),
-                        min: 12, max: 28, step: 1, unit: 'px',
-                        path: `${this.basePath}.preco.size`
-                    })
-                );
+                // Estilo do R$
+                const styleSelector = document.createElement('div');
+                styleSelector.className = 'control-item';
+                const currentStyle = window.d2State.get(`${this.basePath}.preco.currencyStyle`, 'normal');
+                const activeBg = 'rgba(100,100,255,0.15)';
+                const inactiveBg = 'transparent';
+                const btnBase = 'flex: 1; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; color: inherit; transition: all 0.2s;';
+                styleSelector.innerHTML = `
+                    <label>Estilo do R$</label>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                        <button class="currency-style-btn ${currentStyle === 'normal' ? 'active' : ''}" data-style="normal"
+                            style="${btnBase} border: 2px solid ${currentStyle === 'normal' ? '#6366f1' : 'rgba(0,0,0,0.15)'}; background: ${currentStyle === 'normal' ? activeBg : inactiveBg};">
+                            R$ 99,90
+                        </button>
+                        <button class="currency-style-btn ${currentStyle === 'small' ? 'active' : ''}" data-style="small"
+                            style="${btnBase} border: 2px solid ${currentStyle === 'small' ? '#6366f1' : 'rgba(0,0,0,0.15)'}; background: ${currentStyle === 'small' ? activeBg : inactiveBg};">
+                            <span style="font-size: 9px; vertical-align: super;">R$</span>99<span style="font-size: 9px; vertical-align: super;">,90</span>
+                        </button>
+                    </div>
+                `;
+                styleSelector.querySelectorAll('.currency-style-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const style = btn.dataset.style;
+                        window.d2State.set(`${this.basePath}.preco.currencyStyle`, style);
+                        styleSelector.querySelectorAll('.currency-style-btn').forEach(b => {
+                            const isActive = b.dataset.style === style;
+                            b.style.background = isActive ? activeBg : inactiveBg;
+                            b.style.borderColor = isActive ? '#6366f1' : 'rgba(0,0,0,0.15)';
+                            b.classList.toggle('active', isActive);
+                        });
+                    });
+                });
+                container.appendChild(styleSelector);
 
-                container.appendChild(
-                    C.createWeightSelector({
-                        label: 'Peso da fonte',
-                        value: window.d2State.get(`${this.basePath}.preco.weight`, 800),
-                        path: `${this.basePath}.preco.weight`
-                    })
-                );
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho da fonte',
+                    value: window.d2State.get(`${this.basePath}.preco.size`, 16),
+                    min: 12, max: 28, step: 1, unit: 'px',
+                    path: `${this.basePath}.preco.size`
+                }));
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor do texto',
-                        value: window.d2State.get(`${this.basePath}.preco.color`, '#333333'),
-                        path: `${this.basePath}.preco.color`
-                    })
-                );
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso da fonte',
+                    value: window.d2State.get(`${this.basePath}.preco.weight`, 800),
+                    path: `${this.basePath}.preco.weight`
+                }));
+
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor do texto',
+                    value: window.d2State.get(`${this.basePath}.preco.color`, '#333333'),
+                    path: `${this.basePath}.preco.color`
+                }));
 
                 return container;
             }
@@ -210,40 +339,55 @@ class D2ProdutosEditor {
             { title: 'Botão Comprar', icon: 'fa-shopping-cart', expanded: false },
             () => {
                 const container = document.createElement('div');
+                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Tamanho da fonte',
-                        value: window.d2State.get(`${this.basePath}.btn.size`, 13),
-                        min: 10, max: 18, step: 1, unit: 'px',
-                        path: `${this.basePath}.btn.size`
-                    })
-                );
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho da fonte',
+                    value: window.d2State.get(`${this.basePath}.btn.size`, 13),
+                    min: 10, max: 18, step: 1, unit: 'px',
+                    path: `${this.basePath}.btn.size`
+                }));
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor de fundo',
-                        value: window.d2State.get(`${this.basePath}.btn.bgColor`, '#25D366'),
-                        path: `${this.basePath}.btn.bgColor`
-                    })
-                );
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor de fundo',
+                    value: window.d2State.get(`${this.basePath}.btn.bgColor`, '#25D366'),
+                    path: `${this.basePath}.btn.bgColor`
+                }));
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor do texto',
-                        value: window.d2State.get(`${this.basePath}.btn.color`, '#ffffff'),
-                        path: `${this.basePath}.btn.color`
-                    })
-                );
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor do texto',
+                    value: window.d2State.get(`${this.basePath}.btn.color`, '#ffffff'),
+                    path: `${this.basePath}.btn.color`
+                }));
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Arredondamento',
-                        value: window.d2State.get(`${this.basePath}.btn.borderRadius`, 20),
-                        min: 0, max: 30, step: 2, unit: 'px',
-                        path: `${this.basePath}.btn.borderRadius`
-                    })
-                );
+                container.appendChild(C.createSlider({
+                    label: 'Arredondamento',
+                    value: window.d2State.get(`${this.basePath}.btn.borderRadius`, 20),
+                    min: 0, max: 30, step: 2, unit: 'px',
+                    path: `${this.basePath}.btn.borderRadius`
+                }));
+
+                // ── ESPAÇAMENTO ──
+                const spacingDiv = document.createElement('div');
+                spacingDiv.style.cssText = dividerStyle;
+                spacingDiv.textContent = 'Espaçamento';
+                container.appendChild(spacingDiv);
+
+                container.appendChild(C.createSlider({
+                    label: 'Padding horizontal',
+                    value: window.d2State.get(`${this.basePath}.btn.paddingH`, 14),
+                    min: 6, max: 30, step: 2, unit: 'px',
+                    path: `${this.basePath}.btn.paddingH`
+                }));
+
+                container.appendChild(C.createSlider({
+                    label: 'Padding vertical',
+                    value: window.d2State.get(`${this.basePath}.btn.paddingV`, 6),
+                    min: 4, max: 20, step: 2, unit: 'px',
+                    path: `${this.basePath}.btn.paddingV`
+                }));
+
+
 
                 return container;
             }
@@ -303,7 +447,7 @@ class D2ProdutosEditor {
                                         label: 'Imagem',
                                         value: product.image || '',
                                         path: `d2Products.${index}.image`,
-                                        aspect: '4/3'
+                                        compact: true
                                     })
                                 );
 

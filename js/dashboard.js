@@ -311,12 +311,17 @@ function loadProjects() {
 
     // Helper para renderizar card de rascunho
     const renderDraftCard = (project) => {
+        const hasThumbnail = !!project.thumbnail;
         const previewImage = project.thumbnail
             || project.data?.style?.bgImage
             || project.data?.profile?.avatar
             || 'https://ui-avatars.com/api/?name=Site&background=666&color=fff';
-        const previewClass = (project.thumbnail || project.data?.style?.bgImage) ? 'project-thumbnail' : '';
-        const displayName = project.data?.profile?.name || project.name || 'Novo Site';
+        const previewClass = (hasThumbnail || project.data?.style?.bgImage) ? 'project-thumbnail' : '';
+        // Prioriza project.name (editado pelo usuário) sobre profile.name
+        const displayName = project.name || project.data?.profile?.name || 'Novo Site';
+        const thumbnailStyle = hasThumbnail
+            ? 'style="object-fit: cover; object-position: top center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; border-radius: 20px; margin: 0; box-shadow: none; z-index: 1;"'
+            : '';
         const modelType = project.modelType || 'd1';
         const modelConfig = {
             'd1': { name: 'D-1', icon: 'fa-link', color: '#9333ea', bgColor: 'rgba(147, 51, 234, 0.15)' },
@@ -328,7 +333,7 @@ function loadProjects() {
         return `
         <div class="project-card draft model-${modelType}" data-id="${project.id}">
             <div class="project-preview">
-                <img src="${previewImage}" alt="${displayName}" class="${previewClass}">
+                <img src="${previewImage}" alt="${displayName}" class="${previewClass}" ${thumbnailStyle}>
                 <span class="model-badge" style="background: ${model.bgColor}; color: ${model.color};">
                     <i class="fas ${model.icon}"></i> ${model.name}
                 </span>
@@ -1199,6 +1204,20 @@ function initEditorD2() {
         } else {
             console.log('[Editor D2] No saved data found, using defaults');
         }
+
+        // Carrega nome do projeto no input do header
+        if (project) {
+            const projectNameInput = document.getElementById('project-name-header');
+            const savedName = project.name || project.data?.projectName || 'Novo Site';
+            if (projectNameInput) {
+                projectNameInput.value = savedName;
+            }
+            // Garante que o nome está no estado do editor
+            if (window.d2State) {
+                window.d2State.set('projectName', savedName);
+            }
+            console.log('[Editor D2] Project name loaded:', savedName);
+        }
     } else {
         console.log('[Editor D2] No current project, using defaults');
     }
@@ -1277,6 +1296,20 @@ function initEditorD1() {
         initD1Embedded();
     } else {
         console.error('[D1 Editor] editor-d1-embedded.js not loaded');
+    }
+
+    // Carrega nome do projeto no input do header
+    const projectId = UserData.getCurrentProjectId();
+    if (projectId) {
+        const project = UserData.getProject(projectId);
+        if (project) {
+            const projectNameInput = document.getElementById('project-name-header');
+            const savedName = project.name || project.data?.projectName || 'Novo Site';
+            if (projectNameInput) {
+                projectNameInput.value = savedName;
+            }
+            console.log('[D1 Editor] Project name loaded:', savedName);
+        }
     }
 }
 

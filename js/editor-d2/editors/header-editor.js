@@ -114,6 +114,41 @@ class D2HeaderEditor {
         );
         fragment.appendChild(brandGroup);
 
+        // ===== MENU LATERAL (SIDEBAR) =====
+        const sidebarGroup = C.createGroupExpander(
+            { title: 'Menu Lateral', icon: 'fa-bars', expanded: false },
+            () => {
+                const container = document.createElement('div');
+
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor de fundo',
+                        value: window.d2State.get(`${this.basePath}.sidebar.bgColor`, '#1a1a1a'),
+                        path: `${this.basePath}.sidebar.bgColor`
+                    })
+                );
+
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor do texto',
+                        value: window.d2State.get(`${this.basePath}.sidebar.textColor`, '#ffffff'),
+                        path: `${this.basePath}.sidebar.textColor`
+                    })
+                );
+
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor de destaque',
+                        value: window.d2State.get(`${this.basePath}.sidebar.accentColor`, '#e67e22'),
+                        path: `${this.basePath}.sidebar.accentColor`
+                    })
+                );
+
+                return container;
+            }
+        );
+        fragment.appendChild(sidebarGroup);
+
         return fragment;
     }
 }

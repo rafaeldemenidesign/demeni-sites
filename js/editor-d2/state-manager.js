@@ -74,7 +74,18 @@ class D2StateManager {
                     logoPosition: 'left', // 'left', 'center', 'right'
                     height: 80,
                     bgColor: '#2d2d2d',
-                    textColor: '#ffffff'
+                    textColor: '#ffffff',
+                    sidebar: {
+                        bgColor: '#1a1a1a',
+                        textColor: '#ffffff',
+                        accentColor: '#e67e22',
+                        width: 280,
+                        fontSize: 15,
+                        iconSize: 16,
+                        itemPadding: 14,
+                        borderWidth: 3,
+                        showSeparators: false
+                    }
                 },
 
                 hero: {
@@ -138,6 +149,8 @@ class D2StateManager {
                 categorias: {
                     sectionSpacing: 40,
                     bgColor: '#ffffff',
+                    sectionTitle: { text: 'Categorias', size: 28, color: '#333333', weight: 400, enabled: false, paddingTop: 0, gap: 6, paddingBottom: 16 },
+                    sectionSubtitle: { text: 'Encontre o que precisa', size: 14, color: '#666666', weight: 400, enabled: false },
                     icon: { size: 80, radius: 18 },
                     label: { size: 12, weight: 500, color: '#222222' },
                     items: [
@@ -152,23 +165,32 @@ class D2StateManager {
                 produtos: {
                     sectionSpacing: 30,
                     bgColor: '#1a365d',
-                    sectionTitle: { text: 'Produtos Demeni', size: 36, color: '#ffffff' },
+                    bgColor2: '#0d1b36',
+                    bgGradient: false,
+                    bgGradientInvert: false,
+                    sectionTitle: { text: 'Produtos Demeni', size: 36, color: '#ffffff', weight: 400, enabled: true, paddingTop: 0, gap: 6, paddingBottom: 24 },
+                    sectionSubtitle: { text: 'Confira nossos destaques', size: 14, color: 'rgba(255,255,255,0.7)', weight: 400, enabled: false },
                     gridGap: 16,
+                    gridColumns: 2,
                     card: {
                         bgColor: '#ffffff',
                         borderRadius: 20,
-                        shadow: '0 2px 8px rgba(0,0,0,0.1)'
+                        shadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        borderEnabled: false,
+                        borderWidth: 1,
+                        borderColor: '#e0e0e0'
                     },
                     title: { size: 15, weight: 500, color: '#333333' },
-                    preco: { size: 16, weight: 800, color: '#333333' },
-                    btn: { size: 13, bgColor: '#25D366', color: '#ffffff', borderRadius: 20 }
+                    preco: { size: 16, weight: 800, color: '#333333', currencyStyle: 'normal' },
+                    btn: { size: 13, bgColor: '#25D366', color: '#ffffff', borderRadius: 20, paddingH: 14, paddingV: 6, marginTop: 0 }
                 },
 
                 // Feedbacks
                 feedbacks: {
                     sectionSpacing: 30,
                     bgColor: '#e8e8e8',
-                    sectionTitle: { text: 'O que estão dizendo?', size: 28, color: '#333333' },
+                    sectionTitle: { text: 'O que estão dizendo?', size: 28, color: '#333333', weight: 400, enabled: true, paddingTop: 0, gap: 6, paddingBottom: 24 },
+                    sectionSubtitle: { text: 'Depoimentos de nossos clientes', size: 14, color: '#666666', weight: 400, enabled: false },
                     avatar: { size: 60, radius: 8 },
                     name: { size: 16, weight: 500, color: '#1a365d' },
                     text: { size: 13, color: '#666666' },
@@ -356,6 +378,69 @@ class D2StateManager {
         const stateData = this.exportState();
         UserData.updateProject(projectId, { data: stateData });
         console.log('[D2 State Manager] Auto-saved to storage');
+
+        // Captura thumbnail com debounce separado (mais lento)
+        this.scheduleThumbnailCapture();
+    }
+
+    /**
+     * Agenda captura de thumbnail com debounce de 3s
+     */
+    scheduleThumbnailCapture() {
+        if (this.thumbnailDebounceTimer) {
+            clearTimeout(this.thumbnailDebounceTimer);
+        }
+        this.thumbnailDebounceTimer = setTimeout(() => {
+            this.captureThumbnail();
+        }, 3000); // 3s após última mudança - não impacta UX
+    }
+
+    /**
+     * Captura o preview como WebP thumbnail e salva no projeto
+     * Usa html2canvas para capturar e redimensiona para o aspect ratio do card
+     */
+    async captureThumbnail() {
+        if (typeof html2canvas !== 'function') {
+            console.warn('[D2 State Manager] html2canvas not loaded');
+            return;
+        }
+
+        const frame = document.getElementById('preview-frame')
+            || document.getElementById('preview-frame-d2');
+        if (!frame) {
+            console.warn('[D2 State Manager] Preview frame not found');
+            return;
+        }
+
+        try {
+            const srcCanvas = await html2canvas(frame, {
+                scale: 1,
+                useCORS: true,
+                allowTaint: true,
+                logging: false
+            });
+
+            // CROP: recorta para 300×580 a partir do topo (sem achatar/esticar)
+            const PHONE_W = 300;
+            const PHONE_H = 580;
+            const outputCanvas = document.createElement('canvas');
+            outputCanvas.width = PHONE_W;
+            outputCanvas.height = PHONE_H;
+            const ctx = outputCanvas.getContext('2d');
+
+            // Copia só os primeiros 300×580 pixels do source (crop, não resize)
+            ctx.drawImage(srcCanvas, 0, 0, PHONE_W, PHONE_H, 0, 0, PHONE_W, PHONE_H);
+
+            const webpDataUrl = outputCanvas.toDataURL('image/webp', 0.8);
+
+            const projectId = window.UserData?.getCurrentProjectId();
+            if (projectId && webpDataUrl.length < 500000) {
+                UserData.updateProject(projectId, { thumbnail: webpDataUrl });
+                console.log(`[D2 State Manager] Thumbnail CROP: ${srcCanvas.width}×${srcCanvas.height} → ${PHONE_W}×${PHONE_H}, ${Math.round(webpDataUrl.length / 1024)}kb`);
+            }
+        } catch (err) {
+            console.warn('[D2 State Manager] Thumbnail capture failed:', err.message);
+        }
     }
 
     /**

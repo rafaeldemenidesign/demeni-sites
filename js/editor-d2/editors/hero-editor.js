@@ -191,6 +191,133 @@ class D2HeroEditor {
         );
         fragment.appendChild(headerGroup);
 
+        // ===== MENU LATERAL (SIDEBAR) =====
+        const sidebarMenuGroup = C.createGroupExpander(
+            { title: 'Menu Lateral', icon: 'fa-bars', expanded: false },
+            () => {
+                const container = document.createElement('div');
+
+                // --- Cores ---
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor de fundo',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.bgColor', '#1a1a1a'),
+                        path: 'd2Adjustments.header.sidebar.bgColor'
+                    })
+                );
+
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor do texto',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.textColor', '#ffffff'),
+                        path: 'd2Adjustments.header.sidebar.textColor'
+                    })
+                );
+
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor de destaque',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.accentColor', '#e67e22'),
+                        path: 'd2Adjustments.header.sidebar.accentColor'
+                    })
+                );
+
+                // --- Dimensões ---
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Largura do menu',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.width', 280),
+                        min: 200, max: 360, step: 10, unit: 'px',
+                        path: 'd2Adjustments.header.sidebar.width'
+                    })
+                );
+
+                // --- Tipografia ---
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Tamanho da fonte',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.fontSize', 15),
+                        min: 12, max: 22, step: 1, unit: 'px',
+                        path: 'd2Adjustments.header.sidebar.fontSize'
+                    })
+                );
+
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Tamanho do ícone',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.iconSize', 16),
+                        min: 12, max: 24, step: 1, unit: 'px',
+                        path: 'd2Adjustments.header.sidebar.iconSize'
+                    })
+                );
+
+                // --- Espaçamento ---
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Espaçamento dos itens',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.itemPadding', 14),
+                        min: 8, max: 24, step: 2, unit: 'px',
+                        path: 'd2Adjustments.header.sidebar.itemPadding'
+                    })
+                );
+
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Borda de destaque',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.borderWidth', 3),
+                        min: 0, max: 6, step: 1, unit: 'px',
+                        path: 'd2Adjustments.header.sidebar.borderWidth'
+                    })
+                );
+
+                // --- Extras ---
+                container.appendChild(
+                    C.createToggle({
+                        label: 'Separadores entre itens',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.showSeparators', false),
+                        path: 'd2Adjustments.header.sidebar.showSeparators'
+                    })
+                );
+
+                // --- Nomes das seções no menu ---
+                const namesTitle = document.createElement('div');
+                namesTitle.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
+                namesTitle.textContent = 'Nomes das seções';
+                container.appendChild(namesTitle);
+
+                const currentSections = window.d2State.get('d2Sections', []);
+                currentSections.filter(s => s.id !== 'footer').forEach((section, index) => {
+                    const input = document.createElement('div');
+                    input.className = 'control-item';
+
+                    const label = document.createElement('label');
+                    label.className = 'control-label';
+                    label.textContent = section.id.charAt(0).toUpperCase() + section.id.slice(1);
+
+                    const field = document.createElement('input');
+                    field.type = 'text';
+                    field.className = 'control-input';
+                    field.value = section.name || '';
+                    field.placeholder = section.id;
+                    field.addEventListener('input', (e) => {
+                        const sections = [...window.d2State.get('d2Sections', [])];
+                        const idx = sections.findIndex(s => s.id === section.id);
+                        if (idx !== -1) {
+                            sections[idx] = { ...sections[idx], name: e.target.value };
+                            window.d2State.set('d2Sections', sections);
+                        }
+                    });
+
+                    input.appendChild(label);
+                    input.appendChild(field);
+                    container.appendChild(input);
+                });
+
+                return container;
+            }
+        );
+        fragment.appendChild(sidebarMenuGroup);
+
         // ===== IMAGEM DE FUNDO =====
         const bgImageGroup = C.createGroupExpander(
             { title: 'Imagem de Fundo', icon: 'fa-image', expanded: true },
@@ -200,6 +327,52 @@ class D2HeroEditor {
                 // Mini preview da imagem de fundo
                 const bgPreview = this.createBgImageMiniPreview();
                 container.appendChild(bgPreview);
+
+                // Sliders de posição e zoom (só aparecem quando tem imagem)
+                const positionControls = document.createElement('div');
+                positionControls.className = 'bg-position-controls';
+                positionControls.id = 'bg-position-controls';
+
+                // Slider Posição Horizontal
+                positionControls.appendChild(
+                    C.createSlider({
+                        label: 'Posição Horizontal',
+                        value: window.d2State.get(`${this.basePath}.bgPositionX`, 50),
+                        min: 0,
+                        max: 100,
+                        step: 1,
+                        unit: '%',
+                        path: `${this.basePath}.bgPositionX`
+                    })
+                );
+
+                // Slider Posição Vertical
+                positionControls.appendChild(
+                    C.createSlider({
+                        label: 'Posição Vertical',
+                        value: window.d2State.get(`${this.basePath}.bgPositionY`, 50),
+                        min: 0,
+                        max: 100,
+                        step: 1,
+                        unit: '%',
+                        path: `${this.basePath}.bgPositionY`
+                    })
+                );
+
+                // Slider Zoom
+                positionControls.appendChild(
+                    C.createSlider({
+                        label: 'Zoom',
+                        value: window.d2State.get(`${this.basePath}.bgZoom`, 100),
+                        min: 100,
+                        max: 200,
+                        step: 5,
+                        unit: '%',
+                        path: `${this.basePath}.bgZoom`
+                    })
+                );
+
+                container.appendChild(positionControls);
 
                 // Color picker para quando não há imagem
                 container.appendChild(
@@ -252,15 +425,15 @@ class D2HeroEditor {
         );
         fragment.appendChild(gradientGroup);
 
-        // ===== SCROLL INDICATOR =====
+        // ===== SETA DE SCROLL =====
         const scrollGroup = C.createGroupExpander(
-            { title: 'Indicador de Rolagem', icon: 'fa-chevron-down', expanded: false },
+            { title: 'Seta de Scroll', icon: 'fa-chevron-down', expanded: false },
             () => {
                 const container = document.createElement('div');
 
                 container.appendChild(
                     C.createToggle({
-                        label: 'Exibir setinha',
+                        label: 'Mostrar seta',
                         value: window.d2State.get(`${this.basePath}.scrollIndicator.enabled`, true),
                         path: `${this.basePath}.scrollIndicator.enabled`
                     })
@@ -268,9 +441,18 @@ class D2HeroEditor {
 
                 container.appendChild(
                     C.createColorPicker({
-                        label: 'Cor da setinha',
+                        label: 'Cor da seta',
                         value: window.d2State.get(`${this.basePath}.scrollIndicator.color`, '#ffffff'),
                         path: `${this.basePath}.scrollIndicator.color`
+                    })
+                );
+
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Distância do fundo',
+                        value: window.d2State.get(`${this.basePath}.scrollIndicator.paddingBottom`, 20),
+                        min: 0, max: 80, step: 2, unit: 'px',
+                        path: `${this.basePath}.scrollIndicator.paddingBottom`
                     })
                 );
 
@@ -680,6 +862,7 @@ class D2HeroEditor {
      * Cria mini preview da imagem de fundo com botões editar/excluir
      */
     createBgImageMiniPreview() {
+        console.log('[Hero Editor] createBgImageMiniPreview called');
         const container = document.createElement('div');
         container.className = 'control-item bg-image-preview-container';
 
@@ -707,7 +890,8 @@ class D2HeroEditor {
 
         // Subscribe para atualizações
         window.d2State.subscribe(({ path }) => {
-            if (path.includes('.bgImage')) {
+            if (path.includes('.bgImage') || path.includes('.bgPositionX') ||
+                path.includes('.bgPositionY') || path.includes('.bgZoom')) {
                 this.updateBgImageMiniPreview(previewWrapper, fileInput);
             }
         });
@@ -719,15 +903,30 @@ class D2HeroEditor {
      * Atualiza o mini preview da imagem de fundo
      */
     updateBgImageMiniPreview(wrapper, fileInput) {
-        const bgImage = window.d2State.get(`${this.basePath}.bgImage`, '');
+        // Lógica:
+        // - '_REMOVED_' → Usuário removeu explicitamente, mostra placeholder
+        // - falsy (null, undefined, '', 'null') → Usa default do template
+        // - 'url...' → Imagem customizada
+        const rawValue = window.d2State.get(`${this.basePath}.bgImage`);
+        const wasRemoved = rawValue === '_REMOVED_';
+        const bgImage = wasRemoved ? '' : (rawValue && rawValue !== 'null' ? rawValue : 'hero-bg.webp');
+
+        console.log('[Hero Editor] BG Image:', bgImage, 'Raw:', rawValue, 'Removed:', wasRemoved);
 
         wrapper.innerHTML = ''; // Limpa
 
-        if (bgImage) {
+        if (bgImage) { // Tem imagem para mostrar
+            // Pega valores de posição e zoom
+            const posX = window.d2State.get(`${this.basePath}.bgPositionX`, 50);
+            const posY = window.d2State.get(`${this.basePath}.bgPositionY`, 50);
+            const zoom = window.d2State.get(`${this.basePath}.bgZoom`, 100);
+
             // Tem imagem - mostra thumbnail com botões
             const thumb = document.createElement('div');
             thumb.className = 'bg-thumb';
             thumb.style.backgroundImage = `url(${bgImage})`;
+            thumb.style.backgroundPosition = `${posX}% ${posY}%`;
+            thumb.style.backgroundSize = `${zoom}%`;
 
             const actions = document.createElement('div');
             actions.className = 'bg-actions';
@@ -749,7 +948,7 @@ class D2HeroEditor {
             deleteBtn.title = 'Remover imagem';
             deleteBtn.onclick = (e) => {
                 e.stopPropagation();
-                window.d2State.set(`${this.basePath}.bgImage`, '');
+                window.d2State.set(`${this.basePath}.bgImage`, '_REMOVED_'); // Marcador especial
             };
 
             actions.appendChild(editBtn);

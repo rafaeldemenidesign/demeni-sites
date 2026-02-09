@@ -21,6 +21,15 @@ function renderPreviewD2New(frame, state) {
         return path.split('.').reduce((o, k) => o?.[k], adj) ?? defaultVal;
     };
 
+    // Helper: converte hex para rgba com opacidade
+    const hexToRgba = (hex, alpha = 1) => {
+        const h = hex.replace('#', '');
+        const r = parseInt(h.substring(0, 2), 16);
+        const g = parseInt(h.substring(2, 4), 16);
+        const b = parseInt(h.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
     // Get sections configuration (order and visibility)
     const sections = state?.d2Sections || [
         { id: 'hero', enabled: true },
@@ -46,6 +55,18 @@ function renderPreviewD2New(frame, state) {
     const headerHeight = get('header.height', 80);
     const headerBgColor = get('header.bgColor', '#2d2d2d');
     const headerTextColor = get('header.textColor', '#ffffff');
+    const sidebarBgColor = get('header.sidebar.bgColor', '#1a1a1a');
+    const sidebarTextColor = get('header.sidebar.textColor', '#ffffff');
+    const sidebarAccentColor = get('header.sidebar.accentColor', '#e67e22');
+    const sidebarWidth = get('header.sidebar.width', 280);
+    const sidebarFontSize = get('header.sidebar.fontSize', 15);
+    const sidebarIconSize = get('header.sidebar.iconSize', 16);
+    const sidebarItemPadding = get('header.sidebar.itemPadding', 14);
+    const sidebarBorderWidth = get('header.sidebar.borderWidth', 3);
+    const sidebarShowSeparators = get('header.sidebar.showSeparators', false);
+
+    // Seções habilitadas para o menu lateral (sem footer)
+    const enabledSections = sections.filter(s => s.enabled && s.id !== 'footer');
 
     // =============================================
     // HERO - TODOS os valores dinâmicos
@@ -53,12 +74,19 @@ function renderPreviewD2New(frame, state) {
     const heroSectionHeight = get('hero.sectionHeight', 100);
     const heroTextPosition = get('hero.textPosition', 'center');
     const heroContentPadding = get('hero.contentPadding', 60);
-    const heroBgImage = get('hero.bgImage', null);
+    // _REMOVED_ = usuário removeu explicitamente, usar null
+    const rawHeroBg = get('hero.bgImage', null);
+    const heroBgImage = rawHeroBg === '_REMOVED_' ? null : (rawHeroBg || 'hero-bg.webp');
+    const heroBgColor = get('hero.bgColor', '#1a1a2e');
+    const heroBgPositionX = get('hero.bgPositionX', 50);
+    const heroBgPositionY = get('hero.bgPositionY', 50);
+    const heroBgZoom = get('hero.bgZoom', 100);
     const heroGradientEnd = get('hero.gradient.colorEnd', '#0a0a0a');
     const heroGradientIntensity = get('hero.gradient.intensity', 60);
     const heroGradientPosition = get('hero.gradient.position', 50);
     const heroScrollIndicatorEnabled = get('hero.scrollIndicator.enabled', true);
     const heroScrollIndicatorColor = get('hero.scrollIndicator.color', '#ffffff');
+    const heroScrollIndicatorPadding = get('hero.scrollIndicator.paddingBottom', 20);
 
     // Título
     const heroTitleText = get('hero.title.text', '') || state?.profile?.name || 'Seu Nome';
@@ -97,39 +125,82 @@ function renderPreviewD2New(frame, state) {
     // =============================================
     const categoriasBgColor = get('categorias.bgColor', '#ffffff');
     const categoriasSpacing = get('categorias.sectionSpacing', 40);
-    const categoriaIconSize = get('categorias.icon.size', 80);
-    const categoriaIconRadius = get('categorias.icon.radius', 18);
-    const categoriaLabelSize = get('categorias.label.size', 12);
+    const categoriasColumns = get('categorias.columnsPerRow', 4);
+    const categoriaIconSize = get('categorias.icon.size', 55);
+    const categoriaIconRadius = get('categorias.icon.radius', 16);
+    const categoriaIconColor = get('categorias.icon.color', '#333333');
+    const categoriaIconBgColor = get('categorias.icon.bgColor', '#f5f5f5');
+    const categoriaLabelSize = get('categorias.label.size', 10);
     const categoriaLabelColor = get('categorias.label.color', '#222222');
     const categoriaLabelWeight = get('categorias.label.weight', 500);
     const categoriasItems = get('categorias.items', [
-        { id: 1, label: 'PRODUTOS', icon: 'Pen Tool.png' },
-        { id: 2, label: 'SERVIÇOS', icon: 'Engrenagem.png' },
-        { id: 3, label: 'EDUCAÇÃO', icon: 'Aulas.png' },
-        { id: 4, label: 'SOBRE', icon: 'Sobre.png' }
+        { id: 1, label: 'PRODUTOS', icon: 'fa-box-open' },
+        { id: 2, label: 'SERVIÇOS', icon: 'fa-concierge-bell' },
+        { id: 3, label: 'EDUCAÇÃO', icon: 'fa-graduation-cap' },
+        { id: 4, label: 'SOBRE', icon: 'fa-info-circle' }
     ]);
+    const categoriasSectionTitle = get('categorias.sectionTitle.text', 'Categorias');
+    const categoriasSectionTitleSize = get('categorias.sectionTitle.size', 28);
+    const categoriasSectionTitleColor = get('categorias.sectionTitle.color', '#333333');
+    const categoriasSectionTitleEnabled = get('categorias.sectionTitle.enabled', false);
+    const categoriasTitlePaddingTop = get('categorias.sectionTitle.paddingTop', 0);
+    const categoriasTitleGap = get('categorias.sectionTitle.gap', 6);
+    const categoriasTitlePaddingBottom = get('categorias.sectionTitle.paddingBottom', 16);
+    const categoriasSectionSubtitle = get('categorias.sectionSubtitle.text', 'Encontre o que precisa');
+    const categoriasSectionSubtitleSize = get('categorias.sectionSubtitle.size', 14);
+    const categoriasSectionSubtitleColor = get('categorias.sectionSubtitle.color', '#666666');
+    const categoriasSectionSubtitleEnabled = get('categorias.sectionSubtitle.enabled', false);
+    const categoriasTitleWeight = get('categorias.sectionTitle.weight', 400);
+    const categoriasSubtitleWeight = get('categorias.sectionSubtitle.weight', 400);
 
     // =============================================
     // PRODUTOS - Valores dinâmicos
     // =============================================
     const produtosBgColor = get('produtos.bgColor', '#1a365d');
+    const produtosBgColor2 = get('produtos.bgColor2', '#0d1b36');
+    const produtosBgGradient = get('produtos.bgGradient', false);
+    const produtosBgGradientInvert = get('produtos.bgGradientInvert', false);
     const produtosSpacing = get('produtos.sectionSpacing', 30);
     const produtosSectionTitle = get('produtos.sectionTitle.text', 'Produtos Demeni');
     const produtosSectionTitleSize = get('produtos.sectionTitle.size', 36);
     const produtosSectionTitleColor = get('produtos.sectionTitle.color', '#ffffff');
+    const produtosSectionTitleEnabled = get('produtos.sectionTitle.enabled', true);
+    const produtosTitlePaddingTop = get('produtos.sectionTitle.paddingTop', 0);
+    const produtosTitleGap = get('produtos.sectionTitle.gap', 6);
+    const produtosTitlePaddingBottom = get('produtos.sectionTitle.paddingBottom', 24);
+    const produtosSectionSubtitle = get('produtos.sectionSubtitle.text', 'Confira nossos destaques');
+    const produtosSectionSubtitleSize = get('produtos.sectionSubtitle.size', 14);
+    const produtosSectionSubtitleColor = get('produtos.sectionSubtitle.color', 'rgba(255,255,255,0.7)');
+    const produtosSectionSubtitleEnabled = get('produtos.sectionSubtitle.enabled', false);
+    const produtosTitleWeight = get('produtos.sectionTitle.weight', 400);
+    const produtosSubtitleWeight = get('produtos.sectionSubtitle.weight', 400);
     const produtosGridGap = get('produtos.gridGap', 16);
+    const produtosGridColumns = get('produtos.gridColumns', 2);
     const produtoCardBgColor = get('produtos.card.bgColor', '#ffffff');
     const produtoCardRadius = get('produtos.card.borderRadius', 20);
+    const produtoCardBorderEnabled = get('produtos.card.borderEnabled', false);
+    const produtoCardBorderWidth = get('produtos.card.borderWidth', 1);
+    const produtoCardBorderColor = get('produtos.card.borderColor', '#e0e0e0');
     const produtoTitleSize = get('produtos.title.size', 15);
     const produtoTitleWeight = get('produtos.title.weight', 500);
     const produtoTitleColor = get('produtos.title.color', '#333333');
     const produtoPrecoSize = get('produtos.preco.size', 16);
     const produtoPrecoWeight = get('produtos.preco.weight', 800);
     const produtoPrecoColor = get('produtos.preco.color', '#333333');
+    const produtoPrecoCurrencyStyle = get('produtos.preco.currencyStyle', 'normal');
     const produtoBtnSize = get('produtos.btn.size', 13);
     const produtoBtnBgColor = get('produtos.btn.bgColor', '#25D366');
     const produtoBtnColor = get('produtos.btn.color', '#ffffff');
     const produtoBtnRadius = get('produtos.btn.borderRadius', 20);
+    const produtoBtnPaddingH = get('produtos.btn.paddingH', 14);
+    const produtoBtnPaddingV = get('produtos.btn.paddingV', 6);
+    const produtoBtnMarginTop = get('produtos.btn.marginTop', 0);
+    // Computed gradient
+    const produtosBgStyle = produtosBgGradient
+        ? (produtosBgGradientInvert
+            ? `linear-gradient(to top, ${produtosBgColor}, ${produtosBgColor2})`
+            : `linear-gradient(to bottom, ${produtosBgColor}, ${produtosBgColor2})`)
+        : produtosBgColor;
 
     // =============================================
     // FEEDBACKS - Valores dinâmicos
@@ -139,6 +210,16 @@ function renderPreviewD2New(frame, state) {
     const feedbacksSectionTitle = get('feedbacks.sectionTitle.text', 'O que estão dizendo?');
     const feedbacksSectionTitleSize = get('feedbacks.sectionTitle.size', 28);
     const feedbacksSectionTitleColor = get('feedbacks.sectionTitle.color', '#333333');
+    const feedbacksSectionTitleEnabled = get('feedbacks.sectionTitle.enabled', true);
+    const feedbacksTitlePaddingTop = get('feedbacks.sectionTitle.paddingTop', 0);
+    const feedbacksTitleGap = get('feedbacks.sectionTitle.gap', 6);
+    const feedbacksTitlePaddingBottom = get('feedbacks.sectionTitle.paddingBottom', 24);
+    const feedbacksSectionSubtitle = get('feedbacks.sectionSubtitle.text', 'Depoimentos de nossos clientes');
+    const feedbacksSectionSubtitleSize = get('feedbacks.sectionSubtitle.size', 14);
+    const feedbacksSectionSubtitleColor = get('feedbacks.sectionSubtitle.color', '#666666');
+    const feedbacksSectionSubtitleEnabled = get('feedbacks.sectionSubtitle.enabled', false);
+    const feedbacksTitleWeight = get('feedbacks.sectionTitle.weight', 400);
+    const feedbacksSubtitleWeight = get('feedbacks.sectionSubtitle.weight', 400);
     const feedbackAvatarSize = get('feedbacks.avatar.size', 60);
     const feedbackAvatarRadius = get('feedbacks.avatar.radius', 8);
     const feedbackNameSize = get('feedbacks.name.size', 16);
@@ -236,6 +317,8 @@ function renderPreviewD2New(frame, state) {
                 margin: 0;
                 padding: 0;
                 min-height: 100%;
+                position: relative;
+                overflow: hidden;
             }
             
             .d2-preview-container * {
@@ -270,8 +353,91 @@ function renderPreviewD2New(frame, state) {
                 ${headerLogoPosition === 'center' ? 'position: absolute; right: 24px;' : ''}
             }
 
+            /* SIDEBAR */
+            .d2-sidebar-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                opacity: 0;
+                visibility: hidden;
+                z-index: 998;
+                transition: opacity 0.3s, visibility 0.3s;
+            }
+            .d2-sidebar-overlay.open {
+                opacity: 1;
+                visibility: visible;
+            }
+            .d2-sidebar {
+                position: absolute;
+                top: 0;
+                ${headerLogoPosition === 'right' ? 'left: 0;' : 'right: 0;'}
+                width: ${sidebarWidth}px;
+                height: 100%;
+                background: ${sidebarBgColor};
+                z-index: 999;
+                transform: translateX(${headerLogoPosition === 'right' ? '-100%' : '100%'});
+                transition: transform 0.3s ease;
+                padding: ${headerHeight + 20}px 0 20px;
+                box-shadow: ${headerLogoPosition === 'right' ? '4px 0' : '-4px 0'} 20px rgba(0,0,0,0.3);
+                overflow-y: auto;
+            }
+            .d2-sidebar.open {
+                transform: translateX(0);
+            }
+            .d2-sidebar .sidebar-close {
+                position: absolute;
+                top: 20px;
+                ${headerLogoPosition === 'right' ? 'right: 20px;' : 'left: 20px;'}
+                color: ${sidebarTextColor};
+                font-size: 28px;
+                cursor: pointer;
+                background: none;
+                border: none;
+                opacity: 0.7;
+                transition: opacity 0.2s;
+            }
+            .d2-sidebar .sidebar-close:hover {
+                opacity: 1;
+            }
+            .d2-sidebar .sidebar-title {
+                padding: 0 24px 16px;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: ${sidebarTextColor};
+                opacity: 0.4;
+            }
+            .d2-sidebar .sidebar-item {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: ${sidebarItemPadding}px 24px;
+                color: ${sidebarTextColor};
+                cursor: pointer;
+                transition: background 0.2s, color 0.2s;
+                text-decoration: none;
+                font-size: ${sidebarFontSize}px;
+                border-${headerLogoPosition === 'right' ? 'left' : 'right'}: ${sidebarBorderWidth}px solid transparent;
+                ${sidebarShowSeparators ? `border-bottom: 1px solid rgba(255,255,255,0.08);` : ''}
+            }
+            .d2-sidebar .sidebar-item:hover {
+                background: rgba(255,255,255,0.08);
+                color: ${sidebarAccentColor};
+                border-${headerLogoPosition === 'right' ? 'left' : 'right'}-color: ${sidebarAccentColor};
+            }
+            .d2-sidebar .sidebar-item i {
+                width: 20px;
+                text-align: center;
+                font-size: ${sidebarIconSize}px;
+                opacity: 0.8;
+            }
+
             /* HERO */
             .d2-hero {
+                background-color: ${heroBgColor};
                 height: ${heroSectionHeight}vh;
                 min-height: 300px;
                 position: relative;
@@ -290,11 +456,14 @@ function renderPreviewD2New(frame, state) {
                 height: 100%;
                 z-index: 1;
             }
-            .d2-hero .hero-bg img {
+            .d2-hero .hero-bg .hero-bg-image {
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
-                object-position: center top;
+                background-size: cover;
+                background-position: ${heroBgPositionX}% ${heroBgPositionY}%;
+                background-repeat: no-repeat;
+                transform: scale(${heroBgZoom / 100});
+                transform-origin: ${heroBgPositionX}% ${heroBgPositionY}%;
             }
             .d2-hero .hero-gradient {
                 position: absolute;
@@ -302,12 +471,12 @@ function renderPreviewD2New(frame, state) {
                 left: 0;
                 width: 100%;
                 height: ${100 - heroGradientPosition}%;
-                background: linear-gradient(to top, ${heroGradientEnd} 0%, rgba(10, 10, 10, ${heroGradientIntensity / 100}) 50%, transparent 100%);
+                background: linear-gradient(to top, ${heroGradientEnd} 0%, ${hexToRgba(heroGradientEnd, heroGradientIntensity / 100)} 50%, ${hexToRgba(heroGradientEnd, 0)} 100%);
                 z-index: 2;
             }
             .d2-hero .scroll-indicator {
                 position: absolute;
-                bottom: 20px;
+                bottom: ${heroScrollIndicatorPadding}px;
                 left: 50%;
                 transform: translateX(-50%);
                 z-index: 10;
@@ -353,32 +522,38 @@ function renderPreviewD2New(frame, state) {
                 font-weight: ${heroBtnFontWeight};
                 letter-spacing: 1px;
                 border-radius: ${heroBtnBorderRadius}px;
-                box-shadow: 0 4px 15px rgba(81, 103, 231, 0.4);
+                box-shadow: 0 4px 15px ${hexToRgba(heroBtnBgColor, 0.4)};
             }
 
             /* CATEGORIAS */
             .d2-categorias {
-                padding: ${categoriasSpacing}px 32px;
+                padding: ${categoriasSpacing}px 20px;
                 text-align: center;
                 background: ${categoriasBgColor};
                 color: #333;
                 overflow: hidden;
                 margin: 0;
             }
-            .d2-section-label {
-                display: block;
-                font-size: 11px;
-                letter-spacing: 3px;
-                opacity: 0.5;
-                margin-bottom: 14px;
-                color: #666;
+            .d2-categorias h2 {
+                font-family: 'Liebling', serif;
+                font-size: ${categoriasSectionTitleSize}px;
+                font-weight: ${categoriasTitleWeight};
+                margin-top: ${categoriasTitlePaddingTop}px;
+                margin-bottom: ${categoriasTitleGap}px;
+                color: ${categoriasSectionTitleColor};
+            }
+            .d2-categorias .section-subtitle {
+                font-size: ${categoriasSectionSubtitleSize}px;
+                color: ${categoriasSectionSubtitleColor};
+                margin-bottom: ${categoriasTitlePaddingBottom}px;
+                font-weight: ${categoriasSubtitleWeight};
+                opacity: 0.8;
             }
             .d2-categorias-grid {
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 10px;
-                max-width: 100%;
+                gap: 12px 8px;
             }
             .d2-categoria-item {
                 display: flex;
@@ -386,23 +561,27 @@ function renderPreviewD2New(frame, state) {
                 align-items: center;
                 text-decoration: none;
                 color: #333;
-                width: ${categoriaIconSize + 10}px;
-                flex-shrink: 0;
+                flex: 0 0 calc(${100 / categoriasColumns}% - 6px);
+                min-width: 0;
             }
             .d2-categoria-icon {
                 width: ${categoriaIconSize}px;
                 height: ${categoriaIconSize}px;
                 border-radius: ${categoriaIconRadius}px;
-                background: #f5f5f5;
+                background: ${categoriaIconBgColor};
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin-bottom: 8px;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+                margin-bottom: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            .d2-categoria-icon i {
+                font-size: ${Math.round(categoriaIconSize * 0.4)}px;
+                color: ${categoriaIconColor};
             }
             .d2-categoria-icon img {
-                width: 36px;
-                height: 36px;
+                width: ${Math.round(categoriaIconSize * 0.45)}px;
+                height: ${Math.round(categoriaIconSize * 0.45)}px;
                 object-fit: contain;
             }
             .d2-categoria-item span {
@@ -410,13 +589,19 @@ function renderPreviewD2New(frame, state) {
                 letter-spacing: 0.5px;
                 color: ${categoriaLabelColor};
                 font-weight: ${categoriaLabelWeight};
+                text-align: center;
+                line-height: 1.2;
+                word-break: break-word;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             /* PRODUTOS */
             .d2-produtos {
                 padding: ${produtosSpacing}px 32px;
                 text-align: center;
-                background: ${produtosBgColor};
+                background: ${produtosBgStyle};
                 margin: 0;
             }
             .d2-produtos .d2-section-label {
@@ -425,9 +610,17 @@ function renderPreviewD2New(frame, state) {
             .d2-produtos h2 {
                 font-family: 'Liebling', serif;
                 font-size: ${produtosSectionTitleSize}px;
-                font-weight: 400;
-                margin-bottom: 24px;
+                font-weight: ${produtosTitleWeight};
+                margin-top: ${produtosTitlePaddingTop}px;
+                margin-bottom: ${produtosTitleGap}px;
                 color: ${produtosSectionTitleColor};
+            }
+            .d2-produtos .section-subtitle {
+                font-size: ${produtosSectionSubtitleSize}px;
+                color: ${produtosSectionSubtitleColor};
+                margin-bottom: ${produtosTitlePaddingBottom}px;
+                font-weight: ${produtosSubtitleWeight};
+                opacity: 0.8;
             }
             .d2-produtos-grid {
                 display: flex;
@@ -440,22 +633,22 @@ function renderPreviewD2New(frame, state) {
             .d2-produto-card {
                 background: ${produtoCardBgColor};
                 border-radius: ${produtoCardRadius}px;
-                overflow: hidden;
                 text-decoration: none;
                 color: #333;
                 display: flex;
                 flex-direction: column;
-                padding: 4px;
-                width: calc(50% - ${produtosGridGap / 2}px);
-                min-width: 140px;
-                max-width: 180px;
+                padding: 6px;
+                width: calc(${100 / produtosGridColumns}% - ${produtosGridGap}px);
+                min-width: 100px;
                 flex-shrink: 0;
+                box-sizing: border-box;
+                ${produtoCardBorderEnabled ? `border: ${produtoCardBorderWidth}px solid ${produtoCardBorderColor};` : ''}
             }
             .d2-produto-img {
                 width: 100%;
                 aspect-ratio: 4 / 3;
                 overflow: hidden;
-                border-radius: 16px;
+                border-radius: ${Math.max(produtoCardRadius - 6, 0)}px;
             }
             .d2-produto-img img {
                 width: 100%;
@@ -465,31 +658,54 @@ function renderPreviewD2New(frame, state) {
             .d2-produto-card h3 {
                 font-size: ${produtoTitleSize}px;
                 font-weight: ${produtoTitleWeight};
-                padding: 10px 6px 6px;
-                line-height: 1.1;
+                padding: 8px 6px 2px;
+                margin: 0;
+                line-height: 1.2;
                 text-align: left;
                 color: ${produtoTitleColor};
             }
             .d2-produto-footer {
                 display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 10px 10px;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 4px 6px 6px;
+                margin-top: auto;
+                gap: 8px;
             }
             .d2-preco {
                 font-size: ${produtoPrecoSize}px;
                 font-weight: ${produtoPrecoWeight};
                 color: ${produtoPrecoColor};
+                display: inline-flex;
+                align-items: baseline;
+                white-space: nowrap;
+            }
+            .d2-preco .currency {
+                font-size: ${Math.round(produtoPrecoSize * 0.55)}px;
+                margin-right: 1px;
+                font-weight: ${produtoPrecoWeight};
+            }
+            .d2-preco .cents {
+                font-size: ${Math.round(produtoPrecoSize * 0.55)}px;
+                font-weight: ${produtoPrecoWeight};
             }
             .d2-produto-btn {
                 display: inline-block;
-                padding: 6px 14px;
+                padding: ${produtoBtnPaddingV}px ${produtoBtnPaddingH}px;
                 background: ${produtoBtnBgColor};
                 color: ${produtoBtnColor};
                 font-size: ${produtoBtnSize}px;
-                font-weight: 500;
+                font-weight: 600;
                 border-radius: ${produtoBtnRadius}px;
                 text-transform: lowercase;
+                white-space: nowrap;
+                transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+                cursor: pointer;
+            }
+            .d2-produto-btn:hover {
+                transform: scale(1.06);
+                filter: brightness(1.15);
+                box-shadow: 0 0 12px rgba(255,255,255,0.3), 0 4px 8px rgba(0,0,0,0.2);
             }
 
             /* FEEDBACKS */
@@ -506,9 +722,17 @@ function renderPreviewD2New(frame, state) {
             .d2-feedbacks h2 {
                 font-family: 'Liebling', serif;
                 font-size: ${feedbacksSectionTitleSize}px;
-                font-weight: 400;
-                margin-bottom: 24px;
+                font-weight: ${feedbacksTitleWeight};
+                margin-top: ${feedbacksTitlePaddingTop}px;
+                margin-bottom: ${feedbacksTitleGap}px;
                 color: ${feedbacksSectionTitleColor};
+            }
+            .d2-feedbacks .section-subtitle {
+                font-size: ${feedbacksSectionSubtitleSize}px;
+                color: ${feedbacksSectionSubtitleColor};
+                margin-bottom: ${feedbacksTitlePaddingBottom}px;
+                font-weight: ${feedbacksSubtitleWeight};
+                opacity: 0.8;
             }
             .d2-feedbacks-list {
                 display: flex;
@@ -568,10 +792,12 @@ function renderPreviewD2New(frame, state) {
                 height: 100%;
                 z-index: 1;
             }
-            .d2-cta-secundario .cta-bg img {
+            .d2-cta-secundario .cta-bg .cta-bg-image {
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
                 filter: brightness(${ctaBrightness});
             }
             .d2-cta-secundario .cta-content {
@@ -688,13 +914,25 @@ function renderPreviewD2New(frame, state) {
                 <div class="logo">
                     <img src="${state?.profile?.logo || baseUrl + '/Logo-Tipográfica-Demeni.png'}" alt="Logo">
                 </div>
-                <button class="menu-btn">☰</button>
+                <button class="menu-btn" onclick="var s=this.closest('.d2-preview-container');s.querySelector('.d2-sidebar').classList.add('open');s.querySelector('.d2-sidebar-overlay').classList.add('open')">☰</button>
             </header>
 
+            <!-- SIDEBAR OVERLAY -->
+            <div class="d2-sidebar-overlay" onclick="var s=this.closest('.d2-preview-container');s.querySelector('.d2-sidebar').classList.remove('open');this.classList.remove('open')"></div>
+            <nav class="d2-sidebar">
+                <button class="sidebar-close" onclick="var s=this.closest('.d2-preview-container');s.querySelector('.d2-sidebar').classList.remove('open');s.querySelector('.d2-sidebar-overlay').classList.remove('open')">&times;</button>
+                <div class="sidebar-title">Menu</div>
+                ${enabledSections.map(s => `
+                <a class="sidebar-item" onclick="var c=this.closest('.d2-preview-container');c.querySelector('.d2-sidebar').classList.remove('open');c.querySelector('.d2-sidebar-overlay').classList.remove('open');var target=c.querySelector('#section-${s.id}');if(target)target.scrollIntoView({behavior:'smooth',block:'start'})">
+                    <i class="fas ${s.icon || 'fa-circle'}"></i>
+                    <span>${s.name}</span>
+                </a>`).join('')}
+            </nav>
+
             <!-- HERO -->
-            <section class="d2-hero">
+            <section class="d2-hero" id="section-hero">
                 <div class="hero-bg">
-                    <img src="${heroBgImage || baseUrl + '/hero-bg.webp'}" alt="Background">
+                    ${heroBgImage ? `<div class="hero-bg-image" style="background-image: url('${heroBgImage}')"></div>` : ''}
                 </div>
                 <div class="hero-gradient"></div>
                 <div class="hero-content">
@@ -707,48 +945,68 @@ function renderPreviewD2New(frame, state) {
 
             <!-- CATEGORIAS -->
             ${isSectionEnabled('categorias') ? `
-            <section class="d2-categorias">
-                <span class="d2-section-label">CATEGORIAS</span>
+            <section class="d2-categorias" id="section-categorias">
+                ${categoriasSectionTitleEnabled ? `<h2>${categoriasSectionTitle}</h2>` : ''}
+                ${categoriasSectionSubtitleEnabled ? `<p class="section-subtitle">${categoriasSectionSubtitle}</p>` : ''}
                 <div class="d2-categorias-grid">
-                    ${categoriasItems.map(cat => `
+                    ${categoriasItems.map(cat => {
+        const isFa = cat.icon?.startsWith('fa-');
+        const isUrl = cat.icon?.startsWith('http') || cat.icon?.startsWith('data:');
+        const iconHtml = isFa
+            ? `<i class="fas ${cat.icon}"></i>`
+            : `<img src="${isUrl ? cat.icon : baseUrl + '/' + cat.icon}" alt="${cat.label}">`;
+        return `
                     <a href="${cat.link || '#'}" class="d2-categoria-item">
                         <div class="d2-categoria-icon">
-                            <img src="${cat.icon?.startsWith('http') ? cat.icon : baseUrl + '/' + cat.icon}" alt="${cat.label}">
+                            ${iconHtml}
                         </div>
                         <span>${cat.label}</span>
-                    </a>
-                    `).join('')}
+                    </a>`;
+    }).join('')}
                 </div>
             </section>
             ` : ''}
 
             <!-- PRODUTOS (Dinâmico) -->
             ${isSectionEnabled('produtos') ? `
-            <section class="d2-produtos">
-                <span class="d2-section-label">PRODUTOS</span>
-                <h2>${produtosSectionTitle}</h2>
+            <section class="d2-produtos" id="section-produtos">
+                ${produtosSectionTitleEnabled ? `<h2>${produtosSectionTitle}</h2>` : ''}
+                ${produtosSectionSubtitleEnabled ? `<p class="section-subtitle">${produtosSectionSubtitle}</p>` : ''}
                 <div class="d2-produtos-grid">
-                    ${(state?.d2Products || []).map(p => `
+                    ${(state?.d2Products || []).map(p => {
+        const rawPrice = p.price || 'R$ 0,00';
+        let priceHtml;
+        if (produtoPrecoCurrencyStyle === 'small') {
+            const match = rawPrice.match(/R\$\s*([\d.]+),(\d{2})/);
+            if (match) {
+                priceHtml = `<span class="currency">R$</span><span class="value">${match[1]}</span><span class="cents">,${match[2]}</span>`;
+            } else {
+                priceHtml = rawPrice;
+            }
+        } else {
+            priceHtml = rawPrice;
+        }
+        return `
                     <a href="${p.link || '#'}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
                         <div class="d2-produto-img">
                             <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}">
                         </div>
                         <h3>${p.title || 'Nome do Produto'}</h3>
                         <div class="d2-produto-footer">
-                            <span class="d2-preco">${p.price || 'R$ 0,00'}</span>
+                            <span class="d2-preco">${priceHtml}</span>
                             <span class="d2-produto-btn">Comprar</span>
                         </div>
-                    </a>
-                    `).join('')}
+                    </a>`;
+    }).join('')}
                 </div>
             </section>
             ` : ''}
 
             <!-- FEEDBACKS (Dinâmico) -->
             ${isSectionEnabled('feedbacks') ? `
-            <section class="d2-feedbacks">
-                <span class="d2-section-label">FEEDBACKS</span>
-                <h2>${feedbacksSectionTitle}</h2>
+            <section class="d2-feedbacks" id="section-feedbacks">
+                ${feedbacksSectionTitleEnabled ? `<h2>${feedbacksSectionTitle}</h2>` : ''}
+                ${feedbacksSectionSubtitleEnabled ? `<p class="section-subtitle">${feedbacksSectionSubtitle}</p>` : ''}
                 <div class="d2-feedbacks-list">
                     ${(state?.d2Feedbacks || []).map(f => `
                     <div class="d2-feedback-card">
@@ -765,9 +1023,9 @@ function renderPreviewD2New(frame, state) {
 
             <!-- CTA SECUNDÁRIO -->
             ${isSectionEnabled('cta') ? `
-            <section class="d2-cta-secundario">
+            <section class="d2-cta-secundario" id="section-cta">
                 <div class="cta-bg">
-                    <img src="${ctaBgImage || heroBgImage || baseUrl + '/hero-bg.webp'}" alt="Background">
+                    <div class="cta-bg-image" style="background-image: url('${ctaBgImage || heroBgImage || baseUrl + '/hero-bg.webp'}')"></div>
                 </div>
                 <div class="cta-content">
                     <h2>${ctaTitleText}</h2>

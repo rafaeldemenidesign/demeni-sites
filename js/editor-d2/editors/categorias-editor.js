@@ -43,10 +43,119 @@ class D2CategoriasEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Colunas por linha',
+                        value: window.d2State.get(`${this.basePath}.columnsPerRow`, 4),
+                        min: 2, max: 6, step: 1, unit: '',
+                        path: `${this.basePath}.columnsPerRow`
+                    })
+                );
+
                 return container;
             }
         );
         fragment.appendChild(sectionGroup);
+
+        // ===== TÍTULO DA SEÇÃO =====
+        const titleGroup = C.createGroupExpander(
+            { title: 'Título da Seção', icon: 'fa-heading', expanded: false },
+            () => {
+                const container = document.createElement('div');
+                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
+
+                // ── TÍTULO ──
+                container.appendChild(C.createToggle({
+                    label: 'Mostrar título',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.enabled`, false),
+                    path: `${this.basePath}.sectionTitle.enabled`
+                }));
+                container.appendChild(C.createTextInput({
+                    label: 'Texto',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.text`, 'Categorias'),
+                    placeholder: 'Ex: Nossas Categorias',
+                    path: `${this.basePath}.sectionTitle.text`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.size`, 28),
+                    min: 16, max: 60, step: 1, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.size`
+                }));
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.weight`, 400),
+                    path: `${this.basePath}.sectionTitle.weight`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#333333'),
+                    path: `${this.basePath}.sectionTitle.color`
+                }));
+
+                // ── SUBTÍTULO ──
+                const subDiv = document.createElement('div');
+                subDiv.style.cssText = dividerStyle;
+                subDiv.textContent = 'Subtítulo';
+                container.appendChild(subDiv);
+
+                container.appendChild(C.createToggle({
+                    label: 'Mostrar subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.enabled`, false),
+                    path: `${this.basePath}.sectionSubtitle.enabled`
+                }));
+                container.appendChild(C.createTextInput({
+                    label: 'Texto',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.text`, 'Encontre o que precisa'),
+                    placeholder: 'Ex: Explore nossas opções',
+                    path: `${this.basePath}.sectionSubtitle.text`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.size`, 14),
+                    min: 10, max: 24, step: 1, unit: 'px',
+                    path: `${this.basePath}.sectionSubtitle.size`
+                }));
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.weight`, 400),
+                    path: `${this.basePath}.sectionSubtitle.weight`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, '#666666'),
+                    path: `${this.basePath}.sectionSubtitle.color`
+                }));
+
+                // ── ESPAÇAMENTO ──
+                const spDiv = document.createElement('div');
+                spDiv.style.cssText = dividerStyle;
+                spDiv.textContent = 'Espaçamento';
+                container.appendChild(spDiv);
+
+                container.appendChild(C.createSlider({
+                    label: 'Acima do título',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.paddingTop`, 0),
+                    min: 0, max: 40, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.paddingTop`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Entre título e subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.gap`, 6),
+                    min: 0, max: 30, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.gap`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Abaixo do subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.paddingBottom`, 16),
+                    min: 0, max: 40, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.paddingBottom`
+                }));
+
+                return container;
+            }
+        );
+        fragment.appendChild(titleGroup);
 
         // ===== ÍCONES =====
         const iconsGroup = C.createGroupExpander(
@@ -57,8 +166,8 @@ class D2CategoriasEditor {
                 container.appendChild(
                     C.createSlider({
                         label: 'Tamanho do container',
-                        value: window.d2State.get(`${this.basePath}.icon.size`, 80),
-                        min: 50, max: 120, step: 5, unit: 'px',
+                        value: window.d2State.get(`${this.basePath}.icon.size`, 55),
+                        min: 40, max: 80, step: 5, unit: 'px',
                         path: `${this.basePath}.icon.size`
                     })
                 );
@@ -80,6 +189,14 @@ class D2CategoriasEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor do ícone',
+                        value: window.d2State.get(`${this.basePath}.icon.color`, '#333333'),
+                        path: `${this.basePath}.icon.color`
+                    })
+                );
+
                 return container;
             }
         );
@@ -94,7 +211,7 @@ class D2CategoriasEditor {
                 container.appendChild(
                     C.createSlider({
                         label: 'Tamanho da fonte',
-                        value: window.d2State.get(`${this.basePath}.label.size`, 12),
+                        value: window.d2State.get(`${this.basePath}.label.size`, 10),
                         min: 8, max: 18, step: 1, unit: 'px',
                         path: `${this.basePath}.label.size`
                     })
@@ -160,20 +277,30 @@ class D2CategoriasEditor {
                                     })
                                 );
 
-                                // Seletor de ícone (simplificado)
+                                // Seletor de ícone FontAwesome
                                 const iconOptions = [
-                                    { value: 'Pen Tool.png', label: 'Caneta' },
-                                    { value: 'Engrenagem.png', label: 'Engrenagem' },
-                                    { value: 'Aulas.png', label: 'Aulas' },
-                                    { value: 'Sobre.png', label: 'Sobre' },
-                                    { value: 'produtos.png', label: 'Produtos' },
-                                    { value: 'servicos.png', label: 'Serviços' }
+                                    { value: 'fa-box-open', label: '📦 Produtos' },
+                                    { value: 'fa-concierge-bell', label: '🔔 Serviços' },
+                                    { value: 'fa-graduation-cap', label: '🎓 Educação' },
+                                    { value: 'fa-info-circle', label: 'ℹ️ Sobre' },
+                                    { value: 'fa-shopping-cart', label: '🛒 Compras' },
+                                    { value: 'fa-star', label: '⭐ Destaques' },
+                                    { value: 'fa-heart', label: '❤️ Favoritos' },
+                                    { value: 'fa-map-marker-alt', label: '📍 Local' },
+                                    { value: 'fa-calendar', label: '📅 Agenda' },
+                                    { value: 'fa-phone', label: '📱 Contato' },
+                                    { value: 'fa-envelope', label: '✉️ Email' },
+                                    { value: 'fa-cog', label: '⚙️ Config' },
+                                    { value: 'fa-users', label: '👥 Equipe' },
+                                    { value: 'fa-camera', label: '📷 Galeria' },
+                                    { value: 'fa-cut', label: '✂️ Corte' },
+                                    { value: 'fa-paint-brush', label: '🎨 Arte' }
                                 ];
 
                                 itemContainer.appendChild(
                                     C.createSelect({
                                         label: 'Ícone',
-                                        value: item.icon || 'Pen Tool.png',
+                                        value: item.icon || 'fa-box-open',
                                         options: iconOptions,
                                         path: `${this.basePath}.items.${index}.icon`
                                     })
@@ -185,7 +312,8 @@ class D2CategoriasEditor {
                                         label: 'Ícone Personalizado',
                                         value: item.customIcon || '',
                                         path: `${this.basePath}.items.${index}.customIcon`,
-                                        aspect: '1/1'
+                                        aspect: '1/1',
+                                        compact: true
                                     })
                                 );
 
@@ -229,8 +357,8 @@ class D2CategoriasEditor {
         const items = window.d2State.get(`${this.basePath}.items`, []);
         const newItem = {
             id: Date.now(),
-            label: 'NOVA CATEGORIA',
-            icon: 'Pen Tool.png',
+            label: 'NOVA',
+            icon: 'fa-star',
             link: ''
         };
         items.push(newItem);

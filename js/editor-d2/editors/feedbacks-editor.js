@@ -53,32 +53,95 @@ class D2FeedbacksEditor {
             { title: 'Título da Seção', icon: 'fa-heading', expanded: true },
             () => {
                 const container = document.createElement('div');
+                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
 
-                container.appendChild(
-                    C.createTextInput({
-                        label: 'Texto do título',
-                        value: window.d2State.get(`${this.basePath}.sectionTitle.text`, 'O que estão dizendo?'),
-                        placeholder: 'Ex: Depoimentos',
-                        path: `${this.basePath}.sectionTitle.text`
-                    })
-                );
+                // ── TÍTULO ──
+                container.appendChild(C.createToggle({
+                    label: 'Mostrar título',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.enabled`, true),
+                    path: `${this.basePath}.sectionTitle.enabled`
+                }));
+                container.appendChild(C.createTextInput({
+                    label: 'Texto',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.text`, 'O que estão dizendo?'),
+                    placeholder: 'Ex: Depoimentos',
+                    path: `${this.basePath}.sectionTitle.text`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.size`, 28),
+                    min: 16, max: 60, step: 1, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.size`
+                }));
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.weight`, 400),
+                    path: `${this.basePath}.sectionTitle.weight`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#333333'),
+                    path: `${this.basePath}.sectionTitle.color`
+                }));
 
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Tamanho da fonte',
-                        value: window.d2State.get(`${this.basePath}.sectionTitle.size`, 36),
-                        min: 20, max: 60, step: 2, unit: 'px',
-                        path: `${this.basePath}.sectionTitle.size`
-                    })
-                );
+                // ── SUBTÍTULO ──
+                const subDiv = document.createElement('div');
+                subDiv.style.cssText = dividerStyle;
+                subDiv.textContent = 'Subtítulo';
+                container.appendChild(subDiv);
 
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor do título',
-                        value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#333333'),
-                        path: `${this.basePath}.sectionTitle.color`
-                    })
-                );
+                container.appendChild(C.createToggle({
+                    label: 'Mostrar subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.enabled`, false),
+                    path: `${this.basePath}.sectionSubtitle.enabled`
+                }));
+                container.appendChild(C.createTextInput({
+                    label: 'Texto',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.text`, 'Depoimentos de nossos clientes'),
+                    placeholder: 'Ex: Veja o que dizem',
+                    path: `${this.basePath}.sectionSubtitle.text`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Tamanho',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.size`, 14),
+                    min: 10, max: 24, step: 1, unit: 'px',
+                    path: `${this.basePath}.sectionSubtitle.size`
+                }));
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.weight`, 400),
+                    path: `${this.basePath}.sectionSubtitle.weight`
+                }));
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, '#666666'),
+                    path: `${this.basePath}.sectionSubtitle.color`
+                }));
+
+                // ── ESPAÇAMENTO ──
+                const spDiv = document.createElement('div');
+                spDiv.style.cssText = dividerStyle;
+                spDiv.textContent = 'Espaçamento';
+                container.appendChild(spDiv);
+
+                container.appendChild(C.createSlider({
+                    label: 'Acima do título',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.paddingTop`, 0),
+                    min: 0, max: 40, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.paddingTop`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Entre título e subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.gap`, 6),
+                    min: 0, max: 30, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.gap`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Abaixo do subtítulo',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.paddingBottom`, 24),
+                    min: 0, max: 40, step: 2, unit: 'px',
+                    path: `${this.basePath}.sectionTitle.paddingBottom`
+                }));
 
                 return container;
             }

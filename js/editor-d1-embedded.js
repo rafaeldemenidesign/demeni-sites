@@ -700,8 +700,8 @@ function generateD1LinksHtml() {
                     font-size: 13px;
                     font-weight: 500;
                     ${buttonBackdrop}
-                    ${style.buttonShadow === 'subtle' ? 'box-shadow: 0 2px 8px rgba(0,0,0,0.1);' : ''}
-                    ${style.buttonShadow === 'strong' ? 'box-shadow: 0 4px 16px rgba(0,0,0,0.2);' : ''}
+                    ${style.buttonShadow === 'subtle' ? `box-shadow: 0 2px 8px rgba(${hexToRgb(style.buttonColor)}, 0.25);` : ''}
+                    ${style.buttonShadow === 'strong' ? `box-shadow: 0 4px 16px rgba(${hexToRgb(style.buttonColor)}, 0.4);` : ''}
                     transition: transform 0.2s, opacity 0.2s;
                 ">
                     ${iconMapD1[link.icon] || ''} ${link.label}
@@ -735,7 +735,8 @@ function generateD1VideoHtml() {
 
 // ========== STORAGE ==========
 function saveD1ToStorage() {
-    const projectId = UserData?.getCurrentProject?.()?.id;
+    const projectId = UserData?.getCurrentProjectId?.();
+    console.log('[D1 Embedded] saveD1ToStorage called, projectId:', projectId);
     if (!projectId) {
         console.warn('[D1 Embedded] No current project to save');
         return;
@@ -748,7 +749,68 @@ function saveD1ToStorage() {
     };
 
     UserData.updateProject(projectId, { data: projectData });
-    console.log('[D1 Embedded] Saved to storage');
+    console.log('[D1 Embedded] Saved to storage, scheduling thumbnail...');
+
+    // Agenda captura de thumbnail
+    scheduleD1ThumbnailCapture(projectId);
+}
+
+// ========== THUMBNAIL CAPTURE ==========
+let d1ThumbnailTimer = null;
+
+function scheduleD1ThumbnailCapture(projectId) {
+    if (d1ThumbnailTimer) clearTimeout(d1ThumbnailTimer);
+    d1ThumbnailTimer = setTimeout(() => captureD1Thumbnail(projectId), 3000);
+}
+
+async function captureD1Thumbnail(projectId) {
+    console.log('[D1 Embedded] captureD1Thumbnail called, projectId:', projectId);
+    console.log('[D1 Embedded] html2canvas available:', typeof html2canvas);
+
+    if (typeof html2canvas !== 'function') {
+        console.warn('[D1 Embedded] html2canvas NOT loaded!');
+        return;
+    }
+
+    const frame = document.getElementById('preview-frame-d1');
+    if (!frame) {
+        console.warn('[D1 Embedded] preview-frame-d1 NOT found!');
+        return;
+    }
+
+    console.log('[D1 Embedded] Frame found:', frame.clientWidth, '×', frame.clientHeight, 'children:', frame.children.length);
+
+    try {
+        const srcCanvas = await html2canvas(frame, {
+            scale: 1,
+            useCORS: true,
+            allowTaint: true,
+            logging: false
+        });
+
+        console.log('[D1 Embedded] Canvas captured:', srcCanvas.width, '×', srcCanvas.height);
+
+        // Crop para proporção do celular (300×580)
+        const PHONE_W = 300;
+        const PHONE_H = 580;
+        const outputCanvas = document.createElement('canvas');
+        outputCanvas.width = PHONE_W;
+        outputCanvas.height = PHONE_H;
+        const ctx = outputCanvas.getContext('2d');
+        ctx.drawImage(srcCanvas, 0, 0, PHONE_W, PHONE_H, 0, 0, PHONE_W, PHONE_H);
+
+        const webpDataUrl = outputCanvas.toDataURL('image/webp', 0.8);
+        console.log('[D1 Embedded] WebP size:', Math.round(webpDataUrl.length / 1024), 'kb');
+
+        if (projectId && webpDataUrl.length < 500000) {
+            UserData.updateProject(projectId, { thumbnail: webpDataUrl });
+            console.log(`[D1 Embedded] ✅ Thumbnail saved! ${srcCanvas.width}×${srcCanvas.height} → ${PHONE_W}×${PHONE_H}`);
+        } else {
+            console.warn('[D1 Embedded] Thumbnail NOT saved - projectId:', projectId, 'size:', webpDataUrl.length);
+        }
+    } catch (err) {
+        console.error('[D1 Embedded] ❌ Thumbnail capture FAILED:', err);
+    }
 }
 
 function loadD1FromStorage() {
@@ -813,7 +875,6 @@ window.updateD1Link = updateD1Link;
 window.updateD1LinkUrl = updateD1LinkUrl;
 window.removeD1Banner = removeD1Banner;
 window.updateD1Banner = updateD1Banner;
-window.applyD1Theme = applyD1Theme;
 window.D1Embedded = D1Embedded;
 
 console.log('[D1 Embedded] Module loaded');
