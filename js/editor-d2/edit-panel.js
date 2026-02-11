@@ -19,7 +19,8 @@ class D2EditPanel {
             produtos: () => new window.D2ProdutosEditor().render(),
             feedbacks: () => new window.D2FeedbacksEditor().render(),
             cta: () => new window.D2CTAEditor().render(),
-            footer: () => new window.D2FooterEditor().render()
+            footer: () => new window.D2FooterEditor().render(),
+            pwa: () => new window.D2PWAEditor().render()
         };
 
         this.bindEvents();

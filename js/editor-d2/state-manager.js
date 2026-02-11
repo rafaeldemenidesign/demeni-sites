@@ -49,7 +49,8 @@ class D2StateManager {
                 { id: 'produtos', name: 'Produtos', icon: 'fa-shopping-bag', enabled: true, locked: false },
                 { id: 'feedbacks', name: 'Feedbacks', icon: 'fa-comments', enabled: true, locked: false },
                 { id: 'cta', name: 'CTA', icon: 'fa-bullhorn', enabled: true, locked: false },
-                { id: 'footer', name: 'Footer', icon: 'fa-copyright', enabled: true, locked: true }
+                { id: 'footer', name: 'Footer', icon: 'fa-copyright', enabled: true, locked: true },
+                { id: 'pwa', name: 'PWA / Ícone', icon: 'fa-mobile-alt', enabled: true, locked: true }
             ],
 
             // Produtos para a seção de produtos
@@ -334,6 +335,19 @@ class D2StateManager {
                         facebook: '',
                         whatsapp: ''
                     }
+                },
+
+                // PWA / Favicon
+                pwa: {
+                    favicon: {
+                        mode: 'auto',       // 'auto' (iniciais) ou 'upload'
+                        image: null,         // base64 ou URL se upload
+                        bgColor: '#1a365d',  // fundo do ícone auto
+                        textColor: '#ffffff',// texto do ícone auto
+                        shape: 'circle'      // 'circle' ou 'rounded-square'
+                    },
+                    themeColor: '#1a365d',    // cor da barra do browser
+                    appName: ''              // nome do app (default = hero title)
                 }
             }
         };
