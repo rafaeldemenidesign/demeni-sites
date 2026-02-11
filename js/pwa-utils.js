@@ -85,7 +85,30 @@ function generateManifest(options = {}) {
     };
 }
 
+/**
+ * Gera as meta tags para o <head> do site publicado
+ * @param {object} options - { faviconDataUrl, themeColor, appName }
+ * @returns {string} HTML string com todas as meta tags
+ */
+function generatePWAHead(options = {}) {
+    const {
+        faviconDataUrl = '',
+        themeColor = '#1a365d',
+        appName = 'Meu Site'
+    } = options;
+
+    return `
+    <link rel="icon" href="${faviconDataUrl}" type="image/png">
+    <link rel="apple-touch-icon" href="${faviconDataUrl}">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="${themeColor}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="${appName}">
+    `.trim();
+}
+
 // Export
-window.PWAUtils = { getInitials, generateFavicon, generateManifest };
+window.PWAUtils = { getInitials, generateFavicon, generateManifest, generatePWAHead };
 
 console.log('[PWA Utils] Module loaded');

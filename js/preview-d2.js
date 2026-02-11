@@ -436,6 +436,43 @@ function renderPreviewD2New(frame, state) {
     const footerSocialFacebook = get('footer.social.facebook', '');
     const footerSocialWhatsapp = get('footer.social.whatsapp', '');
 
+    // =============================================
+    // PWA / FAVICON — para export/publish
+    // =============================================
+    const pwaFaviconMode = get('pwa.favicon.mode', 'auto');
+    const pwaFaviconImage = get('pwa.favicon.image', null);
+    const pwaFaviconBgColor = get('pwa.favicon.bgColor', '#1a365d');
+    const pwaFaviconTextColor = get('pwa.favicon.textColor', '#ffffff');
+    const pwaFaviconShape = get('pwa.favicon.shape', 'circle');
+    const pwaThemeColor = get('pwa.themeColor', '#1a365d');
+    const pwaAppName = get('pwa.appName', '') || heroTitleText;
+
+    // Gera favicon data URL para uso no export
+    let pwaFaviconDataUrl = null;
+    if (window.PWAUtils) {
+        if (pwaFaviconMode === 'upload' && pwaFaviconImage) {
+            pwaFaviconDataUrl = pwaFaviconImage;
+        } else {
+            pwaFaviconDataUrl = window.PWAUtils.generateFavicon(
+                heroTitleText, pwaFaviconBgColor, pwaFaviconTextColor, pwaFaviconShape
+            );
+        }
+    }
+
+    // Armazena dados PWA no state para o export usar
+    if (window.d2State) {
+        window.d2State._pwaExportData = {
+            faviconDataUrl: pwaFaviconDataUrl,
+            themeColor: pwaThemeColor,
+            appName: pwaAppName,
+            manifest: window.PWAUtils ? window.PWAUtils.generateManifest({
+                name: pwaAppName,
+                themeColor: pwaThemeColor,
+                bgColor: pwaFaviconBgColor
+            }) : null
+        };
+    }
+
     // CSS + HTML para renderizar DENTRO de uma div
     // Nota: Usamos o seletor do container (#preview-frame) em vez de body
     const fullHtml = `
