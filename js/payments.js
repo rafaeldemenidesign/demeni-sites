@@ -54,8 +54,7 @@ const Payments = (function () {
         is_promotional: true,
         description: 'Oferta exclusiva de boas-vindas!',
         features: [
-            '1 site para criar',
-            'Suporte por WhatsApp'
+            '40 créditos = 1 site'
         ]
     };
 
@@ -69,9 +68,7 @@ const Payments = (function () {
             price: 200.00,
             bonus_credits: 0,
             features: [
-                '5 sites para criar',
-                'Ideal para recargas',
-                'Suporte por WhatsApp'
+                '200 créditos = 5 sites'
             ]
         },
         {
@@ -83,10 +80,8 @@ const Payments = (function () {
             bonus_credits: 200,
             is_featured: true,
             features: [
-                '15 sites para criar',
-                '+200 créditos bônus',
-                'Suporte prioritário',
-                'Ideal para entrada'
+                '400 créditos + 200 bônus',
+                '600 créditos = 15 sites'
             ]
         },
         {
@@ -97,11 +92,8 @@ const Payments = (function () {
             price: 600.00,
             bonus_credits: 400,
             features: [
-                '25 sites para criar',
-                '+400 créditos bônus',
-                'Suporte VIP',
-                'Templates exclusivos',
-                'Consultoria 30min'
+                '600 créditos + 400 bônus',
+                '1.000 créditos = 25 sites'
             ]
         }
     ];
