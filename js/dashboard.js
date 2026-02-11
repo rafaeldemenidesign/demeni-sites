@@ -615,7 +615,7 @@ async function loadPackages() {
                 <div class="pkg-credits">
                     <span class="credits-total">${totalCredits} créditos</span>
                     ${bonusCredits > 0 ? `<span class="credits-bonus">+${bonusCredits} bônus inclusos</span>` : ''}
-                    ${pkg.description ? `<span class="credits-bonus" ${isPromo ? 'style="color: #f59e0b;"' : ''}>${pkg.description}</span>` : ''}
+                    ${pkg.description ? `<span class="credits-bonus" ${isPromo ? 'style="color: #9ca3af;"' : ''}>${pkg.description}</span>` : ''}
                 </div>
 
                 <button class="btn-buy-clicksign" onclick="buyPackageMP('${pkg.id}')">
