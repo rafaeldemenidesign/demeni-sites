@@ -220,25 +220,26 @@ function renderDiscountBadge() {
     const stats = XPSystem.getStats();
     const freeLeft = window.Credits ? Credits.getRemainingFreePublishes() : 0;
     const hex = stats.patente.hex;
+    const gradient = stats.patente.gradient;
     const nextName = stats.nextPatente ? stats.nextPatente.name : 'Máximo';
     const nextHex = stats.nextPatente ? stats.nextPatente.hex : hex;
     const pct = stats.progress.percentage;
 
-    // Apply patente color as background tint
+    // Apply patente gradient as solid background
     container.style.cssText = `
         display: block;
         padding: 14px 16px;
         margin-top: 12px;
-        background: ${hex}18;
-        border: 1px solid ${hex}30;
+        background: ${gradient};
+        border: none;
         border-radius: 12px;
     `;
 
     container.innerHTML = `
         <!-- Header: Patente + Level -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <span style="font-size: 13px; font-weight: 800; color: ${hex}; text-transform: uppercase; letter-spacing: 0.5px;">${stats.patente.name}</span>
-            <span style="font-size: 12px; color: #6b7280;">Nível ${stats.level} · ${stats.xp} XP</span>
+            <span style="font-size: 13px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">${stats.patente.name}</span>
+            <span style="font-size: 12px; color: rgba(255,255,255,0.8);">Nível ${stats.level} · ${stats.xp} XP</span>
         </div>
 
         <!-- Metrics Row -->
@@ -261,8 +262,8 @@ function renderDiscountBadge() {
         <!-- Progress Bar -->
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-size: 10px; color: #6b7280;">${pct}% para ${nextName}</span>
-                <span style="font-size: 10px; color: ${nextHex}; font-weight: 600;">▸ ${nextName}</span>
+                <span style="font-size: 10px; color: rgba(255,255,255,0.8);">${pct}% para ${nextName}</span>
+                <span style="font-size: 10px; color: #fff; font-weight: 600;">▸ ${nextName}</span>
             </div>
             <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.6); border-radius: 3px; overflow: hidden;">
                 <div style="width: ${pct}%; height: 100%; background: ${hex}; border-radius: 3px; transition: width 0.5s ease;"></div>
