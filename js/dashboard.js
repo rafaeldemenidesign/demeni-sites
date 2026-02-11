@@ -204,7 +204,8 @@ function refreshCredits() {
     const credits = Credits.getCredits();
     const formatted = Credits.formatCredits(credits);
 
-    document.getElementById('credits-badge').textContent = formatted;
+    const badgeEl = document.getElementById('credits-badge');
+    if (badgeEl) badgeEl.textContent = formatted;
     document.getElementById('header-credits').textContent = formatted;
     document.getElementById('wallet-balance').textContent = formatted;
 }
@@ -276,7 +277,7 @@ function loadProjects() {
         const modelConfig = {
             'd1': { name: 'D-1', icon: 'fa-link', color: '#9333ea', bgColor: 'rgba(147, 51, 234, 0.15)' },
             'd2': { name: 'D-2', icon: 'fa-store', color: '#0ea5e9', bgColor: 'rgba(14, 165, 233, 0.15)' },
-            'prime': { name: 'Prime', icon: 'fa-crown', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' }
+            'prime': { name: 'D-3', icon: 'fa-utensils', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' }
         };
         const model = modelConfig[modelType] || modelConfig['d1'];
 
@@ -326,7 +327,7 @@ function loadProjects() {
         const modelConfig = {
             'd1': { name: 'D-1', icon: 'fa-link', color: '#9333ea', bgColor: 'rgba(147, 51, 234, 0.15)' },
             'd2': { name: 'D-2', icon: 'fa-store', color: '#0ea5e9', bgColor: 'rgba(14, 165, 233, 0.15)' },
-            'prime': { name: 'Prime', icon: 'fa-crown', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' }
+            'prime': { name: 'D-3', icon: 'fa-utensils', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' }
         };
         const model = modelConfig[modelType] || modelConfig['d1'];
 
@@ -385,7 +386,7 @@ function closeModelSelectionModal() {
 }
 
 function selectModel(modelType) {
-    // Model costs (D-1=40, D-2=80, Prime-D=140)
+    // Model costs (D-1=40, D-2=80, D-3=140)
     const modelCosts = {
         'd1': 40,
         'd2': 80,
@@ -880,10 +881,34 @@ function doLogout() {
     window.location.reload();
 }
 
-// Setup logout button
-document.getElementById('btn-logout')?.addEventListener('click', (e) => {
+// Setup logout button (now inside hamburger popup)
+document.getElementById('hm-logout')?.addEventListener('click', (e) => {
     e.preventDefault();
+    closeHamburgerMenu();
     doLogout();
+});
+
+// ========== HAMBURGER MENU ==========
+function openHamburgerMenu() {
+    document.getElementById('modal-hamburger-menu')?.classList.add('active');
+}
+
+function closeHamburgerMenu() {
+    document.getElementById('modal-hamburger-menu')?.classList.remove('active');
+}
+
+// Make functions global
+window.openHamburgerMenu = openHamburgerMenu;
+window.closeHamburgerMenu = closeHamburgerMenu;
+
+// Hamburger button click
+document.getElementById('btn-hamburger-menu')?.addEventListener('click', () => {
+    openHamburgerMenu();
+});
+
+// Close on backdrop click
+document.getElementById('modal-hamburger-menu')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeHamburgerMenu();
 });
 
 // ========== TEST LOGIN ==========

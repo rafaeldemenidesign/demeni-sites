@@ -29,8 +29,8 @@
 
     /* Dimensions - Compact like D-1 */
     --d2-menu-width: 180px;
-    --d2-section-list-width: 180px;
-    --d2-preview-width: 380px;
+    --d2-section-list-width: 160px;
+    --d2-preview-width: 420px;
     --d2-header-height: 60px;
 
     /* Transitions */
@@ -177,7 +177,7 @@
 .editor-d2-menu {
     width: var(--d2-menu-width);
     background: var(--d2-bg-sidebar);
-    border-right: 1px dashed #e0e0e0;
+    border-right: 1px solid #e0e0e0;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -291,10 +291,21 @@
 .editor-d2-sections {
     width: var(--d2-section-list-width);
     background: var(--d2-bg-panel);
-    border-right: 1px dashed #e0e0e0;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    position: relative;
+}
+
+/* Separador gradient */
+.editor-d2-sections::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent 0%, #d0d0d0 20%, #d0d0d0 80%, transparent 100%);
 }
 
 .editor-d2-sections .sections-header {

@@ -186,6 +186,62 @@ class D2HeroEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createSelect({
+                        label: 'Tipo de fundo',
+                        value: window.d2State.get('d2Adjustments.header.bgType', 'solid'),
+                        options: [
+                            { value: 'solid', label: 'Cor Sólida' },
+                            { value: 'gradient', label: 'Degradê' },
+                            { value: 'glass', label: 'Glass (transparente)' }
+                        ],
+                        path: 'd2Adjustments.header.bgType'
+                    })
+                );
+
+                const currentBgType = window.d2State.get('d2Adjustments.header.bgType', 'solid');
+
+                // Controles de degradê (só quando bgType = gradient)
+                if (currentBgType === 'gradient') {
+                    container.appendChild(
+                        C.createToggle({
+                            label: 'Inverter degradê',
+                            value: window.d2State.get('d2Adjustments.header.bgGradientInvert', false),
+                            path: 'd2Adjustments.header.bgGradientInvert'
+                        })
+                    );
+                    const label = document.createElement('div');
+                    label.style.cssText = 'font-size: 11px; opacity: 0.6; margin-top: 8px;';
+                    label.textContent = 'Escolha o degradê:';
+                    container.appendChild(label);
+                    container.appendChild(C.createGradientPresets({
+                        value: window.d2State.get('d2Adjustments.header.bgGradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)'),
+                        path: 'd2Adjustments.header.bgGradient'
+                    }));
+                }
+
+                // Controle de blur (só quando bgType = glass)
+                if (currentBgType === 'glass') {
+                    container.appendChild(
+                        C.createSlider({
+                            label: 'Blur do glass',
+                            value: window.d2State.get('d2Adjustments.header.bgGlassBlur', 10),
+                            min: 2, max: 30, step: 2, unit: 'px',
+                            path: 'd2Adjustments.header.bgGlassBlur'
+                        })
+                    );
+                }
+
+                container.appendChild(C.createDivider());
+
+                container.appendChild(
+                    C.createToggle({
+                        label: 'Esconder ao rolar',
+                        value: window.d2State.get('d2Adjustments.header.autoHide', false),
+                        path: 'd2Adjustments.header.autoHide'
+                    })
+                );
+
                 return container;
             }
         );
@@ -524,6 +580,9 @@ class D2HeroEditor {
                     })
                 );
 
+                // Texto gradiente
+                container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.title` }));
+
                 return container;
             }
         );
@@ -718,6 +777,15 @@ class D2HeroEditor {
                     }
                 );
                 container.appendChild(sizeGroup);
+
+                // Animação hover
+                container.appendChild(
+                    C.createToggle({
+                        label: 'Animação ao passar o mouse',
+                        value: window.d2State.get(`${this.basePath}.btn.hoverAnimation`, true),
+                        path: `${this.basePath}.btn.hoverAnimation`
+                    })
+                );
 
                 // Link do botão
                 container.appendChild(

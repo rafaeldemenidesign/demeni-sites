@@ -73,7 +73,18 @@ class D2StateManager {
                     logo: { size: 28, color: 'white' },
                     logoPosition: 'left', // 'left', 'center', 'right'
                     height: 80,
+                    autoHide: false,
                     bgColor: '#2d2d2d',
+                    bgType: 'solid', // 'solid', 'gradient', 'glass', 'image'
+                    bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)',
+                    bgGradientOrientation: 'horizontal', // 'horizontal', 'vertical'
+                    bgGradientInvert: false,
+                    bgGlass: false,
+                    bgGlassBlur: 10,
+                    bgImage: null,
+                    bgImageSizeH: 100,
+                    bgImageSizeV: 100,
+                    bgImageZoom: 100,
                     textColor: '#ffffff',
                     sidebar: {
                         bgColor: '#1a1a1a',
@@ -107,12 +118,13 @@ class D2StateManager {
                         color: '#ffffff'
                     },
                     title: {
-                        text: '',  // Se vazio, usa profile.name
+                        text: '',
                         size: 56,
                         spacing: 4,
                         weight: 400,
                         color: '#ffffff',
                         font: 'Liebling',
+                        textGradient: { enabled: false, gradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)' },
                         padding: { top: 0, bottom: 0, left: 0, right: 0 }
                     },
                     subtitle: {
@@ -141,15 +153,34 @@ class D2StateManager {
                         bgPreset: 'blue', // 'blue', 'yellow', 'red', 'green', 'pink', 'purple', 'gray', 'black', 'offwhite', 'orange', 'brown'
                         bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)',
                         borderColor: 'transparent',
-                        borderRadius: 30
+                        borderRadius: 30,
+                        hoverAnimation: true
                     }
                 },
 
                 // Categorias
                 categorias: {
+                    topLine: { enabled: false, height: 3, bgType: 'gradient', bgColor: '#5167E7', bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)' },
                     sectionSpacing: 40,
+                    bgMode: 'color',
                     bgColor: '#ffffff',
-                    sectionTitle: { text: 'Categorias', size: 28, color: '#333333', weight: 400, enabled: false, paddingTop: 0, gap: 6, paddingBottom: 16 },
+                    bgColor2: '#d0d0d0',
+                    bgGradient: false,
+                    bgGradientInvert: false,
+                    bgImage: null,
+                    bgOverlay: false,
+                    bgOverlayType: 'solid',
+                    bgOverlayColor: '#000000',
+                    bgOverlayColor2: '#000000',
+                    bgOverlayOpacity: 50,
+                    bgOverlayInvert: false,
+                    bgOverlayPosition: 50,
+                    bgOverlaySpread: 80,
+                    bgImageBlur: 0,
+                    bgImageZoom: 100,
+                    bgImagePosX: 50,
+                    bgImagePosY: 0,
+                    sectionTitle: { text: 'Categorias', size: 28, color: '#333333', weight: 400, enabled: false, paddingTop: 0, gap: 6, paddingBottom: 16, textGradient: { enabled: false, gradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)' } },
                     sectionSubtitle: { text: 'Encontre o que precisa', size: 14, color: '#666666', weight: 400, enabled: false },
                     icon: { size: 80, radius: 18 },
                     label: { size: 12, weight: 500, color: '#222222' },
@@ -163,12 +194,27 @@ class D2StateManager {
 
                 // Produtos
                 produtos: {
+                    topLine: { enabled: false, height: 3, bgType: 'gradient', bgColor: '#5167E7', bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)' },
                     sectionSpacing: 30,
+                    bgMode: 'color',
                     bgColor: '#1a365d',
                     bgColor2: '#0d1b36',
                     bgGradient: false,
                     bgGradientInvert: false,
-                    sectionTitle: { text: 'Produtos Demeni', size: 36, color: '#ffffff', weight: 400, enabled: true, paddingTop: 0, gap: 6, paddingBottom: 24 },
+                    bgImage: null,
+                    bgOverlay: false,
+                    bgOverlayType: 'solid',
+                    bgOverlayColor: '#000000',
+                    bgOverlayColor2: '#000000',
+                    bgOverlayOpacity: 50,
+                    bgOverlayInvert: false,
+                    bgOverlayPosition: 50,
+                    bgOverlaySpread: 80,
+                    bgImageBlur: 0,
+                    bgImageZoom: 100,
+                    bgImagePosX: 50,
+                    bgImagePosY: 0,
+                    sectionTitle: { text: 'Produtos Demeni', size: 36, color: '#ffffff', weight: 400, enabled: true, paddingTop: 0, gap: 6, paddingBottom: 24, textGradient: { enabled: false, gradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)' } },
                     sectionSubtitle: { text: 'Confira nossos destaques', size: 14, color: 'rgba(255,255,255,0.7)', weight: 400, enabled: false },
                     gridGap: 16,
                     gridColumns: 2,
@@ -189,6 +235,7 @@ class D2StateManager {
 
                 // Feedbacks
                 feedbacks: {
+                    topLine: { enabled: false, height: 3, bgType: 'gradient', bgColor: '#5167E7', bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)' },
                     sectionSpacing: 30,
                     bgMode: 'color',
                     bgColor: '#e8e8e8',
@@ -208,17 +255,19 @@ class D2StateManager {
                     bgImageZoom: 100,
                     bgImagePosX: 50,
                     bgImagePosY: 0,
-                    sectionTitle: { text: 'O que estão dizendo?', size: 28, color: '#333333', weight: 400, enabled: true, paddingTop: 0, gap: 6, paddingBottom: 24 },
+                    sectionTitle: { text: 'O que estão dizendo?', size: 28, color: '#333333', weight: 400, enabled: true, paddingTop: 0, gap: 6, paddingBottom: 24, textGradient: { enabled: false, gradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)' } },
                     sectionSubtitle: { text: 'Depoimentos de nossos clientes', size: 14, color: '#666666', weight: 400, enabled: false },
                     avatar: { size: 60, radius: 8 },
                     name: { size: 16, weight: 500, color: '#1a365d' },
                     text: { size: 13, weight: 400, color: '#666666' },
-                    card: { bgColor: '#f5f5f5', borderRadius: 12 },
+                    card: { bgColor: '#f5f5f5', borderRadius: 12, glass: false, glassBlur: 10, borderEnabled: false, borderWidth: 1, borderColor: '#e0e0e0' },
+                    cardAnimation: true,
                     bottomCta: { enabled: false, text: 'Faça parte dos nossos clientes satisfeitos!', size: 16, weight: 400, color: '#333333', paddingTop: 20, paddingBottom: 20 }
                 },
 
                 // CTA Secundário
                 cta: {
+                    topLine: { enabled: false, height: 3, bgType: 'gradient', bgColor: '#5167E7', bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)' },
                     bgMode: 'image',
                     bgColor: '#1a365d',
                     bgColor2: '#0d1b2a',
@@ -256,26 +305,31 @@ class D2StateManager {
                         link: '#',
                         bgType: 'gradient',
                         bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)',
-                        borderRadius: 30
+                        borderRadius: 30,
+                        hoverAnimation: true
                     }
                 },
 
                 // Footer
                 footer: {
+                    topLine: { enabled: false, height: 3, bgType: 'gradient', bgColor: '#5167E7', bgGradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)' },
                     sectionSpacing: 40,
                     bgColor: '#1a365d',
-                    logo: { size: 28, opacity: 0.8 },
+                    bgType: 'solid', // 'solid' ou 'gradient'
+                    bgGradient: 'linear-gradient(135deg, #1a365d 0%, #2d3a81 50%, #0d1b36 100%)',
+                    logo: { size: 28, opacity: 0.8, color: 'white' },
                     title: { text: 'Invista no seu negócio!', size: 24, color: '#ffffff' },
                     subtitle: { text: '', size: 14, opacity: 0.6 },
                     info: {
-                        email: 'contato@exemplo.com',
-                        phone: '(00) 0000-0000',
-                        cnpj: ''
+                        email: '',
+                        phone: '',
+                        cnpj: '',
+                        size: 13,
+                        opacity: 0.8
                     },
-                    text: { size: 13, opacity: 0.8 },
                     social: {
-                        size: 36,
-                        gap: 18,
+                        size: 28,
+                        gap: 12,
                         instagram: '',
                         facebook: '',
                         whatsapp: ''

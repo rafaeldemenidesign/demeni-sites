@@ -46,6 +46,103 @@ function renderPreviewD2New(frame, state) {
         return section ? section.enabled : true;
     };
 
+    /**
+     * Computa background style, overlay CSS e blur para qualquer seção.
+     * @param {string} key - chave da seção (ex: 'feedbacks', 'cta', 'categorias', 'produtos')
+     * @param {Object} defaults - valores padrão customizados por seção
+     * @returns {{ bgStyle, overlayCSS, bgMode, bgImage, bgImageBlur, bgImagePosX, bgImagePosY, bgSize }}
+     */
+    function computeSectionBg(key, defaults = {}) {
+        const d = {
+            bgMode: 'color', bgColor: '#ffffff', bgColor2: '#d0d0d0',
+            bgGradient: false, bgGradientInvert: false, bgImage: null,
+            bgOverlay: false, bgOverlayType: 'solid', bgOverlayColor: '#000000',
+            bgOverlayColor2: '#000000', bgOverlayOpacity: 50, bgOverlayInvert: false,
+            bgOverlayPosition: 50, bgOverlaySpread: 80,
+            bgImageBlur: 0, bgImageZoom: 100, bgImagePosX: 50, bgImagePosY: 0,
+            ...defaults
+        };
+
+        const bgMode = get(`${key}.bgMode`, d.bgMode);
+        const bgColor = get(`${key}.bgColor`, d.bgColor);
+        const bgColor2 = get(`${key}.bgColor2`, d.bgColor2);
+        const bgGradient = get(`${key}.bgGradient`, d.bgGradient);
+        const bgGradientInvert = get(`${key}.bgGradientInvert`, d.bgGradientInvert);
+        const bgImage = get(`${key}.bgImage`, d.bgImage) || d.bgImageFallback || null;
+        const bgOverlay = get(`${key}.bgOverlay`, d.bgOverlay);
+        const bgOverlayType = get(`${key}.bgOverlayType`, d.bgOverlayType);
+        const bgOverlayColor = get(`${key}.bgOverlayColor`, d.bgOverlayColor);
+        const bgOverlayColor2 = get(`${key}.bgOverlayColor2`, d.bgOverlayColor2);
+        const bgOverlayOpacity = get(`${key}.bgOverlayOpacity`, d.bgOverlayOpacity);
+        const bgOverlayInvert = get(`${key}.bgOverlayInvert`, d.bgOverlayInvert);
+        const bgOverlayPosition = get(`${key}.bgOverlayPosition`, d.bgOverlayPosition);
+        const bgOverlaySpread = get(`${key}.bgOverlaySpread`, d.bgOverlaySpread);
+        const bgImageBlur = get(`${key}.bgImageBlur`, d.bgImageBlur);
+        const bgImageZoom = get(`${key}.bgImageZoom`, d.bgImageZoom);
+        const bgImagePosX = get(`${key}.bgImagePosX`, d.bgImagePosX);
+        const bgImagePosY = get(`${key}.bgImagePosY`, d.bgImagePosY);
+
+        const bgSize = bgImageZoom === 100 ? 'cover' : `${bgImageZoom}%`;
+
+        // Compute background style
+        let bgStyle;
+        if (bgMode === 'image' && bgImage) {
+            bgStyle = `url('${bgImage}') ${bgImagePosX}% ${bgImagePosY}% / ${bgSize} no-repeat`;
+        } else if (bgGradient) {
+            const c1 = bgGradientInvert ? bgColor2 : bgColor;
+            const c2 = bgGradientInvert ? bgColor : bgColor2;
+            bgStyle = `linear-gradient(to bottom, ${c1}, ${c2})`;
+        } else {
+            bgStyle = bgColor;
+        }
+
+        // Compute overlay CSS
+        let overlayCSS = 'display: none;';
+        if (bgMode === 'image' && bgImage && bgOverlay) {
+            const op = bgOverlayOpacity / 100;
+            const dir = bgOverlayInvert ? 'to top' : 'to bottom';
+            const halfSpread = bgOverlaySpread / 2;
+            const startFade = Math.max(0, bgOverlayPosition - halfSpread);
+            const endFade = Math.min(100, bgOverlayPosition + halfSpread);
+
+            if (bgOverlayType === 'solid') {
+                overlayCSS = `background: ${hexToRgba(bgOverlayColor, op)};`;
+            } else if (bgOverlayType === 'gradient') {
+                const c1 = hexToRgba(bgOverlayColor, op);
+                const c2 = hexToRgba(bgOverlayColor2, op);
+                overlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, ${c2} ${endFade}%);`;
+            } else {
+                const c1 = hexToRgba(bgOverlayColor, op);
+                overlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, transparent ${endFade}%);`;
+            }
+        }
+
+        return { bgStyle, overlayCSS, bgMode, bgImage, bgImageBlur, bgImagePosX, bgImagePosY, bgSize };
+    }
+
+    /**
+     * Computa a linha decorativa no topo de uma seção.
+     * @param {string} key - chave da seção (ex: 'categorias')
+     * @returns {{ enabled, css, html }}
+     */
+    function computeTopLine(key) {
+        const enabled = get(`${key}.topLine.enabled`, false);
+        if (!enabled) return { enabled: false, css: '', html: '' };
+
+        const height = get(`${key}.topLine.height`, 3);
+        const bgType = get(`${key}.topLine.bgType`, 'gradient');
+        const bgColor = get(`${key}.topLine.bgColor`, '#5167E7');
+        const bgGradient = get(`${key}.topLine.bgGradient`, 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)');
+        const bg = bgType === 'gradient' ? bgGradient : bgColor;
+        const cls = `d2-topline-${key}`;
+
+        return {
+            enabled: true,
+            css: `.${cls} { height: ${height}px; background: ${bg}; width: 100%; margin: 0; flex-shrink: 0; }`,
+            html: `<div class="${cls}"></div>`
+        };
+    }
+
     // =============================================
     // HEADER - Valores do State
     // =============================================
@@ -53,8 +150,38 @@ function renderPreviewD2New(frame, state) {
     const headerLogoColor = get('header.logo.color', '#ffffff');
     const headerLogoPosition = get('header.logoPosition', 'left');
     const headerHeight = get('header.height', 80);
+    const headerAutoHide = get('header.autoHide', false);
     const headerBgColor = get('header.bgColor', '#2d2d2d');
+    const headerBgType = get('header.bgType', 'solid');
+    const headerBgGradient = get('header.bgGradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)');
+    const headerBgGradientOrientation = get('header.bgGradientOrientation', 'horizontal');
+    const headerBgGradientInvert = get('header.bgGradientInvert', false);
+    const headerBgGlass = get('header.bgGlass', false);
+    const headerBgGlassBlur = get('header.bgGlassBlur', 10);
+    const headerBgImage = get('header.bgImage', null);
+    const headerBgImageSizeH = get('header.bgImageSizeH', 100);
+    const headerBgImageSizeV = get('header.bgImageSizeV', 100);
+    const headerBgImageZoom = get('header.bgImageZoom', 100);
     const headerTextColor = get('header.textColor', '#ffffff');
+
+    // Compute header background
+    let headerBackground;
+    if (headerBgType === 'gradient') {
+        // Re-orient gradient from the stored value
+        let gradStr = headerBgGradient;
+        if (headerBgGradientOrientation === 'vertical') {
+            gradStr = gradStr.replace(/\d+deg/, headerBgGradientInvert ? '0deg' : '180deg');
+        } else {
+            gradStr = gradStr.replace(/\d+deg/, headerBgGradientInvert ? '315deg' : '135deg');
+        }
+        headerBackground = gradStr;
+    } else if (headerBgType === 'image' && headerBgImage) {
+        headerBackground = `url('${headerBgImage}') center / cover no-repeat`;
+    } else if (headerBgType === 'glass') {
+        headerBackground = `${hexToRgba(headerBgColor, 0.3)}`;
+    } else {
+        headerBackground = headerBgColor;
+    }
     const sidebarBgColor = get('header.sidebar.bgColor', '#1a1a1a');
     const sidebarTextColor = get('header.sidebar.textColor', '#ffffff');
     const sidebarAccentColor = get('header.sidebar.accentColor', '#e67e22');
@@ -95,6 +222,14 @@ function renderPreviewD2New(frame, state) {
     const heroTitleWeight = get('hero.title.weight', 400);
     const heroTitleColor = get('hero.title.color', '#ffffff');
     const heroTitleFont = get('hero.title.font', 'Liebling');
+    const heroTitleGradientEnabled = get('hero.title.textGradient.enabled', false);
+    const heroTitleGradient = get('hero.title.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)');
+
+    // Helper: gera CSS para texto gradiente
+    function textGradientCSS(enabled, gradient) {
+        if (!enabled) return '';
+        return `background: ${gradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;`;
+    }
 
     // Subtítulo
     const heroSubtitleText = get('hero.subtitle.text', '') || state?.profile?.role || 'Sua Profissão';
@@ -119,11 +254,13 @@ function renderPreviewD2New(frame, state) {
 
     // Background do botão (solid ou gradient)
     const heroBtnBackground = heroBtnBgType === 'gradient' ? heroBtnBgGradient : heroBtnBgColor;
+    const heroBtnHoverAnimation = get('hero.btn.hoverAnimation', true);
 
     // =============================================
     // CATEGORIAS - Valores dinâmicos
     // =============================================
-    const categoriasBgColor = get('categorias.bgColor', '#ffffff');
+    const categoriasBg = computeSectionBg('categorias', { bgColor: '#ffffff' });
+    const categoriasTopLine = computeTopLine('categorias');
     const categoriasSpacing = get('categorias.sectionSpacing', 40);
     const categoriasColumns = get('categorias.columnsPerRow', 4);
     const categoriaIconSize = get('categorias.icon.size', 55);
@@ -151,15 +288,15 @@ function renderPreviewD2New(frame, state) {
     const categoriasSectionSubtitleColor = get('categorias.sectionSubtitle.color', '#666666');
     const categoriasSectionSubtitleEnabled = get('categorias.sectionSubtitle.enabled', false);
     const categoriasTitleWeight = get('categorias.sectionTitle.weight', 400);
+    const categoriasTitleGradientEnabled = get('categorias.sectionTitle.textGradient.enabled', false);
+    const categoriasTitleGradient = get('categorias.sectionTitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const categoriasSubtitleWeight = get('categorias.sectionSubtitle.weight', 400);
 
     // =============================================
     // PRODUTOS - Valores dinâmicos
     // =============================================
-    const produtosBgColor = get('produtos.bgColor', '#1a365d');
-    const produtosBgColor2 = get('produtos.bgColor2', '#0d1b36');
-    const produtosBgGradient = get('produtos.bgGradient', false);
-    const produtosBgGradientInvert = get('produtos.bgGradientInvert', false);
+    const produtosBg = computeSectionBg('produtos', { bgColor: '#1a365d', bgColor2: '#0d1b36' });
+    const produtosTopLine = computeTopLine('produtos');
     const produtosSpacing = get('produtos.sectionSpacing', 30);
     const produtosSectionTitle = get('produtos.sectionTitle.text', 'Produtos Demeni');
     const produtosSectionTitleSize = get('produtos.sectionTitle.size', 36);
@@ -173,6 +310,8 @@ function renderPreviewD2New(frame, state) {
     const produtosSectionSubtitleColor = get('produtos.sectionSubtitle.color', 'rgba(255,255,255,0.7)');
     const produtosSectionSubtitleEnabled = get('produtos.sectionSubtitle.enabled', false);
     const produtosTitleWeight = get('produtos.sectionTitle.weight', 400);
+    const produtosTitleGradientEnabled = get('produtos.sectionTitle.textGradient.enabled', false);
+    const produtosTitleGradient = get('produtos.sectionTitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const produtosSubtitleWeight = get('produtos.sectionSubtitle.weight', 400);
     const produtosGridGap = get('produtos.gridGap', 16);
     const produtosGridColumns = get('produtos.gridColumns', 2);
@@ -197,34 +336,12 @@ function renderPreviewD2New(frame, state) {
     const produtoBtnPaddingH = get('produtos.btn.paddingH', 14);
     const produtoBtnPaddingV = get('produtos.btn.paddingV', 6);
     const produtoBtnMarginTop = get('produtos.btn.marginTop', 0);
-    // Computed gradient
-    const produtosBgStyle = produtosBgGradient
-        ? (produtosBgGradientInvert
-            ? `linear-gradient(to top, ${produtosBgColor}, ${produtosBgColor2})`
-            : `linear-gradient(to bottom, ${produtosBgColor}, ${produtosBgColor2})`)
-        : produtosBgColor;
 
     // =============================================
     // FEEDBACKS - Valores dinâmicos
     // =============================================
-    const feedbacksBgMode = get('feedbacks.bgMode', 'color');
-    const feedbacksBgColor = get('feedbacks.bgColor', '#e8e8e8');
-    const feedbacksBgColor2 = get('feedbacks.bgColor2', '#d0d0d0');
-    const feedbacksBgGradient = get('feedbacks.bgGradient', false);
-    const feedbacksBgGradientInvert = get('feedbacks.bgGradientInvert', false);
-    const feedbacksBgImage = get('feedbacks.bgImage', null);
-    const feedbacksBgOverlay = get('feedbacks.bgOverlay', false);
-    const feedbacksBgOverlayType = get('feedbacks.bgOverlayType', 'solid');
-    const feedbacksBgOverlayColor = get('feedbacks.bgOverlayColor', '#000000');
-    const feedbacksBgOverlayColor2 = get('feedbacks.bgOverlayColor2', '#000000');
-    const feedbacksBgOverlayOpacity = get('feedbacks.bgOverlayOpacity', 50);
-    const feedbacksBgOverlayInvert = get('feedbacks.bgOverlayInvert', false);
-    const feedbacksBgOverlayPosition = get('feedbacks.bgOverlayPosition', 50);
-    const feedbacksBgOverlaySpread = get('feedbacks.bgOverlaySpread', 80);
-    const feedbacksBgImageBlur = get('feedbacks.bgImageBlur', 0);
-    const feedbacksBgImageZoom = get('feedbacks.bgImageZoom', 100);
-    const feedbacksBgImagePosX = get('feedbacks.bgImagePosX', 50);
-    const feedbacksBgImagePosY = get('feedbacks.bgImagePosY', 0);
+    const feedbacksBg = computeSectionBg('feedbacks', { bgColor: '#e8e8e8', bgColor2: '#d0d0d0' });
+    const feedbacksTopLine = computeTopLine('feedbacks');
     const feedbacksSpacing = get('feedbacks.sectionSpacing', 30);
     const feedbacksSectionTitle = get('feedbacks.sectionTitle.text', 'O que estão dizendo?');
     const feedbacksSectionTitleSize = get('feedbacks.sectionTitle.size', 28);
@@ -238,6 +355,8 @@ function renderPreviewD2New(frame, state) {
     const feedbacksSectionSubtitleColor = get('feedbacks.sectionSubtitle.color', '#666666');
     const feedbacksSectionSubtitleEnabled = get('feedbacks.sectionSubtitle.enabled', false);
     const feedbacksTitleWeight = get('feedbacks.sectionTitle.weight', 400);
+    const feedbacksTitleGradientEnabled = get('feedbacks.sectionTitle.textGradient.enabled', false);
+    const feedbacksTitleGradient = get('feedbacks.sectionTitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const feedbacksSubtitleWeight = get('feedbacks.sectionSubtitle.weight', 400);
     const feedbackAvatarSize = get('feedbacks.avatar.size', 60);
     const feedbackAvatarRadius = get('feedbacks.avatar.radius', 8);
@@ -249,6 +368,12 @@ function renderPreviewD2New(frame, state) {
     const feedbackTextColor = get('feedbacks.text.color', '#666666');
     const feedbackCardBgColor = get('feedbacks.card.bgColor', '#f5f5f5');
     const feedbackCardRadius = get('feedbacks.card.borderRadius', 12);
+    const feedbackCardGlass = get('feedbacks.card.glass', false);
+    const feedbackCardGlassBlur = get('feedbacks.card.glassBlur', 10);
+    const feedbackCardBorderEnabled = get('feedbacks.card.borderEnabled', false);
+    const feedbackCardBorderWidth = get('feedbacks.card.borderWidth', 1);
+    const feedbackCardBorderColor = get('feedbacks.card.borderColor', '#e0e0e0');
+    const feedbackCardAnimation = get('feedbacks.cardAnimation', true);
     const feedbackBottomCtaEnabled = get('feedbacks.bottomCta.enabled', false);
     const feedbackBottomCtaText = get('feedbacks.bottomCta.text', 'Faça parte dos nossos clientes satisfeitos!');
     const feedbackBottomCtaSize = get('feedbacks.bottomCta.size', 16);
@@ -257,69 +382,14 @@ function renderPreviewD2New(frame, state) {
     const feedbackBottomCtaPaddingTop = get('feedbacks.bottomCta.paddingTop', 20);
     const feedbackBottomCtaPaddingBottom = get('feedbacks.bottomCta.paddingBottom', 20);
 
-    // Compute feedbacks background style
-    let feedbacksBgStyle;
-    const fbBgSize = feedbacksBgImageZoom === 100 ? 'cover' : `${feedbacksBgImageZoom}%`;
-    if (feedbacksBgMode === 'image' && feedbacksBgImage) {
-        feedbacksBgStyle = `url('${feedbacksBgImage}') ${feedbacksBgImagePosX}% ${feedbacksBgImagePosY}% / ${fbBgSize} no-repeat`;
-    } else if (feedbacksBgGradient) {
-        const c1 = feedbacksBgGradientInvert ? feedbacksBgColor2 : feedbacksBgColor;
-        const c2 = feedbacksBgGradientInvert ? feedbacksBgColor : feedbacksBgColor2;
-        feedbacksBgStyle = `linear-gradient(to bottom, ${c1}, ${c2})`;
-    } else {
-        feedbacksBgStyle = feedbacksBgColor;
-    }
-
-    // Compute overlay CSS for feedbacks
-    let feedbacksOverlayCSS = 'display: none;';
-    if (feedbacksBgMode === 'image' && feedbacksBgImage && feedbacksBgOverlay) {
-        const op = feedbacksBgOverlayOpacity / 100;
-        const hexToRgba = (hex, a) => {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return `rgba(${r},${g},${b},${a})`;
-        };
-        const dir = feedbacksBgOverlayInvert ? 'to top' : 'to bottom';
-        const pos = feedbacksBgOverlayPosition;
-        const halfSpread = feedbacksBgOverlaySpread / 2;
-        const startFade = Math.max(0, pos - halfSpread);
-        const endFade = Math.min(100, pos + halfSpread);
-
-        if (feedbacksBgOverlayType === 'solid') {
-            feedbacksOverlayCSS = `background: ${hexToRgba(feedbacksBgOverlayColor, op)};`;
-        } else if (feedbacksBgOverlayType === 'gradient') {
-            const c1 = hexToRgba(feedbacksBgOverlayColor, op);
-            const c2 = hexToRgba(feedbacksBgOverlayColor2, op);
-            feedbacksOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, ${c2} ${endFade}%);`;
-        } else {
-            // gradientTransparent
-            const c1 = hexToRgba(feedbacksBgOverlayColor, op);
-            feedbacksOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, transparent ${endFade}%);`;
-        }
-    }
-
     // =============================================
     // CTA SECUNDÁRIO - Valores dinâmicos
     // =============================================
-    const ctaBgMode = get('cta.bgMode', 'image');
-    const ctaBgColor = get('cta.bgColor', '#1a365d');
-    const ctaBgColor2 = get('cta.bgColor2', '#0d1b2a');
-    const ctaBgGradient = get('cta.bgGradient', false);
-    const ctaBgGradientInvert = get('cta.bgGradientInvert', false);
-    const ctaBgImage = get('cta.bgImage', null) || heroBgImage;
-    const ctaBgImageBlur = get('cta.bgImageBlur', 0);
-    const ctaBgImageZoom = get('cta.bgImageZoom', 100);
-    const ctaBgImagePosX = get('cta.bgImagePosX', 50);
-    const ctaBgImagePosY = get('cta.bgImagePosY', 0);
-    const ctaBgOverlay = get('cta.bgOverlay', true);
-    const ctaBgOverlayType = get('cta.bgOverlayType', 'solid');
-    const ctaBgOverlayColor = get('cta.bgOverlayColor', '#000000');
-    const ctaBgOverlayColor2 = get('cta.bgOverlayColor2', '#000000');
-    const ctaBgOverlayOpacity = get('cta.bgOverlayOpacity', 50);
-    const ctaBgOverlayInvert = get('cta.bgOverlayInvert', false);
-    const ctaBgOverlayPosition = get('cta.bgOverlayPosition', 50);
-    const ctaBgOverlaySpread = get('cta.bgOverlaySpread', 80);
+    const ctaBg = computeSectionBg('cta', {
+        bgMode: 'image', bgColor: '#1a365d', bgColor2: '#0d1b2a',
+        bgOverlay: true, bgImageFallback: heroBgImage
+    });
+    const ctaTopLine = computeTopLine('cta');
     const ctaHeight = get('cta.height', 250);
     const ctaTitleText = get('cta.title.text', '') || heroTitleText;
     const ctaTitleSize = get('cta.title.size', 52);
@@ -335,68 +405,33 @@ function renderPreviewD2New(frame, state) {
     const ctaBtnBgType = get('cta.btn.bgType', 'gradient');
     const ctaBtnBgGradient = get('cta.btn.bgGradient', heroBtnBgGradient);
     const ctaBtnRadius = get('cta.btn.borderRadius', 30);
-
-    // Compute CTA background style
-    let ctaBgStyle;
-    const ctaBgSize = ctaBgImageZoom === 100 ? 'cover' : `${ctaBgImageZoom}%`;
-    if (ctaBgMode === 'image' && ctaBgImage) {
-        ctaBgStyle = `url('${ctaBgImage}') ${ctaBgImagePosX}% ${ctaBgImagePosY}% / ${ctaBgSize} no-repeat`;
-    } else if (ctaBgGradient) {
-        const c1 = ctaBgGradientInvert ? ctaBgColor2 : ctaBgColor;
-        const c2 = ctaBgGradientInvert ? ctaBgColor : ctaBgColor2;
-        ctaBgStyle = `linear-gradient(to bottom, ${c1}, ${c2})`;
-    } else {
-        ctaBgStyle = ctaBgColor;
-    }
-
-    // Compute CTA overlay CSS
-    let ctaOverlayCSS = 'display: none;';
-    if (ctaBgMode === 'image' && ctaBgImage && ctaBgOverlay) {
-        const op = ctaBgOverlayOpacity / 100;
-        const hexToRgba = (hex, a) => {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return `rgba(${r},${g},${b},${a})`;
-        };
-        const dir = ctaBgOverlayInvert ? 'to top' : 'to bottom';
-        const pos = ctaBgOverlayPosition;
-        const halfSpread = ctaBgOverlaySpread / 2;
-        const startFade = Math.max(0, pos - halfSpread);
-        const endFade = Math.min(100, pos + halfSpread);
-
-        if (ctaBgOverlayType === 'solid') {
-            ctaOverlayCSS = `background: ${hexToRgba(ctaBgOverlayColor, op)};`;
-        } else if (ctaBgOverlayType === 'gradient') {
-            const c1 = hexToRgba(ctaBgOverlayColor, op);
-            const c2 = hexToRgba(ctaBgOverlayColor2, op);
-            ctaOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, ${c2} ${endFade}%);`;
-        } else {
-            const c1 = hexToRgba(ctaBgOverlayColor, op);
-            ctaOverlayCSS = `background: linear-gradient(${dir}, ${c1} ${startFade}%, transparent ${endFade}%);`;
-        }
-    }
+    const ctaBtnHoverAnimation = get('cta.btn.hoverAnimation', true);
 
     // =============================================
     // FOOTER - Valores dinâmicos
     // =============================================
     const footerBgColor = get('footer.bgColor', '#1a365d');
+    const footerBgType = get('footer.bgType', 'solid');
+    const footerBgGradient = get('footer.bgGradient', 'linear-gradient(135deg, #1a365d 0%, #2d3a81 50%, #0d1b36 100%)');
+    const footerBackground = footerBgType === 'gradient' ? footerBgGradient : footerBgColor;
+    const footerTopLine = computeTopLine('footer');
     const footerSpacing = get('footer.sectionSpacing', 40);
     const footerLogoSize = get('footer.logo.size', 28);
     const footerLogoOpacity = get('footer.logo.opacity', 0.8);
+    const footerLogoColor = get('footer.logo.color', 'white');
     const footerTitleText = get('footer.title.text', 'Invista no seu negócio!');
     const footerTitleSize = get('footer.title.size', 24);
     const footerTitleColor = get('footer.title.color', '#ffffff');
     const footerSubtitleText = get('footer.subtitle.text', '');
     const footerSubtitleSize = get('footer.subtitle.size', 14);
     const footerSubtitleOpacity = get('footer.subtitle.opacity', 0.6);
-    const footerInfoEmail = get('footer.info.email', 'contato@exemplo.com');
-    const footerInfoPhone = get('footer.info.phone', '(00) 0000-0000');
+    const footerInfoEmail = get('footer.info.email', '');
+    const footerInfoPhone = get('footer.info.phone', '');
     const footerInfoCnpj = get('footer.info.cnpj', '');
-    const footerTextSize = get('footer.text.size', 13);
-    const footerTextOpacity = get('footer.text.opacity', 0.8);
-    const footerSocialSize = get('footer.social.size', 36);
-    const footerSocialGap = get('footer.social.gap', 18);
+    const footerTextSize = get('footer.info.size', 13);
+    const footerTextOpacity = get('footer.info.opacity', 0.8);
+    const footerSocialSize = get('footer.social.size', 28);
+    const footerSocialGap = get('footer.social.gap', 12);
     const footerSocialInstagram = get('footer.social.instagram', '');
     const footerSocialFacebook = get('footer.social.facebook', '');
     const footerSocialWhatsapp = get('footer.social.whatsapp', '');
@@ -461,12 +496,14 @@ function renderPreviewD2New(frame, state) {
                 display: flex;
                 justify-content: ${headerLogoPosition === 'center' ? 'center' : 'space-between'};
                 align-items: center;
-                background: ${headerBgColor};
+                background: ${headerBackground};
                 margin: 0;
                 padding: 0 20px;
                 ${headerLogoPosition === 'right' ? 'flex-direction: row-reverse;' : ''}
-                ${headerLogoPosition === 'center' ? 'position: relative;' : ''}
+                ${headerBgType === 'glass' ? `backdrop-filter: blur(${headerBgGlassBlur}px); -webkit-backdrop-filter: blur(${headerBgGlassBlur}px);` : ''}
+                ${(headerAutoHide || headerBgType === 'glass') ? `position: absolute; top: 0; left: 0; right: 0; z-index: 100; transition: transform 0.3s ease;` : (headerLogoPosition === 'center' ? 'position: relative;' : '')}
             }
+            ${headerAutoHide ? `.d2-header.header-hidden { transform: translateY(-100%); }` : ''}
             .d2-header .logo img {
                 max-height: ${headerLogoSize}px;
                 width: auto;
@@ -629,6 +666,7 @@ function renderPreviewD2New(frame, state) {
                 font-family: '${heroTitleFont}', serif;
                 color: ${heroTitleColor};
                 margin-bottom: ${heroTitleSpacing}px;
+                ${textGradientCSS(heroTitleGradientEnabled, heroTitleGradient)}
             }
             .d2-hero .subtitle {
                 font-size: ${heroSubtitleSize}px;
@@ -651,16 +689,48 @@ function renderPreviewD2New(frame, state) {
                 letter-spacing: 1px;
                 border-radius: ${heroBtnBorderRadius}px;
                 box-shadow: 0 4px 15px ${hexToRgba(heroBtnBgColor, 0.4)};
+                transition: ${heroBtnHoverAnimation ? 'transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease' : 'none'};
+                cursor: pointer;
             }
+            ${heroBtnHoverAnimation ? `
+            .d2-hero .d2-cta-btn:hover {
+                transform: scale(1.06);
+                filter: brightness(1.15);
+                box-shadow: 0 0 12px rgba(255,255,255,0.3), 0 4px 8px rgba(0,0,0,0.2);
+            }` : ''}
 
             /* CATEGORIAS */
             .d2-categorias {
                 padding: ${categoriasSpacing}px 20px;
                 text-align: center;
-                background: ${categoriasBgColor};
+                ${categoriasBg.bgMode === 'image' && categoriasBg.bgImage && categoriasBg.bgImageBlur > 0
+            ? 'background: transparent;'
+            : `background: ${categoriasBg.bgStyle};`}
                 color: #333;
                 overflow: hidden;
                 margin: 0;
+                position: relative;
+            }
+            ${categoriasBg.bgMode === 'image' && categoriasBg.bgImage && categoriasBg.bgImageBlur > 0 ? `
+            .d2-categorias::after {
+                content: '';
+                position: absolute;
+                inset: -${categoriasBg.bgImageBlur * 2}px;
+                background: url('${categoriasBg.bgImage}') ${categoriasBg.bgImagePosX}% ${categoriasBg.bgImagePosY}% / ${categoriasBg.bgSize} no-repeat;
+                filter: blur(${categoriasBg.bgImageBlur}px);
+                z-index: 0;
+            }` : ''}
+            .d2-categorias::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                ${categoriasBg.overlayCSS}
+                pointer-events: none;
+                z-index: 1;
+            }
+            .d2-categorias > * {
+                position: relative;
+                z-index: 2;
             }
             .d2-categorias h2 {
                 font-family: 'Liebling', serif;
@@ -669,6 +739,7 @@ function renderPreviewD2New(frame, state) {
                 margin-top: ${categoriasTitlePaddingTop}px;
                 margin-bottom: ${categoriasTitleGap}px;
                 color: ${categoriasSectionTitleColor};
+                ${textGradientCSS(categoriasTitleGradientEnabled, categoriasTitleGradient)}
             }
             .d2-categorias .section-subtitle {
                 font-size: ${categoriasSectionSubtitleSize}px;
@@ -729,8 +800,33 @@ function renderPreviewD2New(frame, state) {
             .d2-produtos {
                 padding: ${produtosSpacing}px ${produtosSectionPaddingH}px;
                 text-align: center;
-                background: ${produtosBgStyle};
+                ${produtosBg.bgMode === 'image' && produtosBg.bgImage && produtosBg.bgImageBlur > 0
+            ? 'background: transparent;'
+            : `background: ${produtosBg.bgStyle};`}
                 margin: 0;
+                position: relative;
+                overflow: hidden;
+            }
+            ${produtosBg.bgMode === 'image' && produtosBg.bgImage && produtosBg.bgImageBlur > 0 ? `
+            .d2-produtos::after {
+                content: '';
+                position: absolute;
+                inset: -${produtosBg.bgImageBlur * 2}px;
+                background: url('${produtosBg.bgImage}') ${produtosBg.bgImagePosX}% ${produtosBg.bgImagePosY}% / ${produtosBg.bgSize} no-repeat;
+                filter: blur(${produtosBg.bgImageBlur}px);
+                z-index: 0;
+            }` : ''}
+            .d2-produtos::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                ${produtosBg.overlayCSS}
+                pointer-events: none;
+                z-index: 1;
+            }
+            .d2-produtos > * {
+                position: relative;
+                z-index: 2;
             }
             .d2-produtos .d2-section-label {
                 color: rgba(255, 255, 255, 0.5);
@@ -742,6 +838,7 @@ function renderPreviewD2New(frame, state) {
                 margin-top: ${produtosTitlePaddingTop}px;
                 margin-bottom: ${produtosTitleGap}px;
                 color: ${produtosSectionTitleColor};
+                ${textGradientCSS(produtosTitleGradientEnabled, produtosTitleGradient)}
             }
             .d2-produtos .section-subtitle {
                 font-size: ${produtosSectionSubtitleSize}px;
@@ -840,28 +937,28 @@ function renderPreviewD2New(frame, state) {
             .d2-feedbacks {
                 padding: ${feedbacksSpacing}px 32px;
                 text-align: center;
-                ${feedbacksBgMode === 'image' && feedbacksBgImage && feedbacksBgImageBlur > 0
+                ${feedbacksBg.bgMode === 'image' && feedbacksBg.bgImage && feedbacksBg.bgImageBlur > 0
             ? 'background: transparent;'
-            : `background: ${feedbacksBgStyle};`}
+            : `background: ${feedbacksBg.bgStyle};`}
                 color: #333;
                 margin: 0;
                 position: relative;
                 overflow: hidden;
             }
-            ${feedbacksBgMode === 'image' && feedbacksBgImage && feedbacksBgImageBlur > 0 ? `
+            ${feedbacksBg.bgMode === 'image' && feedbacksBg.bgImage && feedbacksBg.bgImageBlur > 0 ? `
             .d2-feedbacks::after {
                 content: '';
                 position: absolute;
-                inset: -${feedbacksBgImageBlur * 2}px;
-                background: url('${feedbacksBgImage}') ${feedbacksBgImagePosX}% ${feedbacksBgImagePosY}% / ${fbBgSize} no-repeat;
-                filter: blur(${feedbacksBgImageBlur}px);
+                inset: -${feedbacksBg.bgImageBlur * 2}px;
+                background: url('${feedbacksBg.bgImage}') ${feedbacksBg.bgImagePosX}% ${feedbacksBg.bgImagePosY}% / ${feedbacksBg.bgSize} no-repeat;
+                filter: blur(${feedbacksBg.bgImageBlur}px);
                 z-index: 0;
             }` : ''}
             .d2-feedbacks::before {
                 content: '';
                 position: absolute;
                 inset: 0;
-                ${feedbacksOverlayCSS}
+                ${feedbacksBg.overlayCSS}
                 pointer-events: none;
                 z-index: 1;
             }
@@ -878,6 +975,7 @@ function renderPreviewD2New(frame, state) {
                 margin-top: ${feedbacksTitlePaddingTop}px;
                 margin-bottom: ${feedbacksTitleGap}px;
                 color: ${feedbacksSectionTitleColor};
+                ${textGradientCSS(feedbacksTitleGradientEnabled, feedbacksTitleGradient)}
             }
             .d2-feedbacks .section-subtitle {
                 font-size: ${feedbacksSectionSubtitleSize}px;
@@ -895,12 +993,29 @@ function renderPreviewD2New(frame, state) {
             .d2-feedback-card {
                 display: flex;
                 gap: 14px;
-                background: ${feedbackCardBgColor};
+                background: ${feedbackCardGlass
+            ? 'rgba(255, 255, 255, 0.15)'
+            : feedbackCardBgColor};
                 padding: 16px;
                 border-radius: ${feedbackCardRadius}px;
                 text-align: left;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                cursor: default;
+                ${feedbackCardGlass
+            ? `backdrop-filter: blur(${feedbackCardGlassBlur}px);
+                       -webkit-backdrop-filter: blur(${feedbackCardGlassBlur}px);
+                       border: 1px solid rgba(255, 255, 255, 0.2);`
+            : ''}
+                ${!feedbackCardGlass && feedbackCardBorderEnabled
+            ? `border: ${feedbackCardBorderWidth}px solid ${feedbackCardBorderColor};`
+            : ''}
             }
+            ${feedbackCardAnimation ? `
+            .d2-feedback-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            }` : ''}
             .d2-feedback-avatar {
                 width: 100%;
                 height: 100%;
@@ -942,24 +1057,24 @@ function renderPreviewD2New(frame, state) {
                 text-align: center;
                 overflow: hidden;
                 margin: 0;
-                ${ctaBgMode === 'image' && ctaBgImage && ctaBgImageBlur > 0
+                ${ctaBg.bgMode === 'image' && ctaBg.bgImage && ctaBg.bgImageBlur > 0
             ? 'background: transparent;'
-            : `background: ${ctaBgStyle};`}
+            : `background: ${ctaBg.bgStyle};`}
             }
-            ${ctaBgMode === 'image' && ctaBgImage && ctaBgImageBlur > 0 ? `
+            ${ctaBg.bgMode === 'image' && ctaBg.bgImage && ctaBg.bgImageBlur > 0 ? `
             .d2-cta-secundario::after {
                 content: '';
                 position: absolute;
-                inset: -${ctaBgImageBlur * 2}px;
-                background: url('${ctaBgImage}') ${ctaBgImagePosX}% ${ctaBgImagePosY}% / ${ctaBgSize} no-repeat;
-                filter: blur(${ctaBgImageBlur}px);
+                inset: -${ctaBg.bgImageBlur * 2}px;
+                background: url('${ctaBg.bgImage}') ${ctaBg.bgImagePosX}% ${ctaBg.bgImagePosY}% / ${ctaBg.bgSize} no-repeat;
+                filter: blur(${ctaBg.bgImageBlur}px);
                 z-index: 0;
             }` : ''}
             .d2-cta-secundario::before {
                 content: '';
                 position: absolute;
                 inset: 0;
-                ${ctaOverlayCSS}
+                ${ctaBg.overlayCSS}
                 pointer-events: none;
                 z-index: 1;
             }
@@ -985,12 +1100,19 @@ function renderPreviewD2New(frame, state) {
             }
             .d2-cta-secundario .d2-cta-btn {
                 border-radius: ${ctaBtnRadius}px;
+                ${ctaBtnHoverAnimation ? 'transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;' : ''}
             }
+            ${ctaBtnHoverAnimation ? `
+            .d2-cta-secundario .d2-cta-btn:hover {
+                transform: scale(1.06);
+                filter: brightness(1.15);
+                box-shadow: 0 0 12px rgba(255,255,255,0.3), 0 4px 8px rgba(0,0,0,0.2);
+            }` : ''}
 
             /* FOOTER */
             .d2-footer {
                 padding: ${footerSpacing}px 32px;
-                background: ${footerBgColor};
+                background: ${footerBackground};
                 text-align: left;
                 margin: 0;
             }
@@ -1026,6 +1148,7 @@ function renderPreviewD2New(frame, state) {
                 height: ${footerLogoSize}px;
                 width: auto;
                 opacity: ${footerLogoOpacity};
+                filter: ${footerLogoColor === 'white' ? 'brightness(0) invert(1)' : footerLogoColor === 'black' ? 'brightness(0)' : 'none'};
             }
             .d2-footer-social {
                 display: flex;
@@ -1048,18 +1171,8 @@ function renderPreviewD2New(frame, state) {
                 background: #1877F2;
                 overflow: hidden;
             }
-            .d2-social-btn.whatsapp-chat {
-                width: auto;
-                padding: 0 14px;
-                gap: 6px;
+            .d2-social-btn.whatsapp {
                 background: #25D366;
-                color: #fff;
-                font-size: 22px;
-                font-weight: 500;
-            }
-            .d2-social-btn.whatsapp-chat span {
-                color: #fff;
-                font-size: 13px;
             }
             .d2-social-btn svg {
                 width: 26px;
@@ -1072,6 +1185,13 @@ function renderPreviewD2New(frame, state) {
             .d2-social-btn.facebook svg {
                 transform: translateY(3px);
             }
+
+            /* TOP LINES */
+            ${categoriasTopLine.css}
+            ${produtosTopLine.css}
+            ${feedbacksTopLine.css}
+            ${ctaTopLine.css}
+            ${footerTopLine.css}
         </style>
 
         <div class="d2-preview-container">
@@ -1111,6 +1231,7 @@ function renderPreviewD2New(frame, state) {
 
             <!-- CATEGORIAS -->
             ${isSectionEnabled('categorias') ? `
+            ${categoriasTopLine.html}
             <section class="d2-categorias" id="section-categorias">
                 ${categoriasSectionTitleEnabled ? `<h2>${categoriasSectionTitle}</h2>` : ''}
                 ${categoriasSectionSubtitleEnabled ? `<p class="section-subtitle">${categoriasSectionSubtitle}</p>` : ''}
@@ -1135,6 +1256,7 @@ function renderPreviewD2New(frame, state) {
 
             <!-- PRODUTOS (Dinâmico) -->
             ${isSectionEnabled('produtos') ? `
+            ${produtosTopLine.html}
             <section class="d2-produtos" id="section-produtos">
                 ${produtosSectionTitleEnabled ? `<h2>${produtosSectionTitle}</h2>` : ''}
                 ${produtosSectionSubtitleEnabled ? `<p class="section-subtitle">${produtosSectionSubtitle}</p>` : ''}
@@ -1170,6 +1292,7 @@ function renderPreviewD2New(frame, state) {
 
             <!-- FEEDBACKS (Dinâmico) -->
             ${isSectionEnabled('feedbacks') ? `
+            ${feedbacksTopLine.html}
             <section class="d2-feedbacks" id="section-feedbacks">
                 ${feedbacksSectionTitleEnabled ? `<h2>${feedbacksSectionTitle}</h2>` : ''}
                 ${feedbacksSectionSubtitleEnabled ? `<p class="section-subtitle">${feedbacksSectionSubtitle}</p>` : ''}
@@ -1196,6 +1319,7 @@ function renderPreviewD2New(frame, state) {
 
             <!-- CTA SECUNDÁRIO -->
             ${isSectionEnabled('cta') ? `
+            ${ctaTopLine.html}
             <section class="d2-cta-secundario" id="section-cta">
                 <div class="cta-content">
                     <h2>${ctaTitleText}</h2>
@@ -1206,9 +1330,10 @@ function renderPreviewD2New(frame, state) {
             ` : ''}
 
             <!-- FOOTER -->
+            ${footerTopLine.html}
             <footer class="d2-footer">
                 <h3>${footerTitleText}</h3>
-                <p class="d2-footer-subtitle">${footerSubtitleText}</p>
+                ${footerSubtitleText ? `<p class="d2-footer-subtitle">${footerSubtitleText}</p>` : ''}
                 <div class="d2-footer-info">
                     ${footerInfoEmail ? `<p><strong>Email:</strong> ${footerInfoEmail}</p>` : ''}
                     ${footerInfoPhone ? `<p><strong>Telefone/Whatsapp:</strong> ${footerInfoPhone}</p>` : ''}
@@ -1232,11 +1357,10 @@ function renderPreviewD2New(frame, state) {
                             </svg>
                         </a>` : ''}
                         ${footerSocialWhatsapp ? `
-                        <a href="https://wa.me/${footerSocialWhatsapp.replace(/\D/g, '')}" class="d2-social-btn whatsapp-chat" target="_blank">
+                        <a href="https://wa.me/${footerSocialWhatsapp.replace(/\D/g, '')}" class="d2-social-btn whatsapp" target="_blank">
                             <svg viewBox="0 0 24 24" fill="white">
                                 <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
                             </svg>
-                            <span>Chat</span>
                         </a>` : ''}
                     </div>
                 </div>
@@ -1245,6 +1369,25 @@ function renderPreviewD2New(frame, state) {
     `;
 
     frame.innerHTML = fullHtml;
+
+    // Header auto-hide scroll listener
+    if (headerAutoHide) {
+        const header = frame.querySelector('.d2-header');
+        const scrollParent = frame.closest('[style*="overflow"]') || frame.parentElement;
+        if (header && scrollParent) {
+            let lastScrollY = 0;
+            scrollParent.addEventListener('scroll', () => {
+                const currentScrollY = scrollParent.scrollTop;
+                if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
+                    header.classList.add('header-hidden');
+                } else {
+                    header.classList.remove('header-hidden');
+                }
+                lastScrollY = currentScrollY;
+            }, { passive: true });
+        }
+    }
+
     console.log('[Preview D2] Layout completo renderizado');
 }
 

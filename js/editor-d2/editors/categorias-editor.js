@@ -20,28 +20,21 @@ class D2CategoriasEditor {
         const fragment = document.createDocumentFragment();
         const C = window.D2Controls;
 
-        // ===== SEÇÃO GERAL =====
-        const sectionGroup = C.createGroupExpander(
-            { title: 'Seção', icon: 'fa-layer-group', expanded: true },
+        // ===== FUNDO DA SEÇÃO =====
+        const bgGroup = C.createBgSection({
+            basePath: this.basePath,
+            defaults: { bgColor: '#ffffff', bgColor2: '#d0d0d0', sectionSpacing: 40 }
+        });
+        fragment.appendChild(bgGroup);
+
+        // ===== LINHA DECORATIVA =====
+        fragment.appendChild(C.createTopLineSection({ basePath: this.basePath }));
+
+        // ===== LAYOUT =====
+        const layoutGroup = C.createGroupExpander(
+            { title: 'Layout', icon: 'fa-th-large', expanded: false },
             () => {
                 const container = document.createElement('div');
-
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Espaçamento da seção',
-                        value: window.d2State.get(`${this.basePath}.sectionSpacing`, 40),
-                        min: 20, max: 80, step: 5, unit: 'px',
-                        path: `${this.basePath}.sectionSpacing`
-                    })
-                );
-
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor de fundo',
-                        value: window.d2State.get(`${this.basePath}.bgColor`, '#ffffff'),
-                        path: `${this.basePath}.bgColor`
-                    })
-                );
 
                 container.appendChild(
                     C.createSlider({
@@ -55,7 +48,7 @@ class D2CategoriasEditor {
                 return container;
             }
         );
-        fragment.appendChild(sectionGroup);
+        fragment.appendChild(layoutGroup);
 
         // ===== TÍTULO DA SEÇÃO =====
         const titleGroup = C.createGroupExpander(
@@ -92,6 +85,7 @@ class D2CategoriasEditor {
                     value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#333333'),
                     path: `${this.basePath}.sectionTitle.color`
                 }));
+                container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionTitle` }));
 
                 // ── SUBTÍTULO ──
                 const subDiv = document.createElement('div');

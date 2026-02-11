@@ -47,7 +47,11 @@
         <!-- MAIN LAYOUT: 4 COLUNAS -->
         <main class="editor-d2-main">
             <!-- COLUNA 1: MENU PRINCIPAL -->
-            <aside class="editor-d2-menu">
+            <aside class="editor-d2-menu" id="editor-menu">
+                <button class="menu-toggle" id="menu-toggle" title="Expandir menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+
                 <div class="user-card">
                     <img src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=80" alt="Avatar"
                         class="user-avatar" id="user-avatar">
@@ -59,31 +63,31 @@
                 </div>
 
                 <nav class="menu-nav">
-                    <a href="app.html" class="menu-link">
+                    <a href="app.html" class="menu-link" title="Meus Projetos">
                         <i class="fas fa-folder"></i>
                         <span>Meus Projetos</span>
                     </a>
-                    <a href="#" class="menu-link active">
+                    <a href="#" class="menu-link active" title="Editor D2">
                         <i class="fas fa-edit"></i>
                         <span>Editor D2</span>
                     </a>
-                    <a href="app.html#wallet" class="menu-link">
+                    <a href="app.html#wallet" class="menu-link" title="Minha Carteira">
                         <i class="fas fa-wallet"></i>
                         <span>Minha Carteira</span>
                         <span class="menu-badge" id="credits-badge">0</span>
                     </a>
-                    <a href="#" class="menu-link">
+                    <a href="#" class="menu-link" title="Aulas">
                         <i class="fas fa-graduation-cap"></i>
                         <span>Aulas</span>
                     </a>
-                    <a href="#" class="menu-link">
+                    <a href="#" class="menu-link" title="Ajuda">
                         <i class="fas fa-question-circle"></i>
                         <span>Ajuda</span>
                     </a>
                 </nav>
 
                 <div class="menu-footer">
-                    <a href="#" class="menu-link menu-logout" id="btn-logout">
+                    <a href="#" class="menu-link menu-logout" id="btn-logout" title="Sair">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Sair</span>
                     </a>
@@ -294,6 +298,23 @@
                     window.location.href = 'index.html';
                 }
             });
+
+            // Hamburger menu toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const editorMenu = document.getElementById('editor-menu');
+            if (menuToggle && editorMenu) {
+                menuToggle.addEventListener('click', () => {
+                    editorMenu.classList.toggle('expanded');
+                    const icon = menuToggle.querySelector('i');
+                    if (editorMenu.classList.contains('expanded')) {
+                        icon.className = 'fas fa-times';
+                        menuToggle.title = 'Fechar menu';
+                    } else {
+                        icon.className = 'fas fa-bars';
+                        menuToggle.title = 'Expandir menu';
+                    }
+                });
+            }
 
             console.log('[Editor D2] Initialized successfully');
         });

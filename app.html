@@ -25,8 +25,8 @@
             <!-- User Profile Card -->
             <div class="user-card" id="user-card">
                 <div class="user-card-header">
-                    <button class="btn-edit-profile" id="btn-edit-profile" title="Editar Perfil">
-                        <i class="fas fa-pen"></i>
+                    <button class="btn-hamburger-menu" id="btn-hamburger-menu" title="Menu">
+                        <i class="fas fa-bars"></i>
                     </button>
                     <div class="user-avatar">
                         <img src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=80"
@@ -60,7 +60,6 @@
                 <a href="#" class="nav-item" data-page="wallet">
                     <i class="fas fa-wallet"></i>
                     <span>Minha Carteira</span>
-                    <span class="credits-badge" id="credits-badge">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="lessons">
                     <i class="fas fa-graduation-cap"></i>
@@ -76,13 +75,8 @@
                 </a>
             </nav>
 
-            <!-- Sidebar Footer -->
-            <div class="sidebar-footer">
-                <a href="#" class="nav-item" id="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Sair</span>
-                </a>
-            </div>
+            <!-- Sidebar Footer (vazio — Sair migrou p/ popup) -->
+            <div class="sidebar-footer"></div>
         </aside>
 
         <!-- MAIN CONTENT -->
@@ -164,9 +158,9 @@
                     <!-- D-2 draft projects rendered here -->
                 </div>
 
-                <!-- Rascunhos: Site Completo (Prime-D) -->
+                <!-- Rascunhos: Cardápio (D-3) -->
                 <div class="section-divider" id="drafts-prime-section">
-                    <h3 class="section-label"><i class="fas fa-rocket"></i> Site Completo (Prime-D) <span
+                    <h3 class="section-label"><i class="fas fa-utensils"></i> Cardápio (D-3) <span
                             class="count-badge drafts" id="drafts-prime-count">0</span></h3>
                 </div>
                 <div class="projects-grid" id="drafts-prime-grid">
@@ -370,7 +364,7 @@
                                     </div>
                                 </div>
                                 <div class="commission-item">
-                                    <label>Prime-D</label>
+                                    <label>D-3</label>
                                     <div class="input-group">
                                         <span>R$</span>
                                         <input type="number" id="comm-prime" value="80" min="0">
@@ -415,7 +409,7 @@
                     <details class="faq-item">
                         <summary>Quanto custa para publicar um site?</summary>
                         <p>O custo depende do modelo: <strong>D-1 (Bio Link) = 40 créditos</strong>, <strong>D-2
-                                (Landing Page) = 80 créditos</strong>, <strong>Prime-D (Site Completo) = 140
+                                (Landing Page) = 80 créditos</strong>, <strong>D-3 (Cardápio) = 140
                                 créditos</strong>. Atualizações no mesmo site são gratuitas.</p>
                     </details>
                     <details class="faq-item">
@@ -790,6 +784,66 @@
         </div>
     </div>
 
+    <!-- Modal: Menu Hamburger -->
+    <div class="modal" id="modal-hamburger-menu">
+        <div class="modal-content modal-hamburger">
+            <div class="modal-header">
+                <h2><i class="fas fa-bars"></i> Menu</h2>
+                <button class="modal-close" onclick="closeHamburgerMenu()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body hamburger-menu-body">
+                <a href="#" class="hamburger-menu-item" id="hm-edit-profile">
+                    <i class="fas fa-user-edit"></i>
+                    <div class="hm-item-text">
+                        <span class="hm-item-title">Editar Perfil</span>
+                        <span class="hm-item-desc">Altere seu nome, foto e informações</span>
+                    </div>
+                </a>
+                <a href="#" class="hamburger-menu-item" id="hm-level">
+                    <i class="fas fa-trophy"></i>
+                    <div class="hm-item-text">
+                        <span class="hm-item-title">Seu Nível</span>
+                        <span class="hm-item-desc">Veja sua evolução e conquistas</span>
+                    </div>
+                </a>
+                <a href="#" class="hamburger-menu-item disabled" id="hm-vendas">
+                    <i class="fas fa-chart-line"></i>
+                    <div class="hm-item-text">
+                        <span class="hm-item-title">Vendas</span>
+                        <span class="hm-item-desc">Vendas de modelo de site</span>
+                    </div>
+                    <span class="hm-badge-soon">em breve</span>
+                </a>
+                <a href="#" class="hamburger-menu-item disabled" id="hm-cfd">
+                    <i class="fas fa-calculator"></i>
+                    <div class="hm-item-text">
+                        <span class="hm-item-title">CFD</span>
+                        <span class="hm-item-desc">Controle de finanças Demeni</span>
+                    </div>
+                    <span class="hm-badge-soon">em breve</span>
+                </a>
+                <a href="#" class="hamburger-menu-item disabled" id="hm-lead">
+                    <i class="fas fa-magnet"></i>
+                    <div class="hm-item-text">
+                        <span class="hm-item-title">Lea-D</span>
+                        <span class="hm-item-desc">Conseguir e administrar leads</span>
+                    </div>
+                    <span class="hm-badge-soon">em breve</span>
+                </a>
+                <div class="hm-divider"></div>
+                <a href="#" class="hamburger-menu-item hm-logout" id="hm-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <div class="hm-item-text">
+                        <span class="hm-item-title">Sair</span>
+                        <span class="hm-item-desc">Encerrar sessão</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Login -->
     <div class="modal" id="modal-login">
         <div class="modal-content">
@@ -871,7 +925,7 @@
                         </div>
                     </div>
 
-                    <!-- Prime-D: Site Completo (Em breve) -->
+                    <!-- D-3: Cardápio (Em breve) -->
                     <div class="model-card disabled">
                         <div class="model-preview">
                             <div class="model-preview-content">
@@ -882,8 +936,8 @@
                             <span class="model-badge coming-soon">Em breve</span>
                         </div>
                         <div class="model-info">
-                            <h3>Prime-D <small>Site Completo</small></h3>
-                            <p class="model-desc">Múltiplas páginas, totalmente responsivo, design premium</p>
+                            <h3>D-3 <small>Cardápio</small></h3>
+                            <p class="model-desc">Cardápio digital completo com categorias, preços e fotos</p>
                             <div class="model-price">
                                 <span class="price">140</span>
                                 <span class="unit">créditos</span>

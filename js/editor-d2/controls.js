@@ -541,6 +541,327 @@ window.D2Controls = {
         });
 
         return container;
+    },
+
+    /**
+     * Cria um GroupExpander completo de "Fundo da Seção"
+     * Reutilizável em qualquer editor.
+     * @param {Object} options - { basePath, defaults, expanded }
+     */
+    createBgSection(options) {
+        const C = window.D2Controls;
+        const bp = options.basePath;
+        const d = {
+            bgMode: 'color', bgColor: '#ffffff', bgColor2: '#d0d0d0',
+            bgGradient: false, bgGradientInvert: false, bgImage: null,
+            bgOverlay: false, bgOverlayType: 'solid', bgOverlayColor: '#000000',
+            bgOverlayColor2: '#000000', bgOverlayOpacity: 50, bgOverlayInvert: false,
+            bgOverlayPosition: 50, bgOverlaySpread: 80,
+            bgImageBlur: 0, bgImageZoom: 100, bgImagePosX: 50, bgImagePosY: 0,
+            sectionSpacing: 30,
+            ...(options.defaults || {})
+        };
+
+        return C.createGroupExpander(
+            { title: 'Fundo da Seção', icon: 'fa-fill-drip', expanded: options.expanded !== false },
+            () => {
+                const container = document.createElement('div');
+                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
+
+                const bgMode = window.d2State.get(`${bp}.bgMode`, d.bgMode);
+
+                // Mode toggle buttons
+                const modeDiv = document.createElement('div');
+                modeDiv.style.cssText = 'display: flex; gap: 4px; margin-bottom: 12px;';
+                modeDiv.innerHTML = `
+                    <button class="mode-btn ${bgMode === 'color' ? 'active' : ''}" data-mode="color" style="flex:1;padding:8px;border:1px solid rgba(255,255,255,0.2);border-radius:6px;background:${bgMode === 'color' ? 'rgba(255,255,255,0.15)' : 'transparent'};color:inherit;cursor:pointer;font-size:12px;">
+                        <i class="fas fa-palette"></i> Cor
+                    </button>
+                    <button class="mode-btn ${bgMode === 'image' ? 'active' : ''}" data-mode="image" style="flex:1;padding:8px;border:1px solid rgba(255,255,255,0.2);border-radius:6px;background:${bgMode === 'image' ? 'rgba(255,255,255,0.15)' : 'transparent'};color:inherit;cursor:pointer;font-size:12px;">
+                        <i class="fas fa-image"></i> Imagem
+                    </button>
+                `;
+                const sectionId = bp.replace('d2Adjustments.', '');
+                modeDiv.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        window.d2State.set(`${bp}.bgMode`, btn.dataset.mode);
+                        document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                            detail: { sectionId }
+                        }));
+                    });
+                });
+                container.appendChild(modeDiv);
+
+                if (bgMode === 'color') {
+                    // ── COLOR MODE ──
+                    container.appendChild(C.createColorPicker({
+                        label: 'Cor principal',
+                        value: window.d2State.get(`${bp}.bgColor`, d.bgColor),
+                        path: `${bp}.bgColor`
+                    }));
+
+                    container.appendChild(C.createToggle({
+                        label: 'Ativar degradê',
+                        value: window.d2State.get(`${bp}.bgGradient`, d.bgGradient),
+                        path: `${bp}.bgGradient`
+                    }));
+
+                    if (window.d2State.get(`${bp}.bgGradient`, d.bgGradient)) {
+                        container.appendChild(C.createColorPicker({
+                            label: 'Cor 2',
+                            value: window.d2State.get(`${bp}.bgColor2`, d.bgColor2),
+                            path: `${bp}.bgColor2`
+                        }));
+                        container.appendChild(C.createToggle({
+                            label: 'Inverter direção',
+                            value: window.d2State.get(`${bp}.bgGradientInvert`, d.bgGradientInvert),
+                            path: `${bp}.bgGradientInvert`
+                        }));
+                    }
+                } else {
+                    // ── IMAGE MODE ──
+                    container.appendChild(C.createImagePicker({
+                        label: 'Imagem de fundo',
+                        value: window.d2State.get(`${bp}.bgImage`, d.bgImage),
+                        path: `${bp}.bgImage`,
+                        aspect: '16/9'
+                    }));
+
+                    container.appendChild(C.createSlider({
+                        label: 'Desfoque',
+                        value: window.d2State.get(`${bp}.bgImageBlur`, d.bgImageBlur),
+                        min: 0, max: 20, step: 1, unit: 'px',
+                        path: `${bp}.bgImageBlur`
+                    }));
+                    container.appendChild(C.createSlider({
+                        label: 'Zoom',
+                        value: window.d2State.get(`${bp}.bgImageZoom`, d.bgImageZoom),
+                        min: 100, max: 300, step: 5, unit: '%',
+                        path: `${bp}.bgImageZoom`
+                    }));
+                    container.appendChild(C.createSlider({
+                        label: 'Posição horizontal',
+                        value: window.d2State.get(`${bp}.bgImagePosX`, d.bgImagePosX),
+                        min: 0, max: 100, step: 5, unit: '%',
+                        path: `${bp}.bgImagePosX`
+                    }));
+                    container.appendChild(C.createSlider({
+                        label: 'Posição vertical',
+                        value: window.d2State.get(`${bp}.bgImagePosY`, d.bgImagePosY),
+                        min: 0, max: 100, step: 5, unit: '%',
+                        path: `${bp}.bgImagePosY`
+                    }));
+
+                    // Overlay divider
+                    const overlayDiv = document.createElement('div');
+                    overlayDiv.style.cssText = dividerStyle;
+                    overlayDiv.textContent = 'Overlay';
+                    container.appendChild(overlayDiv);
+
+                    container.appendChild(C.createToggle({
+                        label: 'Ativar overlay',
+                        value: window.d2State.get(`${bp}.bgOverlay`, d.bgOverlay),
+                        path: `${bp}.bgOverlay`
+                    }));
+
+                    if (window.d2State.get(`${bp}.bgOverlay`, d.bgOverlay)) {
+                        container.appendChild(C.createSelect({
+                            label: 'Tipo',
+                            value: window.d2State.get(`${bp}.bgOverlayType`, d.bgOverlayType),
+                            options: [
+                                { value: 'solid', label: 'Chapado' },
+                                { value: 'gradient', label: 'Degradê' },
+                                { value: 'gradientTransparent', label: 'Degradê → Transparente' }
+                            ],
+                            path: `${bp}.bgOverlayType`
+                        }));
+                        container.appendChild(C.createColorPicker({
+                            label: 'Cor do overlay',
+                            value: window.d2State.get(`${bp}.bgOverlayColor`, d.bgOverlayColor),
+                            path: `${bp}.bgOverlayColor`
+                        }));
+                        const overlayType = window.d2State.get(`${bp}.bgOverlayType`, d.bgOverlayType);
+                        if (overlayType === 'gradient') {
+                            container.appendChild(C.createColorPicker({
+                                label: 'Cor 2',
+                                value: window.d2State.get(`${bp}.bgOverlayColor2`, d.bgOverlayColor2),
+                                path: `${bp}.bgOverlayColor2`
+                            }));
+                        }
+                        container.appendChild(C.createSlider({
+                            label: 'Opacidade',
+                            value: window.d2State.get(`${bp}.bgOverlayOpacity`, d.bgOverlayOpacity),
+                            min: 0, max: 100, step: 5, unit: '%',
+                            path: `${bp}.bgOverlayOpacity`
+                        }));
+                        if (overlayType !== 'solid') {
+                            container.appendChild(C.createToggle({
+                                label: 'Inverter',
+                                value: window.d2State.get(`${bp}.bgOverlayInvert`, d.bgOverlayInvert),
+                                path: `${bp}.bgOverlayInvert`
+                            }));
+                            container.appendChild(C.createSlider({
+                                label: 'Posição',
+                                value: window.d2State.get(`${bp}.bgOverlayPosition`, d.bgOverlayPosition),
+                                min: 0, max: 100, step: 5, unit: '%',
+                                path: `${bp}.bgOverlayPosition`
+                            }));
+                            container.appendChild(C.createSlider({
+                                label: 'Suavidade',
+                                value: window.d2State.get(`${bp}.bgOverlaySpread`, d.bgOverlaySpread),
+                                min: 10, max: 100, step: 5, unit: '%',
+                                path: `${bp}.bgOverlaySpread`
+                            }));
+                        }
+                    }
+                }
+
+                // Spacing
+                const spDiv = document.createElement('div');
+                spDiv.style.cssText = dividerStyle;
+                spDiv.textContent = 'Espaçamento';
+                container.appendChild(spDiv);
+
+                container.appendChild(C.createSlider({
+                    label: 'Espaçamento da seção',
+                    value: window.d2State.get(`${bp}.sectionSpacing`, d.sectionSpacing),
+                    min: 20, max: 80, step: 5, unit: 'px',
+                    path: `${bp}.sectionSpacing`
+                }));
+
+                return container;
+            }
+        );
+    },
+
+    /**
+     * Presets de degradê — grid de botões visuais
+     * @param {Object} options - { value, path }
+     */
+    createGradientPresets(options) {
+        const { value, path } = options;
+        const C = window.D2Controls;
+        const presets = [
+            { name: 'Azul Royal', css: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)' },
+            { name: 'Dourado', css: 'linear-gradient(135deg, #F5A623 0%, #F7DC6F 50%, #D4AC0D 100%)' },
+            { name: 'Sunset', css: 'linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%)' },
+            { name: 'Oceano', css: 'linear-gradient(135deg, #0077B6 0%, #48CAE4 50%, #023E8A 100%)' },
+            { name: 'Esmeralda', css: 'linear-gradient(135deg, #2ECC71 0%, #82E0AA 50%, #1B8C4E 100%)' },
+            { name: 'Rosé', css: 'linear-gradient(135deg, #E91E63 0%, #F48FB1 50%, #880E4F 100%)' },
+            { name: 'Cinza', css: 'linear-gradient(135deg, #555 0%, #999 50%, #333 100%)' },
+            { name: 'Noite', css: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }
+        ];
+
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0;';
+
+        presets.forEach(p => {
+            const btn = document.createElement('button');
+            btn.title = p.name;
+            const isActive = value === p.css;
+            btn.style.cssText = `
+                width: 32px; height: 32px; border-radius: 50%; border: 2px solid ${isActive ? 'var(--d2-gold)' : 'rgba(255,255,255,0.15)'};
+                background: ${p.css}; cursor: pointer; padding: 0; transition: border-color 0.2s, transform 0.15s;
+                ${isActive ? 'transform: scale(1.15);' : ''}
+            `;
+            btn.addEventListener('mouseenter', () => { if (!isActive) btn.style.borderColor = 'rgba(255,255,255,0.4)'; });
+            btn.addEventListener('mouseleave', () => { if (!isActive) btn.style.borderColor = 'rgba(255,255,255,0.15)'; });
+            btn.addEventListener('click', () => {
+                window.d2State.set(path, p.css);
+            });
+            wrapper.appendChild(btn);
+        });
+
+        return wrapper;
+    },
+
+    // Cria um GroupExpander de "Linha Decorativa"
+    // @param {Object} options - { basePath }
+    createTopLineSection(options) {
+        const { basePath } = options;
+        const C = window.D2Controls;
+        const tlPath = `${basePath}.topLine`;
+
+        return C.createGroupExpander(
+            { title: 'Linha Decorativa', icon: 'fa-minus', expanded: false },
+            () => {
+                const container = document.createElement('div');
+
+                container.appendChild(C.createToggle({
+                    label: 'Ativar linha no topo',
+                    value: window.d2State.get(`${tlPath}.enabled`, false),
+                    path: `${tlPath}.enabled`
+                }));
+
+                container.appendChild(C.createSlider({
+                    label: 'Altura',
+                    value: window.d2State.get(`${tlPath}.height`, 3),
+                    min: 1, max: 8, step: 1, unit: 'px',
+                    path: `${tlPath}.height`
+                }));
+
+                container.appendChild(C.createSelect({
+                    label: 'Tipo',
+                    value: window.d2State.get(`${tlPath}.bgType`, 'gradient'),
+                    options: [
+                        { value: 'solid', label: 'Cor Sólida' },
+                        { value: 'gradient', label: 'Degradê' }
+                    ],
+                    path: `${tlPath}.bgType`
+                }));
+
+                container.appendChild(C.createColorPicker({
+                    label: 'Cor',
+                    value: window.d2State.get(`${tlPath}.bgColor`, '#5167E7'),
+                    path: `${tlPath}.bgColor`
+                }));
+
+                // Presets de degradê (quando tipo = gradient)
+                if (window.d2State.get(`${tlPath}.bgType`, 'gradient') === 'gradient') {
+                    const label = document.createElement('div');
+                    label.style.cssText = 'font-size: 11px; opacity: 0.6; margin-top: 8px;';
+                    label.textContent = 'Escolha o degradê:';
+                    container.appendChild(label);
+                    container.appendChild(C.createGradientPresets({
+                        value: window.d2State.get(`${tlPath}.bgGradient`, 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)'),
+                        path: `${tlPath}.bgGradient`
+                    }));
+                }
+
+                return container;
+            }
+        );
+    },
+
+    /**
+     * Controles de texto gradiente (toggle + presets)
+     * @param {Object} options - { basePath: 'section.sectionTitle' ou 'hero.title' }
+     */
+    createTextGradientControls(options) {
+        const { basePath } = options;
+        const C = window.D2Controls;
+        const tgPath = `${basePath}.textGradient`;
+        const container = document.createElement('div');
+
+        container.appendChild(C.createToggle({
+            label: 'Texto gradiente',
+            value: window.d2State.get(`${tgPath}.enabled`, false),
+            path: `${tgPath}.enabled`
+        }));
+
+        // Presets de degradê (quando ativado)
+        if (window.d2State.get(`${tgPath}.enabled`, false)) {
+            const label = document.createElement('div');
+            label.style.cssText = 'font-size: 11px; opacity: 0.6; margin-top: 8px;';
+            label.textContent = 'Escolha o degradê:';
+            container.appendChild(label);
+            container.appendChild(C.createGradientPresets({
+                value: window.d2State.get(`${tgPath}.gradient`, 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)'),
+                path: `${tgPath}.gradient`
+            }));
+        }
+
+        return container;
     }
 };
 

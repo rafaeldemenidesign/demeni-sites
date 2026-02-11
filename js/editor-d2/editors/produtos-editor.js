@@ -20,52 +20,15 @@ class D2ProdutosEditor {
         const fragment = document.createDocumentFragment();
         const C = window.D2Controls;
 
-        // ===== SEÇÃO GERAL =====
-        const sectionGroup = C.createGroupExpander(
-            { title: 'Seção', icon: 'fa-layer-group', expanded: true },
-            () => {
-                const container = document.createElement('div');
-                const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
+        // ===== FUNDO DA SEÇÃO =====
+        const bgGroup = C.createBgSection({
+            basePath: this.basePath,
+            defaults: { bgColor: '#1a365d', bgColor2: '#0d1b36', sectionSpacing: 30 }
+        });
+        fragment.appendChild(bgGroup);
 
-                container.appendChild(C.createColorPicker({
-                    label: 'Cor de fundo',
-                    value: window.d2State.get(`${this.basePath}.bgColor`, '#1a365d'),
-                    path: `${this.basePath}.bgColor`
-                }));
-
-                // ── DEGRADÊ ──
-                const gradDiv = document.createElement('div');
-                gradDiv.style.cssText = dividerStyle;
-                gradDiv.textContent = 'Degradê';
-                container.appendChild(gradDiv);
-
-                container.appendChild(C.createToggle({
-                    label: 'Ativar degradê',
-                    value: window.d2State.get(`${this.basePath}.bgGradient`, false),
-                    path: `${this.basePath}.bgGradient`
-                }));
-                container.appendChild(C.createColorPicker({
-                    label: '2ª cor do degradê',
-                    value: window.d2State.get(`${this.basePath}.bgColor2`, '#0d1b36'),
-                    path: `${this.basePath}.bgColor2`
-                }));
-                container.appendChild(C.createToggle({
-                    label: 'Inverter direção',
-                    value: window.d2State.get(`${this.basePath}.bgGradientInvert`, false),
-                    path: `${this.basePath}.bgGradientInvert`
-                }));
-
-                container.appendChild(C.createSlider({
-                    label: 'Espaçamento da seção',
-                    value: window.d2State.get(`${this.basePath}.sectionSpacing`, 30),
-                    min: 20, max: 80, step: 5, unit: 'px',
-                    path: `${this.basePath}.sectionSpacing`
-                }));
-
-                return container;
-            }
-        );
-        fragment.appendChild(sectionGroup);
+        // ===== LINHA DECORATIVA =====
+        fragment.appendChild(C.createTopLineSection({ basePath: this.basePath }));
 
         // ===== TÍTULO DA SEÇÃO =====
         const titleGroup = C.createGroupExpander(
@@ -102,6 +65,7 @@ class D2ProdutosEditor {
                     value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#ffffff'),
                     path: `${this.basePath}.sectionTitle.color`
                 }));
+                container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionTitle` }));
 
                 // ── SUBTÍTULO ──
                 const subDiv = document.createElement('div');

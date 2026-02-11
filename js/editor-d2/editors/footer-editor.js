@@ -43,10 +43,37 @@ class D2FooterEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createSelect({
+                        label: 'Tipo de fundo',
+                        value: window.d2State.get(`${this.basePath}.bgType`, 'solid'),
+                        options: [
+                            { value: 'solid', label: 'Cor Sólida' },
+                            { value: 'gradient', label: 'Degradê' }
+                        ],
+                        path: `${this.basePath}.bgType`
+                    })
+                );
+
+                // Presets de degradê (quando tipo = gradient)
+                if (window.d2State.get(`${this.basePath}.bgType`, 'solid') === 'gradient') {
+                    const label = document.createElement('div');
+                    label.style.cssText = 'font-size: 11px; opacity: 0.6; margin-top: 8px;';
+                    label.textContent = 'Escolha o degradê:';
+                    container.appendChild(label);
+                    container.appendChild(C.createGradientPresets({
+                        value: window.d2State.get(`${this.basePath}.bgGradient`, 'linear-gradient(135deg, #1a365d 0%, #2d3a81 50%, #0d1b36 100%)'),
+                        path: `${this.basePath}.bgGradient`
+                    }));
+                }
+
                 return container;
             }
         );
         fragment.appendChild(sectionGroup);
+
+        // ===== LINHA DECORATIVA =====
+        fragment.appendChild(C.createTopLineSection({ basePath: this.basePath }));
 
         // ===== LOGO =====
         const logoGroup = C.createGroupExpander(
@@ -69,6 +96,19 @@ class D2FooterEditor {
                         value: window.d2State.get(`${this.basePath}.logo.opacity`, 0.8) * 100,
                         min: 30, max: 100, step: 5, unit: '%',
                         path: `${this.basePath}.logo.opacity`
+                    })
+                );
+
+                container.appendChild(
+                    C.createSelect({
+                        label: 'Cor do logo',
+                        value: window.d2State.get(`${this.basePath}.logo.color`, 'white'),
+                        options: [
+                            { value: 'white', label: 'Branco' },
+                            { value: 'black', label: 'Preto' },
+                            { value: 'original', label: 'Original' }
+                        ],
+                        path: `${this.basePath}.logo.color`
                     })
                 );
 
