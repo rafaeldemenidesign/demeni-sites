@@ -156,14 +156,14 @@
 
 .credits-total {
     font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-primary, #1f2937);
+    font-weight: 400;
+    color: #6b7280;
 }
 
 .credits-bonus {
     font-size: 0.8rem;
     color: #22c55e;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 /* Buy Button - Verde */
