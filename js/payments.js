@@ -108,6 +108,9 @@ const Payments = (function () {
 
     let hasUsedStarterPack = false;
 
+    // Inicializar packages sync com Starter Pack (assumir não usado até verificar)
+    packages = [STARTER_PACK, ...BASE_PACKAGES];
+
     async function loadPackages() {
         // Check if user has used Starter Pack
         await checkStarterPackUsage();
@@ -182,11 +185,9 @@ const Payments = (function () {
         let pkgs = packages;
         if (!pkgs || pkgs.length === 0) {
             console.warn('⚠️ Packages vazio, usando fallback');
-            pkgs = [
-                { id: 'one', name: 'One', icon: 'fa-star', credits: 200, price: 200.00, bonus_credits: 0, features: ['5 sites para criar', 'Suporte WhatsApp'] },
-                { id: 'plus', name: 'Plus', icon: 'fa-crown', credits: 400, price: 400.00, bonus_credits: 200, is_featured: true, features: ['15 sites', '+200 bônus'] },
-                { id: 'master', name: 'Master', icon: 'fa-trophy', credits: 600, price: 600.00, bonus_credits: 400, features: ['25 sites', '+400 bônus'] }
-            ];
+            pkgs = hasUsedStarterPack
+                ? [...BASE_PACKAGES]
+                : [STARTER_PACK, ...BASE_PACKAGES];
         }
 
         return pkgs.map(pkg => ({
