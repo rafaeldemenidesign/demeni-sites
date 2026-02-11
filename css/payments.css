@@ -51,10 +51,44 @@
     letter-spacing: 0.5px;
 }
 
-/* Promo Card */
+/* Promo Card — Starter Pack (clean, sem gradiente) */
 .credit-package-clicksign.promo {
-    border: 2px solid #22c55e;
-    background: linear-gradient(180deg, rgba(34, 197, 94, 0.05) 0%, #ffffff 30%);
+    border: 2px solid #f59e0b;
+    background: #ffffff;
+    animation: promo-glow 3s ease-in-out infinite;
+}
+
+.credit-package-clicksign.promo .pkg-icon {
+    color: #f59e0b;
+}
+
+.credit-package-clicksign.promo .price-currency,
+.credit-package-clicksign.promo .price-value {
+    color: #22c55e;
+}
+
+.credit-package-clicksign.promo .pkg-description {
+    color: #f59e0b;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+.credit-package-clicksign.promo .pkg-features li {
+    color: var(--text-primary, #1f2937);
+    font-weight: 500;
+}
+
+@keyframes promo-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    }
+
+    50% {
+        box-shadow: 0 0 16px 2px rgba(245, 158, 11, 0.15);
+    }
 }
 
 /* Package Header */

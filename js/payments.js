@@ -54,8 +54,10 @@ const Payments = (function () {
         is_promotional: true,
         description: 'Oferta exclusiva de boas-vindas!',
         features: [
-            'Crie seu primeiro site',
-            'Suporte por WhatsApp'
+            'Crie e publique seu 1º site agora',
+            'Acesso a todos os recursos do editor',
+            'Suporte prioritário por WhatsApp',
+            'Oferta única — não volta depois'
         ]
     };
 
