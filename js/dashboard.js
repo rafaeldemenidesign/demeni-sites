@@ -220,30 +220,47 @@ function renderDiscountBadge() {
     const stats = XPSystem.getStats();
     const freeLeft = window.Credits ? Credits.getRemainingFreePublishes() : 0;
     const hex = stats.patente.hex;
+    const nextName = stats.nextPatente ? stats.nextPatente.name : 'Máximo';
+    const nextHex = stats.nextPatente ? stats.nextPatente.hex : hex;
+    const pct = stats.progress.percentage;
 
     container.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <span style="background: ${hex}; color: #fff; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">${stats.patente.name}</span>
-            ${stats.discount > 0 ? `<span style="color: var(--success, #22c55e); font-weight: 700; font-size: 13px;">${stats.discount}% off</span>` : ''}
+        <!-- Header: Patente + Level -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <span style="background: ${hex}; color: #fff; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">${stats.patente.name}</span>
+            <span style="font-size: 12px; color: #6b7280;">Nível ${stats.level} · ${stats.xp} XP</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <i class="fas fa-coins" style="color: ${hex}; font-size: 12px;"></i>
-                <span style="font-weight: 600; color: var(--text-primary); font-size: 13px;">${stats.sitePrice} cr/site</span>
+
+        <!-- Metrics Row -->
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <div style="flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Custo/site</div>
+                <div style="font-size: 15px; font-weight: 700; color: ${hex};">${stats.sitePrice} cr</div>
             </div>
-            ${freeLeft > 0 ? `
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <i class="fas fa-gift" style="color: var(--success, #22c55e); font-size: 12px;"></i>
-                <span style="font-weight: 600; color: var(--success, #22c55e); font-size: 13px;">${freeLeft} grátis hoje</span>
-            </div>` : `
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <i class="fas fa-clock" style="color: var(--text-muted); font-size: 12px;"></i>
-                <span style="font-size: 12px; color: var(--text-muted);">Limite diário atingido</span>
-            </div>`}
+            <div style="flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Grátis hoje</div>
+                <div style="font-size: 15px; font-weight: 700; color: ${freeLeft > 0 ? '#22c55e' : '#ef4444'};">${freeLeft}</div>
+            </div>
+            ${stats.discount > 0 ? `
+            <div style="flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Desconto</div>
+                <div style="font-size: 15px; font-weight: 700; color: #22c55e;">${stats.discount}%</div>
+            </div>` : ''}
+        </div>
+
+        <!-- Progress Bar -->
+        <div style="margin-top: 2px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 10px; color: #9ca3af;">${pct}% para ${nextName}</span>
+                <span style="font-size: 10px; color: ${nextHex}; font-weight: 600;">▸ ${nextName}</span>
+            </div>
+            <div style="width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, ${hex}, ${nextHex}); border-radius: 3px; transition: width 0.5s ease;"></div>
+            </div>
         </div>
     `;
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
+    container.style.display = 'block';
+    container.style.flexDirection = '';
 }
 
 // ========== PROJECTS ==========
