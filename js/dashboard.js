@@ -224,43 +224,51 @@ function renderDiscountBadge() {
     const nextHex = stats.nextPatente ? stats.nextPatente.hex : hex;
     const pct = stats.progress.percentage;
 
+    // Apply patente color as background tint
+    container.style.cssText = `
+        display: block;
+        padding: 14px 16px;
+        margin-top: 12px;
+        background: ${hex}18;
+        border: 1px solid ${hex}30;
+        border-radius: 12px;
+    `;
+
     container.innerHTML = `
         <!-- Header: Patente + Level -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <span style="background: ${hex}; color: #fff; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">${stats.patente.name}</span>
+            <span style="font-size: 13px; font-weight: 800; color: ${hex}; text-transform: uppercase; letter-spacing: 0.5px;">${stats.patente.name}</span>
             <span style="font-size: 12px; color: #6b7280;">Nível ${stats.level} · ${stats.xp} XP</span>
         </div>
 
         <!-- Metrics Row -->
         <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <div style="flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; text-align: center;">
-                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Custo/site</div>
-                <div style="font-size: 15px; font-weight: 700; color: ${hex};">${stats.sitePrice} cr</div>
+            <div style="flex: 1; background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+                <div style="font-size: 10px; color: #9ca3af; margin-bottom: 2px;">Custo/site</div>
+                <div style="font-size: 15px; font-weight: 700; color: #1f2937;">${stats.sitePrice} cr</div>
             </div>
-            <div style="flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; text-align: center;">
-                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Grátis hoje</div>
+            <div style="flex: 1; background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+                <div style="font-size: 10px; color: #9ca3af; margin-bottom: 2px;">Grátis hoje</div>
                 <div style="font-size: 15px; font-weight: 700; color: ${freeLeft > 0 ? '#22c55e' : '#ef4444'};">${freeLeft}</div>
             </div>
             ${stats.discount > 0 ? `
-            <div style="flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; text-align: center;">
-                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Desconto</div>
+            <div style="flex: 1; background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+                <div style="font-size: 10px; color: #9ca3af; margin-bottom: 2px;">Desconto</div>
                 <div style="font-size: 15px; font-weight: 700; color: #22c55e;">${stats.discount}%</div>
             </div>` : ''}
         </div>
 
         <!-- Progress Bar -->
-        <div style="margin-top: 2px;">
+        <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-size: 10px; color: #9ca3af;">${pct}% para ${nextName}</span>
+                <span style="font-size: 10px; color: #6b7280;">${pct}% para ${nextName}</span>
                 <span style="font-size: 10px; color: ${nextHex}; font-weight: 600;">▸ ${nextName}</span>
             </div>
-            <div style="width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
-                <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, ${hex}, ${nextHex}); border-radius: 3px; transition: width 0.5s ease;"></div>
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.6); border-radius: 3px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: ${hex}; border-radius: 3px; transition: width 0.5s ease;"></div>
             </div>
         </div>
     `;
-    container.style.display = 'block';
-    container.style.flexDirection = '';
 }
 
 // ========== PROJECTS ==========
