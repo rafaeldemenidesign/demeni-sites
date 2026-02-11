@@ -124,7 +124,7 @@ class D2StateManager {
                         spacing: 4,
                         weight: 400,
                         color: '#ffffff',
-                        font: 'Liebling',
+                        font: 'Montserrat',
                         textGradient: { enabled: false, gradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)' },
                         padding: { top: 0, bottom: 0, left: 0, right: 0 }
                     },
@@ -134,7 +134,7 @@ class D2StateManager {
                         spacing: 32,
                         weight: 300,
                         color: '#ffffff',
-                        font: 'Liebling',
+                        font: 'Montserrat',
                         padding: { top: 0, bottom: 0, left: 0, right: 0 }
                     },
                     btn: {
@@ -145,7 +145,7 @@ class D2StateManager {
                             spacing: 1,
                             weight: 600,
                             color: '#ffffff',
-                            font: 'Liebling'
+                            font: 'Montserrat'
                         },
                         paddingInner: { vertical: 12, horizontal: 40 },
                         paddingOuter: { top: 0, bottom: 0, left: 0, right: 0 },
@@ -791,6 +791,25 @@ class D2StateManager {
                 console.log(`[D2 State Manager] Migrated section: ${defSection.id}`);
             }
         });
+
+        // Migração de fonte: Liebling → Montserrat
+        this._migrateFonts(this.state);
+    }
+
+    /**
+     * Migra fontes legadas (Liebling) para Montserrat em todo o state
+     */
+    _migrateFonts(obj) {
+        if (!obj || typeof obj !== 'object') return;
+
+        for (const key in obj) {
+            if (key === 'font' && obj[key] === 'Liebling') {
+                obj[key] = 'Montserrat';
+                console.log('[D2 State Manager] Font migrated: Liebling → Montserrat');
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                this._migrateFonts(obj[key]);
+            }
+        }
     }
 
     /**
