@@ -1305,6 +1305,61 @@ body {
     margin-bottom: 24px;
 }
 
+/* Wallet - Layout */
+.wallet-banner {
+    margin-bottom: 24px;
+}
+
+.wallet-content {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 32px;
+}
+
+.wallet-sidebar {
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.wallet-balance-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+}
+
+.wallet-packages {
+    flex: 1;
+}
+
+.trust-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.trust-badge i {
+    color: var(--accent);
+    font-size: 0.9rem;
+    width: 18px;
+    text-align: center;
+}
+
 /* Wallet */
 .wallet-header {
     text-align: center;
@@ -1706,6 +1761,244 @@ body {
 
 .support-success p {
     color: var(--text-secondary);
+}
+
+/* Affiliates */
+.affiliate-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.affiliate-tab {
+    padding: 10px 20px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.affiliate-tab.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.affiliate-tab:hover:not(.active) {
+    border-color: var(--accent);
+}
+
+.affiliate-tab-content {
+    display: none;
+}
+
+.affiliate-tab-content.active {
+    display: block;
+}
+
+.affiliate-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.affiliate-stats {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.affiliate-share-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.affiliate-share-box h4 {
+    font-size: 1rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.affiliate-share-box h4 i {
+    color: var(--accent);
+}
+
+.share-link-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.share-link-container input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.btn-copy {
+    padding: 10px 14px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.btn-copy:hover {
+    opacity: 0.85;
+}
+
+.share-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.affiliate-config-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.config-header h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.config-header h4 i {
+    color: var(--accent);
+}
+
+.config-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.commission-config h5 {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+}
+
+.commission-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.commission-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.commission-item label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.input-group span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.input-group input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    width: 60px;
+}
+
+.input-group input:focus {
+    outline: none;
+}
+
+/* Lessons Banner */
+.lessons-banner {
+    margin-bottom: 24px;
+}
+
+/* Responsive: Wallet stacking */
+@media (max-width: 768px) {
+    .wallet-content {
+        flex-direction: column;
+    }
+
+    .wallet-sidebar {
+        min-width: auto;
+    }
+
+    .affiliate-stats {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .commission-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Modals - Apple Style */
