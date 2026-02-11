@@ -186,10 +186,10 @@ class D2StateManager {
                     icon: { size: 80, radius: 18 },
                     label: { size: 12, weight: 500, color: '#222222' },
                     items: [
-                        { id: 1, label: 'PRODUTOS', icon: 'Pen Tool.png', customIcon: null },
-                        { id: 2, label: 'SERVIÇOS', icon: 'Engrenagem.png', customIcon: null },
-                        { id: 3, label: 'EDUCAÇÃO', icon: 'Aulas.png', customIcon: null },
-                        { id: 4, label: 'SOBRE', icon: 'Sobre.png', customIcon: null }
+                        { id: 1, label: 'PRODUTOS', icon: 'img/Pen Tool.png', customIcon: null },
+                        { id: 2, label: 'SERVIÇOS', icon: 'img/Engrenagem.png', customIcon: null },
+                        { id: 3, label: 'EDUCAÇÃO', icon: 'img/Aulas.png', customIcon: null },
+                        { id: 4, label: 'SOBRE', icon: 'img/Sobre.png', customIcon: null }
                     ]
                 },
 
