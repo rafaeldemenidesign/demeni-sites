@@ -614,17 +614,14 @@ async function loadPackages() {
                 <div class="pkg-credits">
                     <span class="credits-total">${totalCredits} créditos</span>
                     ${bonusCredits > 0 ? `<span class="credits-bonus">+${bonusCredits} bônus inclusos</span>` : ''}
+                    ${pkg.description ? `<span class="credits-bonus" ${isPromo ? 'style="color: #f59e0b;"' : ''}>${pkg.description}</span>` : ''}
                 </div>
-
-                ${isPromo && pkg.description ? `<p class="pkg-description">${pkg.description}</p>` : ''}
-                ${isPromo && featuresHTML ? `<ul class="pkg-features">${featuresHTML}</ul>` : ''}
 
                 <button class="btn-buy-clicksign" onclick="buyPackageMP('${pkg.id}')">
                     <i class="fab fa-pix"></i> Comprar
                 </button>
 
-                ${!isPromo && pkg.description ? `<p class="pkg-description">${pkg.description}</p>` : ''}
-                ${!isPromo && featuresHTML ? `<ul class="pkg-features">${featuresHTML}</ul>` : ''}
+                ${featuresHTML ? `<ul class="pkg-features">${featuresHTML}</ul>` : ''}
             </div>
         `}).join('');
     } else {

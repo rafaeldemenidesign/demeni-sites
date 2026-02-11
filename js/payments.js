@@ -67,6 +67,7 @@ const Payments = (function () {
             credits: 200,
             price: 200.00,
             bonus_credits: 0,
+            description: 'Investimento pequeno',
             features: [
                 '200 créditos = 5 sites'
             ]
