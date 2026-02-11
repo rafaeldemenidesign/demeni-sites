@@ -70,7 +70,7 @@ const Payments = (function () {
             bonus_credits: 0,
             features: [
                 '5 sites para criar',
-                'Ideal para iniciantes',
+                'Ideal para recargas',
                 'Suporte por WhatsApp'
             ]
         },
@@ -86,7 +86,7 @@ const Payments = (function () {
                 '15 sites para criar',
                 '+200 créditos bônus',
                 'Suporte prioritário',
-                'Templates exclusivos'
+                'Ideal para entrada'
             ]
         },
         {
@@ -169,31 +169,11 @@ const Payments = (function () {
     }
 
     async function loadUserDiscount() {
-        if (!window.Auth || typeof Auth.getCurrentUser !== 'function') {
+        // Centralizado no XPSystem — sem tabela duplicada
+        if (window.XPSystem) {
+            userDiscount = XPSystem.getCurrentDiscount();
+        } else {
             userDiscount = 0;
-            return;
-        }
-        const user = Auth.getCurrentUser();
-        if (!user) {
-            userDiscount = 0;
-            return;
-        }
-
-        // Calculate discount based on level
-        const level = user.level || 1;
-        const discountTiers = [
-            { minLevel: 50, discount: 20 },
-            { minLevel: 20, discount: 15 },
-            { minLevel: 10, discount: 10 },
-            { minLevel: 5, discount: 5 },
-            { minLevel: 1, discount: 0 }
-        ];
-
-        for (const tier of discountTiers) {
-            if (level >= tier.minLevel) {
-                userDiscount = tier.discount;
-                break;
-            }
         }
     }
 

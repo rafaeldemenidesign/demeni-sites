@@ -208,6 +208,25 @@ function refreshCredits() {
     if (badgeEl) badgeEl.textContent = formatted;
     document.getElementById('header-credits').textContent = formatted;
     document.getElementById('wallet-balance').textContent = formatted;
+
+    // Discount badge (gamificação)
+    renderDiscountBadge();
+}
+
+function renderDiscountBadge() {
+    const container = document.getElementById('discount-badge');
+    if (!container || !window.XPSystem) return;
+
+    const stats = XPSystem.getStats();
+    const freeLeft = window.Credits ? Credits.getRemainingFreePublishes() : 0;
+
+    container.innerHTML = `
+        <i class="fas fa-tag" style="color: ${stats.patente.hex}; margin-right: 6px;"></i>
+        <span>${stats.patente.name} • ${stats.sitePrice} cr/site</span>
+        ${stats.discount > 0 ? `<span style="color: var(--success, #22c55e); margin-left: 8px; font-weight: 600;">${stats.discount}% off</span>` : ''}
+        ${freeLeft > 0 ? `<span style="opacity: 0.6; margin-left: 8px; font-size: 11px;">${freeLeft} grátis hoje</span>` : ''}
+    `;
+    container.style.display = 'flex';
 }
 
 // ========== PROJECTS ==========

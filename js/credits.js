@@ -9,7 +9,7 @@ const Credits = (function () {
         // First purchase (includes platform access)
         FIRST_SITE: 147,
 
-        // Cost per site (in credits) - 1 crédito = R$1
+        // Cost per site (in credits) - uses XPSystem.getCurrentSitePrice() at runtime
         SITE_COST: 40,
 
         // Credit packages
@@ -23,12 +23,46 @@ const Credits = (function () {
         // Kiwify links - TODO: Update with real package links when created
         KIWIFY_LINKS: {
             first: 'https://pay.kiwify.com.br/DzGxIEZ',
-            basic: 'https://pay.kiwify.com.br/DzGxIEZ',  // Usar link real quando criar pacote
-            silver: 'https://pay.kiwify.com.br/DzGxIEZ', // Usar link real quando criar pacote
-            gold: 'https://pay.kiwify.com.br/DzGxIEZ',   // Usar link real quando criar pacote
-            diamond: 'https://pay.kiwify.com.br/DzGxIEZ' // Usar link real quando criar pacote
+            basic: 'https://pay.kiwify.com.br/DzGxIEZ',
+            silver: 'https://pay.kiwify.com.br/DzGxIEZ',
+            gold: 'https://pay.kiwify.com.br/DzGxIEZ',
+            diamond: 'https://pay.kiwify.com.br/DzGxIEZ'
         }
     };
+
+    // ========== DAILY PUBLISH LIMITS ==========
+    const DAILY_TIERS = [
+        { from: 1, to: 2, fee: 0 },      // 1º-2º site: grátis
+        { from: 3, to: 5, fee: 5 },      // 3º ao 5º: R$5
+        { from: 6, to: 10, fee: 10 },     // 6º ao 10º: R$10
+        { from: 11, to: Infinity, fee: 15 } // 11º+: R$15
+    ];
+
+    function getTodayPublishes() {
+        const today = new Date().toISOString().slice(0, 10);
+        const key = `demeni-publishes-${today}`;
+        return parseInt(localStorage.getItem(key) || '0');
+    }
+
+    function incrementTodayPublishes() {
+        const today = new Date().toISOString().slice(0, 10);
+        const key = `demeni-publishes-${today}`;
+        localStorage.setItem(key, getTodayPublishes() + 1);
+    }
+
+    function getExtraFee() {
+        const count = getTodayPublishes() + 1; // próximo site
+        for (const tier of DAILY_TIERS) {
+            if (count >= tier.from && count <= tier.to) {
+                return tier.fee;
+            }
+        }
+        return 15; // fallback
+    }
+
+    function getRemainingFreePublishes() {
+        return Math.max(0, 2 - getTodayPublishes());
+    }
 
     // ========== STORAGE KEY ==========
     const TRANSACTIONS_KEY = 'demeni-transactions';
@@ -59,7 +93,7 @@ const Credits = (function () {
 
         // Calculate XP (handled by XP module if loaded)
         if (window.XPSystem && source === 'purchase') {
-            const xpGained = Math.floor(amount * 2.5);
+            const xpGained = XPSystem.calculateXPFromCredits(amount);
             XPSystem.addXP(xpGained);
         }
 
@@ -93,7 +127,8 @@ const Credits = (function () {
     }
 
     function canPublish() {
-        return hasCredits(PRICING.SITE_COST);
+        const cost = window.XPSystem ? XPSystem.getCurrentSitePrice() : PRICING.SITE_COST;
+        return hasCredits(cost);
     }
 
     function isFirstPurchase() {
@@ -140,27 +175,86 @@ const Credits = (function () {
             };
         }
 
+        // Custo dinâmico por patente
+        const siteCost = window.XPSystem ? XPSystem.getCurrentSitePrice() : PRICING.SITE_COST;
+
         // Check credits
-        if (!canPublish()) {
+        if (!hasCredits(siteCost)) {
             return {
                 success: false,
                 action: 'buy_credits',
-                required: PRICING.SITE_COST,
+                required: siteCost,
                 current: getCredits(),
                 packages: PRICING.PACKAGES,
                 message: 'Créditos insuficientes. Adquira mais créditos para publicar.'
             };
         }
 
+        // Check daily fee
+        const extraFee = getExtraFee();
+        if (extraFee > 0) {
+            return {
+                success: false,
+                action: 'daily_fee',
+                fee: extraFee,
+                siteCost: siteCost,
+                todayCount: getTodayPublishes(),
+                message: `Você já publicou ${getTodayPublishes()} site(s) hoje. Taxa extra de R$${extraFee}.`
+            };
+        }
+
         // Deduct and publish
-        const result = deductCredits(PRICING.SITE_COST, 'publish');
+        const result = deductCredits(siteCost, 'publish');
 
         if (result.success) {
             UserData.publishProject(projectId, `demeni.bio/${projectId.slice(0, 8)}`);
+
+            // Incrementar contador diário
+            incrementTodayPublishes();
+
+            // XP por publicação
+            if (window.XPSystem) {
+                XPSystem.addXP(XPSystem.CONFIG.XP_PER_PUBLISH);
+            }
+
             return {
                 success: true,
                 action: 'published',
                 balance: result.balance,
+                xpGained: window.XPSystem ? XPSystem.CONFIG.XP_PER_PUBLISH : 0,
+                message: 'Site publicado com sucesso!'
+            };
+        }
+
+        return result;
+    }
+
+    /**
+     * Confirma publicação com taxa extra (chamado após modal de confirmação)
+     */
+    function confirmPublishWithFee(projectId) {
+        const siteCost = window.XPSystem ? XPSystem.getCurrentSitePrice() : PRICING.SITE_COST;
+
+        if (!hasCredits(siteCost)) {
+            return { success: false, action: 'buy_credits', message: 'Créditos insuficientes.' };
+        }
+
+        // Deduct and publish (user already confirmed fee payment)
+        const result = deductCredits(siteCost, 'publish');
+
+        if (result.success) {
+            UserData.publishProject(projectId, `demeni.bio/${projectId.slice(0, 8)}`);
+            incrementTodayPublishes();
+
+            if (window.XPSystem) {
+                XPSystem.addXP(XPSystem.CONFIG.XP_PER_PUBLISH);
+            }
+
+            return {
+                success: true,
+                action: 'published',
+                balance: result.balance,
+                xpGained: window.XPSystem ? XPSystem.CONFIG.XP_PER_PUBLISH : 0,
                 message: 'Site publicado com sucesso!'
             };
         }
@@ -182,7 +276,7 @@ const Credits = (function () {
     }
 
     function getSiteCost() {
-        return PRICING.SITE_COST;
+        return window.XPSystem ? XPSystem.getCurrentSitePrice() : PRICING.SITE_COST;
     }
 
     function getFirstSitePrice() {
@@ -226,6 +320,12 @@ const Credits = (function () {
         // Purchase flow
         isFirstPurchase,
         attemptPublish,
+        confirmPublishWithFee,
+
+        // Daily limits
+        getTodayPublishes,
+        getExtraFee,
+        getRemainingFreePublishes,
 
         // Packages
         getPackages,

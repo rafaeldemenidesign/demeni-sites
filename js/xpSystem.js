@@ -7,7 +7,10 @@ const XPSystem = (function () {
     // ========== LEVEL CONFIGURATION ==========
     const CONFIG = {
         // XP multiplier for purchases (credits * multiplier)
-        XP_MULTIPLIER: 3,
+        XP_MULTIPLIER: 1,
+
+        // XP gained per published site
+        XP_PER_PUBLISH: 35,
 
         // XP required per level (linear progression)
         XP_PER_LEVEL: 50,
@@ -25,7 +28,7 @@ const XPSystem = (function () {
                 hex: '#CD7F32',
                 gradient: 'linear-gradient(135deg, #CD7F32 0%, #8B5A2B 50%, #CD7F32 100%)',
                 discount: 0,
-                sitePrice: 40
+                sitePrice: 40  // mantém
             },
             {
                 minLevel: 21,
@@ -34,8 +37,8 @@ const XPSystem = (function () {
                 name: 'Prata',
                 hex: '#C0C0C0',
                 gradient: 'linear-gradient(135deg, #E8E8E8 0%, #A8A8A8 50%, #E8E8E8 100%)',
-                discount: 5,
-                sitePrice: 38
+                discount: 12,
+                sitePrice: 35
             },
             {
                 minLevel: 41,
@@ -44,8 +47,8 @@ const XPSystem = (function () {
                 name: 'Ouro',
                 hex: '#FFD700',
                 gradient: 'linear-gradient(135deg, #FFD700 0%, #B8860B 50%, #FFD700 100%)',
-                discount: 12,
-                sitePrice: 35
+                discount: 25,
+                sitePrice: 30
             },
             {
                 minLevel: 61,
@@ -54,8 +57,8 @@ const XPSystem = (function () {
                 name: 'Turmalina',
                 hex: '#40E0D0',
                 gradient: 'linear-gradient(135deg, #40E0D0 0%, #00CED1 50%, #48D1CC 100%)',
-                discount: 18,
-                sitePrice: 33
+                discount: 37,
+                sitePrice: 25
             },
             {
                 minLevel: 81,
@@ -64,8 +67,8 @@ const XPSystem = (function () {
                 name: 'Fire',
                 hex: '#FF4500',
                 gradient: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #FF4500 50%, #FF0000 75%, #FF4500 100%)',
-                discount: 25,
-                sitePrice: 30,
+                discount: 50,
+                sitePrice: 20,
                 animated: true
             }
         ]
