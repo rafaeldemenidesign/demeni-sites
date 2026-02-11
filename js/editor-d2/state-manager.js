@@ -766,10 +766,31 @@ class D2StateManager {
     loadState(savedState) {
         // Merge com o estado padrão para garantir que todas as propriedades existam
         this.state = this.deepMerge(this.getDefaultState(), savedState);
+
+        // Migração: garante que seções novas existam (ex: PWA)
+        this._migrateSections();
+
         this.notifyListeners('*', this.state, null);
         this.updatePreview();
 
         console.log('[D2 State Manager] State loaded');
+    }
+
+    /**
+     * Migração de seções: adiciona seções padrão que faltam no state salvo
+     */
+    _migrateSections() {
+        const defaults = this.getDefaultState();
+        const defaultSections = defaults.d2Sections || [];
+        const currentSections = this.state.d2Sections || [];
+
+        defaultSections.forEach(defSection => {
+            const exists = currentSections.some(s => s.id === defSection.id);
+            if (!exists) {
+                currentSections.push(defSection);
+                console.log(`[D2 State Manager] Migrated section: ${defSection.id}`);
+            }
+        });
     }
 
     /**

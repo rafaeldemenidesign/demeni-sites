@@ -208,10 +208,13 @@ body {
     border-color: var(--accent);
 }
 
-/* === SETTINGS DRAWER (popover flutuante estilo Gemini) === */
+/* === SETTINGS DRAWER (popover ao lado da sidebar) === */
 .settings-drawer-backdrop {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 260px;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.25);
     z-index: 999;
     opacity: 0;
@@ -226,14 +229,14 @@ body {
 
 .settings-drawer {
     position: fixed;
-    top: 60px;
-    right: 16px;
+    top: 8px;
+    left: 268px;
     width: 300px;
     height: auto;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 16px);
     background: var(--bg-card, #1e1e2e);
     z-index: 1000;
-    transform: translateY(-8px);
+    transform: translateX(-12px);
     opacity: 0;
     visibility: hidden;
     transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s;
@@ -244,7 +247,7 @@ body {
 }
 
 .settings-drawer.open {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
     visibility: visible;
 }
