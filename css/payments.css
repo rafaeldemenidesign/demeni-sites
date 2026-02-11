@@ -652,17 +652,18 @@
 }
 
 .wallet-balance-card {
-    background: transparent;
+    background: #9333ea;
     padding: 20px;
     text-align: center;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    border-radius: 12px;
 }
 
 .wallet-balance-card .balance-label {
     font-size: 0.7rem;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -670,13 +671,13 @@
 .wallet-balance-card .balance-amount {
     font-size: 3rem;
     font-weight: 800;
-    color: #1b97c0;
+    color: #ffffff;
     line-height: 1;
 }
 
 .wallet-balance-card .balance-unit {
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 /* Container dos Planos */
