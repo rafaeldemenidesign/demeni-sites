@@ -644,6 +644,7 @@
     display: flex;
     gap: 24px;
     margin-bottom: 32px;
+    align-items: stretch;
 }
 
 /* Sidebar do Saldo */
@@ -692,6 +693,7 @@
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
     max-width: none;
+    height: 100%;
 }
 
 /* Cards menores */
