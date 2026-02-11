@@ -881,34 +881,50 @@ function doLogout() {
     window.location.reload();
 }
 
-// Setup logout button (now inside hamburger popup)
-document.getElementById('hm-logout')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    closeHamburgerMenu();
-    doLogout();
-});
-
-// ========== HAMBURGER MENU ==========
-function openHamburgerMenu() {
-    document.getElementById('modal-hamburger-menu')?.classList.add('active');
+// ========== SETTINGS DRAWER ==========
+function openSettingsDrawer() {
+    document.getElementById('settings-drawer')?.classList.add('open');
+    document.getElementById('settings-drawer-backdrop')?.classList.add('active');
 }
 
-function closeHamburgerMenu() {
-    document.getElementById('modal-hamburger-menu')?.classList.remove('active');
+function closeSettingsDrawer() {
+    document.getElementById('settings-drawer')?.classList.remove('open');
+    document.getElementById('settings-drawer-backdrop')?.classList.remove('active');
 }
 
-// Make functions global
-window.openHamburgerMenu = openHamburgerMenu;
-window.closeHamburgerMenu = closeHamburgerMenu;
+// Keep legacy names for compatibility
+window.openHamburgerMenu = openSettingsDrawer;
+window.closeHamburgerMenu = closeSettingsDrawer;
+window.openSettingsDrawer = openSettingsDrawer;
+window.closeSettingsDrawer = closeSettingsDrawer;
 
-// Hamburger button click
+// Hamburger button opens drawer
 document.getElementById('btn-hamburger-menu')?.addEventListener('click', () => {
-    openHamburgerMenu();
+    openSettingsDrawer();
 });
 
 // Close on backdrop click
-document.getElementById('modal-hamburger-menu')?.addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeHamburgerMenu();
+document.getElementById('settings-drawer-backdrop')?.addEventListener('click', () => {
+    closeSettingsDrawer();
+});
+
+// Drawer item actions
+document.querySelectorAll('.settings-item[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        closeSettingsDrawer();
+        switch (action) {
+            case 'edit-profile':
+                // TODO: navigate to edit profile
+                break;
+            case 'my-level':
+                // TODO: open level/achievements modal
+                break;
+            case 'logout':
+                doLogout();
+                break;
+        }
+    });
 });
 
 // ========== TEST LOGIN ==========

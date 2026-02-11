@@ -784,65 +784,41 @@
         </div>
     </div>
 
-    <!-- Modal: Menu Hamburger -->
-    <div class="modal" id="modal-hamburger-menu">
-        <div class="modal-content modal-hamburger">
-            <div class="modal-header">
-                <h2><i class="fas fa-bars"></i> Menu</h2>
-                <button class="modal-close" onclick="closeHamburgerMenu()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body hamburger-menu-body">
-                <a href="#" class="hamburger-menu-item" id="hm-edit-profile">
-                    <i class="fas fa-user-edit"></i>
-                    <div class="hm-item-text">
-                        <span class="hm-item-title">Editar Perfil</span>
-                        <span class="hm-item-desc">Altere seu nome, foto e informações</span>
-                    </div>
-                </a>
-                <a href="#" class="hamburger-menu-item" id="hm-level">
-                    <i class="fas fa-trophy"></i>
-                    <div class="hm-item-text">
-                        <span class="hm-item-title">Seu Nível</span>
-                        <span class="hm-item-desc">Veja sua evolução e conquistas</span>
-                    </div>
-                </a>
-                <a href="#" class="hamburger-menu-item disabled" id="hm-vendas">
-                    <i class="fas fa-chart-line"></i>
-                    <div class="hm-item-text">
-                        <span class="hm-item-title">Vendas</span>
-                        <span class="hm-item-desc">Vendas de modelo de site</span>
-                    </div>
-                    <span class="hm-badge-soon">em breve</span>
-                </a>
-                <a href="#" class="hamburger-menu-item disabled" id="hm-cfd">
-                    <i class="fas fa-calculator"></i>
-                    <div class="hm-item-text">
-                        <span class="hm-item-title">CFD</span>
-                        <span class="hm-item-desc">Controle de finanças Demeni</span>
-                    </div>
-                    <span class="hm-badge-soon">em breve</span>
-                </a>
-                <a href="#" class="hamburger-menu-item disabled" id="hm-lead">
-                    <i class="fas fa-magnet"></i>
-                    <div class="hm-item-text">
-                        <span class="hm-item-title">Lea-D</span>
-                        <span class="hm-item-desc">Conseguir e administrar leads</span>
-                    </div>
-                    <span class="hm-badge-soon">em breve</span>
-                </a>
-                <div class="hm-divider"></div>
-                <a href="#" class="hamburger-menu-item hm-logout" id="hm-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <div class="hm-item-text">
-                        <span class="hm-item-title">Sair</span>
-                        <span class="hm-item-desc">Encerrar sessão</span>
-                    </div>
-                </a>
-            </div>
+    <!-- Settings Drawer (slide-in da direita) -->
+    <div class="settings-drawer-backdrop" id="settings-drawer-backdrop"></div>
+    <aside class="settings-drawer" id="settings-drawer">
+        <div class="settings-drawer-content">
+            <button class="settings-item" data-action="edit-profile">
+                <i class="fas fa-user-edit"></i>
+                <span>Editar Perfil</span>
+            </button>
+            <button class="settings-item" data-action="my-level">
+                <i class="fas fa-trophy"></i>
+                <span>Seu Nível</span>
+            </button>
+            <div class="settings-divider"></div>
+            <button class="settings-item disabled">
+                <i class="fas fa-chart-line"></i>
+                <span>Vendas</span>
+                <span class="badge-soon">em breve</span>
+            </button>
+            <button class="settings-item disabled">
+                <i class="fas fa-calculator"></i>
+                <span>CFD</span>
+                <span class="badge-soon">em breve</span>
+            </button>
+            <button class="settings-item disabled">
+                <i class="fas fa-magnet"></i>
+                <span>Lea-D</span>
+                <span class="badge-soon">em breve</span>
+            </button>
+            <div class="settings-divider"></div>
+            <button class="settings-item settings-item-danger" data-action="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair</span>
+            </button>
         </div>
-    </div>
+    </aside>
 
     <!-- Modal: Login -->
     <div class="modal" id="modal-login">
