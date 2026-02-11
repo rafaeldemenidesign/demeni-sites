@@ -219,14 +219,31 @@ function renderDiscountBadge() {
 
     const stats = XPSystem.getStats();
     const freeLeft = window.Credits ? Credits.getRemainingFreePublishes() : 0;
+    const hex = stats.patente.hex;
 
     container.innerHTML = `
-        <i class="fas fa-tag" style="color: ${stats.patente.hex}; margin-right: 6px;"></i>
-        <span>${stats.patente.name} • ${stats.sitePrice} cr/site</span>
-        ${stats.discount > 0 ? `<span style="color: var(--success, #22c55e); margin-left: 8px; font-weight: 600;">${stats.discount}% off</span>` : ''}
-        ${freeLeft > 0 ? `<span style="opacity: 0.6; margin-left: 8px; font-size: 11px;">${freeLeft} grátis hoje</span>` : ''}
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <span style="background: ${hex}; color: #fff; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">${stats.patente.name}</span>
+            ${stats.discount > 0 ? `<span style="color: var(--success, #22c55e); font-weight: 700; font-size: 13px;">${stats.discount}% off</span>` : ''}
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-coins" style="color: ${hex}; font-size: 12px;"></i>
+                <span style="font-weight: 600; color: var(--text-primary); font-size: 13px;">${stats.sitePrice} cr/site</span>
+            </div>
+            ${freeLeft > 0 ? `
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-gift" style="color: var(--success, #22c55e); font-size: 12px;"></i>
+                <span style="font-weight: 600; color: var(--success, #22c55e); font-size: 13px;">${freeLeft} grátis hoje</span>
+            </div>` : `
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-clock" style="color: var(--text-muted); font-size: 12px;"></i>
+                <span style="font-size: 12px; color: var(--text-muted);">Limite diário atingido</span>
+            </div>`}
+        </div>
     `;
     container.style.display = 'flex';
+    container.style.flexDirection = 'column';
 }
 
 // ========== PROJECTS ==========
@@ -574,15 +591,15 @@ async function loadPackages() {
                     ${bonusCredits > 0 ? `<span class="credits-bonus">+${bonusCredits} bônus inclusos</span>` : ''}
                 </div>
 
+                ${isPromo && pkg.description ? `<p class="pkg-description">${pkg.description}</p>` : ''}
+                ${isPromo && featuresHTML ? `<ul class="pkg-features">${featuresHTML}</ul>` : ''}
+
                 <button class="btn-buy-clicksign" onclick="buyPackageMP('${pkg.id}')">
                     <i class="fab fa-pix"></i> Comprar
                 </button>
 
-                ${pkg.description ? `<p class="pkg-description">${pkg.description}</p>` : ''}
-
-                <ul class="pkg-features">
-                    ${featuresHTML}
-                </ul>
+                ${!isPromo && pkg.description ? `<p class="pkg-description">${pkg.description}</p>` : ''}
+                ${!isPromo && featuresHTML ? `<ul class="pkg-features">${featuresHTML}</ul>` : ''}
             </div>
         `}).join('');
     } else {
