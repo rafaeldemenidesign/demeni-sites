@@ -16,7 +16,33 @@
 </head>
 
 <body>
-    <div class="admin-layout">
+    <!-- Admin Login Screen -->
+    <div id="admin-login-screen" class="admin-login-screen">
+        <div class="admin-login-card">
+            <div class="admin-login-header">
+                <i class="fas fa-shield-alt"></i>
+                <h1>Demeni <span>Admin</span></h1>
+                <p>Painel Administrativo</p>
+            </div>
+            <form id="admin-login-form" onsubmit="return handleAdminLogin(event)">
+                <div class="form-group">
+                    <label for="admin-login-email">Email</label>
+                    <input type="email" id="admin-login-email" placeholder="admin@demeni.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-login-password">Senha</label>
+                    <input type="password" id="admin-login-password" placeholder="••••••••" required>
+                </div>
+                <div id="admin-login-error" class="admin-login-error" style="display:none"></div>
+                <button type="submit" class="btn-primary btn-full" id="admin-login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (hidden until authenticated) -->
+    <div class="admin-layout" id="admin-layout" style="display:none">
         <!-- Sidebar -->
         <aside class="admin-sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -47,6 +73,9 @@
                 <a href="#" class="nav-link" data-page="announcements">
                     <i class="fas fa-bullhorn"></i> Comunicados
                 </a>
+                <a href="#" class="nav-link" data-page="feed">
+                    <i class="fas fa-rss"></i> Feed
+                </a>
                 <a href="#" class="nav-link" data-page="webhooks">
                     <i class="fas fa-plug"></i> Webhooks
                 </a>
@@ -56,7 +85,7 @@
             </nav>
             <div class="sidebar-footer">
                 <div class="admin-user">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=D4AF37&color=000" alt="Admin">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=9333ea&color=fff" alt="Admin">
                     <span id="admin-email">admin@demeni.com</span>
                 </div>
                 <button class="btn-logout" onclick="doLogout()">
@@ -540,6 +569,60 @@
                 </div>
             </section>
 
+            <!-- Feed Management Page -->
+            <section id="page-feed" class="page">
+                <div class="page-header">
+                    <h2>Feed — Publicações</h2>
+                    <button class="btn-primary" onclick="openFeedModal()">
+                        <i class="fas fa-plus"></i> Novo Post
+                    </button>
+                </div>
+
+                <!-- Feed Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon sites"><i class="fas fa-newspaper"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-feed-total">0</div>
+                            <div class="stat-label">Total Posts</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon revenue"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-feed-published">0</div>
+                            <div class="stat-label">Publicados</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon users"><i class="fas fa-heart"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-feed-likes">0</div>
+                            <div class="stat-label">Curtidas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feed Posts Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Título</th>
+                                <th>Status</th>
+                                <th>Curtidas</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feed-table">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- Settings Page -->
             <section id="page-settings" class="page">
                 <div class="page-header">
@@ -684,6 +767,67 @@
                 </div>
                 <button class="btn-primary btn-full" onclick="sendTicketReply()">
                     <i class="fas fa-paper-plane"></i> Enviar Resposta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Create/Edit Feed Post -->
+    <div class="modal" id="modal-feed">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> <span id="feed-modal-title">Novo Post</span></h2>
+                <button class="modal-close" onclick="closeFeedModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="feed-post-id">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="feed-title" placeholder="Título do post" required>
+                </div>
+                <div class="form-group">
+                    <label>Texto</label>
+                    <div class="feed-text-toolbar">
+                        <button type="button" onclick="feedFormatInsert('bold')" title="Negrito"><i
+                                class="fas fa-bold"></i></button>
+                        <button type="button" onclick="feedFormatInsert('italic')" title="Itálico"><i
+                                class="fas fa-italic"></i></button>
+                    </div>
+                    <textarea id="feed-text" rows="6" placeholder="Use **negrito**, *itálico* e quebras de linha"
+                        required></textarea>
+                    <small style="color:var(--text-muted)">Dica: **texto** = <strong>negrito</strong>, *texto* =
+                        <em>itálico</em></small>
+                </div>
+                <div class="form-group">
+                    <label>Imagem do Post</label>
+                    <div class="feed-upload-area" id="feed-upload-area"
+                        onclick="document.getElementById('feed-file-input').click()">
+                        <input type="file" id="feed-file-input" accept="image/*" onchange="handleFeedImageUpload(event)"
+                            style="display:none">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Clique ou arraste uma imagem</p>
+                        <small>Será convertida para WebP automaticamente</small>
+                    </div>
+                    <div class="feed-upload-progress" id="feed-upload-progress" style="display:none">
+                        <div class="feed-upload-bar">
+                            <div class="feed-upload-fill" id="feed-upload-fill"></div>
+                        </div>
+                        <span id="feed-upload-status">Convertendo para WebP...</span>
+                    </div>
+                    <input type="hidden" id="feed-image">
+                    <div class="feed-image-preview" id="feed-image-preview"></div>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="feed-status">
+                        <option value="draft">Rascunho</option>
+                        <option value="published">Publicado</option>
+                    </select>
+                </div>
+                <button class="btn-primary btn-full" onclick="saveFeedPost()">
+                    <i class="fas fa-save"></i> Salvar Post
                 </button>
             </div>
         </div>

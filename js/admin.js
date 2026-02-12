@@ -10,20 +10,56 @@ let sites = [];
 let editingUserId = null;
 
 // ========== INIT ==========
-document.addEventListener('DOMContentLoaded', async () => {
-    // Check auth
-    if (!Auth.isLoggedIn()) {
-        showLoginRequired();
-        return;
+document.addEventListener('DOMContentLoaded', () => {
+    // Always require manual login for admin — no auto-login
+    document.getElementById('admin-login-screen').style.display = 'flex';
+});
+
+async function handleAdminLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('admin-login-email').value.trim();
+    const password = document.getElementById('admin-login-password').value;
+    const errorEl = document.getElementById('admin-login-error');
+    const btn = document.getElementById('admin-login-btn');
+
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+
+    try {
+        const result = await Auth.login(email, password);
+
+        if (!result.success) {
+            errorEl.textContent = result.error || 'Email ou senha incorretos';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        if (!ADMIN_EMAILS.includes(email)) {
+            errorEl.textContent = 'Acesso negado. Este email não tem permissão de admin.';
+            errorEl.style.display = 'block';
+            Auth.logout();
+            return;
+        }
+
+        showAdminDashboard(result.user);
+    } catch (e) {
+        errorEl.textContent = 'Erro de conexão. Tente novamente.';
+        errorEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
     }
 
-    const user = Auth.getCurrentUser();
-    if (!user || !ADMIN_EMAILS.includes(user.email)) {
-        showLoginRequired();
-        return;
-    }
+    return false;
+}
+window.handleAdminLogin = handleAdminLogin;
 
-    // Setup
+async function showAdminDashboard(user) {
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.getElementById('admin-layout').style.display = 'flex';
+
     document.getElementById('admin-email').textContent = user.email;
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', {
         weekday: 'long', day: 'numeric', month: 'long'
@@ -32,12 +68,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupNavigation();
     await loadAllData();
     initCharts();
-});
-
-function showLoginRequired() {
-    document.getElementById('login-required').style.display = 'block';
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
 }
+
+function doLogout() {
+    Auth.logout();
+    document.getElementById('admin-layout').style.display = 'none';
+    document.getElementById('admin-login-screen').style.display = 'flex';
+    document.getElementById('admin-login-email').value = '';
+    document.getElementById('admin-login-password').value = '';
+}
+window.doLogout = doLogout;
 
 // ========== NAVIGATION ==========
 function setupNavigation() {
@@ -99,12 +139,20 @@ async function loadFranchisees() {
 async function loadPayments() {
     if (SupabaseClient?.isConfigured()) {
         const { data } = await SupabaseClient.getClient()
-            .from('payments')
-            .select('*, profiles(name, email)')
-            .eq('status', 'approved')
+            .from('transactions')
+            .select('*, profiles:user_id(name, email)')
+            .eq('type', 'purchase')
+            .eq('payment_status', 'approved')
             .order('created_at', { ascending: false })
             .limit(50);
-        payments = data || [];
+        // Map transactions fields to expected payment fields
+        payments = (data || []).map(t => ({
+            ...t,
+            amount: t.price_paid || 0,
+            package_name: t.description || 'Pacote',
+            status: t.payment_status,
+            mp_payment_id: t.payment_id
+        }));
     } else {
         // Demo data
         payments = [
@@ -120,10 +168,15 @@ async function loadPayments() {
 async function loadSites() {
     if (SupabaseClient?.isConfigured()) {
         const { data } = await SupabaseClient.getClient()
-            .from('sites')
-            .select('*, profiles(name, email)')
+            .from('published_sites')
+            .select('*, profiles:user_id(name, email)')
             .order('created_at', { ascending: false });
-        sites = data || [];
+        // Map published_sites fields to expected site fields
+        sites = (data || []).map(s => ({
+            ...s,
+            name: s.site_name || 'Sem nome',
+            is_published: s.is_active
+        }));
     } else {
         // Demo data
         sites = [
@@ -141,9 +194,10 @@ async function loadActivity() {
         try {
             // Buscar pagamentos recentes
             const { data: recentPayments } = await SupabaseClient.getClient()
-                .from('payments')
-                .select('*, profiles(name)')
-                .eq('status', 'approved')
+                .from('transactions')
+                .select('*, profiles:user_id(name)')
+                .eq('type', 'purchase')
+                .eq('payment_status', 'approved')
                 .order('created_at', { ascending: false })
                 .limit(3);
 
@@ -151,7 +205,7 @@ async function loadActivity() {
                 recentPayments.forEach(p => {
                     activities.push({
                         type: 'payment',
-                        text: `${p.profiles?.name || 'Usuário'} comprou ${p.package_name || 'pacote'}`,
+                        text: `${p.profiles?.name || 'Usuário'} comprou ${p.description || 'pacote'}`,
                         time: getTimeAgo(p.created_at)
                     });
                 });
@@ -247,7 +301,7 @@ function renderFranchisees() {
         <tr>
             <td>
                 <div class="user-cell">
-                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || 'User')}&background=D4AF37&color=000&size=36" alt="">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || 'User')}&background=9333ea&color=fff&size=36" alt="">
                     <span>${f.name || 'Sem nome'}</span>
                 </div>
             </td>
@@ -445,6 +499,8 @@ function closeCreateModal() {
     document.getElementById('create-form').reset();
 }
 
+// NOTE: auth.admin.createUser requires service_role key (server-side).
+// In production, this should call a Supabase Edge Function.
 async function createFranchisee(e) {
     e.preventDefault();
 
@@ -573,12 +629,13 @@ async function toggleSiteStatus(siteId) {
     try {
         if (SupabaseClient?.isConfigured()) {
             await SupabaseClient.getClient()
-                .from('sites')
-                .update({ is_published: newStatus })
+                .from('published_sites')
+                .update({ is_active: newStatus })
                 .eq('id', siteId);
         }
 
         site.is_published = newStatus;
+        site.is_active = newStatus;
         renderSites();
         alert(`✅ Site ${newStatus ? 'reativado' : 'suspenso'}!`);
     } catch (error) {
@@ -784,6 +841,25 @@ async function sendTicketReply() {
         ticket.messages.push({ sender: 'admin', content: reply });
     }
     ticket.status = newStatus;
+
+    // Persist to Supabase
+    try {
+        if (SupabaseClient?.isConfigured()) {
+            const updateData = {
+                status: newStatus,
+                updated_at: new Date().toISOString()
+            };
+            if (reply) {
+                updateData.admin_response = reply;
+            }
+            await SupabaseClient.getClient()
+                .from('support_tickets')
+                .update(updateData)
+                .eq('id', currentTicketId);
+        }
+    } catch (error) {
+        console.error('Error saving ticket reply:', error);
+    }
 
     renderTickets();
     updateTicketStats();
@@ -1281,3 +1357,514 @@ window.exportReport = exportReport;
 window.refreshWebhooks = refreshWebhooks;
 window.reprocessWebhook = reprocessWebhook;
 window.viewWebhookDetails = viewWebhookDetails;
+
+// ========== PHASE 4: FEED MANAGEMENT ==========
+let feedPosts = [];
+
+async function loadFeedPosts() {
+    if (SupabaseClient?.isConfigured()) {
+        try {
+            const { data, error } = await SupabaseClient.getClient()
+                .from('feed_posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                feedPosts = data;
+            }
+        } catch (e) {
+            console.log('📰 Feed: fallback to demo', e);
+        }
+    }
+
+    // Demo data fallback
+    if (!feedPosts || feedPosts.length === 0) {
+        feedPosts = [
+            {
+                id: 'demo-1',
+                title: '🚀 Novidades Demeni Sites',
+                text: 'Estamos lançando novas funcionalidades para turbinar seus sites! Fiquem ligados nas próximas atualizações.',
+                image_url: 'assets/feed/post-1.png',
+                status: 'published',
+                likes_count: 12,
+                created_at: '2026-02-10T10:00:00'
+            },
+            {
+                id: 'demo-2',
+                title: '📱 Templates Mobile-First',
+                text: 'Todos os novos templates agora são otimizados para mobile. Seus clientes vão amar a experiência.',
+                image_url: 'assets/feed/post-2.png',
+                status: 'published',
+                likes_count: 8,
+                created_at: '2026-02-09T15:30:00'
+            },
+            {
+                id: 'demo-3',
+                title: '💡 Dica: Use o Editor D-2',
+                text: 'O Editor D-2 tem controle total sobre cada seção do site. Experimente os temas de estilo para personalizar rapidamente.',
+                image_url: 'assets/feed/post-3.png',
+                status: 'draft',
+                likes_count: 0,
+                created_at: '2026-02-08T09:00:00'
+            }
+        ];
+    }
+
+    renderFeedPosts();
+    updateFeedStats();
+}
+
+function renderFeedPosts() {
+    const tbody = document.getElementById('feed-table');
+    if (!tbody) return;
+
+    tbody.innerHTML = feedPosts.map(p => `
+        <tr>
+            <td>
+                <img src="${p.image_url || 'https://via.placeholder.com/80x50/f0ecff/9333ea?text=Sem+Img'}"
+                     alt="${p.title}" style="width:80px; height:50px; object-fit:cover; border-radius:8px;">
+            </td>
+            <td>
+                <strong>${p.title}</strong>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
+                    ${(p.text || '').substring(0, 60)}${p.text?.length > 60 ? '...' : ''}
+                </div>
+            </td>
+            <td>
+                <span class="status-badge ${p.status === 'published' ? 'active' : 'pending'}">
+                    ${p.status === 'published' ? 'Publicado' : 'Rascunho'}
+                </span>
+            </td>
+            <td><i class="fas fa-heart" style="color:#ef4444; margin-right:4px;"></i>${p.likes_count || 0}</td>
+            <td>${formatDate(p.created_at)}</td>
+            <td>
+                <button class="action-btn" onclick="openFeedModal('${p.id}')" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn" onclick="toggleFeedPostStatus('${p.id}')" title="${p.status === 'published' ? 'Despublicar' : 'Publicar'}">
+                    <i class="fas fa-${p.status === 'published' ? 'eye-slash' : 'eye'}"></i>
+                </button>
+                <button class="action-btn danger" onclick="deleteFeedPost('${p.id}')" title="Excluir">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function updateFeedStats() {
+    const total = feedPosts.length;
+    const published = feedPosts.filter(p => p.status === 'published').length;
+    const likes = feedPosts.reduce((sum, p) => sum + (p.likes_count || 0), 0);
+
+    const elTotal = document.getElementById('stat-feed-total');
+    const elPub = document.getElementById('stat-feed-published');
+    const elLikes = document.getElementById('stat-feed-likes');
+
+    if (elTotal) elTotal.textContent = total;
+    if (elPub) elPub.textContent = published;
+    if (elLikes) elLikes.textContent = likes;
+}
+
+function openFeedModal(postId) {
+    const modal = document.getElementById('modal-feed');
+    const titleEl = document.getElementById('feed-modal-title');
+    const postIdEl = document.getElementById('feed-post-id');
+    const titleInput = document.getElementById('feed-title');
+    const textInput = document.getElementById('feed-text');
+    const imageInput = document.getElementById('feed-image');
+    const statusInput = document.getElementById('feed-status');
+    const previewEl = document.getElementById('feed-image-preview');
+    const uploadArea = document.getElementById('feed-upload-area');
+    const uploadProgress = document.getElementById('feed-upload-progress');
+
+    // Reset upload state
+    if (uploadProgress) uploadProgress.style.display = 'none';
+    if (uploadArea) uploadArea.style.display = '';
+    const fileInput = document.getElementById('feed-file-input');
+    if (fileInput) fileInput.value = '';
+
+    if (postId) {
+        const post = feedPosts.find(p => p.id === postId);
+        if (!post) return;
+        titleEl.textContent = 'Editar Post';
+        postIdEl.value = postId;
+        titleInput.value = post.title;
+        textInput.value = post.text;
+        imageInput.value = post.image_url || '';
+        statusInput.value = post.status;
+        if (post.image_url) {
+            previewEl.innerHTML = `
+                <div style="position:relative">
+                    <img src="${post.image_url}" alt="Preview">
+                    <button type="button" onclick="removeFeedImage()" 
+                        style="position:absolute; top:8px; right:8px; background:rgba(239,68,68,0.9); color:#fff; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:0.8rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>`;
+            if (uploadArea) uploadArea.style.display = 'none';
+        } else {
+            previewEl.innerHTML = '';
+        }
+    } else {
+        titleEl.textContent = 'Novo Post';
+        postIdEl.value = '';
+        titleInput.value = '';
+        textInput.value = '';
+        imageInput.value = '';
+        statusInput.value = 'draft';
+        previewEl.innerHTML = '';
+    }
+
+    modal.classList.add('active');
+}
+
+function closeFeedModal() {
+    document.getElementById('modal-feed').classList.remove('active');
+}
+
+async function saveFeedPost() {
+    const postId = document.getElementById('feed-post-id').value;
+    const title = document.getElementById('feed-title').value.trim();
+    const text = document.getElementById('feed-text').value.trim();
+    const imageUrl = document.getElementById('feed-image').value.trim();
+    const status = document.getElementById('feed-status').value;
+
+    if (!title || !text) {
+        alert('Preencha título e texto.');
+        return;
+    }
+
+    const postData = {
+        title,
+        text,
+        image_url: imageUrl || null,
+        status,
+        updated_at: new Date().toISOString()
+    };
+
+    try {
+        if (SupabaseClient?.isConfigured()) {
+            if (postId && !postId.startsWith('demo-')) {
+                // Update
+                const { error } = await SupabaseClient.getClient()
+                    .from('feed_posts')
+                    .update(postData)
+                    .eq('id', postId);
+                if (error) throw error;
+            } else {
+                // Insert
+                postData.created_at = new Date().toISOString();
+                const { error } = await SupabaseClient.getClient()
+                    .from('feed_posts')
+                    .insert(postData);
+                if (error) throw error;
+            }
+        } else {
+            // Local-only (demo mode)
+            if (postId) {
+                const post = feedPosts.find(p => p.id === postId);
+                if (post) Object.assign(post, postData);
+            } else {
+                feedPosts.unshift({
+                    id: 'demo-' + Date.now(),
+                    ...postData,
+                    likes_count: 0,
+                    created_at: new Date().toISOString()
+                });
+            }
+        }
+
+        closeFeedModal();
+        await loadFeedPosts();
+        logActivity(`${postId ? 'Editou' : 'Criou'} post: ${title}`);
+        alert(`✅ Post ${postId ? 'atualizado' : 'criado'}!`);
+    } catch (error) {
+        console.error('Error saving feed post:', error);
+        alert('Erro ao salvar post: ' + error.message);
+    }
+}
+
+async function deleteFeedPost(id) {
+    if (!confirm('Deseja excluir este post? Esta ação não pode ser desfeita.')) return;
+
+    try {
+        if (SupabaseClient?.isConfigured() && !id.startsWith('demo-')) {
+            const { error } = await SupabaseClient.getClient()
+                .from('feed_posts')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+        } else {
+            feedPosts = feedPosts.filter(p => p.id !== id);
+        }
+
+        await loadFeedPosts();
+        logActivity('Excluiu um post do feed');
+        alert('✅ Post excluído!');
+    } catch (error) {
+        console.error('Error deleting feed post:', error);
+        alert('Erro ao excluir post: ' + error.message);
+    }
+}
+
+async function toggleFeedPostStatus(id) {
+    const post = feedPosts.find(p => p.id === id);
+    if (!post) return;
+
+    const newStatus = post.status === 'published' ? 'draft' : 'published';
+    const action = newStatus === 'published' ? 'publicar' : 'despublicar';
+
+    if (!confirm(`Deseja ${action} este post?`)) return;
+
+    try {
+        if (SupabaseClient?.isConfigured() && !id.startsWith('demo-')) {
+            const { error } = await SupabaseClient.getClient()
+                .from('feed_posts')
+                .update({ status: newStatus, updated_at: new Date().toISOString() })
+                .eq('id', id);
+            if (error) throw error;
+        } else {
+            post.status = newStatus;
+        }
+
+        await loadFeedPosts();
+        logActivity(`${newStatus === 'published' ? 'Publicou' : 'Despublicou'} post: ${post.title}`);
+        alert(`✅ Post ${newStatus === 'published' ? 'publicado' : 'despublicado'}!`);
+    } catch (error) {
+        console.error('Error toggling feed post:', error);
+        alert('Erro ao atualizar post');
+    }
+}
+
+// Load Feed data
+setTimeout(() => {
+    loadFeedPosts();
+}, 300);
+
+// ========== IMAGE UPLOAD + WEBP CONVERSION ==========
+async function handleFeedImageUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const uploadArea = document.getElementById('feed-upload-area');
+    const progressEl = document.getElementById('feed-upload-progress');
+    const fillEl = document.getElementById('feed-upload-fill');
+    const statusEl = document.getElementById('feed-upload-status');
+    const previewEl = document.getElementById('feed-image-preview');
+    const imageInput = document.getElementById('feed-image');
+
+    uploadArea.style.display = 'none';
+    progressEl.style.display = 'flex';
+    fillEl.style.width = '10%';
+    statusEl.textContent = 'Convertendo para WebP...';
+
+    try {
+        // Step 1: Convert to WebP using canvas
+        const webpBlob = await convertToWebP(file, 0.85);
+        fillEl.style.width = '40%';
+        statusEl.textContent = 'Enviando para o servidor...';
+
+        // Step 2: Upload to Supabase Storage
+        if (SupabaseClient?.isConfigured()) {
+            const fileName = `feed_${Date.now()}.webp`;
+            const { data, error } = await SupabaseClient.getClient()
+                .storage
+                .from('feed-images')
+                .upload(fileName, webpBlob, {
+                    contentType: 'image/webp',
+                    upsert: false
+                });
+
+            if (error) throw error;
+
+            fillEl.style.width = '80%';
+            statusEl.textContent = 'Obtendo URL...';
+
+            // Step 3: Get public URL
+            const { data: urlData } = SupabaseClient.getClient()
+                .storage
+                .from('feed-images')
+                .getPublicUrl(fileName);
+
+            const publicUrl = urlData.publicUrl;
+            imageInput.value = publicUrl;
+
+            fillEl.style.width = '100%';
+            statusEl.textContent = '✅ Upload concluído!';
+
+            // Show preview
+            previewEl.innerHTML = `<img src="${publicUrl}" alt="Preview">`;
+        } else {
+            // Local mode: use base64 data URL
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageInput.value = e.target.result;
+                previewEl.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                fillEl.style.width = '100%';
+                statusEl.textContent = '✅ Imagem carregada (modo local)';
+            };
+            reader.readAsDataURL(webpBlob);
+        }
+
+        // Hide progress after 2s
+        setTimeout(() => {
+            progressEl.style.display = 'none';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Upload error:', error);
+        fillEl.style.width = '0%';
+        statusEl.textContent = '❌ Erro: ' + error.message;
+        uploadArea.style.display = '';
+        setTimeout(() => { progressEl.style.display = 'none'; }, 3000);
+    }
+}
+
+function convertToWebP(file, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+
+        img.onload = () => {
+            // Max dimensions: 1200x800 for feed images
+            let { width, height } = img;
+            const MAX_W = 1200;
+            const MAX_H = 800;
+
+            if (width > MAX_W) {
+                height = Math.round(height * (MAX_W / width));
+                width = MAX_W;
+            }
+            if (height > MAX_H) {
+                width = Math.round(width * (MAX_H / height));
+                height = MAX_H;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+                (blob) => {
+                    URL.revokeObjectURL(url);
+                    if (blob) resolve(blob);
+                    else reject(new Error('Falha na conversão WebP'));
+                },
+                'image/webp',
+                quality
+            );
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Erro ao carregar imagem'));
+        };
+
+        img.src = url;
+    });
+}
+
+// Drag and drop support
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadArea = document.getElementById('feed-upload-area');
+    if (!uploadArea) return;
+
+    ['dragenter', 'dragover'].forEach(evt => {
+        uploadArea.addEventListener(evt, (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(evt => {
+        uploadArea.addEventListener(evt, (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            const fileInput = document.getElementById('feed-file-input');
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            handleFeedImageUpload({ target: fileInput });
+        }
+    });
+});
+
+// ========== TEXT FORMATTING ==========
+function formatFeedText(text) {
+    if (!text) return '';
+    // Escape HTML first
+    let html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    // Bold+Italic: ***text***
+    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    // Bold: **text**
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Italic: *text*
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // Line breaks
+    html = html.replace(/\n/g, '<br>');
+    return html;
+}
+
+function feedFormatInsert(type) {
+    const textarea = document.getElementById('feed-text');
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    const wrap = type === 'bold' ? '**' : '*';
+
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+
+    if (selected) {
+        textarea.value = before + wrap + selected + wrap + after;
+        textarea.selectionStart = start;
+        textarea.selectionEnd = end + wrap.length * 2;
+    } else {
+        const placeholder = type === 'bold' ? 'texto negrito' : 'texto itálico';
+        textarea.value = before + wrap + placeholder + wrap + after;
+        textarea.selectionStart = start + wrap.length;
+        textarea.selectionEnd = start + wrap.length + placeholder.length;
+    }
+    textarea.focus();
+}
+
+// ========== IMAGE REMOVE/REPLACE ==========
+function removeFeedImage() {
+    const imageInput = document.getElementById('feed-image');
+    const previewEl = document.getElementById('feed-image-preview');
+    const uploadArea = document.getElementById('feed-upload-area');
+    const fileInput = document.getElementById('feed-file-input');
+
+    imageInput.value = '';
+    previewEl.innerHTML = '';
+    if (fileInput) fileInput.value = '';
+    if (uploadArea) uploadArea.style.display = '';
+}
+
+// Make formatFeedText globally available (used by feed.js too)
+window.formatFeedText = formatFeedText;
+
+// Expose Feed functions
+window.openFeedModal = openFeedModal;
+window.closeFeedModal = closeFeedModal;
+window.saveFeedPost = saveFeedPost;
+window.deleteFeedPost = deleteFeedPost;
+window.toggleFeedPostStatus = toggleFeedPostStatus;
+window.handleFeedImageUpload = handleFeedImageUpload;
+window.feedFormatInsert = feedFormatInsert;
+window.removeFeedImage = removeFeedImage;

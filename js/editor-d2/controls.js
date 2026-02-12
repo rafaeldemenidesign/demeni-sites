@@ -250,20 +250,73 @@ window.D2Controls = {
     },
 
     /**
-     * Cria um Font Picker
+     * Lista oficial de fontes da plataforma.
+     * Cada estilo é uma categoria tipográfica distinta mapeada para uma Google Font.
+     */
+    FONT_REGISTRY: [
+        { value: 'Montserrat',       label: 'Moderna',     url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Playfair Display', label: 'Elegante',    url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap' },
+        { value: 'Nunito',           label: 'Divertida',   url: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Oswald',           label: 'Impactante',  url: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap' },
+        { value: 'Quicksand',       label: 'Suave',       url: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap' },
+        { value: 'Lora',            label: 'Clássica',    url: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap' }
+    ],
+
+    /**
+     * Carrega uma Google Font dinamicamente injetando <link> no <head>
+     * @param {string} fontName - Nome da fonte (ex: 'Playfair Display')
+     */
+    loadGoogleFont(fontName) {
+        const font = this.FONT_REGISTRY.find(f => f.value === fontName);
+        if (!font) return;
+
+        const linkId = `gfont-${fontName.replace(/\s+/g, '-').toLowerCase()}`;
+        if (document.getElementById(linkId)) return; // já carregada
+
+        const link = document.createElement('link');
+        link.id = linkId;
+        link.rel = 'stylesheet';
+        link.href = font.url;
+        document.head.appendChild(link);
+
+        console.log(`[D2Controls] Google Font carregada: ${fontName}`);
+    },
+
+    /**
+     * Retorna a URL do Google Fonts para uma fonte específica
+     * @param {string} fontName - Nome da fonte
+     * @returns {string|null} URL da fonte ou null
+     */
+    getGoogleFontUrl(fontName) {
+        const font = this.FONT_REGISTRY.find(f => f.value === fontName);
+        return font ? font.url : null;
+    },
+
+    /**
+     * Cria um Font Picker com 6 estilos distintos
+     * Ao selecionar, carrega a Google Font automaticamente
      * @param {Object} options - { label, value, path }
      */
     createFontPicker(options) {
-        const fonts = [
-            { value: 'Liebling', label: 'Liebling' },
-            { value: 'Montserrat', label: 'Montserrat' },
-            { value: 'Inter', label: 'Inter' },
-            { value: 'Poppins', label: 'Poppins' },
-            { value: 'Roboto', label: 'Roboto' },
-            { value: 'Playfair Display', label: 'Playfair Display' }
-        ];
+        const fonts = this.FONT_REGISTRY.map(f => ({
+            value: f.value,
+            label: `${f.label} (${f.value})`
+        }));
 
-        return this.createSelect({ ...options, options: fonts });
+        // Carrega a fonte atual
+        if (options.value) {
+            this.loadGoogleFont(options.value);
+        }
+
+        const container = this.createSelect({ ...options, options: fonts });
+
+        // Ao trocar a fonte, carrega ela
+        const select = container.querySelector('select');
+        select.addEventListener('change', (e) => {
+            this.loadGoogleFont(e.target.value);
+        });
+
+        return container;
     },
 
     /**

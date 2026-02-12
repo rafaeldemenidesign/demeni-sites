@@ -221,7 +221,7 @@ function renderPreviewD2New(frame, state) {
     const heroTitleSpacing = get('hero.title.spacing', 4);
     const heroTitleWeight = get('hero.title.weight', 400);
     const heroTitleColor = get('hero.title.color', '#ffffff');
-    const heroTitleFont = get('hero.title.font', 'Liebling');
+    const heroTitleFont = get('hero.title.font', 'Montserrat');
     const heroTitleGradientEnabled = get('hero.title.textGradient.enabled', false);
     const heroTitleGradient = get('hero.title.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)');
 
@@ -237,7 +237,7 @@ function renderPreviewD2New(frame, state) {
     const heroSubtitleSpacing = get('hero.subtitle.spacing', 32);
     const heroSubtitleWeight = get('hero.subtitle.weight', 300);
     const heroSubtitleColor = get('hero.subtitle.color', '#ffffff');
-    const heroSubtitleFont = get('hero.subtitle.font', 'Liebling');
+    const heroSubtitleFont = get('hero.subtitle.font', 'Montserrat');
 
     // Botão CTA
     const heroBtnText = get('hero.btn.text', 'QUERO SABER MAIS');
@@ -475,6 +475,16 @@ function renderPreviewD2New(frame, state) {
 
     // CSS + HTML para renderizar DENTRO de uma div
     // Nota: Usamos o seletor do container (#preview-frame) em vez de body
+    // Fonte base — usa a do hero title como referência principal
+    const baseFont = heroTitleFont || 'Montserrat';
+
+    // Coleta todas as fontes usadas para gerar os @import do Google Fonts
+    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont].filter(Boolean));
+    const fontImports = [...usedFonts].map(fontName => {
+        const fontEntry = window.D2Controls?.FONT_REGISTRY?.find(f => f.value === fontName);
+        return fontEntry ? `@import url('${fontEntry.url}');` : '';
+    }).filter(Boolean).join('\n            ');
+
     const fullHtml = `
         <style>
             /* ========================================
@@ -482,36 +492,12 @@ function renderPreviewD2New(frame, state) {
                Adaptado para renderização em div
                ======================================== */
             
-            /* FONTE LIEBLING */
-            @font-face {
-                font-family: 'Liebling';
-                src: url('${baseUrl}/fonts/Liebling.otf') format('opentype');
-                font-weight: 400;
-            }
-            @font-face {
-                font-family: 'Liebling';
-                src: url('${baseUrl}/fonts/Liebling Light.otf') format('opentype');
-                font-weight: 300;
-            }
-            @font-face {
-                font-family: 'Liebling';
-                src: url('${baseUrl}/fonts/Liebling Medium.otf') format('opentype');
-                font-weight: 500;
-            }
-            @font-face {
-                font-family: 'Liebling';
-                src: url('${baseUrl}/fonts/Liebling Bold.otf') format('opentype');
-                font-weight: 700;
-            }
-            @font-face {
-                font-family: 'Liebling';
-                src: url('${baseUrl}/fonts/Liebling Black.otf') format('opentype');
-                font-weight: 900;
-            }
+            /* GOOGLE FONTS - carregadas dinamicamente */
+            ${fontImports}
             
             /* Container do preview - substitui body */
             .d2-preview-container {
-                font-family: 'Liebling', 'Georgia', serif;
+                font-family: '${baseFont}', 'Montserrat', sans-serif;
                 background: #0a0a0a;
                 color: #fff;
                 margin: 0;
@@ -720,7 +706,7 @@ function renderPreviewD2New(frame, state) {
                 border: none;
                 color: ${heroBtnFontColor};
                 text-decoration: none;
-                font-family: 'Liebling', serif;
+                font-family: '${baseFont}', sans-serif;
                 font-size: ${heroBtnFontSize}px;
                 font-weight: ${heroBtnFontWeight};
                 letter-spacing: 1px;
@@ -770,7 +756,7 @@ function renderPreviewD2New(frame, state) {
                 z-index: 2;
             }
             .d2-categorias h2 {
-                font-family: 'Liebling', serif;
+                font-family: '${baseFont}', sans-serif;
                 font-size: ${categoriasSectionTitleSize}px;
                 font-weight: ${categoriasTitleWeight};
                 margin-top: ${categoriasTitlePaddingTop}px;
@@ -869,7 +855,7 @@ function renderPreviewD2New(frame, state) {
                 color: rgba(255, 255, 255, 0.5);
             }
             .d2-produtos h2 {
-                font-family: 'Liebling', serif;
+                font-family: '${baseFont}', sans-serif;
                 font-size: ${produtosSectionTitleSize}px;
                 font-weight: ${produtosTitleWeight};
                 margin-top: ${produtosTitlePaddingTop}px;
@@ -1154,7 +1140,7 @@ function renderPreviewD2New(frame, state) {
                 margin: 0;
             }
             .d2-footer h3 {
-                font-family: 'Liebling', serif;
+                font-family: '${baseFont}', sans-serif;
                 font-size: ${footerTitleSize}px;
                 font-weight: 400;
                 color: ${footerTitleColor};

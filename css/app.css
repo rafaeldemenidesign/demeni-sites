@@ -112,21 +112,31 @@ body {
     border-radius: 6px;
 }
 
-.app-container {
+.app-layout {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
+}
+
+.app-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
 }
 
 /* ========== SIDEBAR ========== */
 .sidebar {
-    width: 260px;
+    width: 210px;
+    min-width: 210px;
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    position: fixed;
-    height: 100vh;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 72px);
     z-index: 100;
+    overflow-y: auto;
 }
 
 .sidebar-header {
@@ -159,32 +169,59 @@ body {
     gap: 12px;
 }
 
-.btn-hamburger-menu {
-    width: 32px;
-    height: 32px;
-    background: var(--bg-glass);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    color: var(--text-secondary);
+/* === SIDEBAR FOOTER: Avatar + Hamburger === */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 20px 20px 80px;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar-profile-btn {
+    position: relative;
     cursor: pointer;
-    transition: all 0.2s;
+    display: inline-flex;
+    width: fit-content;
+}
+
+.sidebar-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border);
+    transition: border-color 0.2s;
+}
+
+
+.sidebar-hamburger-icon {
+    position: absolute;
+    bottom: -2px;
+    right: -14px;
+    width: 34px;
+    height: 34px;
+    background: #fff;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.8rem;
+    color: var(--text-primary);
+    transition: all 0.2s;
 }
 
-.btn-hamburger-menu:hover {
+.sidebar-profile-btn:hover .sidebar-hamburger-icon {
     background: var(--accent);
-    color: #000;
     border-color: var(--accent);
+    color: #fff;
 }
 
 /* === SETTINGS DRAWER (popover ao lado da sidebar) === */
 .settings-drawer-backdrop {
     position: fixed;
     top: 0;
-    left: 260px;
+    left: 210px;
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.25);
@@ -201,8 +238,8 @@ body {
 
 .settings-drawer {
     position: fixed;
-    top: 8px;
-    left: 268px;
+    top: 100px;
+    left: 218px;
     width: 300px;
     height: auto;
     max-height: calc(100vh - 16px);
@@ -287,6 +324,48 @@ body {
     letter-spacing: 0.5px;
     color: var(--text-muted);
     margin-left: auto;
+}
+
+/* Drawer User Info */
+.drawer-user-info {
+    padding: 16px 20px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.drawer-user-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.drawer-level-tag {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.drawer-xp-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.drawer-xp-progress {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+.drawer-xp-text {
+    font-size: 0.7rem;
+    color: var(--text-muted);
 }
 
 .user-avatar {
@@ -521,8 +600,11 @@ body {
 /* Navigation */
 .sidebar-nav {
     flex: 1;
-    padding: 15px 10px;
+    padding: 20px 10px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .nav-item {
@@ -536,16 +618,20 @@ body {
     margin-bottom: 4px;
     transition: all 0.2s;
     position: relative;
+    font-weight: 600;
 }
 
 .nav-item:hover {
-    background: var(--bg-glass);
-    color: var(--text-primary);
+    color: var(--purple);
+    transform: translateX(4px);
+}
+
+.nav-item:hover i {
+    color: var(--purple);
 }
 
 .nav-item.active {
-    background: rgba(27, 151, 192, 0.1);
-    color: var(--accent);
+    color: var(--purple);
 }
 
 .nav-item i {
@@ -568,29 +654,29 @@ body {
     border-radius: 10px;
 }
 
-.sidebar-footer {
-    padding: 20px 15px;
-    border-top: 1px solid var(--border);
-}
+
 
 .main-content {
     flex: 1;
-    margin-left: 260px;
     display: flex;
     flex-direction: column;
     background: var(--bg-content);
+    overflow-y: auto;
+    height: calc(100vh - 72px);
 }
 
 .main-header {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 20px 32px;
+    padding: 16px 32px;
     background: var(--bg-sidebar);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 200;
+    width: 100%;
+    height: 72px;
 }
 
 .menu-toggle {
@@ -707,52 +793,81 @@ body {
 }
 
 .credits-label-tiny {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 .credits-amount-big {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--purple);
 }
 
 .credits-unit-small {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: 0.85rem;
+    color: var(--purple);
+    font-weight: 600;
 }
 
 .btn-topup-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
-    background: #6b7280;
-    color: white;
+    padding: 10px 20px;
+    background: #fff;
+    color: var(--text-primary);
     border-radius: 100px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-decoration: none;
-    transition: all 0.2s;
+    border: 2.5px solid transparent;
+    background-image: linear-gradient(#fff, #fff), linear-gradient(135deg, #7c3aed, #c026d3, #9333ea, #6d28d9, #7c3aed);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    background-size: 100% 100%, 400% 400%;
+    cursor: pointer;
+    animation: none;
+    transition: none;
 }
 
 .btn-topup-pill:hover {
-    background: #4b5563;
-    transform: scale(1.02);
+    animation: gradientMove 1.2s ease infinite;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0 0, 0% 0%;
+    }
+
+    25% {
+        background-position: 0 0, 100% 0%;
+    }
+
+    50% {
+        background-position: 0 0, 100% 100%;
+    }
+
+    75% {
+        background-position: 0 0, 0% 100%;
+    }
+
+    100% {
+        background-position: 0 0, 0% 0%;
+    }
 }
 
 .credits-display {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(27, 151, 192, 0.1);
+    background: rgba(147, 51, 234, 0.08);
     padding: 8px 16px;
     border-radius: 20px;
-    color: var(--accent);
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    color: var(--purple);
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 /* ========== HEADER EDITOR MODE ========== */
@@ -1311,9 +1426,10 @@ body {
 
 .wallet-sidebar {
     min-width: 240px;
+    max-width: 240px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 8px;
 }
 
 .wallet-balance-card {
@@ -2097,16 +2213,17 @@ body {
 /* Responsive */
 @media (max-width: 900px) {
     .sidebar {
+        position: fixed;
+        top: 72px;
+        left: 0;
+        height: calc(100vh - 72px);
         transform: translateX(-100%);
         transition: transform 0.3s;
+        z-index: 150;
     }
 
     .sidebar.open {
         transform: translateX(0);
-    }
-
-    .main-content {
-        margin-left: 0;
     }
 
     .menu-toggle {

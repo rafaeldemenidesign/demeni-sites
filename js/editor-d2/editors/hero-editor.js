@@ -575,7 +575,7 @@ class D2HeroEditor {
                 container.appendChild(
                     C.createFontPicker({
                         label: 'Família da fonte',
-                        value: window.d2State.get(`${this.basePath}.title.font`, 'Liebling'),
+                        value: window.d2State.get(`${this.basePath}.title.font`, 'Montserrat'),
                         path: `${this.basePath}.title.font`
                     })
                 );

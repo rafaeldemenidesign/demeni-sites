@@ -14,6 +14,7 @@ const STYLE_THEMES = {
         name: 'Elegante',
         icon: 'fa-wine-glass',
         description: 'Tipografia sofisticada com espaçamento amplo',
+        googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap',
         typography: {
             fontFamily: "'Playfair Display', Georgia, serif",
             headingWeight: 500,
@@ -38,6 +39,7 @@ const STYLE_THEMES = {
         name: 'Infantil',
         icon: 'fa-child',
         description: 'Fonte arredondada e visual divertido',
+        googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap',
         typography: {
             fontFamily: "'Nunito', 'Comic Sans MS', sans-serif",
             headingWeight: 700,
@@ -62,6 +64,7 @@ const STYLE_THEMES = {
         name: 'Masculino',
         icon: 'fa-user-tie',
         description: 'Fonte bold e visual compacto',
+        googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap',
         typography: {
             fontFamily: "'Oswald', 'Impact', sans-serif",
             headingWeight: 600,
@@ -86,6 +89,7 @@ const STYLE_THEMES = {
         name: 'Feminino',
         icon: 'fa-spa',
         description: 'Fonte leve e espaçamento amplo',
+        googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap',
         typography: {
             fontFamily: "'Quicksand', 'Segoe UI', sans-serif",
             headingWeight: 500,
@@ -136,6 +140,19 @@ function applyStyleThemeToPreview(themeId, previewContainer) {
 
     const { typography, spacing, borderRadius } = theme;
 
+    // Carrega a Google Font do tema
+    if (theme.googleFontsUrl) {
+        const linkId = `gfont-theme-${themeId}`;
+        if (!document.getElementById(linkId)) {
+            const link = document.createElement('link');
+            link.id = linkId;
+            link.rel = 'stylesheet';
+            link.href = theme.googleFontsUrl;
+            document.head.appendChild(link);
+            console.log(`[StyleThemes] Google Font carregada para tema: ${theme.name}`);
+        }
+    }
+
     // Apply CSS variables
     previewContainer.style.setProperty('--theme-font-family', typography.fontFamily);
     previewContainer.style.setProperty('--theme-heading-weight', typography.headingWeight);
@@ -166,7 +183,13 @@ function generateThemeCSS(themeId) {
 
     const { typography, spacing, borderRadius } = theme;
 
+    // @import da Google Font do tema para sites publicados
+    const fontImport = theme.googleFontsUrl
+        ? `@import url('${theme.googleFontsUrl}');`
+        : '';
+
     return `
+        ${fontImport}
         :root {
             --theme-font-family: ${typography.fontFamily};
             --theme-heading-weight: ${typography.headingWeight};

@@ -18,7 +18,7 @@
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 24px 20px;
+    padding: 16px 16px;
     text-align: left;
     position: relative;
     transition: box-shadow 0.3s ease;
@@ -33,7 +33,6 @@
 /* Featured Card - Destaque */
 .credit-package-clicksign.featured {
     border: 2px solid #9333ea;
-    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.15);
 }
 
 .featured-badge {
@@ -73,17 +72,14 @@
     font-size: 0.82rem;
 }
 
-.credit-package-clicksign.promo .pkg-features li {
-    color: var(--text-primary, #1f2937);
-    font-weight: 500;
-}
+
 
 /* Package Header */
 .pkg-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .pkg-icon {
@@ -103,7 +99,7 @@
     display: flex;
     align-items: baseline;
     gap: 2px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .price-currency {
@@ -124,8 +120,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #e5e7eb;
 }
 
@@ -151,25 +147,25 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .credits-total {
     font-size: 0.9rem;
-    font-weight: 400;
+    font-weight: 500;
     color: #6b7280;
 }
 
 .credits-bonus {
     font-size: 0.8rem;
-    color: #22c55e;
-    font-weight: 400;
+    color: #6b7280;
+    font-weight: 500;
 }
 
 /* Buy Button - Verde */
 .btn-buy-clicksign {
     width: 100%;
-    padding: 12px 20px;
+    padding: 10px 16px;
     background: #22c55e;
     color: white;
     border: none;
@@ -182,7 +178,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .btn-buy-clicksign:hover {
@@ -210,13 +206,13 @@
     align-items: center;
     gap: 8px;
     font-size: 0.85rem;
-    font-weight: 400;
-    color: #9ca3af;
-    padding: 6px 0;
+    font-weight: 500;
+    color: #6b7280;
+    padding: 4px 0;
 }
 
 .pkg-features li i {
-    color: #9ca3af;
+    color: #6b7280;
     font-size: 0.75rem;
 }
 
@@ -621,7 +617,7 @@
 /* Banner Rotativo */
 .wallet-banner {
     width: 100%;
-    height: 210px;
+    height: 160px;
     background: linear-gradient(135deg, rgba(27, 151, 192, 0.15), rgba(147, 51, 234, 0.1));
     border-radius: 12px;
     margin-bottom: 24px;
@@ -695,10 +691,10 @@
 
 
 /* Grid de Pacotes Compacto */
-.wallet-packages .packages-grid {
+#page-wallet .wallet-packages .packages-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
+    gap: 8px;
     max-width: none;
     height: 100%;
 }
@@ -756,7 +752,7 @@
 
 /* Trust Badges */
 .trust-badges {
-    margin-top: 24px;
+    margin-top: 4px;
     display: flex;
     flex-direction: column;
     gap: 12px;

@@ -416,8 +416,8 @@
 }
 
 .section-card .section-name {
-    font-size: 0.8rem;
-    font-weight: 400;
+    font-size: 0.875rem;
+    font-weight: 500;
     white-space: nowrap;
     overflow: visible;
     text-overflow: clip;
@@ -1637,9 +1637,9 @@
 .page-editor-d2.active {
     display: block !important;
     position: absolute;
-    top: 80px;
+    top: 72px;
     /* Below header */
-    left: 260px;
+    left: 210px;
     /* After sidebar */
     right: 0;
     bottom: 0;
@@ -1649,7 +1649,7 @@
 /* 3-column container for embedded editor */
 .editor-d2-container {
     display: grid;
-    grid-template-columns: 180px 1fr 360px;
+    grid-template-columns: 240px 1fr 360px;
     /* Sections | Edit Panel | Preview (compact) */
     height: 100%;
     background: var(--d2-bg-dark, #f8f8f8);
@@ -1657,24 +1657,28 @@
     overflow: hidden;
 }
 
-/* Sections column */
-.editor-d2-sections {
-    background: #f2eff6;
+/* Sections column - FULL OVERRIDE for embedded editor */
+.editor-d2-container .editor-d2-sections {
+    background: #f2eff6 !important;
     border-right: 1px dashed #e0e0e0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
 }
 
-.editor-d2-sections .sections-header {
+.editor-d2-container .editor-d2-sections .sections-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
     border-bottom: 1px solid var(--d2-border, #e2e8f0);
+    background: transparent;
 }
 
-.editor-d2-sections .sections-header h3 {
+.editor-d2-container .editor-d2-sections .sections-header h3 {
     font-size: 0.9rem;
     font-weight: 600;
     color: #4a5568;
@@ -1684,10 +1688,34 @@
     margin: 0;
 }
 
-.editor-d2-sections .sections-list {
+.editor-d2-container .editor-d2-sections .sections-list {
     flex: 1;
     overflow-y: auto;
-    padding: 12px;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;
+}
+
+/* Cards edge-to-edge - FULL OVERRIDE */
+.editor-d2-container .section-card {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    padding: 12px 16px !important;
+    margin: 0 !important;
+    background: transparent !important;
+}
+
+.editor-d2-container .section-card:hover {
+    background: #ebe5f5 !important;
+}
+
+.editor-d2-container .section-card.selected {
+    background: #8b5cf6 !important;
+    border-color: #8b5cf6 !important;
 }
 
 .editor-d2-sections .btn-add-section {

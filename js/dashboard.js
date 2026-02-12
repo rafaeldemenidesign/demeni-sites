@@ -87,6 +87,7 @@ function navigateTo(page) {
 
     // Update title
     const titles = {
+        home: 'Página Inicial',
         projects: 'Meus Projetos',
         wallet: 'Minha Carteira',
         lessons: 'Aulas',
@@ -164,39 +165,34 @@ function refreshUserCard() {
     const user = UserData.getUser();
     const stats = XPSystem.getStats();
 
-    // Update avatar
-    if (user.avatar) {
-        document.getElementById('user-avatar').src = user.avatar;
+    // Update sidebar footer avatar
+    const sidebarAvatar = document.getElementById('sidebar-avatar');
+    if (sidebarAvatar && user.avatar) {
+        sidebarAvatar.src = user.avatar;
     }
-
-    // Update name
-    document.getElementById('user-name').textContent = user.name || 'Usuário';
-
-    // Update level with pulse animation
-    const levelBadge = document.getElementById('level-badge');
-    const previousLevel = parseInt(levelBadge.textContent) || 0;
-    levelBadge.textContent = stats.level;
-
-    // Pulse animation if level changed
-    if (previousLevel > 0 && previousLevel !== stats.level) {
-        levelBadge.classList.add('pulse');
-        setTimeout(() => levelBadge.classList.remove('pulse'), 600);
-    }
-
-    document.getElementById('level-tag').textContent = `Nível ${stats.level}`;
-    document.getElementById('border-tag').textContent = stats.patente.name;
 
     // Update avatar border with patente class
-    const avatarWrapper = document.querySelector('.user-avatar');
-    avatarWrapper.className = 'user-avatar';
-    if (stats.patente.id !== 'default') {
-        avatarWrapper.classList.add(stats.patente.id);
+    if (sidebarAvatar) {
+        sidebarAvatar.className = 'sidebar-avatar';
+        if (stats.patente.id !== 'default') {
+            sidebarAvatar.classList.add(stats.patente.id);
+        }
     }
 
-    // Update XP bar
-    document.getElementById('xp-progress').style.width = `${stats.progress.percentage}%`;
-    document.getElementById('xp-text').textContent =
-        `${XPSystem.formatXP(stats.xp)} / ${XPSystem.formatXP(XPSystem.getXPForLevel(stats.level + 1))} XP`;
+    // Update drawer user info
+    const drawerName = document.getElementById('drawer-user-name');
+    if (drawerName) drawerName.textContent = user.name || 'Usuário';
+
+    const drawerLevel = document.getElementById('drawer-level-tag');
+    if (drawerLevel) drawerLevel.textContent = `Nível ${stats.level} · ${stats.patente.name}`;
+
+    const drawerXpProgress = document.getElementById('drawer-xp-progress');
+    if (drawerXpProgress) drawerXpProgress.style.width = `${stats.progress.percentage}%`;
+
+    const drawerXpText = document.getElementById('drawer-xp-text');
+    if (drawerXpText) {
+        drawerXpText.textContent = `${XPSystem.formatXP(stats.xp)} / ${XPSystem.formatXP(XPSystem.getXPForLevel(stats.level + 1))} XP`;
+    }
 }
 
 // ========== CREDITS ==========
@@ -229,7 +225,7 @@ function renderDiscountBadge() {
     container.style.cssText = `
         display: block;
         padding: 14px 16px;
-        margin-top: 12px;
+        margin-top: 4px;
         background: ${gradient};
         border: none;
         border-radius: 12px;
@@ -239,23 +235,23 @@ function renderDiscountBadge() {
         <!-- Header: Patente + Level -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
             <span style="font-size: 13px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">${stats.patente.name}</span>
-            <span style="font-size: 12px; color: rgba(255,255,255,0.8);">Nível ${stats.level} · ${stats.xp} XP</span>
+            <span style="font-size: 12px; color: rgba(255,255,255,0.8);">Nível ${stats.level}</span>
         </div>
 
         <!-- Metrics Row -->
         <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <div style="flex: 1; background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-                <div style="font-size: 10px; color: #9ca3af; margin-bottom: 2px;">Custo/site</div>
-                <div style="font-size: 15px; font-weight: 700; color: #1f2937;">${stats.sitePrice} cr</div>
+            <div style="flex: 1; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 10px; color: rgba(255,255,255,0.65); margin-bottom: 2px;">Custo/site</div>
+                <div style="font-size: 15px; font-weight: 700; color: #fff;">${stats.sitePrice} cr</div>
             </div>
-            <div style="flex: 1; background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-                <div style="font-size: 10px; color: #9ca3af; margin-bottom: 2px;">Grátis hoje</div>
-                <div style="font-size: 15px; font-weight: 700; color: ${freeLeft > 0 ? '#22c55e' : '#ef4444'};">${freeLeft}</div>
+            <div style="flex: 1; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 10px; color: rgba(255,255,255,0.65); margin-bottom: 2px;">Grátis hoje</div>
+                <div style="font-size: 15px; font-weight: 700; color: #fff;">${freeLeft}</div>
             </div>
             ${stats.discount > 0 ? `
-            <div style="flex: 1; background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-                <div style="font-size: 10px; color: #9ca3af; margin-bottom: 2px;">Desconto</div>
-                <div style="font-size: 15px; font-weight: 700; color: #22c55e;">${stats.discount}%</div>
+            <div style="flex: 1; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 10px; color: rgba(255,255,255,0.65); margin-bottom: 2px;">Desconto</div>
+                <div style="font-size: 15px; font-weight: 700; color: #fff;">${stats.discount}%</div>
             </div>` : ''}
         </div>
 
@@ -615,7 +611,7 @@ async function loadPackages() {
                 <div class="pkg-credits">
                     <span class="credits-total">${totalCredits} créditos</span>
                     ${bonusCredits > 0 ? `<span class="credits-bonus">+${bonusCredits} bônus inclusos</span>` : ''}
-                    ${pkg.description ? `<span class="credits-bonus" ${isPromo ? 'style="color: #9ca3af;"' : ''}>${pkg.description}</span>` : ''}
+                    ${pkg.description ? `<span class="credits-bonus">${pkg.description}</span>` : ''}
                 </div>
 
                 <button class="btn-buy-clicksign" onclick="buyPackageMP('${pkg.id}')">
