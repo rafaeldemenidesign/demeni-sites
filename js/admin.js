@@ -501,13 +501,14 @@ function closeCreateModal() {
 
 // NOTE: auth.admin.createUser requires service_role key (server-side).
 // In production, this should call a Supabase Edge Function.
+// CREATE FRANCHISEE via Edge Function
 async function createFranchisee(e) {
     e.preventDefault();
 
     const name = document.getElementById('new-name').value;
     const email = document.getElementById('new-email').value;
     const password = document.getElementById('new-password').value;
-    const credits = parseInt(document.getElementById('new-credits').value) || 40;
+    const credits = parseInt(document.getElementById('new-credits').value) || 600;
 
     const btn = e.target.querySelector('button[type="submit"]');
     btn.disabled = true;
@@ -515,35 +516,32 @@ async function createFranchisee(e) {
 
     try {
         if (SupabaseClient?.isConfigured()) {
-            const { data, error } = await SupabaseClient.getClient().auth.admin.createUser({
-                email: email,
-                password: password,
-                email_confirm: true,
-                user_metadata: { name: name }
+            // Call Edge Function 'create-user'
+            const { data, error } = await SupabaseClient.getClient().functions.invoke('create-user', {
+                body: {
+                    email,
+                    password,
+                    name,
+                    credits
+                }
             });
 
-            if (error) throw error;
-
-            await SupabaseClient.getClient()
-                .from('profiles')
-                .upsert({
-                    id: data.user.id,
-                    name: name,
-                    email: email,
-                    credits: credits,
-                    is_active: true,
-                    created_at: new Date().toISOString()
-                });
+            if (error) throw new Error(error.message || 'Erro na função create-user');
+            if (data?.error) throw new Error(data.error);
+        } else {
+            // Demo mode fallback
+            console.log('Demo mode: created user', { email, name, credits });
         }
 
         alert(`✅ Franqueado criado!\nEmail: ${email}\nSenha: ${password}\nCréditos: ${credits}`);
         closeCreateModal();
+        e.target.reset();
         await loadFranchisees();
         updateStats();
 
     } catch (error) {
-        console.error('Error:', error);
-        alert('Erro: ' + error.message);
+        console.error('Error creating franchisee:', error);
+        alert('Erro ao criar franqueado: ' + error.message);
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-plus"></i> Criar Franqueado';
