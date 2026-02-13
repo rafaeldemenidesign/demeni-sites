@@ -2,6 +2,7 @@
    DEMENI SITES - USER DATA MODULE
    Manages user data, projects, and storage
    User-scoped: each user gets isolated data
+   Cloud-synced via Supabase
    =========================== */
 
 const UserData = (function () {
@@ -11,6 +12,10 @@ const UserData = (function () {
         PROJECTS: 'demeni-projects',
         SESSION: 'demeni-session'
     };
+
+    // Debounce timer for cloud saves
+    const _pendingCloudSaves = {};
+    const CLOUD_SAVE_DELAY = 3000; // 3 seconds
 
     // Current user ID for scoped storage
     let _currentUserId = null;
@@ -138,6 +143,90 @@ const UserData = (function () {
         }
     }
 
+    // ========== FIELD MAPPING (camelCase ↔ snake_case) ==========
+    function toSupabase(localProject) {
+        return {
+            id: localProject.id,
+            user_id: _currentUserId,
+            name: localProject.name,
+            slug: localProject.slug || null,
+            data: localProject.data || {},
+            published: localProject.published || false,
+            published_url: localProject.publishedUrl || null,
+            published_at: localProject.publishedAt || null,
+            updated_at: new Date().toISOString()
+        };
+    }
+
+    function fromSupabase(row) {
+        return {
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            data: row.data || {},
+            published: row.published || false,
+            publishedUrl: row.published_url,
+            publishedAt: row.published_at,
+            modelType: row.data?.modelType || 'd2',
+            publishCost: row.data?.publishCost || 40,
+            thumbnail: row.data?.thumbnail || null,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at
+        };
+    }
+
+    // ========== SUPABASE HELPERS ==========
+    function _isCloudAvailable() {
+        return window.SupabaseClient && SupabaseClient.isConfigured() && _currentUserId;
+    }
+
+    // Sync all projects from Supabase to localStorage
+    async function syncFromCloud() {
+        if (!_isCloudAvailable()) return false;
+
+        try {
+            const { data, error } = await SupabaseClient.getProjects(_currentUserId);
+            if (error) {
+                console.error('❌ Cloud sync error:', error.message);
+                return false;
+            }
+
+            const localProjects = (data || []).map(fromSupabase);
+            save(_scopedKey(KEYS.PROJECTS), localProjects);
+            console.log(`☁️ Synced ${localProjects.length} projects from cloud`);
+            return true;
+        } catch (e) {
+            console.error('❌ Cloud sync exception:', e);
+            return false;
+        }
+    }
+
+    // Debounced cloud save for a specific project
+    function _scheduleCloudSave(projectId) {
+        if (!_isCloudAvailable()) return;
+
+        // Cancel previous pending save for this project
+        if (_pendingCloudSaves[projectId]) {
+            clearTimeout(_pendingCloudSaves[projectId]);
+        }
+
+        _pendingCloudSaves[projectId] = setTimeout(async () => {
+            delete _pendingCloudSaves[projectId];
+            const project = getProject(projectId);
+            if (!project) return;
+
+            try {
+                const supabaseData = toSupabase(project);
+                // Remove id and user_id from updates (they're the key)
+                const { id, user_id, ...updates } = supabaseData;
+                await SupabaseClient.updateProject(projectId, updates);
+                console.log(`☁️ Saved project "${project.name}" to cloud`);
+            } catch (e) {
+                console.error('❌ Cloud save failed for project:', projectId, e);
+            }
+        }, CLOUD_SAVE_DELAY);
+    }
+
     // ========== USER METHODS ==========
     function getUser() {
         let user = load(KEYS.USER);
@@ -165,6 +254,8 @@ const UserData = (function () {
     }
 
     // ========== PROJECT METHODS ==========
+
+    // Get projects from cache (sync). Call syncFromCloud() first to refresh.
     function getProjects() {
         let projects = load(_scopedKey(KEYS.PROJECTS));
         if (!projects) {
@@ -174,19 +265,58 @@ const UserData = (function () {
         return projects;
     }
 
+    // Async version: syncs from cloud first, then returns
+    async function getProjectsAsync() {
+        if (_isCloudAvailable()) {
+            await syncFromCloud();
+        }
+        return getProjects();
+    }
+
+    // Get single project (SYNC — reads from cache)
     function getProject(projectId) {
         const projects = getProjects();
         return projects.find(p => p.id === projectId) || null;
     }
 
-    function createProject(name = 'Meu Site') {
-        const projects = getProjects();
+    // Create project (async — creates in cloud + local)
+    async function createProject(name = 'Meu Site') {
         const newProject = createDefaultProject(name);
+
+        // Try cloud first
+        if (_isCloudAvailable()) {
+            try {
+                const { data, error } = await SupabaseClient.createProject(_currentUserId, name);
+                if (!error && data) {
+                    // Use the Supabase-generated ID and merge
+                    const cloudProject = fromSupabase(data);
+                    cloudProject.data = newProject.data; // Keep default data structure
+
+                    // Save locally with cloud ID
+                    const projects = getProjects();
+                    projects.unshift(cloudProject);
+                    save(_scopedKey(KEYS.PROJECTS), projects);
+
+                    // Also push the full data to cloud
+                    _scheduleCloudSave(cloudProject.id);
+
+                    console.log(`☁️ Project "${name}" created in cloud`);
+                    return cloudProject;
+                }
+                console.warn('⚠️ Cloud create failed, falling back to local:', error?.message);
+            } catch (e) {
+                console.warn('⚠️ Cloud create exception, falling back to local:', e.message);
+            }
+        }
+
+        // Fallback: local only
+        const projects = getProjects();
         projects.unshift(newProject);
         save(_scopedKey(KEYS.PROJECTS), projects);
         return newProject;
     }
 
+    // Update project — local IMMEDIATE + cloud DEBOUNCED
     function updateProject(projectId, updates) {
         const projects = getProjects();
         const index = projects.findIndex(p => p.id === projectId);
@@ -199,7 +329,12 @@ const UserData = (function () {
             updatedAt: new Date().toISOString()
         };
 
+        // Save local immediately
         save(_scopedKey(KEYS.PROJECTS), projects);
+
+        // Schedule cloud save (debounced 3s)
+        _scheduleCloudSave(projectId);
+
         return projects[index];
     }
 
@@ -207,10 +342,29 @@ const UserData = (function () {
         return updateProject(projectId, { data: data });
     }
 
-    function deleteProject(projectId) {
+    // Delete project (async — deletes from cloud + local)
+    async function deleteProject(projectId) {
+        // Delete locally first for instant feedback
         let projects = getProjects();
         projects = projects.filter(p => p.id !== projectId);
         save(_scopedKey(KEYS.PROJECTS), projects);
+
+        // Cancel any pending cloud saves
+        if (_pendingCloudSaves[projectId]) {
+            clearTimeout(_pendingCloudSaves[projectId]);
+            delete _pendingCloudSaves[projectId];
+        }
+
+        // Delete from cloud
+        if (_isCloudAvailable()) {
+            try {
+                await SupabaseClient.deleteProject(projectId);
+                console.log(`☁️ Project deleted from cloud`);
+            } catch (e) {
+                console.warn('⚠️ Cloud delete failed:', e.message);
+            }
+        }
+
         return true;
     }
 
@@ -283,6 +437,7 @@ const UserData = (function () {
 
         // Projects
         getProjects,
+        getProjectsAsync,
         getProject,
         createProject,
         updateProject,
@@ -290,6 +445,7 @@ const UserData = (function () {
         deleteProject,
         publishProject,
         unpublishProject,
+        syncFromCloud,
 
         // Current Project
         setCurrentProject,

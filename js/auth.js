@@ -173,6 +173,11 @@ const Auth = (function () {
         if (window.UserData) {
             UserData.setUserId(user.id);
             UserData.updateUser(user);
+            // Sync projects from cloud
+            UserData.syncFromCloud().then(() => {
+                console.log('☁️ Projects synced on login');
+                if (typeof loadProjects === 'function') loadProjects();
+            });
         }
 
         return user;
@@ -322,6 +327,11 @@ const Auth = (function () {
                 xp: user.xp,
                 level: user.level,
                 borderColor: user.borderColor
+            });
+            // Sync projects from cloud on session restore
+            UserData.syncFromCloud().then(() => {
+                console.log('☁️ Projects synced on session restore');
+                if (typeof loadProjects === 'function') loadProjects();
             });
         }
     }

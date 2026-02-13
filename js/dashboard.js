@@ -275,7 +275,11 @@ function renderDiscountBadge() {
 }
 
 // ========== PROJECTS ==========
-function loadProjects() {
+async function loadProjects() {
+    // Sync from cloud first (if available)
+    if (window.SupabaseClient && SupabaseClient.isConfigured()) {
+        await UserData.syncFromCloud();
+    }
     let projects = UserData.getProjects();
 
     // Ordenar por data de atualização (mais recentes primeiro)
@@ -449,7 +453,7 @@ function closeModelSelectionModal() {
     }
 }
 
-function selectModel(modelType) {
+async function selectModel(modelType) {
     // Model costs (D-1=40, D-2=80, D-3=140)
     const modelCosts = {
         'd1': 40,
@@ -458,7 +462,7 @@ function selectModel(modelType) {
     };
 
     // Create project with model type
-    const project = UserData.createProject('Novo Site');
+    const project = await UserData.createProject('Novo Site');
     project.modelType = modelType;
     project.publishCost = modelCosts[modelType] || 40;
     UserData.updateProject(project.id, { modelType, publishCost: modelCosts[modelType] || 40 });
@@ -495,7 +499,7 @@ function editProject(id) {
     saveNavigationState(targetPage, id);
 }
 
-function duplicateProject(id) {
+async function duplicateProject(id) {
     const original = UserData.getProject(id);
     if (!original) {
         showNotification('❌ Projeto não encontrado', 'error');
@@ -503,7 +507,7 @@ function duplicateProject(id) {
     }
 
     // Create a new project with copied data
-    const newProject = UserData.createProject(original.name + ' (Cópia)');
+    const newProject = await UserData.createProject(original.name + ' (Cópia)');
 
     // Copy all project data
     newProject.data = JSON.parse(JSON.stringify(original.data));
@@ -759,12 +763,12 @@ function testAddCredits(amount) {
 }
 
 // ========== DELETE PROJECT ==========
-function deleteProjectConfirm(id) {
+async function deleteProjectConfirm(id) {
     const project = UserData.getProject(id);
     if (!project) return;
 
     if (confirm(`Tem certeza que deseja excluir "${project.name}"? Esta ação não pode ser desfeita.`)) {
-        UserData.deleteProject(id);
+        await UserData.deleteProject(id);
         loadProjects();
         showNotification('Projeto excluído com sucesso!');
     }
