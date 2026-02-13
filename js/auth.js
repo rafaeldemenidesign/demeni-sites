@@ -386,9 +386,4 @@ const Auth = (function () {
 
         // Utilities
         isValidEmail,
-        isUsingSupabase
-    };
-})();
-
-// Make available globally
-window.Auth = Auth;
+       
