@@ -1,4 +1,4 @@
-/* ===========================
+﻿/* ===========================
    DEMENI SITES - DASHBOARD JS
    =========================== */
 
@@ -17,6 +17,7 @@ function init() {
     loadProjects();
     loadPackages();
     loadTransactions();
+    loadNotifications();
 
     // Restore previous state (persist across page reloads)
     restoreNavigationState();
@@ -1609,3 +1610,143 @@ function initEditorD1() {
 
 window.initEditorD1 = initEditorD1;
 
+
+// ========== NOTIFICATIONS ==========
+async function loadNotifications() {
+    if (!window.SupabaseClient || !SupabaseClient.isConfigured()) return;
+    
+    try {
+        const user = Auth.getCurrentUser();
+        if (!user?.id) return;
+
+        const { data, error } = await SupabaseClient.getClient()
+            .from('notifications')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (error) {
+            console.warn('Notifications table may not exist:', error.message);
+            return;
+        }
+
+        const notifications = data || [];
+        const unread = notifications.filter(n => !n.read).length;
+
+        // Update badges
+        updateNotifBadges(unread);
+
+        // Render notification list
+        renderNotifications(notifications);
+    } catch (e) {
+        console.warn('Error loading notifications:', e);
+    }
+}
+
+function updateNotifBadges(count) {
+    const sidebarBadge = document.getElementById('notif-badge-sidebar');
+    const avatarBadge = document.getElementById('notif-badge-avatar');
+
+    if (sidebarBadge) {
+        sidebarBadge.textContent = count;
+        sidebarBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+    if (avatarBadge) {
+        avatarBadge.textContent = count > 9 ? '9+' : count;
+        avatarBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
+}
+
+function renderNotifications(notifications) {
+    const container = document.getElementById('notifications-list');
+    const emptyState = document.getElementById('notif-empty');
+    if (!container) return;
+
+    if (notifications.length === 0) {
+        if (emptyState) emptyState.style.display = '';
+        return;
+    }
+    if (emptyState) emptyState.style.display = 'none';
+
+    const typeIcons = {
+        credits: 'fas fa-coins',
+        info: 'fas fa-info-circle',
+        warning: 'fas fa-exclamation-triangle',
+        success: 'fas fa-check-circle'
+    };
+    const typeColors = {
+        credits: '#f59e0b',
+        info: '#3b82f6',
+        warning: '#ef4444',
+        success: '#22c55e'
+    };
+
+    let html = '';
+    for (const n of notifications) {
+        const icon = typeIcons[n.type] || typeIcons.info;
+        const color = typeColors[n.type] || typeColors.info;
+        const timeAgo = getTimeAgo(n.created_at);
+        const readStyle = n.read ? 'opacity: 0.6;' : 'border-left: 3px solid ' + color + ';';
+
+        html += `
+            <div class="notif-card" data-id="${n.id}" style="background: var(--bg-card, #1a1a2e); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; ${readStyle} transition: opacity 0.3s;" onclick="markNotifRead('${n.id}')">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="${icon}" style="color: ${color}; font-size: 1.1rem; margin-top: 2px;"></i>
+                    <div style="flex: 1;">
+                        <strong style="font-size: 0.85rem; color: var(--text-primary, #fff);">${n.title}</strong>
+                        <p style="font-size: 0.8rem; color: var(--text-muted, #aaa); margin: 4px 0 0;">${n.message}</p>
+                        <span style="font-size: 0.7rem; color: var(--text-muted, #666);">${timeAgo}</span>
+                    </div>
+                    ${!n.read ? '<span style="width: 8px; height: 8px; background: ' + color + '; border-radius: 50; flex-shrink: 0; margin-top: 6px;"></span>' : ''}
+                </div>
+            </div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function getTimeAgo(dateStr) {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diff = Math.floor((now - date) / 1000);
+    if (diff < 60) return 'agora';
+    if (diff < 3600) return `${Math.floor(diff / 60)}min atrás`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d atrás`;
+    return date.toLocaleDateString('pt-BR');
+}
+
+async function markNotifRead(notifId) {
+    const card = document.querySelector(`.notif-card[data-id="${notifId}"]`);
+    if (card) {
+        card.style.opacity = '0.6';
+        card.style.borderLeft = 'none';
+    }
+    
+    try {
+        if (SupabaseClient?.isConfigured()) {
+            await SupabaseClient.getClient()
+                .from('notifications')
+                .update({ read: true })
+                .eq('id', notifId);
+        }
+        loadNotifications();
+    } catch(e) { console.warn('Error marking notification:', e); }
+}
+
+async function markAllNotifsRead() {
+    try {
+        const user = Auth.getCurrentUser();
+        if (!user?.id || !SupabaseClient?.isConfigured()) return;
+        await SupabaseClient.getClient()
+            .from('notifications')
+            .update({ read: true })
+            .eq('user_id', user.id)
+            .eq('read', false);
+        loadNotifications();
+    } catch(e) { console.warn('Error:', e); }
+}
+
+window.markNotifRead = markNotifRead;
+window.markAllNotifsRead = markAllNotifsRead;

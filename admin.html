@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -722,23 +722,41 @@
     <div class="modal" id="modal-credits">
         <div class="modal-content modal-small">
             <div class="modal-header">
-                <h2><i class="fas fa-coins"></i> Editar Créditos</h2>
+                <h2><i class="fas fa-coins"></i> Gerenciar Créditos</h2>
                 <button class="modal-close" onclick="closeCreditsModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <p id="credits-user"></p>
+                <p id="credits-user" style="font-weight: 600; margin-bottom: 4px;"></p>
+                <p style="font-size: 0.85rem; color: #888; margin-bottom: 16px;">Saldo atual: <strong id="credits-current">0</strong> créditos</p>
+                
                 <div class="form-group">
-                    <label>Novo Saldo</label>
-                    <input type="number" id="credits-value" min="0">
+                    <label>Operação</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <button type="button" id="btn-credit-add" class="btn-primary" onclick="setCreditOp('add')" style="flex: 1; padding: 8px; font-size: 0.85rem;">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                        <button type="button" id="btn-credit-sub" style="flex: 1; padding: 8px; font-size: 0.85rem; background: transparent; border: 1px solid #dc3545; color: #dc3545; border-radius: 6px; cursor: pointer;" onclick="setCreditOp('subtract')">
+                            <i class="fas fa-minus"></i> Retirar
+                        </button>
+                    </div>
                 </div>
+
                 <div class="form-group">
-                    <label>Motivo (opcional)</label>
-                    <input type="text" id="credits-reason" placeholder="Ex: Bônus, correção">
+                    <label>Quantidade</label>
+                    <input type="number" id="credits-amount" min="1" value="10" placeholder="Ex: 50">
                 </div>
+
+                <div class="form-group">
+                    <label>Motivo (obrigatório)</label>
+                    <input type="text" id="credits-reason" placeholder="Ex: Bônus de boas-vindas, Correção, Reembolso">
+                </div>
+
+                <p id="credits-preview" style="font-size: 0.85rem; color: #888; text-align: center; margin-bottom: 12px;"></p>
+
                 <button class="btn-primary btn-full" onclick="saveCredits()">
-                    <i class="fas fa-save"></i> Salvar
+                    <i class="fas fa-save"></i> Confirmar
                 </button>
             </div>
         </div>

@@ -1,4 +1,4 @@
-/* ===========================
+﻿/* ===========================
    DEMENI ADMIN - JavaScript
    =========================== */
 
@@ -593,11 +593,54 @@ function togglePasswordVisibility() {
 }
 
 // ========== CREDITS MANAGEMENT ==========
+let _creditOp = 'add';
+
+function setCreditOp(op) {
+    _creditOp = op;
+    const addBtn = document.getElementById('btn-credit-add');
+    const subBtn = document.getElementById('btn-credit-sub');
+    if (op === 'add') {
+        addBtn.style.background = '';
+        addBtn.style.border = '';
+        addBtn.style.color = '';
+        addBtn.className = 'btn-primary';
+        subBtn.style.background = 'transparent';
+        subBtn.style.border = '1px solid #dc3545';
+        subBtn.style.color = '#dc3545';
+        subBtn.className = '';
+    } else {
+        subBtn.style.background = '#dc3545';
+        subBtn.style.border = '1px solid #dc3545';
+        subBtn.style.color = '#fff';
+        subBtn.className = '';
+        addBtn.style.background = 'transparent';
+        addBtn.style.border = '1px solid var(--accent, #7c3aed)';
+        addBtn.style.color = 'var(--accent, #7c3aed)';
+        addBtn.className = '';
+    }
+    updateCreditsPreview();
+}
+
+function updateCreditsPreview() {
+    const current = parseInt(document.getElementById('credits-current').textContent) || 0;
+    const amount = parseInt(document.getElementById('credits-amount').value) || 0;
+    const newTotal = _creditOp === 'add' ? current + amount : Math.max(0, current - amount);
+    const sign = _creditOp === 'add' ? '+' : '-';
+    const color = _creditOp === 'add' ? '#22c55e' : '#dc3545';
+    document.getElementById('credits-preview').innerHTML = 
+        `<span style="color:${color}">${sign}${amount}</span> → Novo saldo: <strong>${newTotal}</strong>`;
+}
+
 function openCreditsModal(userId, userName, currentCredits) {
     editingUserId = userId;
+    _creditOp = 'add';
     document.getElementById('credits-user').textContent = `Usuário: ${userName}`;
-    document.getElementById('credits-value').value = currentCredits;
+    document.getElementById('credits-current').textContent = currentCredits;
+    document.getElementById('credits-amount').value = 10;
     document.getElementById('credits-reason').value = '';
+    setCreditOp('add');
+    updateCreditsPreview();
+    document.getElementById('credits-amount').addEventListener('input', updateCreditsPreview);
     document.getElementById('modal-credits').classList.add('active');
 }
 
@@ -609,14 +652,55 @@ function closeCreditsModal() {
 async function saveCredits() {
     if (!editingUserId) return;
 
-    const newCredits = parseInt(document.getElementById('credits-value').value) || 0;
+    const amount = parseInt(document.getElementById('credits-amount').value) || 0;
+    const reason = document.getElementById('credits-reason').value.trim();
+
+    if (amount <= 0) {
+        alert('Informe uma quantidade válida.');
+        return;
+    }
+    if (!reason) {
+        alert('O motivo é obrigatório para justificar a transação.');
+        return;
+    }
+
+    const currentCredits = parseInt(document.getElementById('credits-current').textContent) || 0;
+    const newCredits = _creditOp === 'add' ? currentCredits + amount : Math.max(0, currentCredits - amount);
+    const delta = _creditOp === 'add' ? amount : -Math.min(amount, currentCredits);
 
     try {
         if (SupabaseClient?.isConfigured()) {
+            // Update credits
             await SupabaseClient.getClient()
                 .from('profiles')
                 .update({ credits: newCredits })
                 .eq('id', editingUserId);
+
+            // Record transaction
+            await SupabaseClient.getClient()
+                .from('transactions')
+                .insert({
+                    user_id: editingUserId,
+                    type: _creditOp === 'add' ? 'credit' : 'debit',
+                    amount: Math.abs(delta),
+                    description: `[Admin] ${reason}`
+                });
+
+            // Create notification for user
+            try {
+                const notifMsg = _creditOp === 'add' 
+                    ? `Você recebeu +${amount} créditos. Motivo: ${reason}`
+                    : `Foram retirados ${Math.abs(delta)} créditos. Motivo: ${reason}`;
+                await SupabaseClient.getClient()
+                    .from('notifications')
+                    .insert({
+                        user_id: editingUserId,
+                        type: 'credits',
+                        title: _creditOp === 'add' ? 'Créditos adicionados' : 'Créditos retirados',
+                        message: notifMsg,
+                        read: false
+                    });
+            } catch(ne) { console.warn('Notifications table may not exist yet:', ne); }
         }
 
         const user = franchisees.find(f => f.id === editingUserId);
@@ -625,12 +709,14 @@ async function saveCredits() {
         renderFranchisees();
         updateStats();
         closeCreditsModal();
-        alert('✅ Créditos atualizados!');
+        const sign = _creditOp === 'add' ? '+' : '-';
+        alert(`✅ ${sign}${Math.abs(delta)} créditos. Novo saldo: ${newCredits}\nMotivo: ${reason}`);
     } catch (error) {
         console.error('Error:', error);
         alert('Erro ao atualizar créditos');
     }
 }
+
 
 async function toggleUserStatus(userId) {
     const user = franchisees.find(f => f.id === userId);
@@ -759,6 +845,8 @@ window.createFranchisee = createFranchisee;
 window.openCreditsModal = openCreditsModal;
 window.closeCreditsModal = closeCreditsModal;
 window.saveCredits = saveCredits;
+window.setCreditOp = setCreditOp;
+window.updateCreditsPreview = updateCreditsPreview;
 window.toggleUserStatus = toggleUserStatus;
 window.toggleSiteStatus = toggleSiteStatus;
 window.filterUsers = filterUsers;
