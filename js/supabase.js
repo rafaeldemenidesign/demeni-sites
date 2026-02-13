@@ -1,4 +1,4 @@
-/* ===========================
+﻿/* ===========================
    DEMENI SITES - SUPABASE CLIENT
    Database and Auth configuration
    =========================== */
@@ -207,6 +207,12 @@ const SupabaseClient = (function () {
         const projectData = localProject?.data || {};
         console.log('📁 Project:', { projectName, hasData: !!projectData });
 
+        // Reserved slugs protection
+        const RESERVED_SLUGS = ['sites', 'site', 'app', 'admin', 'www', 'api', 'mail', 'smtp', 'ftp', 'ns1', 'ns2', 'blog', 'loja', 'store', 'dashboard', 'painel', 'login', 'auth', 'supabase'];
+        if (RESERVED_SLUGS.includes(slug.toLowerCase())) {
+            return { error: { message: `O slug "${slug}" é reservado e não pode ser usado.` } };
+        }
+
         try {
             // Use UPSERT: Insert if new, Update if exists (based on slug)
             console.log('⏳ Calling Supabase upsert...');
@@ -219,7 +225,7 @@ const SupabaseClient = (function () {
                     data: projectData,
                     html_content: htmlContent,
                     published: true,
-                    published_url: `https://${slug}.rafaeldemeni.com`,
+                    published_url: `https://${slug}.sites.rafaeldemeni.com`,
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 }, {
