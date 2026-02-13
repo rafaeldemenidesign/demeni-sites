@@ -887,8 +887,8 @@
                     <button class="modal-close" onclick="closeEditProfileModal()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <!-- Avatar Preview (clickable to upload) -->
-                    <div style="text-align: center; margin-bottom: 20px;">
+                    <!-- Avatar Display (default view) -->
+                    <div id="avatar-display" style="text-align: center; margin-bottom: 20px;">
                         <div id="edit-profile-avatar-wrapper"
                             onclick="document.getElementById('edit-profile-avatar-input').click()"
                             style="position: relative; display: inline-block; cursor: pointer;"
@@ -906,6 +906,45 @@
                             onchange="handleAvatarUpload(event)" style="display: none;">
                         <p style="margin-top: 6px; font-size: 0.75rem; color: var(--text-muted);">Clique para alterar
                         </p>
+                    </div>
+
+                    <!-- Avatar Crop Editor (shown after image selected) -->
+                    <div id="avatar-editor"
+                        style="display: none; text-align: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px;">
+                        <canvas id="avatar-canvas" width="200" height="200"
+                            style="border-radius: 50%; border: 3px solid var(--gold); cursor: grab;"></canvas>
+                        <div style="margin-top: 14px; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="fas fa-arrows-alt-h"
+                                    style="color: var(--text-muted); width: 16px; font-size: 12px;"
+                                    title="Horizontal"></i>
+                                <input type="range" id="avatar-pan-x" min="-100" max="100" value="0"
+                                    style="flex: 1; accent-color: var(--gold);" oninput="updateAvatarCanvas()">
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="fas fa-arrows-alt-v"
+                                    style="color: var(--text-muted); width: 16px; font-size: 12px;"
+                                    title="Vertical"></i>
+                                <input type="range" id="avatar-pan-y" min="-100" max="100" value="0"
+                                    style="flex: 1; accent-color: var(--gold);" oninput="updateAvatarCanvas()">
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-search-plus"
+                                    style="color: var(--text-muted); width: 16px; font-size: 12px;" title="Zoom"></i>
+                                <input type="range" id="avatar-zoom" min="50" max="300" value="100"
+                                    style="flex: 1; accent-color: var(--gold);" oninput="updateAvatarCanvas()">
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center;">
+                            <button type="button" onclick="cancelAvatarEdit()"
+                                style="font-size: 0.8rem; padding: 6px 14px; background: transparent; border: 1px solid var(--text-muted); color: var(--text-secondary); border-radius: 6px; cursor: pointer;">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button type="button" onclick="confirmAvatarEdit()"
+                                style="font-size: 0.8rem; padding: 6px 14px; background: var(--gold); color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                <i class="fas fa-check"></i> Confirmar
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Name -->

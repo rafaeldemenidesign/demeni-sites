@@ -1097,7 +1097,9 @@ async function saveProfile() {
     }
 }
 
-// Handle avatar image upload
+// Handle avatar image upload — opens editor
+let _avatarSourceImage = null;
+
 function handleAvatarUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1109,27 +1111,77 @@ function handleAvatarUpload(event) {
 
     const reader = new FileReader();
     reader.onload = function (e) {
-        // Compress to 200x200 for storage efficiency
         const img = new Image();
         img.onload = function () {
-            const canvas = document.createElement('canvas');
-            const size = 200;
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
+            _avatarSourceImage = img;
 
-            // Center crop
-            const minDim = Math.min(img.width, img.height);
-            const sx = (img.width - minDim) / 2;
-            const sy = (img.height - minDim) / 2;
-            ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+            // Reset sliders
+            document.getElementById('avatar-pan-x').value = 0;
+            document.getElementById('avatar-pan-y').value = 0;
+            document.getElementById('avatar-zoom').value = 100;
 
-            _pendingAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            document.getElementById('edit-profile-avatar-preview').src = _pendingAvatarDataUrl;
+            // Show editor, hide preview
+            document.getElementById('avatar-display').style.display = 'none';
+            document.getElementById('avatar-editor').style.display = 'block';
+
+            updateAvatarCanvas();
         };
         img.src = e.target.result;
     };
     reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    event.target.value = '';
+}
+
+function updateAvatarCanvas() {
+    if (!_avatarSourceImage) return;
+
+    const canvas = document.getElementById('avatar-canvas');
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width; // 200
+
+    const panX = parseInt(document.getElementById('avatar-pan-x').value);
+    const panY = parseInt(document.getElementById('avatar-pan-y').value);
+    const zoom = parseInt(document.getElementById('avatar-zoom').value) / 100;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // Fill background
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, size, size);
+
+    const img = _avatarSourceImage;
+
+    // Calculate dimensions to fit image within canvas with zoom
+    const scale = Math.max(size / img.width, size / img.height) * zoom;
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+
+    // Center + pan offset (pan range -100 to 100 maps proportionally)
+    const maxPanX = (drawW - size) / 2;
+    const maxPanY = (drawH - size) / 2;
+    const offsetX = (size - drawW) / 2 + (panX / 100) * maxPanX;
+    const offsetY = (size - drawH) / 2 + (panY / 100) * maxPanY;
+
+    ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+}
+
+function confirmAvatarEdit() {
+    const canvas = document.getElementById('avatar-canvas');
+    _pendingAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+    // Update preview
+    document.getElementById('edit-profile-avatar-preview').src = _pendingAvatarDataUrl;
+
+    // Hide editor, show preview
+    document.getElementById('avatar-editor').style.display = 'none';
+    document.getElementById('avatar-display').style.display = 'block';
+}
+
+function cancelAvatarEdit() {
+    _avatarSourceImage = null;
+    document.getElementById('avatar-editor').style.display = 'none';
+    document.getElementById('avatar-display').style.display = 'block';
 }
 
 // Expose edit profile functions globally
@@ -1137,6 +1189,9 @@ window.openEditProfileModal = openEditProfileModal;
 window.closeEditProfileModal = closeEditProfileModal;
 window.saveProfile = saveProfile;
 window.handleAvatarUpload = handleAvatarUpload;
+window.updateAvatarCanvas = updateAvatarCanvas;
+window.confirmAvatarEdit = confirmAvatarEdit;
+window.cancelAvatarEdit = cancelAvatarEdit;
 
 // Expose login functions
 window.showLoginModal = showLoginModal;
