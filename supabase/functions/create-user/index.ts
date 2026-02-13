@@ -63,8 +63,7 @@ serve(async (req) => {
                 id: newUser.user.id,
                 email: email,
                 name: name || '',
-                credits: credits || 600, // Default to 600 as requested
-                plan: 'free',
+                credits: credits || 600,
                 created_at: new Date().toISOString()
             })
 

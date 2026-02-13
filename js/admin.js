@@ -10,8 +10,29 @@ let sites = [];
 let editingUserId = null;
 
 // ========== INIT ==========
-document.addEventListener('DOMContentLoaded', () => {
-    // Always require manual login for admin — no auto-login
+document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for Supabase + Auth to initialize
+    await new Promise(r => setTimeout(r, 300));
+
+    // Check for existing session — auto-login if valid admin
+    try {
+        if (window.SupabaseClient && SupabaseClient.isConfigured()) {
+            const session = await SupabaseClient.getSession();
+            if (session?.user) {
+                const email = session.user.email;
+                if (ADMIN_EMAILS.includes(email)) {
+                    // Valid admin session, skip login
+                    await Auth.init?.();
+                    showAdminDashboard(session.user);
+                    return;
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Session check failed:', e);
+    }
+
+    // No valid session — show login
     document.getElementById('admin-login-screen').style.display = 'flex';
 });
 
@@ -526,7 +547,17 @@ async function createFranchisee(e) {
                 }
             });
 
-            if (error) throw new Error(error.message || 'Erro na função create-user');
+            if (error) {
+                // Try to extract detailed error from response context
+                let errorMsg = error.message;
+                try {
+                    if (error.context && typeof error.context.json === 'function') {
+                        const errorBody = await error.context.json();
+                        errorMsg = errorBody.error || errorMsg;
+                    }
+                } catch (e) { /* ignore parse errors */ }
+                throw new Error(errorMsg);
+            }
             if (data?.error) throw new Error(data.error);
         } else {
             // Demo mode fallback
@@ -545,6 +576,19 @@ async function createFranchisee(e) {
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-plus"></i> Criar Franqueado';
+    }
+}
+
+// Toggle password visibility in create modal
+function togglePasswordVisibility() {
+    const input = document.getElementById('new-password');
+    const icon = document.querySelector('#toggle-password-btn i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
     }
 }
 

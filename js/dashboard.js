@@ -167,8 +167,14 @@ function refreshUserCard() {
 
     // Update sidebar footer avatar
     const sidebarAvatar = document.getElementById('sidebar-avatar');
-    if (sidebarAvatar && user.avatar) {
-        sidebarAvatar.src = user.avatar;
+    if (sidebarAvatar) {
+        if (user.avatar) {
+            sidebarAvatar.src = user.avatar;
+        } else {
+            // Generate initials avatar from user name
+            const avatarName = encodeURIComponent(user.name || 'User');
+            sidebarAvatar.src = `https://ui-avatars.com/api/?name=${avatarName}&background=D4AF37&color=000&size=80`;
+        }
     }
 
     // Update avatar border with patente class
@@ -970,7 +976,7 @@ document.querySelectorAll('.settings-item[data-action]').forEach(btn => {
         closeSettingsDrawer();
         switch (action) {
             case 'edit-profile':
-                // TODO: navigate to edit profile
+                openEditProfileModal();
                 break;
             case 'my-level':
                 // TODO: open level/achievements modal
@@ -998,6 +1004,64 @@ function testLogin() {
     }
     return result;
 }
+
+// ========== EDIT PROFILE MODAL ==========
+function openEditProfileModal() {
+    const user = UserData.getUser();
+    document.getElementById('edit-profile-name').value = user.name || '';
+    document.getElementById('edit-profile-email').value = user.email || '';
+    document.getElementById('edit-profile-success').style.display = 'none';
+    document.getElementById('edit-profile-error').style.display = 'none';
+    document.getElementById('modal-edit-profile').classList.add('active');
+}
+
+function closeEditProfileModal() {
+    document.getElementById('modal-edit-profile').classList.remove('active');
+}
+
+async function saveProfile() {
+    const name = document.getElementById('edit-profile-name').value.trim();
+    const btn = document.getElementById('btn-save-profile');
+    const successEl = document.getElementById('edit-profile-success');
+    const errorEl = document.getElementById('edit-profile-error');
+
+    if (!name) {
+        errorEl.textContent = 'Nome é obrigatório';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+    errorEl.style.display = 'none';
+
+    try {
+        // Update in Auth (syncs to Supabase + localStorage)
+        await Auth.updateCurrentUser({ name });
+
+        // Update in UserData local
+        UserData.updateUser({ name });
+
+        // Refresh UI
+        refreshUserCard();
+
+        successEl.style.display = 'block';
+        setTimeout(() => {
+            closeEditProfileModal();
+        }, 1200);
+    } catch (e) {
+        errorEl.textContent = 'Erro ao salvar: ' + e.message;
+        errorEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Salvar Alterações';
+    }
+}
+
+// Expose edit profile functions globally
+window.openEditProfileModal = openEditProfileModal;
+window.closeEditProfileModal = closeEditProfileModal;
+window.saveProfile = saveProfile;
 
 // Expose login functions
 window.showLoginModal = showLoginModal;

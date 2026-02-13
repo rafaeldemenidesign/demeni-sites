@@ -1,6 +1,7 @@
 /* ===========================
    DEMENI SITES - USER DATA MODULE
    Manages user data, projects, and storage
+   User-scoped: each user gets isolated data
    =========================== */
 
 const UserData = (function () {
@@ -10,6 +11,45 @@ const UserData = (function () {
         PROJECTS: 'demeni-projects',
         SESSION: 'demeni-session'
     };
+
+    // Current user ID for scoped storage
+    let _currentUserId = null;
+
+    // Set the active user ID (called on login/init)
+    function setUserId(userId) {
+        _currentUserId = userId;
+        // Migrate old unscoped data if exists
+        _migrateUnscopedData(userId);
+    }
+
+    // Get scoped key for storage
+    function _scopedKey(baseKey) {
+        if (_currentUserId) {
+            return `${baseKey}-${_currentUserId}`;
+        }
+        return baseKey;
+    }
+
+    // Migrate old unscoped data to user-scoped keys (one-time)
+    function _migrateUnscopedData(userId) {
+        const oldProjects = localStorage.getItem(KEYS.PROJECTS);
+        const newKey = `${KEYS.PROJECTS}-${userId}`;
+        const alreadyMigrated = localStorage.getItem(newKey);
+
+        if (oldProjects && !alreadyMigrated) {
+            // Check if this is the user who owns the old data
+            const oldUser = localStorage.getItem(KEYS.USER);
+            if (oldUser) {
+                try {
+                    const parsed = JSON.parse(oldUser);
+                    if (parsed.id === userId || parsed.email) {
+                        localStorage.setItem(newKey, oldProjects);
+                        console.log('✅ Migrated projects to user-scoped key');
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        }
+    }
 
     // ========== DEFAULT USER STRUCTURE ==========
     const createDefaultUser = (email = null) => ({
@@ -114,10 +154,10 @@ const UserData = (function () {
 
     // ========== PROJECT METHODS ==========
     function getProjects() {
-        let projects = load(KEYS.PROJECTS);
+        let projects = load(_scopedKey(KEYS.PROJECTS));
         if (!projects) {
             projects = [];
-            save(KEYS.PROJECTS, projects);
+            save(_scopedKey(KEYS.PROJECTS), projects);
         }
         return projects;
     }
@@ -130,8 +170,8 @@ const UserData = (function () {
     function createProject(name = 'Meu Site') {
         const projects = getProjects();
         const newProject = createDefaultProject(name);
-        projects.unshift(newProject); // Adiciona no INÍCIO (mais recente primeiro)
-        save(KEYS.PROJECTS, projects);
+        projects.unshift(newProject);
+        save(_scopedKey(KEYS.PROJECTS), projects);
         return newProject;
     }
 
@@ -147,7 +187,7 @@ const UserData = (function () {
             updatedAt: new Date().toISOString()
         };
 
-        save(KEYS.PROJECTS, projects);
+        save(_scopedKey(KEYS.PROJECTS), projects);
         return projects[index];
     }
 
@@ -158,7 +198,7 @@ const UserData = (function () {
     function deleteProject(projectId) {
         let projects = getProjects();
         projects = projects.filter(p => p.id !== projectId);
-        save(KEYS.PROJECTS, projects);
+        save(_scopedKey(KEYS.PROJECTS), projects);
         return true;
     }
 
@@ -201,7 +241,7 @@ const UserData = (function () {
 
     function clearAllData() {
         localStorage.removeItem(KEYS.USER);
-        localStorage.removeItem(KEYS.PROJECTS);
+        localStorage.removeItem(_scopedKey(KEYS.PROJECTS));
         sessionStorage.removeItem('demeni-current-project');
     }
 
@@ -216,13 +256,14 @@ const UserData = (function () {
 
     function importData(data) {
         if (data.user) save(KEYS.USER, data.user);
-        if (data.projects) save(KEYS.PROJECTS, data.projects);
+        if (data.projects) save(_scopedKey(KEYS.PROJECTS), data.projects);
         return true;
     }
 
     // ========== PUBLIC API ==========
     return {
         // User
+        setUserId,
         getUser,
         updateUser,
         setUserEmail,

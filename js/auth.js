@@ -165,6 +165,7 @@ const Auth = (function () {
 
         // Sync with UserData module
         if (window.UserData) {
+            UserData.setUserId(user.id);
             UserData.updateUser(user);
         }
 
@@ -305,6 +306,7 @@ const Auth = (function () {
         localStorage.setItem(KEYS.CURRENT_USER, JSON.stringify(sanitizeUser(user)));
 
         if (window.UserData) {
+            UserData.setUserId(user.id);
             UserData.updateUser({
                 id: user.id,
                 email: user.email,
