@@ -1645,7 +1645,7 @@ async function loadNotifications() {
 }
 
 function updateNotifBadges(count) {
-    const sidebarBadge = document.getElementById('notif-badge-sidebar');
+    const sidebarBadge = document.getElementById('notif-badge-menu');
     const avatarBadge = document.getElementById('notif-badge-avatar');
 
     if (sidebarBadge) {
@@ -1750,3 +1750,4 @@ async function markAllNotifsRead() {
 
 window.markNotifRead = markNotifRead;
 window.markAllNotifsRead = markAllNotifsRead;
+

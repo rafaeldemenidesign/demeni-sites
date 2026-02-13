@@ -84,12 +84,6 @@
                         <i class="fas fa-wallet"></i>
                         <span>Minha Carteira</span>
                     </a>
-                    <a href="#" class="nav-item" data-page="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span>Notificações</span>
-                        <span id="notif-badge-sidebar" style="display: none; background: #dc3545; color: #fff; font-size: 0.65rem; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; margin-left: auto;">0</span>
-                    </a>
-                    <a href="#" class="nav-item" data-page="lessons">
                         <i class="fas fa-graduation-cap"></i>
                         <span>Aulas</span>
                     </a>
@@ -109,7 +103,7 @@
                         <img class="sidebar-avatar" id="sidebar-avatar"
                             src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=80"
                             alt="Avatar">
-                        <span id="notif-badge-avatar" style="display: none; position: absolute; top: -2px; right: -2px; background: #dc3545; color: #fff; font-size: 0.6rem; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-dark, #0f0f23);">0</span>
+                        <span id="notif-badge-avatar" style="display: none; position: absolute; top: -4px; right: -4px; background: #3b82f6; color: #fff; font-size: 0.7rem; font-weight: 700; min-width: 22px; height: 22px; border-radius: 11px; align-items: center; justify-content: center; border: 2px solid var(--bg-dark, #0f0f23);">0</span>
                         <div class="sidebar-hamburger-icon">
                             <i class="fas fa-bars"></i>
                         </div>
@@ -867,6 +861,11 @@
                     <span class="drawer-xp-text" id="drawer-xp-text">0 / 200 XP</span>
                 </div>
                 <div class="settings-divider"></div>
+                <button class="settings-item" data-action="notifications" onclick="navigateTo('notifications'); closeSettingsDrawer();">
+                    <i class="fas fa-bell"></i>
+                    <span>Notificações</span>
+                    <span id="notif-badge-menu" style="display: none; background: #3b82f6; color: #fff; font-size: 0.7rem; font-weight: 700; min-width: 20px; height: 20px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin-left: auto;">0</span>
+                </button>
                 <button class="settings-item" data-action="edit-profile">
                     <i class="fas fa-user-edit"></i>
                     <span>Editar Perfil</span>
