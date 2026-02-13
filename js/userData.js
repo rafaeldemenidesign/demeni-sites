@@ -15,6 +15,18 @@ const UserData = (function () {
     // Current user ID for scoped storage
     let _currentUserId = null;
 
+    // Auto-initialize from existing session (prevents race condition with auth.init)
+    try {
+        const savedUser = localStorage.getItem('demeni-current-user');
+        if (savedUser) {
+            const parsed = JSON.parse(savedUser);
+            if (parsed && parsed.id) {
+                _currentUserId = parsed.id;
+                console.log('✅ UserData: auto-scoped to user', _currentUserId.substring(0, 8) + '...');
+            }
+        }
+    } catch (e) { /* ignore */ }
+
     // Set the active user ID (called on login/init)
     function setUserId(userId) {
         _currentUserId = userId;
