@@ -1010,6 +1010,21 @@ function openEditProfileModal() {
     const user = UserData.getUser();
     document.getElementById('edit-profile-name').value = user.name || '';
     document.getElementById('edit-profile-email').value = user.email || '';
+    document.getElementById('edit-profile-phone').value = user.phone || '';
+
+    // Avatar preview
+    const avatarPreview = document.getElementById('edit-profile-avatar-preview');
+    if (avatarPreview) {
+        const avatarName = encodeURIComponent(user.name || 'User');
+        avatarPreview.src = user.avatar || `https://ui-avatars.com/api/?name=${avatarName}&background=D4AF37&color=000&size=120`;
+    }
+
+    // Clear password fields
+    const currentPw = document.getElementById('edit-profile-current-pw');
+    const newPw = document.getElementById('edit-profile-new-pw');
+    if (currentPw) currentPw.value = '';
+    if (newPw) newPw.value = '';
+
     document.getElementById('edit-profile-success').style.display = 'none';
     document.getElementById('edit-profile-error').style.display = 'none';
     document.getElementById('modal-edit-profile').classList.add('active');
@@ -1021,6 +1036,9 @@ function closeEditProfileModal() {
 
 async function saveProfile() {
     const name = document.getElementById('edit-profile-name').value.trim();
+    const phone = document.getElementById('edit-profile-phone').value.trim();
+    const currentPw = document.getElementById('edit-profile-current-pw')?.value || '';
+    const newPw = document.getElementById('edit-profile-new-pw')?.value || '';
     const btn = document.getElementById('btn-save-profile');
     const successEl = document.getElementById('edit-profile-success');
     const errorEl = document.getElementById('edit-profile-error');
@@ -1031,16 +1049,31 @@ async function saveProfile() {
         return;
     }
 
+    // Validate password if user wants to change it
+    if (newPw && newPw.length < 6) {
+        errorEl.textContent = 'Nova senha deve ter no mínimo 6 caracteres';
+        errorEl.style.display = 'block';
+        return;
+    }
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
     errorEl.style.display = 'none';
 
     try {
-        // Update in Auth (syncs to Supabase + localStorage)
-        await Auth.updateCurrentUser({ name });
+        // Update profile data
+        const updates = { name, phone };
+        await Auth.updateCurrentUser(updates);
+        UserData.updateUser(updates);
 
-        // Update in UserData local
-        UserData.updateUser({ name });
+        // Handle password change if both fields are filled
+        if (currentPw && newPw) {
+            if (Auth.isUsingSupabase() && window.SupabaseClient) {
+                const { error } = await SupabaseClient.getClient()
+                    .auth.updateUser({ password: newPw });
+                if (error) throw new Error('Erro ao alterar senha: ' + error.message);
+            }
+        }
 
         // Refresh UI
         refreshUserCard();
@@ -1050,7 +1083,7 @@ async function saveProfile() {
             closeEditProfileModal();
         }, 1200);
     } catch (e) {
-        errorEl.textContent = 'Erro ao salvar: ' + e.message;
+        errorEl.textContent = e.message || 'Erro ao salvar';
         errorEl.style.display = 'block';
     } finally {
         btn.disabled = false;
@@ -1402,4 +1435,76 @@ function initEditorD2() {
         });
 
         // Set up save button
-        document.getElementById('btn-save-d2')?.addEventListe
+        document.getElementById('btn-save-d2')?.addEventListener('click', saveD2Project);
+
+        editorD2Initialized = true;
+    }
+
+    // Render preview (always, even if already initialized)
+    renderD2Preview();
+    console.log('[Editor D2] Initialization complete');
+}
+
+function renderD2Preview() {
+    const previewFrame = document.getElementById('preview-frame-d2');
+    if (previewFrame && window.renderPreviewD2New && window.d2State) {
+        window.renderPreviewD2New(previewFrame, window.d2State.getState());
+    }
+}
+
+function saveD2Project() {
+    const projectId = UserData.getCurrentProject();
+    if (!projectId) {
+        showNotification('❌ Nenhum projeto selecionado');
+        return;
+    }
+
+    // Get state from d2State and save to project
+    const d2Data = {
+        profile: window.d2State.get('profile'),
+        d2Sections: window.d2State.get('d2Sections'),
+        d2Adjustments: window.d2State.get('d2Adjustments'),
+        d2Products: window.d2State.get('d2Products'),
+        d2Feedbacks: window.d2State.get('d2Feedbacks'),
+        d2Categorias: window.d2State.get('d2Categorias')
+    };
+
+    UserData.updateProject(projectId, { data: d2Data });
+    showNotification('✅ Projeto salvo!');
+}
+
+window.initEditorD2 = initEditorD2;
+window.saveD2Project = saveD2Project;
+window.renderD2Preview = renderD2Preview;
+
+// ========== EDITOR D1 EMBEDDED ==========
+
+/**
+ * Initialize the D-1 embedded editor
+ * Delegates to the complete implementation in editor-d1-embedded.js
+ */
+function initEditorD1() {
+    // Check if the full D1 embedded module is loaded
+    if (typeof initD1Embedded === 'function') {
+        initD1Embedded();
+    } else {
+        console.error('[D1 Editor] editor-d1-embedded.js not loaded');
+    }
+
+    // Carrega nome do projeto no input do header
+    const projectId = UserData.getCurrentProjectId();
+    if (projectId) {
+        const project = UserData.getProject(projectId);
+        if (project) {
+            const projectNameInput = document.getElementById('project-name-header');
+            const savedName = project.name || project.data?.projectName || 'Novo Site';
+            if (projectNameInput) {
+                projectNameInput.value = savedName;
+            }
+            console.log('[D1 Editor] Project name loaded:', savedName);
+        }
+    }
+}
+
+window.initEditorD1 = initEditorD1;
+

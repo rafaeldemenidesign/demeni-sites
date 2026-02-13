@@ -230,4 +230,84 @@ const UserData = (function () {
 
     // ========== CURRENT PROJECT (Session) ==========
     function setCurrentProject(projectId) {
-      
+        sessionStorage.setItem('demeni-current-project', projectId);
+    }
+
+    function getCurrentProjectId() {
+        return sessionStorage.getItem('demeni-current-project');
+    }
+
+    function getCurrentProject() {
+        const id = getCurrentProjectId();
+        return id ? getProject(id) : null;
+    }
+
+    // ========== UTILITY METHODS ==========
+    function getProjectCount() {
+        return getProjects().length;
+    }
+
+    function getPublishedProjects() {
+        return getProjects().filter(p => p.published);
+    }
+
+    function clearAllData() {
+        localStorage.removeItem(KEYS.USER);
+        localStorage.removeItem(_scopedKey(KEYS.PROJECTS));
+        sessionStorage.removeItem('demeni-current-project');
+    }
+
+    // ========== EXPORT DATA (for backup) ==========
+    function exportData() {
+        return {
+            user: getUser(),
+            projects: getProjects(),
+            exportedAt: new Date().toISOString()
+        };
+    }
+
+    function importData(data) {
+        if (data.user) save(KEYS.USER, data.user);
+        if (data.projects) save(_scopedKey(KEYS.PROJECTS), data.projects);
+        return true;
+    }
+
+    // ========== PUBLIC API ==========
+    return {
+        // User
+        setUserId,
+        getUser,
+        updateUser,
+        setUserEmail,
+        isLoggedIn,
+
+        // Projects
+        getProjects,
+        getProject,
+        createProject,
+        updateProject,
+        updateProjectData,
+        deleteProject,
+        publishProject,
+        unpublishProject,
+
+        // Current Project
+        setCurrentProject,
+        getCurrentProjectId,
+        getCurrentProject,
+
+        // Utilities
+        getProjectCount,
+        getPublishedProjects,
+        clearAllData,
+        exportData,
+        importData,
+
+        // Helpers
+        generateUUID,
+        createDefaultProject
+    };
+})();
+
+// Make available globally
+window.UserData = UserData;

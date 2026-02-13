@@ -105,9 +105,15 @@ const Auth = (function () {
             await SupabaseClient.signOut();
         }
 
-        // Always clear local storage
+        // Clear user-scoped project data
+        if (window.UserData) {
+            UserData.clearAllData();
+        }
+
+        // Clear all auth/session data
         localStorage.removeItem(KEYS.SESSION);
         localStorage.removeItem(KEYS.CURRENT_USER);
+        localStorage.removeItem('demeni-user');
         sessionStorage.clear();
         return true;
     }
@@ -386,4 +392,9 @@ const Auth = (function () {
 
         // Utilities
         isValidEmail,
-       
+        isUsingSupabase
+    };
+})();
+
+// Make available globally
+window.Auth = Auth;
