@@ -1006,11 +1006,14 @@ function testLogin() {
 }
 
 // ========== EDIT PROFILE MODAL ==========
+let _pendingAvatarDataUrl = null;
+
 function openEditProfileModal() {
     const user = UserData.getUser();
     document.getElementById('edit-profile-name').value = user.name || '';
     document.getElementById('edit-profile-email').value = user.email || '';
     document.getElementById('edit-profile-phone').value = user.phone || '';
+    _pendingAvatarDataUrl = null;
 
     // Avatar preview
     const avatarPreview = document.getElementById('edit-profile-avatar-preview');
@@ -1063,6 +1066,9 @@ async function saveProfile() {
     try {
         // Update profile data
         const updates = { name, phone };
+        if (_pendingAvatarDataUrl) {
+            updates.avatar = _pendingAvatarDataUrl;
+        }
         await Auth.updateCurrentUser(updates);
         UserData.updateUser(updates);
 
@@ -1091,10 +1097,46 @@ async function saveProfile() {
     }
 }
 
+// Handle avatar image upload
+function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecione uma imagem.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        // Compress to 200x200 for storage efficiency
+        const img = new Image();
+        img.onload = function () {
+            const canvas = document.createElement('canvas');
+            const size = 200;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Center crop
+            const minDim = Math.min(img.width, img.height);
+            const sx = (img.width - minDim) / 2;
+            const sy = (img.height - minDim) / 2;
+            ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+
+            _pendingAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            document.getElementById('edit-profile-avatar-preview').src = _pendingAvatarDataUrl;
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
 // Expose edit profile functions globally
 window.openEditProfileModal = openEditProfileModal;
 window.closeEditProfileModal = closeEditProfileModal;
 window.saveProfile = saveProfile;
+window.handleAvatarUpload = handleAvatarUpload;
 
 // Expose login functions
 window.showLoginModal = showLoginModal;

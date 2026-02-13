@@ -887,12 +887,25 @@
                     <button class="modal-close" onclick="closeEditProfileModal()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <!-- Avatar Preview -->
+                    <!-- Avatar Preview (clickable to upload) -->
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <img id="edit-profile-avatar-preview"
-                            src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=120"
-                            alt="Avatar"
-                            style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); object-fit: cover;">
+                        <div id="edit-profile-avatar-wrapper"
+                            onclick="document.getElementById('edit-profile-avatar-input').click()"
+                            style="position: relative; display: inline-block; cursor: pointer;"
+                            title="Clique para trocar a foto">
+                            <img id="edit-profile-avatar-preview"
+                                src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=120"
+                                alt="Avatar"
+                                style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); object-fit: cover;">
+                            <div
+                                style="position: absolute; bottom: 0; right: 0; background: var(--gold); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-dark);">
+                                <i class="fas fa-camera" style="font-size: 11px; color: #000;"></i>
+                            </div>
+                        </div>
+                        <input type="file" id="edit-profile-avatar-input" accept="image/*"
+                            onchange="handleAvatarUpload(event)" style="display: none;">
+                        <p style="margin-top: 6px; font-size: 0.75rem; color: var(--text-muted);">Clique para alterar
+                        </p>
                     </div>
 
                     <!-- Name -->
