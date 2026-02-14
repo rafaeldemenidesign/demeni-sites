@@ -660,31 +660,22 @@ window.D2Controls = {
                         path: `${bp}.bgColor`
                     }));
 
-                    const gradToggle = C.createToggle({
+                    container.appendChild(C.createToggle({
                         label: 'Ativar degradê',
                         value: window.d2State.get(`${bp}.bgGradient`, d.bgGradient),
                         path: `${bp}.bgGradient`
-                    });
-                    // Re-render ao ativar/desativar degradê
-                    gradToggle.querySelector('input[type="checkbox"]').addEventListener('change', () => {
-                        document.dispatchEvent(new CustomEvent('d2:section-selected', {
-                            detail: { sectionId }
-                        }));
-                    });
-                    container.appendChild(gradToggle);
+                    }));
 
-                    if (window.d2State.get(`${bp}.bgGradient`, d.bgGradient)) {
-                        container.appendChild(C.createColorPicker({
-                            label: 'Cor 2',
-                            value: window.d2State.get(`${bp}.bgColor2`, d.bgColor2),
-                            path: `${bp}.bgColor2`
-                        }));
-                        container.appendChild(C.createToggle({
-                            label: 'Inverter direção',
-                            value: window.d2State.get(`${bp}.bgGradientInvert`, d.bgGradientInvert),
-                            path: `${bp}.bgGradientInvert`
-                        }));
-                    }
+                    container.appendChild(C.createColorPicker({
+                        label: 'Cor 2 (degradê)',
+                        value: window.d2State.get(`${bp}.bgColor2`, d.bgColor2),
+                        path: `${bp}.bgColor2`
+                    }));
+                    container.appendChild(C.createToggle({
+                        label: 'Inverter direção',
+                        value: window.d2State.get(`${bp}.bgGradientInvert`, d.bgGradientInvert),
+                        path: `${bp}.bgGradientInvert`
+                    }));
                 } else {
                     // ── IMAGE MODE ──
                     container.appendChild(C.createImagePicker({
