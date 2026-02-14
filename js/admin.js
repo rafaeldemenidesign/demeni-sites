@@ -93,7 +93,6 @@ window.handleAdminLogin = handleAdminLogin;
 async function showAdminDashboard(user) {
     document.getElementById('admin-login-screen').style.display = 'none';
     document.getElementById('admin-layout').style.display = 'flex';
-
     document.getElementById('admin-email').textContent = user.email;
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', {
         weekday: 'long', day: 'numeric', month: 'long'
