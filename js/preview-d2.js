@@ -1263,7 +1263,7 @@ function renderPreviewD2New(frame, state) {
                 const isFa = cat.icon?.startsWith('fa-');
                 const isUrl = cat.icon?.startsWith('http') || cat.icon?.startsWith('data:');
                 const iconHtml = isFa
-                    ? `<i class="fas ${cat.icon}"></i>`
+                    ? `<i class="fas ${cat.icon}" style="color:${categoriaIconColor}"></i>`
                     : `<img src="${isUrl ? cat.icon : baseUrl + '/' + cat.icon}" alt="${cat.label}">`;
                 return `
                     <a href="${cat.link || '#'}" class="d2-categoria-item">
