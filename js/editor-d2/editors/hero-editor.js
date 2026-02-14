@@ -180,14 +180,6 @@ class D2HeroEditor {
 
                 container.appendChild(
                     C.createColorPicker({
-                        label: 'Cor do ícone ☰ menu',
-                        value: window.d2State.get('d2Adjustments.header.textColor', '#ffffff'),
-                        path: 'd2Adjustments.header.textColor'
-                    })
-                );
-
-                container.appendChild(
-                    C.createColorPicker({
                         label: 'Cor de fundo',
                         value: window.d2State.get('d2Adjustments.header.bgColor', '#2d2d2d'),
                         path: 'd2Adjustments.header.bgColor'
@@ -260,6 +252,15 @@ class D2HeroEditor {
             { title: 'Menu Lateral', icon: 'fa-bars', expanded: false },
             () => {
                 const container = document.createElement('div');
+
+                // --- Cor do ícone ☰ na header ---
+                container.appendChild(
+                    C.createColorPicker({
+                        label: 'Cor do ícone ☰ menu',
+                        value: window.d2State.get('d2Adjustments.header.textColor', '#ffffff'),
+                        path: 'd2Adjustments.header.textColor'
+                    })
+                );
 
                 // --- Cores ---
                 container.appendChild(
