@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 
 <head>
+        <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7c3aed">
     <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
     <link rel="icon" type="image/png" href="img/favicon.png">
     <link rel="apple-touch-icon" href="img/favicon.png">
@@ -865,6 +867,11 @@
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+    </script>
 </body>
 
 </html>
