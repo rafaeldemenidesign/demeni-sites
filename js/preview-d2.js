@@ -1265,11 +1265,19 @@ function renderPreviewD2New(frame, state) {
                 ${categoriasSectionSubtitleEnabled ? `<p class="section-subtitle">${categoriasSectionSubtitle}</p>` : ''}
                 <div class="d2-categorias-grid">
                     ${categoriasItems.map(cat => {
-                const isFa = cat.icon?.startsWith('fa-');
-                const isUrl = cat.icon?.startsWith('http') || cat.icon?.startsWith('data:');
+                // Fallback: old PNGs → FontAwesome
+                const pngFallback = {
+                    'img/Pen Tool.png': 'fa-box-open',
+                    'img/Engrenagem.png': 'fa-concierge-bell',
+                    'img/Aulas.png': 'fa-graduation-cap',
+                    'img/Sobre.png': 'fa-info-circle'
+                };
+                let iconRef = pngFallback[cat.icon] || cat.icon || 'fa-circle';
+                const isFa = iconRef.startsWith('fa-');
+                const isUrl = iconRef.startsWith('http') || iconRef.startsWith('data:');
                 const iconHtml = isFa
-                    ? `<i class="fas ${cat.icon}" style="color:${categoriaIconColor}"></i>`
-                    : `<img src="${isUrl ? cat.icon : baseUrl + '/' + cat.icon}" alt="${cat.label}">`;
+                    ? `<i class="fas ${iconRef}" style="color:${categoriaIconColor}"></i>`
+                    : `<img src="${isUrl ? iconRef : baseUrl + '/' + iconRef}" alt="${cat.label}">`;
                 return `
                     <a href="${cat.link || '#'}" class="d2-categoria-item">
                         <div class="d2-categoria-icon">
