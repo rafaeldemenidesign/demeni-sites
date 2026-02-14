@@ -64,17 +64,88 @@ class D2HeaderEditor {
                     })
                 );
 
+                // === Tipo de fundo (Sólido / Degradê) ===
+                const currentBgType = window.d2State.get(`${this.basePath}.bgType`, 'solid');
+
                 container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor de fundo',
-                        value: window.d2State.get(`${this.basePath}.bgColor`, '#2d2d2d'),
-                        path: `${this.basePath}.bgColor`
+                    C.createSelect({
+                        label: 'Tipo de fundo',
+                        value: currentBgType,
+                        options: [
+                            { value: 'solid', label: 'Sólido' },
+                            { value: 'gradient', label: 'Degradê' }
+                        ],
+                        path: `${this.basePath}.bgType`
                     })
                 );
 
+                // === Cor sólida (visível quando bgType = solid) ===
+                const solidColorEl = C.createColorPicker({
+                    label: 'Cor de fundo',
+                    value: window.d2State.get(`${this.basePath}.bgColor`, '#2d2d2d'),
+                    path: `${this.basePath}.bgColor`
+                });
+                solidColorEl.dataset.headerBgControl = 'solid';
+                if (currentBgType !== 'solid') solidColorEl.style.display = 'none';
+                container.appendChild(solidColorEl);
+
+                // === Gradient presets (visível quando bgType = gradient) ===
+                const gradientWrapper = document.createElement('div');
+                gradientWrapper.dataset.headerBgControl = 'gradient';
+                if (currentBgType !== 'gradient') gradientWrapper.style.display = 'none';
+
+                // Label
+                const gradLabel = document.createElement('label');
+                gradLabel.className = 'control-label';
+                gradLabel.textContent = 'Degradê';
+                gradLabel.style.cssText = 'font-size: 12px; color: var(--d2-text-secondary); margin-bottom: 6px; display: block;';
+                gradientWrapper.appendChild(gradLabel);
+
+                // Presets grid
+                gradientWrapper.appendChild(
+                    C.createGradientPresets({
+                        value: window.d2State.get(`${this.basePath}.bgGradient`, 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)'),
+                        path: `${this.basePath}.bgGradient`
+                    })
+                );
+
+                // Orientation selector
+                gradientWrapper.appendChild(
+                    C.createSelect({
+                        label: 'Orientação',
+                        value: window.d2State.get(`${this.basePath}.bgGradientOrientation`, 'horizontal'),
+                        options: [
+                            { value: 'horizontal', label: 'Diagonal ↘' },
+                            { value: 'vertical', label: 'Vertical ↓' }
+                        ],
+                        path: `${this.basePath}.bgGradientOrientation`
+                    })
+                );
+
+                // Invert toggle
+                gradientWrapper.appendChild(
+                    C.createToggle({
+                        label: 'Inverter direção',
+                        value: window.d2State.get(`${this.basePath}.bgGradientInvert`, false),
+                        path: `${this.basePath}.bgGradientInvert`
+                    })
+                );
+
+                container.appendChild(gradientWrapper);
+
+                // === Toggle visibility on bgType change ===
+                window.d2State.subscribe(({ path }) => {
+                    if (path === `${this.basePath}.bgType`) {
+                        const newType = window.d2State.get(`${this.basePath}.bgType`, 'solid');
+                        solidColorEl.style.display = newType === 'solid' ? '' : 'none';
+                        gradientWrapper.style.display = newType === 'gradient' ? '' : 'none';
+                    }
+                });
+
+                // === Cor do ícone ☰ (menu hamburger) ===
                 container.appendChild(
                     C.createColorPicker({
-                        label: 'Cor do texto/ícones',
+                        label: 'Cor do ícone ☰ menu',
                         value: window.d2State.get(`${this.basePath}.textColor`, '#ffffff'),
                         path: `${this.basePath}.textColor`
                     })
