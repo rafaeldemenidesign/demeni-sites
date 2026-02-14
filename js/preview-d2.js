@@ -512,6 +512,10 @@ function renderPreviewD2New(frame, state) {
                 padding: 0;
                 box-sizing: border-box;
             }
+            .d2-preview-container a {
+                color: inherit;
+                text-decoration: none;
+            }
 
             /* HEADER */
             .d2-header {
@@ -796,9 +800,17 @@ function renderPreviewD2New(frame, state) {
                 justify-content: center;
                 margin-bottom: 6px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                color: ${categoriaIconColor};
             }
-            .d2-categoria-icon i {
+            .d2-categoria-icon i,
+            .d2-categoria-icon .svg-inline--fa {
                 font-size: ${Math.round(categoriaIconSize * 0.4)}px;
+                color: ${categoriaIconColor} !important;
+            }
+            .d2-categoria-icon svg {
+                width: ${Math.round(categoriaIconSize * 0.4)}px;
+                height: ${Math.round(categoriaIconSize * 0.4)}px;
+                fill: ${categoriaIconColor};
                 color: ${categoriaIconColor};
             }
             .d2-categoria-icon img {
