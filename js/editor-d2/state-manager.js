@@ -183,13 +183,13 @@ class D2StateManager {
                     bgImagePosY: 0,
                     sectionTitle: { text: 'Categorias', size: 28, color: '#333333', weight: 400, enabled: false, paddingTop: 0, gap: 6, paddingBottom: 16, textGradient: { enabled: false, gradient: 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)' } },
                     sectionSubtitle: { text: 'Encontre o que precisa', size: 14, color: '#666666', weight: 400, enabled: false },
-                    icon: { size: 80, radius: 18 },
+                    icon: { size: 80, radius: 18, color: '#333333', bgColor: '#f5f5f5' },
                     label: { size: 12, weight: 500, color: '#222222' },
                     items: [
-                        { id: 1, label: 'PRODUTOS', icon: 'img/Pen Tool.png', customIcon: null },
-                        { id: 2, label: 'SERVIÇOS', icon: 'img/Engrenagem.png', customIcon: null },
-                        { id: 3, label: 'EDUCAÇÃO', icon: 'img/Aulas.png', customIcon: null },
-                        { id: 4, label: 'SOBRE', icon: 'img/Sobre.png', customIcon: null }
+                        { id: 1, label: 'PRODUTOS', icon: 'fa-box-open', customIcon: null },
+                        { id: 2, label: 'SERVIÇOS', icon: 'fa-concierge-bell', customIcon: null },
+                        { id: 3, label: 'EDUCAÇÃO', icon: 'fa-graduation-cap', customIcon: null },
+                        { id: 4, label: 'SOBRE', icon: 'fa-info-circle', customIcon: null }
                     ]
                 },
 
