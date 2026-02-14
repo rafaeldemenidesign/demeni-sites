@@ -566,7 +566,8 @@ class D2StateManager {
      * Atualiza o preview do site
      */
     updatePreview() {
-        const frame = document.getElementById('preview-frame');
+        const frame = document.getElementById('preview-frame')
+            || document.getElementById('preview-frame-d2');
         if (frame && typeof window.renderPreviewD2New === 'function') {
             window.renderPreviewD2New(frame, this.state);
         }
