@@ -3,25 +3,37 @@
    =========================== */
 
 // ========== CONFIG ==========
-const ADMIN_EMAILS = ['rafaeldemenidesign@gmail.com'];
 let franchisees = [];
 let payments = [];
 let sites = [];
 let editingUserId = null;
 
+// ========== ADMIN VERIFICATION ==========
+async function verifyIsAdmin(userId) {
+    if (!window.SupabaseClient || !SupabaseClient.isConfigured()) return false;
+    try {
+        const { data, error } = await SupabaseClient.getClient()
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', userId)
+            .single();
+        return data?.is_admin === true;
+    } catch (e) {
+        console.error('Admin verification failed:', e);
+        return false;
+    }
+}
+
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', async () => {
-    // Wait for Supabase + Auth to initialize
     await new Promise(r => setTimeout(r, 300));
 
-    // Check for existing session — auto-login if valid admin
     try {
         if (window.SupabaseClient && SupabaseClient.isConfigured()) {
             const session = await SupabaseClient.getSession();
             if (session?.user) {
-                const email = session.user.email;
-                if (ADMIN_EMAILS.includes(email)) {
-                    // Valid admin session, skip login
+                const isAdmin = await verifyIsAdmin(session.user.id);
+                if (isAdmin) {
                     await Auth.init?.();
                     showAdminDashboard(session.user);
                     return;
@@ -32,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.warn('Session check failed:', e);
     }
 
-    // No valid session — show login
     document.getElementById('admin-login-screen').style.display = 'flex';
 });
 
@@ -46,19 +57,21 @@ async function handleAdminLogin(event) {
 
     errorEl.style.display = 'none';
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
 
     try {
         const result = await Auth.login(email, password);
 
-        if (!result.success) {
-            errorEl.textContent = result.error || 'Email ou senha incorretos';
+        if (result.error) {
+            errorEl.textContent = result.error.message || 'Email ou senha incorretos';
             errorEl.style.display = 'block';
             return;
         }
 
-        if (!ADMIN_EMAILS.includes(email)) {
-            errorEl.textContent = 'Acesso negado. Este email não tem permissão de admin.';
+        // Server-side admin check
+        const isAdmin = await verifyIsAdmin(result.user.id);
+        if (!isAdmin) {
+            errorEl.textContent = 'Acesso negado. Esta conta não tem permissão de admin.';
             errorEl.style.display = 'block';
             Auth.logout();
             return;
