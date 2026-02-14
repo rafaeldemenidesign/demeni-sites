@@ -22,7 +22,7 @@ class D2PWAEditor {
 
         // ===== FAVICON =====
         const faviconGroup = C.createGroupExpander(
-            { title: 'Ícone do Site (Favicon)', icon: 'fa-palette', expanded: true },
+            { title: 'Ícone do Site (Favicon)', icon: 'fa-palette', expanded: false },
             () => {
                 const container = document.createElement('div');
 

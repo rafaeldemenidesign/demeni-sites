@@ -153,7 +153,7 @@ class D2CategoriasEditor {
 
         // ===== ÍCONES =====
         const iconsGroup = C.createGroupExpander(
-            { title: 'Containers dos Ícones', icon: 'fa-shapes', expanded: true },
+            { title: 'Containers dos Ícones', icon: 'fa-shapes', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -198,7 +198,7 @@ class D2CategoriasEditor {
 
         // ===== LABELS =====
         const labelsGroup = C.createGroupExpander(
-            { title: 'Labels de Texto', icon: 'fa-tag', expanded: true },
+            { title: 'Labels de Texto', icon: 'fa-tag', expanded: false },
             () => {
                 const container = document.createElement('div');
 

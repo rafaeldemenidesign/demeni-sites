@@ -38,9 +38,16 @@ window.D2Controls = {
             }
         }
 
-        // Toggle ao clicar no header
+        // Toggle ao clicar no header (accordion: fecha irmãos)
         header.addEventListener('click', (e) => {
             e.stopPropagation();
+            const willExpand = !group.classList.contains('expanded');
+            // Fecha todos os irmãos do mesmo nível
+            if (willExpand && group.parentElement) {
+                group.parentElement.querySelectorAll(':scope > .control-group.expanded').forEach(sibling => {
+                    if (sibling !== group) sibling.classList.remove('expanded');
+                });
+            }
             group.classList.toggle('expanded');
         });
 
@@ -254,12 +261,12 @@ window.D2Controls = {
      * Cada estilo é uma categoria tipográfica distinta mapeada para uma Google Font.
      */
     FONT_REGISTRY: [
-        { value: 'Montserrat',       label: 'Moderna',     url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap' },
-        { value: 'Playfair Display', label: 'Elegante',    url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap' },
-        { value: 'Nunito',           label: 'Divertida',   url: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap' },
-        { value: 'Oswald',           label: 'Impactante',  url: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap' },
-        { value: 'Quicksand',       label: 'Suave',       url: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap' },
-        { value: 'Lora',            label: 'Clássica',    url: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap' }
+        { value: 'Montserrat', label: 'Moderna', url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Playfair Display', label: 'Elegante', url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap' },
+        { value: 'Nunito', label: 'Divertida', url: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Oswald', label: 'Impactante', url: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap' },
+        { value: 'Quicksand', label: 'Suave', url: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap' },
+        { value: 'Lora', label: 'Clássica', url: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap' }
     ],
 
     /**
@@ -616,7 +623,7 @@ window.D2Controls = {
         };
 
         return C.createGroupExpander(
-            { title: 'Fundo da Seção', icon: 'fa-fill-drip', expanded: options.expanded !== false },
+            { title: 'Fundo da Seção', icon: 'fa-fill-drip', expanded: false },
             () => {
                 const container = document.createElement('div');
                 const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
@@ -653,11 +660,18 @@ window.D2Controls = {
                         path: `${bp}.bgColor`
                     }));
 
-                    container.appendChild(C.createToggle({
+                    const gradToggle = C.createToggle({
                         label: 'Ativar degradê',
                         value: window.d2State.get(`${bp}.bgGradient`, d.bgGradient),
                         path: `${bp}.bgGradient`
-                    }));
+                    });
+                    // Re-render ao ativar/desativar degradê
+                    gradToggle.querySelector('input[type="checkbox"]').addEventListener('change', () => {
+                        document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                            detail: { sectionId }
+                        }));
+                    });
+                    container.appendChild(gradToggle);
 
                     if (window.d2State.get(`${bp}.bgGradient`, d.bgGradient)) {
                         container.appendChild(C.createColorPicker({

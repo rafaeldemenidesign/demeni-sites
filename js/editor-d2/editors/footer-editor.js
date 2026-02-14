@@ -22,7 +22,7 @@ class D2FooterEditor {
 
         // ===== SEÇÃO GERAL =====
         const sectionGroup = C.createGroupExpander(
-            { title: 'Seção', icon: 'fa-layer-group', expanded: true },
+            { title: 'Seção', icon: 'fa-layer-group', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -119,7 +119,7 @@ class D2FooterEditor {
 
         // ===== TÍTULO =====
         const titleGroup = C.createGroupExpander(
-            { title: 'Título', icon: 'fa-heading', expanded: true },
+            { title: 'Título', icon: 'fa-heading', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -194,7 +194,7 @@ class D2FooterEditor {
 
         // ===== INFORMAÇÕES DE CONTATO =====
         const infoGroup = C.createGroupExpander(
-            { title: 'Informações de Contato', icon: 'fa-info-circle', expanded: true },
+            { title: 'Informações de Contato', icon: 'fa-info-circle', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -250,7 +250,7 @@ class D2FooterEditor {
 
         // ===== REDES SOCIAIS =====
         const socialGroup = C.createGroupExpander(
-            { title: 'Redes Sociais', icon: 'fa-share-alt', expanded: true },
+            { title: 'Redes Sociais', icon: 'fa-share-alt', expanded: false },
             () => {
                 const container = document.createElement('div');
 

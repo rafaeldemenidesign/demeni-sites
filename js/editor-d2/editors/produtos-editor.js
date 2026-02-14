@@ -32,7 +32,7 @@ class D2ProdutosEditor {
 
         // ===== TÍTULO DA SEÇÃO =====
         const titleGroup = C.createGroupExpander(
-            { title: 'Título da Seção', icon: 'fa-heading', expanded: true },
+            { title: 'Título da Seção', icon: 'fa-heading', expanded: false },
             () => {
                 const container = document.createElement('div');
                 const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
@@ -133,7 +133,7 @@ class D2ProdutosEditor {
 
         // ===== GRID DE CARDS =====
         const gridGroup = C.createGroupExpander(
-            { title: 'Layout do Grid', icon: 'fa-th-large', expanded: true },
+            { title: 'Layout do Grid', icon: 'fa-th-large', expanded: false },
             () => {
                 const container = document.createElement('div');
 

@@ -126,7 +126,7 @@ class D2HeroEditor {
 
         // ===== HEADER / LOGO =====
         const headerGroup = C.createGroupExpander(
-            { title: 'Header & Logo', icon: 'fa-crown', expanded: true },
+            { title: 'Header & Logo', icon: 'fa-crown', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -385,7 +385,7 @@ class D2HeroEditor {
 
         // ===== IMAGEM DE FUNDO =====
         const bgImageGroup = C.createGroupExpander(
-            { title: 'Imagem de Fundo', icon: 'fa-image', expanded: true },
+            { title: 'Imagem de Fundo', icon: 'fa-image', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -528,7 +528,7 @@ class D2HeroEditor {
 
         // ===== TÍTULO =====
         const titleGroup = C.createGroupExpander(
-            { title: 'Título', icon: 'fa-heading', expanded: true },
+            { title: 'Título', icon: 'fa-heading', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -665,7 +665,7 @@ class D2HeroEditor {
 
                 // Texto do botão
                 const textGroup = C.createGroupExpander(
-                    { title: 'Texto do Botão', expanded: true, nested: true },
+                    { title: 'Texto do Botão', expanded: false, nested: true },
                     () => {
                         const inner = document.createElement('div');
 
@@ -713,7 +713,7 @@ class D2HeroEditor {
 
                 // Aparência do botão
                 const appearanceGroup = C.createGroupExpander(
-                    { title: 'Cor do Botão', expanded: true, nested: true },
+                    { title: 'Cor do Botão', expanded: false, nested: true },
                     () => {
                         const inner = document.createElement('div');
 

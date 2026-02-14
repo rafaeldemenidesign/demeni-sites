@@ -111,7 +111,7 @@ class D2EditPanel {
 
         // Espaçamento da seção
         const spacingGroup = C.createGroupExpander(
-            { title: 'Espaçamento', icon: 'fa-arrows-alt-v', expanded: true },
+            { title: 'Espaçamento', icon: 'fa-arrows-alt-v', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -135,7 +135,7 @@ class D2EditPanel {
 
         // Ícones
         const iconsGroup = C.createGroupExpander(
-            { title: 'Ícones', icon: 'fa-shapes', expanded: true },
+            { title: 'Ícones', icon: 'fa-shapes', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -195,7 +195,7 @@ class D2EditPanel {
 
         // Seção geral
         const sectionGroup = C.createGroupExpander(
-            { title: 'Seção', icon: 'fa-layer-group', expanded: true },
+            { title: 'Seção', icon: 'fa-layer-group', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -322,7 +322,7 @@ class D2EditPanel {
         const basePath = 'd2Adjustments.feedbacks';
 
         const sectionGroup = C.createGroupExpander(
-            { title: 'Seção', icon: 'fa-layer-group', expanded: true },
+            { title: 'Seção', icon: 'fa-layer-group', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -416,7 +416,7 @@ class D2EditPanel {
         const basePath = 'd2Adjustments.cta';
 
         const bgGroup = C.createGroupExpander(
-            { title: 'Fundo', icon: 'fa-image', expanded: true },
+            { title: 'Fundo', icon: 'fa-image', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -482,7 +482,7 @@ class D2EditPanel {
         const basePath = 'd2Adjustments.footer';
 
         const sectionGroup = C.createGroupExpander(
-            { title: 'Seção', icon: 'fa-layer-group', expanded: true },
+            { title: 'Seção', icon: 'fa-layer-group', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -505,7 +505,7 @@ class D2EditPanel {
         fragment.appendChild(sectionGroup);
 
         const titleGroup = C.createGroupExpander(
-            { title: 'Título', icon: 'fa-heading', expanded: true },
+            { title: 'Título', icon: 'fa-heading', expanded: false },
             () => {
                 const container = document.createElement('div');
 

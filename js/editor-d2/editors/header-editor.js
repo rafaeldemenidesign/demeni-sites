@@ -22,7 +22,7 @@ class D2HeaderEditor {
 
         // ===== LOGO =====
         const logoGroup = C.createGroupExpander(
-            { title: 'Logo', icon: 'fa-image', expanded: true },
+            { title: 'Logo', icon: 'fa-image', expanded: false },
             () => {
                 const container = document.createElement('div');
 
@@ -51,7 +51,7 @@ class D2HeaderEditor {
 
         // ===== LAYOUT DO HEADER =====
         const layoutGroup = C.createGroupExpander(
-            { title: 'Layout', icon: 'fa-arrows-alt-v', expanded: true },
+            { title: 'Layout', icon: 'fa-arrows-alt-v', expanded: false },
             () => {
                 const container = document.createElement('div');
 
