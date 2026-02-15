@@ -1539,6 +1539,51 @@ function initEditorD2() {
         // Set up save button
         document.getElementById('btn-save-d2')?.addEventListener('click', saveD2Project);
 
+        // Preview button - opens full preview in new tab
+        document.getElementById('btn-preview-header')?.addEventListener('click', () => {
+            const projectId = UserData.getCurrentProjectId();
+            if (!projectId) {
+                showNotification('⚠️ Salve o projeto primeiro');
+                return;
+            }
+            // Auto-save before preview
+            saveD2Project();
+            // Open preview in new tab
+            const project = UserData.getProject(projectId);
+            if (project?.subdomain) {
+                window.open(`https://${project.subdomain}.rafaeldemeni.com`, '_blank');
+            } else {
+                // Generate preview HTML and open in new tab
+                const previewWin = window.open('', '_blank');
+                if (previewWin) {
+                    const frame = document.createElement('div');
+                    window.renderPreviewD2New(frame, window.d2State.getState());
+                    previewWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview - ${window.d2State.get('projectName', 'Novo Site')}</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></head><body style="margin:0;padding:0">${frame.innerHTML}</body></html>`);
+                    previewWin.document.close();
+                }
+            }
+        });
+
+        // Publish button
+        document.getElementById('btn-publish-header')?.addEventListener('click', () => {
+            const projectId = UserData.getCurrentProjectId();
+            if (!projectId) {
+                showNotification('⚠️ Nenhum projeto selecionado');
+                return;
+            }
+            // Auto-save before publish
+            saveD2Project();
+            publishProject(projectId);
+        });
+
+        // Add section button
+        document.getElementById('btn-add-section-d2')?.addEventListener('click', () => {
+            if (window.D2AddSectionModal) {
+                const modal = new window.D2AddSectionModal();
+                modal.show();
+            }
+        });
+
         editorD2Initialized = true;
     }
 
@@ -1614,7 +1659,7 @@ window.initEditorD1 = initEditorD1;
 // ========== NOTIFICATIONS ==========
 async function loadNotifications() {
     if (!window.SupabaseClient || !SupabaseClient.isConfigured()) return;
-    
+
     try {
         const user = Auth.getCurrentUser();
         if (!user?.id) return;
@@ -1723,7 +1768,7 @@ async function markNotifRead(notifId) {
         card.style.opacity = '0.6';
         card.style.borderLeft = 'none';
     }
-    
+
     try {
         if (SupabaseClient?.isConfigured()) {
             await SupabaseClient.getClient()
@@ -1732,7 +1777,7 @@ async function markNotifRead(notifId) {
                 .eq('id', notifId);
         }
         loadNotifications();
-    } catch(e) { console.warn('Error marking notification:', e); }
+    } catch (e) { console.warn('Error marking notification:', e); }
 }
 
 async function markAllNotifsRead() {
@@ -1745,7 +1790,7 @@ async function markAllNotifsRead() {
             .eq('user_id', user.id)
             .eq('read', false);
         loadNotifications();
-    } catch(e) { console.warn('Error:', e); }
+    } catch (e) { console.warn('Error:', e); }
 }
 
 window.markNotifRead = markNotifRead;
