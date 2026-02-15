@@ -14,7 +14,11 @@ class D2AddSectionModal {
             { id: 'categorias', name: 'Categorias', icon: 'fa-th-large', desc: 'Grade de ícones clicáveis' },
             { id: 'produtos', name: 'Produtos', icon: 'fa-shopping-bag', desc: 'Vitrine de produtos com preços' },
             { id: 'feedbacks', name: 'Feedbacks', icon: 'fa-comments', desc: 'Depoimentos de clientes' },
-            { id: 'cta', name: 'CTA Secundário', icon: 'fa-bullhorn', desc: 'Banner de chamada para ação' }
+            { id: 'cta', name: 'CTA Secundário', icon: 'fa-bullhorn', desc: 'Banner de chamada para ação' },
+            { id: 'galeria', name: 'Galeria', icon: 'fa-images', desc: 'Grade de imagens/fotos' },
+            { id: 'video', name: 'Vídeo', icon: 'fa-play-circle', desc: 'Vídeo incorporado do YouTube' },
+            { id: 'faq', name: 'FAQ', icon: 'fa-question-circle', desc: 'Perguntas frequentes' },
+            { id: 'texto', name: 'Texto Livre', icon: 'fa-align-left', desc: 'Bloco de texto customizável' }
         ];
     }
 

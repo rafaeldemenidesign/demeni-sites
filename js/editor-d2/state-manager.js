@@ -604,7 +604,11 @@ class D2StateManager {
             categorias: { id: 'categorias', name: 'Categorias', icon: 'fa-th-large' },
             produtos: { id: 'produtos', name: 'Produtos', icon: 'fa-shopping-bag' },
             feedbacks: { id: 'feedbacks', name: 'Feedbacks', icon: 'fa-comments' },
-            cta: { id: 'cta', name: 'CTA', icon: 'fa-bullhorn' }
+            cta: { id: 'cta', name: 'CTA', icon: 'fa-bullhorn' },
+            galeria: { id: 'galeria', name: 'Galeria', icon: 'fa-images' },
+            video: { id: 'video', name: 'Vídeo', icon: 'fa-play-circle' },
+            faq: { id: 'faq', name: 'FAQ', icon: 'fa-question-circle' },
+            texto: { id: 'texto', name: 'Texto Livre', icon: 'fa-align-left' }
         };
 
         const def = sectionDefs[sectionType];

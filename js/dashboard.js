@@ -537,6 +537,155 @@ async function duplicateProject(id) {
     saveNavigationState(targetPage, newProject.id);
 }
 
+// ========== PUBLISH MODAL ==========
+function showPublishModal(projectId) {
+    const project = UserData.getProject(projectId);
+    const projectName = project?.name || window.d2State?.get('projectName') || 'Novo Site';
+    const currentCredits = Credits.getCredits();
+    const siteCost = window.XPSystem ? XPSystem.getCurrentSitePrice() : 40;
+    const hasEnough = currentCredits >= siteCost;
+    const existingSubdomain = project?.subdomain || '';
+    const suggestedSlug = existingSubdomain || projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
+
+    // Remove existing modal
+    document.querySelector('.publish-modal-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'publish-modal-overlay';
+    overlay.innerHTML = `
+        <div class="publish-modal-backdrop"></div>
+        <div class="publish-modal-content">
+            <div class="publish-modal-header">
+                <h3><i class="fas fa-rocket"></i> Publicar Site</h3>
+                <button class="publish-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="publish-modal-body">
+                <div class="publish-project-name">
+                    <i class="fas fa-globe"></i> ${projectName}
+                </div>
+
+                <label class="publish-label">Subdomínio do seu site</label>
+                <div class="publish-domain-input">
+                    <input type="text" id="publish-subdomain" value="${suggestedSlug}" placeholder="meu-site" maxlength="30" />
+                    <span class="publish-domain-suffix">.rafaeldemeni.com</span>
+                </div>
+                <p class="publish-domain-hint">Apenas letras minúsculas, números e hífens</p>
+
+                <div class="publish-cost-box ${hasEnough ? 'has-credits' : 'no-credits'}">
+                    <div class="publish-cost-row">
+                        <span>Custo de publicação</span>
+                        <span class="publish-cost-value"><i class="fas fa-coins"></i> ${siteCost} créditos</span>
+                    </div>
+                    <div class="publish-cost-row">
+                        <span>Seu saldo atual</span>
+                        <span class="publish-balance-value">${currentCredits} créditos</span>
+                    </div>
+                    <hr>
+                    <div class="publish-cost-row publish-cost-remaining">
+                        <span>Saldo após publicação</span>
+                        <span>${hasEnough ? (currentCredits - siteCost) + ' créditos' : '<span style="color:#e74c3c">Insuficiente</span>'}</span>
+                    </div>
+                </div>
+
+                ${!hasEnough ? `
+                    <div class="publish-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Você não tem créditos suficientes. Adquira mais créditos para publicar.
+                    </div>
+                ` : ''}
+            </div>
+            <div class="publish-modal-footer">
+                <button class="publish-btn-cancel">Cancelar</button>
+                ${hasEnough
+            ? `<button class="publish-btn-confirm"><i class="fas fa-rocket"></i> Publicar por ${siteCost} créditos</button>`
+            : `<button class="publish-btn-buy" onclick="navigateTo('carteira')"><i class="fas fa-shopping-cart"></i> Comprar Créditos</button>`
+        }
+            </div>
+        </div>
+    `;
+
+    // Styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .publish-modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
+        .publish-modal-overlay.visible { opacity:1; }
+        .publish-modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); }
+        .publish-modal-content { position:relative; background:#fff; border-radius:16px; width:420px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; transform:translateY(20px); transition:transform .2s; }
+        .publish-modal-overlay.visible .publish-modal-content { transform:translateY(0); }
+        .publish-modal-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; }
+        .publish-modal-header h3 { margin:0; font-size:16px; font-weight:600; }
+        .publish-modal-header h3 i { margin-right:8px; }
+        .publish-modal-close { background:none; border:none; color:#fff; font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px; }
+        .publish-modal-close:hover { background:rgba(255,255,255,0.2); }
+        .publish-modal-body { padding:20px; }
+        .publish-project-name { font-size:15px; font-weight:600; color:#2d3436; margin-bottom:16px; padding:10px 14px; background:#f8f9fa; border-radius:8px; }
+        .publish-project-name i { margin-right:8px; color:#6c5ce7; }
+        .publish-label { font-size:12px; font-weight:600; color:#636e72; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px; }
+        .publish-domain-input { display:flex; align-items:center; border:2px solid #dfe6e9; border-radius:10px; overflow:hidden; transition:border-color .2s; }
+        .publish-domain-input:focus-within { border-color:#6c5ce7; }
+        .publish-domain-input input { flex:1; border:none; padding:10px 12px; font-size:14px; outline:none; font-family:inherit; }
+        .publish-domain-suffix { padding:10px 12px; background:#f0f0f0; color:#636e72; font-size:13px; white-space:nowrap; border-left:1px solid #dfe6e9; }
+        .publish-domain-hint { font-size:11px; color:#b2bec3; margin:4px 0 16px; }
+        .publish-cost-box { padding:14px; border-radius:10px; background:#f8f9fa; border:1px solid #dfe6e9; }
+        .publish-cost-box.has-credits { border-color:#00b894; background:#f0fff4; }
+        .publish-cost-box.no-credits { border-color:#e74c3c; background:#fff5f5; }
+        .publish-cost-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:13px; color:#2d3436; }
+        .publish-cost-value { font-weight:700; color:#6c5ce7; }
+        .publish-cost-value i { margin-right:4px; }
+        .publish-balance-value { font-weight:600; }
+        .publish-cost-remaining { font-weight:600; }
+        .publish-cost-box hr { border:none; border-top:1px solid #dfe6e9; margin:8px 0; }
+        .publish-warning { margin-top:12px; padding:10px 14px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; font-size:13px; color:#856404; display:flex; align-items:center; gap:8px; }
+        .publish-modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:16px 20px; border-top:1px solid #eee; }
+        .publish-btn-cancel { padding:10px 20px; border:1px solid #dfe6e9; background:#fff; border-radius:8px; cursor:pointer; font-size:13px; color:#636e72; transition:all .2s; }
+        .publish-btn-cancel:hover { background:#f8f9fa; }
+        .publish-btn-confirm { padding:10px 24px; border:none; background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; }
+        .publish-btn-confirm:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(108,92,231,0.4); }
+        .publish-btn-buy { padding:10px 24px; border:none; background:linear-gradient(135deg,#00b894,#55efc4); color:#fff; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
+    `;
+    overlay.appendChild(style);
+    document.body.appendChild(overlay);
+
+    // Animate in
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+
+    // Sanitize subdomain input
+    const subdomainInput = overlay.querySelector('#publish-subdomain');
+    subdomainInput.addEventListener('input', () => {
+        subdomainInput.value = subdomainInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    });
+
+    // Close handlers
+    const closeModal = () => {
+        overlay.classList.remove('visible');
+        setTimeout(() => overlay.remove(), 200);
+    };
+    overlay.querySelector('.publish-modal-backdrop').addEventListener('click', closeModal);
+    overlay.querySelector('.publish-modal-close').addEventListener('click', closeModal);
+
+    // Cancel
+    overlay.querySelector('.publish-btn-cancel').addEventListener('click', closeModal);
+
+    // Confirm publish
+    const confirmBtn = overlay.querySelector('.publish-btn-confirm');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            const subdomain = subdomainInput.value.trim();
+            if (!subdomain) {
+                showNotification('⚠️ Digite um subdomínio');
+                subdomainInput.focus();
+                return;
+            }
+            closeModal();
+            // Set subdomain in state and publish
+            if (window.d2State) {
+                window.d2State.set('subdomain', subdomain);
+            }
+            publishProject(projectId);
+        });
+    }
+}
+
 function publishProject(id) {
     const result = Credits.attemptPublish(id);
 
@@ -1558,22 +1707,22 @@ function initEditorD2() {
                 if (previewWin) {
                     const frame = document.createElement('div');
                     window.renderPreviewD2New(frame, window.d2State.getState());
-                    previewWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview - ${window.d2State.get('projectName', 'Novo Site')}</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></head><body style="margin:0;padding:0">${frame.innerHTML}</body></html>`);
+                    previewWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview - ${window.d2State.get('projectName', 'Novo Site')}</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>body{margin:0;padding:0;background:#1a1a2e;display:flex;justify-content:center;min-height:100vh}.preview-wrapper{width:100%;max-width:480px;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,0.4)}</style></head><body><div class="preview-wrapper">${frame.innerHTML}</div></body></html>`);
                     previewWin.document.close();
                 }
             }
         });
 
-        // Publish button
+        // Publish button - shows confirmation modal
         document.getElementById('btn-publish-header')?.addEventListener('click', () => {
             const projectId = UserData.getCurrentProjectId();
             if (!projectId) {
                 showNotification('⚠️ Nenhum projeto selecionado');
                 return;
             }
-            // Auto-save before publish
+            // Auto-save before showing modal
             saveD2Project();
-            publishProject(projectId);
+            showPublishModal(projectId);
         });
 
         // Add section button
