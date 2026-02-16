@@ -225,7 +225,7 @@ const SupabaseClient = (function () {
                     data: projectData,
                     html_content: htmlContent,
                     published: true,
-                    published_url: `https://${slug}.sites.rafaeldemeni.com`,
+                    published_url: `https://${slug}.rafaeldemeni.com`,
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 }, {

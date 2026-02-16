@@ -20,57 +20,18 @@ class D2FooterEditor {
         const fragment = document.createDocumentFragment();
         const C = window.D2Controls;
 
-        // ===== SEÇÃO GERAL =====
-        const sectionGroup = C.createGroupExpander(
-            { title: 'Seção', icon: 'fa-layer-group', expanded: false },
-            () => {
-                const container = document.createElement('div');
-
-                container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor de fundo',
-                        value: window.d2State.get(`${this.basePath}.bgColor`, '#1a365d'),
-                        path: `${this.basePath}.bgColor`
-                    })
-                );
-
-                container.appendChild(
-                    C.createSlider({
-                        label: 'Espaçamento',
-                        value: window.d2State.get(`${this.basePath}.sectionSpacing`, 40),
-                        min: 20, max: 80, step: 5, unit: 'px',
-                        path: `${this.basePath}.sectionSpacing`
-                    })
-                );
-
-                container.appendChild(
-                    C.createSelect({
-                        label: 'Tipo de fundo',
-                        value: window.d2State.get(`${this.basePath}.bgType`, 'solid'),
-                        options: [
-                            { value: 'solid', label: 'Cor Sólida' },
-                            { value: 'gradient', label: 'Degradê' }
-                        ],
-                        path: `${this.basePath}.bgType`
-                    })
-                );
-
-                // Presets de degradê (quando tipo = gradient)
-                if (window.d2State.get(`${this.basePath}.bgType`, 'solid') === 'gradient') {
-                    const label = document.createElement('div');
-                    label.style.cssText = 'font-size: 11px; opacity: 0.6; margin-top: 8px;';
-                    label.textContent = 'Escolha o degradê:';
-                    container.appendChild(label);
-                    container.appendChild(C.createGradientPresets({
-                        value: window.d2State.get(`${this.basePath}.bgGradient`, 'linear-gradient(135deg, #1a365d 0%, #2d3a81 50%, #0d1b36 100%)'),
-                        path: `${this.basePath}.bgGradient`
-                    }));
-                }
-
-                return container;
+        // ===== FUNDO DA SEÇÃO =====
+        const bgGroup = C.createBgSection({
+            basePath: this.basePath,
+            defaults: {
+                bgMode: 'color',
+                bgColor: '#1a365d',
+                bgColor2: '#0d1b36',
+                paddingTop: 40,
+                paddingBottom: 40
             }
-        );
-        fragment.appendChild(sectionGroup);
+        });
+        fragment.appendChild(bgGroup);
 
         // ===== LINHA DECORATIVA =====
         fragment.appendChild(C.createTopLineSection({ basePath: this.basePath }));

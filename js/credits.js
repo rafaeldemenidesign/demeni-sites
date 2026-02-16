@@ -1,4 +1,4 @@
-/* ===========================
+﻿/* ===========================
    DEMENI SITES - CREDITS MODULE
    Manages credits, purchases, and transactions
    =========================== */
@@ -6,8 +6,6 @@
 const Credits = (function () {
     // ========== PRICING ==========
     const PRICING = {
-        // First purchase (includes platform access)
-        FIRST_SITE: 147,
 
         // Cost per site (in credits) - uses XPSystem.getCurrentSitePrice() at runtime
         SITE_COST: 40,
@@ -31,22 +29,26 @@ const Credits = (function () {
     };
 
     // ========== DAILY PUBLISH LIMITS ==========
+    const DAILY_FREE_LIMIT = 10;
     const DAILY_TIERS = [
-        { from: 1, to: 2, fee: 0 },      // 1º-2º site: grátis
-        { from: 3, to: 5, fee: 5 },      // 3º ao 5º: R$5
-        { from: 6, to: 10, fee: 10 },     // 6º ao 10º: R$10
-        { from: 11, to: Infinity, fee: 15 } // 11º+: R$15
+        { from: 1, to: 10, fee: 0 },      // 1º-10º site: grátis
+        { from: 11, to: 20, fee: 10 },    // 11º ao 20º: R$10
+        { from: 21, to: Infinity, fee: 15 } // 21º+: R$15
     ];
+
+    function _getUserId() {
+        return window.UserData?.getUser()?.id || 'default';
+    }
 
     function getTodayPublishes() {
         const today = new Date().toISOString().slice(0, 10);
-        const key = `demeni-publishes-${today}`;
+        const key = `demeni-publishes-${_getUserId()}-${today}`;
         return parseInt(localStorage.getItem(key) || '0');
     }
 
     function incrementTodayPublishes() {
         const today = new Date().toISOString().slice(0, 10);
-        const key = `demeni-publishes-${today}`;
+        const key = `demeni-publishes-${_getUserId()}-${today}`;
         localStorage.setItem(key, getTodayPublishes() + 1);
     }
 
@@ -61,7 +63,7 @@ const Credits = (function () {
     }
 
     function getRemainingFreePublishes() {
-        return Math.max(0, 2 - getTodayPublishes());
+        return Math.max(0, DAILY_FREE_LIMIT - getTodayPublishes());
     }
 
     // ========== STORAGE KEY ==========
@@ -132,8 +134,7 @@ const Credits = (function () {
     }
 
     function isFirstPurchase() {
-        const user = UserData.getUser();
-        return UserData.getPublishedProjects().length === 0 && user.credits === 0;
+        return false; // Legacy — entry is now via Starter Pack or credit packages
     }
 
     // ========== TRANSACTIONS ==========
@@ -163,17 +164,8 @@ const Credits = (function () {
     }
 
     // ========== PUBLISH FLOW ==========
-    function attemptPublish(projectId) {
-        // Check if first purchase
-        if (isFirstPurchase()) {
-            return {
-                success: false,
-                action: 'first_purchase',
-                price: PRICING.FIRST_SITE,
-                link: PRICING.KIWIFY_LINKS.first,
-                message: 'Primeira publicação! Por apenas R$147 você publica e acessa a plataforma.'
-            };
-        }
+    function attemptPublish(projectId, subdomain) {
+        // Users enter via Starter Pack (R$1) or credit packages
 
         // Custo dinâmico por patente
         const siteCost = window.XPSystem ? XPSystem.getCurrentSitePrice() : PRICING.SITE_COST;
@@ -207,7 +199,8 @@ const Credits = (function () {
         const result = deductCredits(siteCost, 'publish');
 
         if (result.success) {
-            UserData.publishProject(projectId, `demeni.bio/${projectId.slice(0, 8)}`);
+            const publishedUrl = subdomain ? `https://${subdomain}.rafaeldemeni.com` : `https://demeni.bio/${projectId.slice(0, 8)}`;
+            UserData.publishProject(projectId, publishedUrl);
 
             // Incrementar contador diário
             incrementTodayPublishes();
@@ -222,6 +215,7 @@ const Credits = (function () {
                 action: 'published',
                 balance: result.balance,
                 xpGained: window.XPSystem ? XPSystem.CONFIG.XP_PER_PUBLISH : 0,
+                publishedUrl: publishedUrl,
                 message: 'Site publicado com sucesso!'
             };
         }
@@ -232,7 +226,7 @@ const Credits = (function () {
     /**
      * Confirma publicação com taxa extra (chamado após modal de confirmação)
      */
-    function confirmPublishWithFee(projectId) {
+    function confirmPublishWithFee(projectId, subdomain) {
         const siteCost = window.XPSystem ? XPSystem.getCurrentSitePrice() : PRICING.SITE_COST;
 
         if (!hasCredits(siteCost)) {
@@ -243,7 +237,8 @@ const Credits = (function () {
         const result = deductCredits(siteCost, 'publish');
 
         if (result.success) {
-            UserData.publishProject(projectId, `demeni.bio/${projectId.slice(0, 8)}`);
+            const publishedUrl = subdomain ? `https://${subdomain}.rafaeldemeni.com` : `https://demeni.bio/${projectId.slice(0, 8)}`;
+            UserData.publishProject(projectId, publishedUrl);
             incrementTodayPublishes();
 
             if (window.XPSystem) {
@@ -255,6 +250,7 @@ const Credits = (function () {
                 action: 'published',
                 balance: result.balance,
                 xpGained: window.XPSystem ? XPSystem.CONFIG.XP_PER_PUBLISH : 0,
+                publishedUrl: publishedUrl,
                 message: 'Site publicado com sucesso!'
             };
         }
@@ -280,7 +276,7 @@ const Credits = (function () {
     }
 
     function getFirstSitePrice() {
-        return PRICING.FIRST_SITE;
+        return 0; // Legacy — no longer used
     }
 
     // ========== SIMULATE PURCHASE (for testing) ==========

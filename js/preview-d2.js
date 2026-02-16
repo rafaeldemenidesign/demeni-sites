@@ -261,7 +261,8 @@ function renderPreviewD2New(frame, state) {
     // =============================================
     const categoriasBg = computeSectionBg('categorias', { bgColor: '#ffffff' });
     const categoriasTopLine = computeTopLine('categorias');
-    const categoriasSpacing = get('categorias.sectionSpacing', 40);
+    const categoriasPadTop = get('categorias.paddingTop', 40);
+    const categoriasPadBot = get('categorias.paddingBottom', 40);
     const categoriasColumns = get('categorias.columnsPerRow', 4);
     const categoriaIconSize = get('categorias.icon.size', 55);
     const categoriaIconRadius = get('categorias.icon.radius', 16);
@@ -297,7 +298,8 @@ function renderPreviewD2New(frame, state) {
     // =============================================
     const produtosBg = computeSectionBg('produtos', { bgColor: '#1a365d', bgColor2: '#0d1b36' });
     const produtosTopLine = computeTopLine('produtos');
-    const produtosSpacing = get('produtos.sectionSpacing', 30);
+    const produtosPadTop = get('produtos.paddingTop', 30);
+    const produtosPadBot = get('produtos.paddingBottom', 30);
     const produtosSectionTitle = get('produtos.sectionTitle.text', 'Produtos Demeni');
     const produtosSectionTitleSize = get('produtos.sectionTitle.size', 36);
     const produtosSectionTitleColor = get('produtos.sectionTitle.color', '#ffffff');
@@ -330,6 +332,7 @@ function renderPreviewD2New(frame, state) {
     const produtoPrecoColor = get('produtos.preco.color', '#333333');
     const produtoPrecoCurrencyStyle = get('produtos.preco.currencyStyle', 'normal');
     const produtoBtnSize = get('produtos.btn.size', 13);
+    const produtoBtnWeight = get('produtos.btn.weight', 600);
     const produtoBtnBgColor = get('produtos.btn.bgColor', '#25D366');
     const produtoBtnColor = get('produtos.btn.color', '#ffffff');
     const produtoBtnRadius = get('produtos.btn.borderRadius', 20);
@@ -342,7 +345,8 @@ function renderPreviewD2New(frame, state) {
     // =============================================
     const feedbacksBg = computeSectionBg('feedbacks', { bgColor: '#e8e8e8', bgColor2: '#d0d0d0' });
     const feedbacksTopLine = computeTopLine('feedbacks');
-    const feedbacksSpacing = get('feedbacks.sectionSpacing', 30);
+    const feedbacksPadTop = get('feedbacks.paddingTop', 30);
+    const feedbacksPadBot = get('feedbacks.paddingBottom', 30);
     const feedbacksSectionTitle = get('feedbacks.sectionTitle.text', 'O que estão dizendo?');
     const feedbacksSectionTitleSize = get('feedbacks.sectionTitle.size', 28);
     const feedbacksSectionTitleColor = get('feedbacks.sectionTitle.color', '#333333');
@@ -390,22 +394,37 @@ function renderPreviewD2New(frame, state) {
         bgOverlay: true, bgImageFallback: heroBgImage
     });
     const ctaTopLine = computeTopLine('cta');
-    const ctaHeight = get('cta.height', 250);
+    const ctaPaddingTop = get('cta.paddingTop', 40);
+    const ctaPaddingBottom = get('cta.paddingBottom', 40);
+    const ctaReplicateHero = get('cta.replicateHero', true);
+
+    // Title: replicate hero or custom
     const ctaTitleText = get('cta.title.text', '') || heroTitleText;
-    const ctaTitleSize = get('cta.title.size', 52);
-    const ctaTitleWeight = get('cta.title.weight', 400);
-    const ctaTitleColor = get('cta.title.color', '#ffffff');
+    const ctaTitleSize = ctaReplicateHero ? heroTitleSize : get('cta.title.size', 52);
+    const ctaTitleWeight = ctaReplicateHero ? heroTitleWeight : get('cta.title.weight', 400);
+    const ctaTitleColor = ctaReplicateHero ? heroTitleColor : get('cta.title.color', '#ffffff');
+    const ctaTitleMarginBottom = get('cta.title.marginBottom', 8);
+
+    // Subtitle: replicate hero or custom
     const ctaSubtitleText = get('cta.subtitle.text', '') || heroSubtitleText;
-    const ctaSubtitleSize = get('cta.subtitle.size', 22);
-    const ctaSubtitleWeight = get('cta.subtitle.weight', 400);
-    const ctaSubtitleColor = get('cta.subtitle.color', '#ffffff');
-    const ctaSubtitleOpacity = get('cta.subtitle.opacity', 0.8);
-    const ctaBtnText = get('cta.btn.text', heroBtnText);
-    const ctaBtnLink = get('cta.btn.link', heroBtnLink);
-    const ctaBtnBgType = get('cta.btn.bgType', 'gradient');
-    const ctaBtnBgGradient = get('cta.btn.bgGradient', heroBtnBgGradient);
-    const ctaBtnRadius = get('cta.btn.borderRadius', 30);
-    const ctaBtnHoverAnimation = get('cta.btn.hoverAnimation', true);
+    const ctaSubtitleSize = ctaReplicateHero ? heroSubtitleSize : get('cta.subtitle.size', 22);
+    const ctaSubtitleWeight = ctaReplicateHero ? heroSubtitleWeight : get('cta.subtitle.weight', 400);
+    const ctaSubtitleColor = ctaReplicateHero ? heroSubtitleColor : get('cta.subtitle.color', '#ffffff');
+    const ctaSubtitleOpacity = ctaReplicateHero ? 0.8 : get('cta.subtitle.opacity', 0.8);
+    const ctaSubtitleMarginBottom = get('cta.subtitle.marginBottom', 20);
+
+    // Button: replicate hero or custom
+    const ctaBtnText = get('cta.btn.text', '') || heroBtnText;
+    const ctaBtnLink = get('cta.btn.link', '') || heroBtnLink;
+    const ctaBtnHoverAnimation = ctaReplicateHero ? true : get('cta.btn.hoverAnimation', true);
+    const ctaBtnFontSize = ctaReplicateHero ? heroBtnFontSize : get('cta.btn.textStyle.size', 16);
+    const ctaBtnFontWeight = ctaReplicateHero ? heroBtnFontWeight : get('cta.btn.textStyle.weight', 600);
+    const ctaBtnFontColor = ctaReplicateHero ? heroBtnFontColor : get('cta.btn.textStyle.color', '#ffffff');
+    const ctaBtnBgColor = ctaReplicateHero ? heroBtnBgColor : get('cta.btn.bgColor', '#5167E7');
+    const ctaBtnBackground = ctaReplicateHero ? heroBtnBackground : ctaBtnBgColor;
+    const ctaBtnPaddingV = ctaReplicateHero ? heroBtnPaddingV : get('cta.btn.paddingInner.vertical', 12);
+    const ctaBtnPaddingH = ctaReplicateHero ? heroBtnPaddingH : get('cta.btn.paddingInner.horizontal', 40);
+    const ctaBtnBorderRadius = ctaReplicateHero ? heroBtnBorderRadius : get('cta.btn.borderRadius', 30);
 
     // =============================================
     // FOOTER - Valores dinâmicos
@@ -415,7 +434,8 @@ function renderPreviewD2New(frame, state) {
     const footerBgGradient = get('footer.bgGradient', 'linear-gradient(135deg, #1a365d 0%, #2d3a81 50%, #0d1b36 100%)');
     const footerBackground = footerBgType === 'gradient' ? footerBgGradient : footerBgColor;
     const footerTopLine = computeTopLine('footer');
-    const footerSpacing = get('footer.sectionSpacing', 40);
+    const footerPadTop = get('footer.paddingTop', 40);
+    const footerPadBot = get('footer.paddingBottom', 40);
     const footerLogoSize = get('footer.logo.size', 28);
     const footerLogoOpacity = get('footer.logo.opacity', 0.8);
     const footerLogoColor = get('footer.logo.color', 'white');
@@ -728,7 +748,7 @@ function renderPreviewD2New(frame, state) {
 
             /* CATEGORIAS */
             .d2-categorias {
-                padding: ${categoriasSpacing}px 20px;
+                padding: ${categoriasPadTop}px 20px ${categoriasPadBot}px 20px;
                 text-align: center;
                 ${categoriasBg.bgMode === 'image' && categoriasBg.bgImage && categoriasBg.bgImageBlur > 0
             ? 'background: transparent;'
@@ -826,7 +846,7 @@ function renderPreviewD2New(frame, state) {
 
             /* PRODUTOS */
             .d2-produtos {
-                padding: ${produtosSpacing}px ${produtosSectionPaddingH}px;
+                padding: ${produtosPadTop}px ${produtosSectionPaddingH}px ${produtosPadBot}px ${produtosSectionPaddingH}px;
                 text-align: center;
                 ${produtosBg.bgMode === 'image' && produtosBg.bgImage && produtosBg.bgImageBlur > 0
             ? 'background: transparent;'
@@ -948,7 +968,7 @@ function renderPreviewD2New(frame, state) {
                 background: ${produtoBtnBgColor};
                 color: ${produtoBtnColor};
                 font-size: ${produtoBtnSize}px;
-                font-weight: 600;
+                font-weight: ${produtoBtnWeight};
                 border-radius: ${produtoBtnRadius}px;
                 text-transform: lowercase;
                 white-space: nowrap;
@@ -963,7 +983,7 @@ function renderPreviewD2New(frame, state) {
 
             /* FEEDBACKS */
             .d2-feedbacks {
-                padding: ${feedbacksSpacing}px 32px;
+                padding: ${feedbacksPadTop}px 32px ${feedbacksPadBot}px 32px;
                 text-align: center;
                 ${feedbacksBg.bgMode === 'image' && feedbacksBg.bgImage && feedbacksBg.bgImageBlur > 0
             ? 'background: transparent;'
@@ -1077,7 +1097,8 @@ function renderPreviewD2New(frame, state) {
 
             /* CTA SECUNDÁRIO */
             .d2-cta-secundario {
-                height: ${ctaHeight}px;
+                padding-top: ${ctaPaddingTop}px;
+                padding-bottom: ${ctaPaddingBottom}px;
                 position: relative;
                 display: flex;
                 align-items: center;
@@ -1111,23 +1132,28 @@ function renderPreviewD2New(frame, state) {
                 z-index: 2;
             }
             .d2-cta-secundario .cta-content {
-                padding: 30px 20px;
+                padding: 0 20px;
             }
             .d2-cta-secundario h2 {
                 font-size: ${ctaTitleSize}px;
                 font-weight: ${ctaTitleWeight};
                 color: ${ctaTitleColor};
-                margin-bottom: 4px;
+                margin-bottom: ${ctaTitleMarginBottom}px;
             }
             .d2-cta-secundario p {
                 font-size: ${ctaSubtitleSize}px;
                 font-weight: ${ctaSubtitleWeight};
                 color: ${ctaSubtitleColor};
                 opacity: ${ctaSubtitleOpacity};
-                margin-bottom: 20px;
+                margin-bottom: ${ctaSubtitleMarginBottom}px;
             }
             .d2-cta-secundario .d2-cta-btn {
-                border-radius: ${ctaBtnRadius}px;
+                padding: ${ctaBtnPaddingV}px ${ctaBtnPaddingH}px;
+                background: ${ctaBtnBackground};
+                font-size: ${ctaBtnFontSize}px;
+                font-weight: ${ctaBtnFontWeight};
+                color: ${ctaBtnFontColor};
+                border-radius: ${ctaBtnBorderRadius}px;
                 ${ctaBtnHoverAnimation ? 'transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;' : ''}
             }
             ${ctaBtnHoverAnimation ? `
@@ -1139,7 +1165,7 @@ function renderPreviewD2New(frame, state) {
 
             /* FOOTER */
             .d2-footer {
-                padding: ${footerSpacing}px 32px;
+                padding: ${footerPadTop}px 32px ${footerPadBot}px 32px;
                 background: ${footerBackground};
                 text-align: left;
                 margin: 0;
@@ -1265,19 +1291,28 @@ function renderPreviewD2New(frame, state) {
                 ${categoriasSectionSubtitleEnabled ? `<p class="section-subtitle">${categoriasSectionSubtitle}</p>` : ''}
                 <div class="d2-categorias-grid">
                     ${categoriasItems.map(cat => {
-                // Fallback: old PNGs → FontAwesome
-                const pngFallback = {
-                    'img/Pen Tool.png': 'fa-box-open',
-                    'img/Engrenagem.png': 'fa-concierge-bell',
-                    'img/Aulas.png': 'fa-graduation-cap',
-                    'img/Sobre.png': 'fa-info-circle'
-                };
-                let iconRef = pngFallback[cat.icon] || cat.icon || 'fa-circle';
-                const isFa = iconRef.startsWith('fa-');
-                const isUrl = iconRef.startsWith('http') || iconRef.startsWith('data:');
-                const iconHtml = isFa
-                    ? `<i class="fas ${iconRef}" style="color:${categoriaIconColor}"></i>`
-                    : `<img src="${isUrl ? iconRef : baseUrl + '/' + iconRef}" alt="${cat.label}">`;
+                // Custom icon takes priority
+                let iconHtml;
+                if (cat.customIcon) {
+                    const cZoom = (cat.customIconZoom || 100) / 100;
+                    const cPosX = cat.customIconPosX ?? 50;
+                    const cPosY = cat.customIconPosY ?? 50;
+                    iconHtml = `<img src="${cat.customIcon}" alt="${cat.label}" style="transform:scale(${cZoom}) translate(${cPosX - 50}%, ${cPosY - 50}%);transform-origin:center center;">`;
+                } else {
+                    // Fallback: old PNGs → FontAwesome
+                    const pngFallback = {
+                        'img/Pen Tool.png': 'fa-box-open',
+                        'img/Engrenagem.png': 'fa-concierge-bell',
+                        'img/Aulas.png': 'fa-graduation-cap',
+                        'img/Sobre.png': 'fa-info-circle'
+                    };
+                    let iconRef = pngFallback[cat.icon] || cat.icon || 'fa-circle';
+                    const isFa = iconRef.startsWith('fa-');
+                    const isUrl = iconRef.startsWith('http') || iconRef.startsWith('data:');
+                    iconHtml = isFa
+                        ? `<i class="fas ${iconRef}" style="color:${categoriaIconColor}"></i>`
+                        : `<img src="${isUrl ? iconRef : baseUrl + '/' + iconRef}" alt="${cat.label}">`;
+                }
                 return `
                     <a href="${cat.link || '#'}" class="d2-categoria-item">
                         <div class="d2-categoria-icon">
@@ -1313,7 +1348,7 @@ function renderPreviewD2New(frame, state) {
                 return `
                     <a href="${p.link || '#'}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
                         <div class="d2-produto-img">
-                            <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}">
+                            <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}" style="transform:scale(${(p.imageZoom || 100) / 100}) translate(${(p.imagePosX ?? 50) - 50}%, ${(p.imagePosY ?? 50) - 50}%);transform-origin:center center;">
                         </div>
                         <h3>${p.title || 'Nome do Produto'}</h3>
                         <div class="d2-produto-footer">
@@ -1340,7 +1375,7 @@ function renderPreviewD2New(frame, state) {
                 return `
                     <div class="d2-feedback-card">
                         <div style="width:${feedbackAvatarSize}px;height:${feedbackAvatarSize}px;border-radius:${feedbackAvatarRadius}px;overflow:hidden;flex-shrink:0;">
-                            <img src="${f.avatar || baseUrl + '/avatar.webp'}" alt="${f.name || 'Cliente'}" class="d2-feedback-avatar" style="object-position:${aPosX}% ${aPosY}%;transform:scale(${aZoom});">
+                            <img src="${f.avatar || baseUrl + '/avatar.webp'}" alt="${f.name || 'Cliente'}" class="d2-feedback-avatar" style="transform:scale(${aZoom}) translate(${(aPosX - 50)}%, ${(aPosY - 50)}%);transform-origin:center center;">
                         </div>
                         <div class="d2-feedback-content">
                             ${f.link ? `<a href="${f.link}" class="d2-feedback-name" target="_blank">${f.name || 'Nome do Cliente'}</a>` : `<span class="d2-feedback-name">${f.name || 'Nome do Cliente'}</span>`}

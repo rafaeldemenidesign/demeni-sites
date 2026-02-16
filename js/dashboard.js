@@ -110,6 +110,11 @@ function navigateTo(page) {
     // Initialize editors when navigating
     if (page === 'editor-d2') {
         initEditorD2();
+        // Ensure publish button state is correct after full editor init
+        setTimeout(() => {
+            const pid = UserData.getCurrentProjectId();
+            if (pid) updateHeaderPublishButton(pid);
+        }, 500);
     }
     if (page === 'editor-d1') {
         initEditorD1();
@@ -544,8 +549,14 @@ function showPublishModal(projectId) {
     const currentCredits = Credits.getCredits();
     const siteCost = window.XPSystem ? XPSystem.getCurrentSitePrice() : 40;
     const hasEnough = currentCredits >= siteCost;
-    const existingSubdomain = project?.subdomain || '';
+    const isUpdate = !!project?.published;
+    const existingSubdomain = project?.subdomain || (project?.publishedUrl ? extractSubdomain(project.publishedUrl) : '');
     const suggestedSlug = existingSubdomain || projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
+
+    const modalTitle = isUpdate ? 'Atualizar Site' : 'Publicar Site';
+    const modalIcon = isUpdate ? 'fa-sync-alt' : 'fa-rocket';
+    const confirmLabel = isUpdate ? `Atualizar gratuitamente` : `Publicar por ${siteCost} créditos`;
+    const confirmIcon = isUpdate ? 'fa-sync-alt' : 'fa-rocket';
 
     // Remove existing modal
     document.querySelector('.publish-modal-overlay')?.remove();
@@ -556,7 +567,7 @@ function showPublishModal(projectId) {
         <div class="publish-modal-backdrop"></div>
         <div class="publish-modal-content">
             <div class="publish-modal-header">
-                <h3><i class="fas fa-rocket"></i> Publicar Site</h3>
+                <h3><i class="fas ${modalIcon}"></i> ${modalTitle}</h3>
                 <button class="publish-modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="publish-modal-body">
@@ -566,11 +577,23 @@ function showPublishModal(projectId) {
 
                 <label class="publish-label">Subdomínio do seu site</label>
                 <div class="publish-domain-input">
-                    <input type="text" id="publish-subdomain" value="${suggestedSlug}" placeholder="meu-site" maxlength="30" />
+                    <input type="text" id="publish-subdomain" value="${suggestedSlug}" placeholder="meu-site" maxlength="30" ${isUpdate ? 'readonly style="opacity:0.7;cursor:not-allowed"' : ''} />
                     <span class="publish-domain-suffix">.rafaeldemeni.com</span>
                 </div>
-                <p class="publish-domain-hint">Apenas letras minúsculas, números e hífens</p>
+                <p class="publish-domain-hint">${isUpdate ? 'Subdomínio não pode ser alterado após publicação' : 'Apenas letras minúsculas, números e hífens'}</p>
 
+                ${isUpdate ? `
+                <div class="publish-cost-box has-credits">
+                    <div class="publish-cost-row">
+                        <span>Atualização</span>
+                        <span class="publish-cost-value" style="color:#00b894;"><i class="fas fa-check-circle"></i> Gratuita</span>
+                    </div>
+                    <div class="publish-cost-row">
+                        <span>URL do site</span>
+                        <span class="publish-balance-value" style="font-size:12px;">${suggestedSlug}.rafaeldemeni.com</span>
+                    </div>
+                </div>
+                ` : `
                 <div class="publish-cost-box ${hasEnough ? 'has-credits' : 'no-credits'}">
                     <div class="publish-cost-row">
                         <span>Custo de publicação</span>
@@ -593,11 +616,12 @@ function showPublishModal(projectId) {
                         Você não tem créditos suficientes. Adquira mais créditos para publicar.
                     </div>
                 ` : ''}
+                `}
             </div>
             <div class="publish-modal-footer">
                 <button class="publish-btn-cancel">Cancelar</button>
-                ${hasEnough
-            ? `<button class="publish-btn-confirm"><i class="fas fa-rocket"></i> Publicar por ${siteCost} créditos</button>`
+                ${(isUpdate || hasEnough)
+            ? `<button class="publish-btn-confirm"><i class="fas ${confirmIcon}"></i> ${confirmLabel}</button>`
             : `<button class="publish-btn-buy" onclick="navigateTo('carteira')"><i class="fas fa-shopping-cart"></i> Comprar Créditos</button>`
         }
             </div>
@@ -642,6 +666,19 @@ function showPublishModal(projectId) {
         .publish-btn-confirm { padding:10px 24px; border:none; background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; }
         .publish-btn-confirm:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(108,92,231,0.4); }
         .publish-btn-buy { padding:10px 24px; border:none; background:linear-gradient(135deg,#00b894,#55efc4); color:#fff; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
+        .publish-success-overlay { position:fixed; top:0; left:0; right:0; bottom:0; z-index:10001; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
+        .publish-success-overlay.visible { opacity:1; }
+        .publish-success-content { position:relative; background:#fff; border-radius:16px; width:400px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; text-align:center; padding:32px 24px; transform:scale(0.9); transition:transform .3s ease; }
+        .publish-success-overlay.visible .publish-success-content { transform:scale(1); }
+        .publish-success-icon { font-size:48px; color:#00b894; margin-bottom:16px; }
+        .publish-success-title { font-size:20px; font-weight:700; color:#2d3436; margin-bottom:8px; }
+        .publish-success-url { font-size:14px; color:#6c5ce7; font-weight:600; margin-bottom:20px; word-break:break-all; }
+        .publish-success-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+        .publish-success-actions a, .publish-success-actions button { padding:10px 20px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .2s; }
+        .publish-success-view { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border:none; }
+        .publish-success-view:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(108,92,231,0.4); }
+        .publish-success-copy { background:#f8f9fa; color:#2d3436; border:1px solid #dfe6e9; }
+        .publish-success-close { background:none; border:none; color:#636e72; cursor:pointer; font-size:13px; margin-top:12px; }
     `;
     overlay.appendChild(style);
     document.body.appendChild(overlay);
@@ -649,11 +686,13 @@ function showPublishModal(projectId) {
     // Animate in
     requestAnimationFrame(() => overlay.classList.add('visible'));
 
-    // Sanitize subdomain input
+    // Sanitize subdomain input (only if not update mode)
     const subdomainInput = overlay.querySelector('#publish-subdomain');
-    subdomainInput.addEventListener('input', () => {
-        subdomainInput.value = subdomainInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-    });
+    if (!isUpdate) {
+        subdomainInput.addEventListener('input', () => {
+            subdomainInput.value = subdomainInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        });
+    }
 
     // Close handlers
     const closeModal = () => {
@@ -666,7 +705,7 @@ function showPublishModal(projectId) {
     // Cancel
     overlay.querySelector('.publish-btn-cancel').addEventListener('click', closeModal);
 
-    // Confirm publish
+    // Confirm publish/update
     const confirmBtn = overlay.querySelector('.publish-btn-confirm');
     if (confirmBtn) {
         confirmBtn.addEventListener('click', () => {
@@ -677,29 +716,249 @@ function showPublishModal(projectId) {
                 return;
             }
             closeModal();
-            // Set subdomain in state and publish
+            // Set subdomain in state
             if (window.d2State) {
                 window.d2State.set('subdomain', subdomain);
             }
-            publishProject(projectId);
+            // Store subdomain on project
+            UserData.updateProject(projectId, { subdomain: subdomain });
+
+            if (isUpdate) {
+                // Free update — update project data + deploy updated HTML
+                const publishedUrl = `https://${subdomain}.rafaeldemeni.com`;
+                UserData.publishProject(projectId, publishedUrl);
+
+                // Deploy updated HTML to Supabase
+                const state = window.d2State ? window.d2State.getState() : null;
+                const pName = window.d2State?.get('projectName') || projectName;
+                const htmlContent = generatePublishableHTML(state, pName);
+                if (htmlContent && window.SupabaseClient?.isConfigured()) {
+                    SupabaseClient.publishSite(projectId, subdomain, htmlContent).then(({ error }) => {
+                        if (error) console.error('❌ [Update] Deploy error:', error);
+                        else console.log('✅ [Update] Site updated:', publishedUrl);
+                    });
+                }
+
+                showPublishSuccess(publishedUrl);
+                updateHeaderPublishButton(projectId);
+                loadProjects();
+            } else {
+                publishProject(projectId, subdomain);
+            }
         });
     }
 }
 
-function publishProject(id) {
-    const result = Credits.attemptPublish(id);
+/**
+ * Extract subdomain from a published URL like https://meunome.rafaeldemeni.com
+ */
+function extractSubdomain(url) {
+    if (!url) return '';
+    try {
+        const hostname = new URL(url).hostname;
+        const parts = hostname.split('.');
+        if (parts.length >= 3) return parts[0];
+        return '';
+    } catch {
+        return '';
+    }
+}
+
+/**
+ * Show success overlay after publishing with link to view site
+ */
+function showPublishSuccess(publishedUrl) {
+    document.querySelector('.publish-success-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'publish-success-overlay';
+    overlay.innerHTML = `
+        <div class="publish-modal-backdrop"></div>
+        <div class="publish-success-content">
+            <div class="publish-success-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="publish-success-title">Site publicado com sucesso!</div>
+            <div class="publish-success-url">${publishedUrl}</div>
+            <div class="publish-success-actions">
+                <a href="${publishedUrl}" target="_blank" class="publish-success-view">
+                    <i class="fas fa-external-link-alt"></i> Ver Site Online
+                </a>
+                <button class="publish-success-copy" id="btn-copy-published-url">
+                    <i class="fas fa-copy"></i> Copiar Link
+                </button>
+            </div>
+            <button class="publish-success-close" id="btn-close-success">Fechar</button>
+        </div>
+    `;
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .publish-success-overlay { position:fixed; top:0; left:0; right:0; bottom:0; z-index:10001; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .3s; }
+        .publish-success-overlay.visible { opacity:1; }
+        .publish-success-overlay .publish-modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); }
+        .publish-success-content { position:relative; background:#fff; border-radius:16px; width:400px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; text-align:center; padding:32px 24px; transform:scale(0.9); transition:transform .3s ease; }
+        .publish-success-overlay.visible .publish-success-content { transform:scale(1); }
+        .publish-success-icon { font-size:48px; color:#00b894; margin-bottom:16px; }
+        .publish-success-title { font-size:20px; font-weight:700; color:#2d3436; margin-bottom:8px; }
+        .publish-success-url { font-size:14px; color:#6c5ce7; font-weight:600; margin-bottom:20px; word-break:break-all; background:#f8f9fa; padding:10px 14px; border-radius:8px; border:1px solid #dfe6e9; }
+        .publish-success-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+        .publish-success-actions a, .publish-success-actions button { padding:10px 20px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .2s; }
+        .publish-success-view { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border:none; }
+        .publish-success-view:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(108,92,231,0.4); }
+        .publish-success-copy { background:#f8f9fa; color:#2d3436; border:1px solid #dfe6e9; }
+        .publish-success-copy:hover { background:#eee; }
+        .publish-success-close { background:none; border:none; color:#636e72; cursor:pointer; font-size:13px; margin-top:16px; padding:6px 12px; }
+        .publish-success-close:hover { color:#2d3436; }
+    `;
+    overlay.appendChild(style);
+    document.body.appendChild(overlay);
+
+    // Bind events via JS (not inline onclick, avoids quoting issues)
+    overlay.querySelector('#btn-copy-published-url').addEventListener('click', function () {
+        navigator.clipboard.writeText(publishedUrl);
+        this.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+    });
+    overlay.querySelector('#btn-close-success').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('.publish-modal-backdrop').addEventListener('click', () => overlay.remove());
+
+    setTimeout(() => overlay.classList.add('visible'), 50);
+}
+
+/**
+ * Update header publish button to show "Atualizar" when project is already published.
+ * Uses the same pill style as the "+ Comprar" button.
+ */
+function updateHeaderPublishButton(projectId) {
+    const btn = document.getElementById('btn-publish-header');
+    if (!btn) {
+        console.log('[Publish] btn-publish-header not found in DOM');
+        return;
+    }
+
+    const project = UserData.getProject(projectId);
+    console.log('[Publish] updateHeaderPublishButton:', projectId?.slice(0, 8), 'published:', project?.published, 'url:', project?.publishedUrl);
+    if (project?.published) {
+        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar';
+        btn.className = 'btn-topup-pill';
+    } else {
+        btn.innerHTML = '<i class="fas fa-bolt"></i> Publicar';
+        btn.className = 'btn-primary';
+    }
+}
+
+/**
+ * Generates a self-contained HTML document from the D2 editor state.
+ * This HTML is what gets served at subdomain.rafaeldemeni.com
+ */
+function generatePublishableHTML(state, projectName) {
+    // Render the D2 preview into a temporary container
+    const tempFrame = document.createElement('div');
+    if (window.renderPreviewD2New) {
+        window.renderPreviewD2New(tempFrame, state);
+    } else {
+        console.error('[Publish] renderPreviewD2New not available');
+        return null;
+    }
+
+    const siteHTML = tempFrame.innerHTML;
+    const description = state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
+
+    // Build a complete standalone HTML document
+    return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>${projectName || 'Meu Site'}</title>
+    <meta name="description" content="${description}">
+    <meta name="generator" content="Demeni Sites">
+    <meta property="og:title" content="${projectName || 'Meu Site'}">
+    <meta property="og:description" content="${description}">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Bebas+Neue&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
+        body {
+            display: flex;
+            justify-content: center;
+            background: #0a0a0f;
+        }
+        .site-wrapper {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            position: relative;
+        }
+        @media (min-width: 481px) {
+            .site-wrapper {
+                box-shadow: 0 0 60px rgba(0,0,0,0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="site-wrapper">
+        ${siteHTML}
+    </div>
+    <script>
+        // Watermark — Powered by Demeni Sites
+        (function(){
+            var w=document.createElement('div');
+            w.style.cssText='position:fixed;bottom:8px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,0.4);font-family:sans-serif;z-index:9999;pointer-events:auto;';
+            w.innerHTML='Criado com <a href="https://sites.rafaeldemeni.com" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none;">Demeni Sites</a>';
+            document.body.appendChild(w);
+        })();
+    </script>
+</body>
+</html>`;
+}
+
+async function publishProject(id, subdomain) {
+    // Get subdomain from param, d2State, or project
+    if (!subdomain && window.d2State) subdomain = window.d2State.get('subdomain');
+    if (!subdomain) {
+        const project = UserData.getProject(id);
+        subdomain = project?.subdomain;
+    }
+
+    const result = Credits.attemptPublish(id, subdomain);
 
     if (result.success) {
-        // Success
-        showNotification('✅ ' + result.message);
+        // Generate HTML from editor preview
+        const state = window.d2State ? window.d2State.getState() : null;
+        const projectName = window.d2State?.get('projectName') || UserData.getProject(id)?.name || 'Meu Site';
+        const htmlContent = generatePublishableHTML(state, projectName);
+
+        if (htmlContent && window.SupabaseClient?.isConfigured()) {
+            try {
+                console.log('📤 [Publish] Uploading site to Supabase...', subdomain);
+                const { data, error } = await SupabaseClient.publishSite(id, subdomain, htmlContent);
+                if (error) {
+                    console.error('❌ [Publish] Supabase error:', error);
+                    showNotification(`⚠️ Site salvo localmente mas falhou no deploy: ${error.message}`);
+                } else {
+                    console.log('✅ [Publish] Site deployed successfully:', `https://${subdomain}.rafaeldemeni.com`);
+                }
+            } catch (e) {
+                console.error('❌ [Publish] Deploy exception:', e);
+            }
+        }
+
+        // Show success with URL
+        showPublishSuccess(result.publishedUrl);
+        // Update header button to "Atualizar" style
+        updateHeaderPublishButton(id);
         loadProjects();
         refreshCredits();
-    } else if (result.action === 'first_purchase') {
-        // First purchase - redirect to Kiwify
-        showBuyModal('first', result);
     } else if (result.action === 'buy_credits') {
         // Need credits
         showBuyModal('credits', result);
+    } else if (result.action === 'daily_fee') {
+        // Show daily fee warning
+        showNotification(`⚠️ ${result.message}`);
     }
 }
 
@@ -1661,6 +1920,9 @@ function initEditorD2() {
                 window.d2State.set('projectName', savedName);
             }
             console.log('[Editor D2] Project name loaded:', savedName);
+
+            // Update header publish button state (Publicar vs Atualizar)
+            updateHeaderPublishButton(projectId);
         }
     } else {
         console.log('[Editor D2] No current project, using defaults');

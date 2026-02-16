@@ -87,11 +87,19 @@ const SiteRouter = (function () {
      * @param {object} site - Dados do projeto
      */
     function renderClientSite(site) {
+        // If the site has pre-rendered HTML content (D2 sites), serve it directly
+        if (site.html_content) {
+            document.open();
+            document.write(site.html_content);
+            document.close();
+            return;
+        }
+
+        // Fallback: D1 link-in-bio template (legacy)
         const siteData = site.data || {};
         const profile = siteData.profile || {};
         const theme = siteData.theme || {};
 
-        // Template do site link-na-bio
         document.documentElement.innerHTML = `
             <!DOCTYPE html>
             <html lang="pt-BR">

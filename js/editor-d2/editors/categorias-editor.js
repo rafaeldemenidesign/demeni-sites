@@ -311,6 +311,39 @@ class D2CategoriasEditor {
                                     })
                                 );
 
+                                // Ajustes do ícone personalizado (only if uploaded)
+                                if (item.customIcon) {
+                                    const posDiv = document.createElement('div');
+                                    posDiv.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 12px 0 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);';
+                                    posDiv.textContent = 'Ajuste do Ícone';
+                                    itemContainer.appendChild(posDiv);
+
+                                    itemContainer.appendChild(
+                                        C.createSlider({
+                                            label: 'Zoom',
+                                            value: item.customIconZoom || 100,
+                                            min: 100, max: 200, step: 5, unit: '%',
+                                            path: `${this.basePath}.items.${index}.customIconZoom`
+                                        })
+                                    );
+                                    itemContainer.appendChild(
+                                        C.createSlider({
+                                            label: 'Horizontal',
+                                            value: item.customIconPosX ?? 50,
+                                            min: 0, max: 100, step: 1, unit: '%',
+                                            path: `${this.basePath}.items.${index}.customIconPosX`
+                                        })
+                                    );
+                                    itemContainer.appendChild(
+                                        C.createSlider({
+                                            label: 'Vertical',
+                                            value: item.customIconPosY ?? 50,
+                                            min: 0, max: 100, step: 1, unit: '%',
+                                            path: `${this.basePath}.items.${index}.customIconPosY`
+                                        })
+                                    );
+                                }
+
                                 // Botão de remover
                                 const deleteBtn = document.createElement('button');
                                 deleteBtn.className = 'btn-delete-item';

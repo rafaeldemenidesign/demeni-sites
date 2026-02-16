@@ -180,7 +180,7 @@ const UserData = (function () {
         return window.SupabaseClient && SupabaseClient.isConfigured() && _currentUserId;
     }
 
-    // Sync all projects from Supabase to localStorage
+    // Sync all projects from Supabase to localStorage (smart merge)
     async function syncFromCloud() {
         if (!_isCloudAvailable()) return false;
 
@@ -191,9 +191,36 @@ const UserData = (function () {
                 return false;
             }
 
-            const localProjects = (data || []).map(fromSupabase);
-            save(_scopedKey(KEYS.PROJECTS), localProjects);
-            console.log(`☁️ Synced ${localProjects.length} projects from cloud`);
+            const cloudProjects = (data || []).map(fromSupabase);
+            const localProjects = getProjects();
+
+            // Smart merge: for each project, keep the version with the newest updatedAt
+            const mergedMap = new Map();
+
+            // Start with cloud projects
+            cloudProjects.forEach(cp => mergedMap.set(cp.id, cp));
+
+            // Merge local projects — local wins if newer
+            localProjects.forEach(lp => {
+                const cp = mergedMap.get(lp.id);
+                if (!cp) {
+                    // Local-only project (not yet in cloud), keep it
+                    mergedMap.set(lp.id, lp);
+                } else {
+                    // Both exist — compare timestamps
+                    const localTime = new Date(lp.updatedAt || 0).getTime();
+                    const cloudTime = new Date(cp.updatedAt || 0).getTime();
+                    if (localTime > cloudTime) {
+                        // Local is newer, keep local version
+                        mergedMap.set(lp.id, lp);
+                    }
+                    // Otherwise cloud version (already in map) wins
+                }
+            });
+
+            const merged = Array.from(mergedMap.values());
+            save(_scopedKey(KEYS.PROJECTS), merged);
+            console.log(`☁️ Synced ${cloudProjects.length} projects from cloud (merged with ${localProjects.length} local)`);
             return true;
         } catch (e) {
             console.error('❌ Cloud sync exception:', e);
@@ -369,10 +396,28 @@ const UserData = (function () {
     }
 
     function publishProject(projectId, url) {
-        return updateProject(projectId, {
+        const result = updateProject(projectId, {
             published: true,
             publishedUrl: url
         });
+
+        // CRITICAL: Save to cloud IMMEDIATELY (bypass debounce)
+        // This prevents losing published state if user reloads before debounce fires
+        if (_isCloudAvailable() && result) {
+            // Cancel any pending debounced save
+            if (_pendingCloudSaves[projectId]) {
+                clearTimeout(_pendingCloudSaves[projectId]);
+                delete _pendingCloudSaves[projectId];
+            }
+            // Save immediately
+            const supabaseData = toSupabase(result);
+            const { id, user_id, ...updates } = supabaseData;
+            SupabaseClient.updateProject(projectId, updates)
+                .then(() => console.log('☁️ Published state saved to cloud immediately'))
+                .catch(e => console.error('❌ Failed to save published state to cloud:', e));
+        }
+
+        return result;
     }
 
     function unpublishProject(projectId) {

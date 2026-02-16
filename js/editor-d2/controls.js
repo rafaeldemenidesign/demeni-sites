@@ -618,7 +618,7 @@ window.D2Controls = {
             bgOverlayColor2: '#000000', bgOverlayOpacity: 50, bgOverlayInvert: false,
             bgOverlayPosition: 50, bgOverlaySpread: 80,
             bgImageBlur: 0, bgImageZoom: 100, bgImagePosX: 50, bgImagePosY: 0,
-            sectionSpacing: 30,
+            paddingTop: 30, paddingBottom: 30,
             ...(options.defaults || {})
         };
 
@@ -774,17 +774,23 @@ window.D2Controls = {
                     }
                 }
 
-                // Spacing
+                // Padding da seção
                 const spDiv = document.createElement('div');
                 spDiv.style.cssText = dividerStyle;
                 spDiv.textContent = 'Espaçamento';
                 container.appendChild(spDiv);
 
                 container.appendChild(C.createSlider({
-                    label: 'Espaçamento da seção',
-                    value: window.d2State.get(`${bp}.sectionSpacing`, d.sectionSpacing),
-                    min: 20, max: 80, step: 5, unit: 'px',
-                    path: `${bp}.sectionSpacing`
+                    label: 'Padding superior',
+                    value: window.d2State.get(`${bp}.paddingTop`, d.paddingTop),
+                    min: 0, max: 80, step: 5, unit: 'px',
+                    path: `${bp}.paddingTop`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Padding inferior',
+                    value: window.d2State.get(`${bp}.paddingBottom`, d.paddingBottom),
+                    min: 0, max: 80, step: 5, unit: 'px',
+                    path: `${bp}.paddingBottom`
                 }));
 
                 return container;

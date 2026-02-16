@@ -326,6 +326,12 @@ class D2ProdutosEditor {
                     path: `${this.basePath}.btn.size`
                 }));
 
+                container.appendChild(C.createWeightSelector({
+                    label: 'Peso da fonte',
+                    value: window.d2State.get(`${this.basePath}.btn.weight`, 600),
+                    path: `${this.basePath}.btn.weight`
+                }));
+
                 container.appendChild(C.createColorPicker({
                     label: 'Cor de fundo',
                     value: window.d2State.get(`${this.basePath}.btn.bgColor`, '#25D366'),
@@ -429,6 +435,39 @@ class D2ProdutosEditor {
                                     })
                                 );
 
+                                // Ajuste da imagem (only if image exists)
+                                if (product.image) {
+                                    const posDiv = document.createElement('div');
+                                    posDiv.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 12px 0 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);';
+                                    posDiv.textContent = 'Ajuste da Foto';
+                                    itemContainer.appendChild(posDiv);
+
+                                    itemContainer.appendChild(
+                                        C.createSlider({
+                                            label: 'Zoom',
+                                            value: product.imageZoom || 100,
+                                            min: 100, max: 200, step: 5, unit: '%',
+                                            path: `d2Products.${index}.imageZoom`
+                                        })
+                                    );
+                                    itemContainer.appendChild(
+                                        C.createSlider({
+                                            label: 'Horizontal',
+                                            value: product.imagePosX ?? 50,
+                                            min: 0, max: 100, step: 1, unit: '%',
+                                            path: `d2Products.${index}.imagePosX`
+                                        })
+                                    );
+                                    itemContainer.appendChild(
+                                        C.createSlider({
+                                            label: 'Vertical',
+                                            value: product.imagePosY ?? 50,
+                                            min: 0, max: 100, step: 1, unit: '%',
+                                            path: `d2Products.${index}.imagePosY`
+                                        })
+                                    );
+                                }
+
                                 // Botão de remover
                                 const deleteBtn = document.createElement('button');
                                 deleteBtn.className = 'btn-delete-item';
@@ -461,7 +500,10 @@ class D2ProdutosEditor {
                         title: 'Novo Produto',
                         price: 'R$ 0,00',
                         image: '',
-                        link: ''
+                        link: '',
+                        imageZoom: 100,
+                        imagePosX: 50,
+                        imagePosY: 50
                     });
                     window.d2State.set('d2Products', products);
                     // Força re-render do painel

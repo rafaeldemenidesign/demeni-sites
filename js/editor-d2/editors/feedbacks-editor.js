@@ -298,11 +298,24 @@ class D2FeedbacksEditor {
             () => {
                 const container = document.createElement('div');
 
-                container.appendChild(C.createToggle({
+                // Toggle com re-render forçado
+                const toggleEl = C.createToggle({
                     label: 'Mostrar texto final',
                     value: window.d2State.get(`${this.basePath}.bottomCta.enabled`, false),
                     path: `${this.basePath}.bottomCta.enabled`
-                }));
+                });
+                // Interceptar o change para forçar re-render
+                const checkbox = toggleEl.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.addEventListener('change', () => {
+                        setTimeout(() => {
+                            document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                                detail: { sectionId: 'feedbacks' }
+                            }));
+                        }, 50);
+                    });
+                }
+                container.appendChild(toggleEl);
 
                 if (window.d2State.get(`${this.basePath}.bottomCta.enabled`, false)) {
                     container.appendChild(C.createTextInput({
