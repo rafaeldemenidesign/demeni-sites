@@ -884,6 +884,7 @@ function generatePublishableHTML(state, projectName) {
         body {
             display: flex;
             justify-content: center;
+            align-items: flex-start;
             background: #0a0a0f;
         }
         .site-wrapper {
@@ -891,11 +892,21 @@ function generatePublishableHTML(state, projectName) {
             min-height: 100vh;
             position: relative;
         }
-        /* On desktop/tablet, constrain to phone-like width for consistent look */
+        /* Desktop: render at 375px (same as editor preview) and scale up */
         @media (min-width: 481px) {
+            body { align-items: center; min-height: 100vh; }
             .site-wrapper {
-                max-width: 430px;
-                box-shadow: 0 0 60px rgba(0,0,0,0.5);
+                width: 375px;
+                max-width: 375px;
+                min-height: 100vh;
+                transform: scale(1.25);
+                transform-origin: top center;
+                box-shadow: 0 0 80px rgba(0,0,0,0.6);
+            }
+        }
+        @media (min-width: 769px) {
+            .site-wrapper {
+                transform: scale(1.35);
             }
         }
     </style>
