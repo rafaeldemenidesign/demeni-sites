@@ -888,12 +888,13 @@ function generatePublishableHTML(state, projectName) {
         }
         .site-wrapper {
             width: 100%;
-            max-width: 480px;
             min-height: 100vh;
             position: relative;
         }
+        /* On desktop/tablet, constrain to phone-like width for consistent look */
         @media (min-width: 481px) {
             .site-wrapper {
+                max-width: 430px;
                 box-shadow: 0 0 60px rgba(0,0,0,0.5);
             }
         }
