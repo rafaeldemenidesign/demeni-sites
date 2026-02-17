@@ -864,11 +864,12 @@ function generatePublishableHTML(state, projectName) {
 
     // Post-process: convert viewport units (vh/vw) to fixed pixel values
     // This ensures the published site looks identical to the phone preview
+    // Lookahead ensures we only match CSS units, not text inside URLs or other strings
     const PHONE_W = 375;
     const PHONE_H = 812;
-    const siteHTML = rawHTML.replace(/(\d+(?:\.\d+)?)vh/g, (_, val) => {
+    const siteHTML = rawHTML.replace(/(\d+(?:\.\d+)?)vh(?=[;\s,\)!}\:])/g, (_, val) => {
         return Math.round(parseFloat(val) * PHONE_H / 100) + 'px';
-    }).replace(/(\d+(?:\.\d+)?)vw/g, (_, val) => {
+    }).replace(/(\d+(?:\.\d+)?)vw(?=[;\s,\)!}\:])/g, (_, val) => {
         return Math.round(parseFloat(val) * PHONE_W / 100) + 'px';
     });
     return `<!DOCTYPE html>
