@@ -862,6 +862,11 @@ function generatePublishableHTML(state, projectName) {
     const siteHTML = tempFrame.innerHTML;
     const description = state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
 
+    // Calculate fixed hero height based on mobile viewport (iPhone 14 Pro = 844px)
+    const MOBILE_VIEWPORT_H = 844;
+    const heroSectionHeight = state?.hero?.sectionHeight || 100;
+    const heroFixedHeight = Math.round((heroSectionHeight / 100) * MOBILE_VIEWPORT_H);
+
     // Build a complete standalone HTML document
     return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -894,20 +899,23 @@ function generatePublishableHTML(state, projectName) {
         }
         /* Desktop: render at 375px (same as editor preview) and scale up */
         @media (min-width: 481px) {
-            body { align-items: center; min-height: 100vh; }
+            body { align-items: flex-start; }
             .site-wrapper {
                 width: 375px;
                 max-width: 375px;
-                min-height: 100vh;
                 transform: scale(1.25);
                 transform-origin: top center;
                 box-shadow: 0 0 80px rgba(0,0,0,0.6);
+                margin: 0 auto;
             }
+            /* Fix: replace vh-based hero height with fixed mobile-equivalent pixels */
+            .d2-hero { height: ${heroFixedHeight}px !important; }
         }
         @media (min-width: 769px) {
-            .site-wrapper {
-                transform: scale(1.35);
-            }
+            .site-wrapper { transform: scale(1.35); }
+        }
+        @media (min-width: 1200px) {
+            .site-wrapper { transform: scale(1.5); }
         }
     </style>
 </head>
