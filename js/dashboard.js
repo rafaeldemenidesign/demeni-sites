@@ -859,10 +859,18 @@ function generatePublishableHTML(state, projectName) {
         return null;
     }
 
-    const siteHTML = tempFrame.innerHTML;
+    const rawHTML = tempFrame.innerHTML;
     const description = state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
 
-    // Build a complete standalone HTML document
+    // Post-process: convert viewport units (vh/vw) to fixed pixel values
+    // This ensures the published site looks identical to the phone preview
+    const PHONE_W = 375;
+    const PHONE_H = 812;
+    const siteHTML = rawHTML.replace(/(\d+(?:\.\d+)?)vh/g, (_, val) => {
+        return Math.round(parseFloat(val) * PHONE_H / 100) + 'px';
+    }).replace(/(\d+(?:\.\d+)?)vw/g, (_, val) => {
+        return Math.round(parseFloat(val) * PHONE_W / 100) + 'px';
+    });
     return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
