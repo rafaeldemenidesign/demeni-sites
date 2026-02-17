@@ -948,9 +948,8 @@ function generatePublishableHTML(state, projectName) {
                 }
                 var PHONE_W = 375, PHONE_H = 812;
                 var vw = window.innerWidth, vh = window.innerHeight;
-                var scaleX = (vw * 0.85) / PHONE_W;
-                var scaleY = (vh * 0.95) / PHONE_H;
-                var scale = Math.min(scaleX, scaleY, 2.0);
+                // Scale based on viewport width — phone can extend beyond viewport height
+                var scale = Math.min((vw * 0.5) / PHONE_W, 2.0);
                 wrapper.style.transform = 'scale(' + scale + ')';
                 wrapper.style.transformOrigin = 'top center';
                 // Center vertically with margin
