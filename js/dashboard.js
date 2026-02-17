@@ -862,11 +862,6 @@ function generatePublishableHTML(state, projectName) {
     const siteHTML = tempFrame.innerHTML;
     const description = state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
 
-    // Calculate fixed hero height based on mobile viewport (iPhone 14 Pro = 844px)
-    const MOBILE_VIEWPORT_H = 844;
-    const heroSectionHeight = state?.hero?.sectionHeight || 100;
-    const heroFixedHeight = Math.round((heroSectionHeight / 100) * MOBILE_VIEWPORT_H);
-
     // Build a complete standalone HTML document
     return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -885,37 +880,45 @@ function generatePublishableHTML(state, projectName) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0f; }
         body {
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            background: #0a0a0f;
         }
         .site-wrapper {
             width: 100%;
             min-height: 100vh;
             position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
-        /* Desktop: render at 375px (same as editor preview) and scale up */
+        /* Desktop/Tablet: fixed phone-sized container with dynamic scale */
         @media (min-width: 481px) {
-            body { align-items: flex-start; }
+            body { align-items: flex-start; padding-top: 0; }
             .site-wrapper {
                 width: 375px;
-                max-width: 375px;
-                transform: scale(1.25);
-                transform-origin: top center;
+                height: 812px;
+                min-height: 812px;
+                max-height: 812px;
+                border-radius: 20px;
                 box-shadow: 0 0 80px rgba(0,0,0,0.6);
-                margin: 0 auto;
+                /* Scale set dynamically by JS below */
             }
-            /* Fix: replace vh-based hero height with fixed mobile-equivalent pixels */
-            .d2-hero { height: ${heroFixedHeight}px !important; }
         }
-        @media (min-width: 769px) {
-            .site-wrapper { transform: scale(1.35); }
+        /* Mobile: natural full-screen */
+        @media (max-width: 480px) {
+            html, body { overflow: visible; height: auto; }
+            .site-wrapper {
+                width: 100%;
+                min-height: 100vh;
+                overflow-y: visible;
+            }
         }
-        @media (min-width: 1200px) {
-            .site-wrapper { transform: scale(1.5); }
+        /* Hide scrollbar inside phone frame on desktop */
+        @media (min-width: 481px) {
+            .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
+            .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
         }
     </style>
 </head>
@@ -924,6 +927,31 @@ function generatePublishableHTML(state, projectName) {
         ${siteHTML}
     </div>
     <script>
+        // Dynamic phone-viewport scaling for desktop
+        (function(){
+            if (window.innerWidth <= 480) return;
+            var wrapper = document.querySelector('.site-wrapper');
+            function fitToScreen() {
+                if (window.innerWidth <= 480) {
+                    wrapper.style.transform = '';
+                    wrapper.style.margin = '';
+                    return;
+                }
+                var PHONE_W = 375, PHONE_H = 812;
+                var vw = window.innerWidth, vh = window.innerHeight;
+                var scaleX = (vw * 0.85) / PHONE_W;
+                var scaleY = (vh * 0.95) / PHONE_H;
+                var scale = Math.min(scaleX, scaleY, 2.0);
+                wrapper.style.transform = 'scale(' + scale + ')';
+                wrapper.style.transformOrigin = 'top center';
+                // Center vertically with margin
+                var scaledH = PHONE_H * scale;
+                var topMargin = Math.max(0, (vh - scaledH) / 2);
+                wrapper.style.marginTop = topMargin + 'px';
+            }
+            fitToScreen();
+            window.addEventListener('resize', fitToScreen);
+        })();
         // Watermark — Powered by Demeni Sites
         (function(){
             var w=document.createElement('div');
