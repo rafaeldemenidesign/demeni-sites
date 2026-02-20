@@ -148,6 +148,8 @@ function renderPreviewD2New(frame, state) {
     // =============================================
     const headerLogoSize = get('header.logo.size', 28);
     const headerLogoColor = get('header.logo.color', '#ffffff');
+    const headerLogoPosX = get('header.logo.posX', 0);
+    const headerLogoPosY = get('header.logo.posY', 0);
     const headerLogoPosition = get('header.logoPosition', 'left');
     const headerHeight = get('header.height', 80);
     const headerAutoHide = get('header.autoHide', false);
@@ -565,6 +567,7 @@ function renderPreviewD2New(frame, state) {
                 max-height: ${headerLogoSize}px;
                 width: auto;
                 filter: ${headerLogoColor === 'white' ? 'brightness(0) invert(1)' : headerLogoColor === 'black' ? 'brightness(0)' : 'none'};
+                transform: translate(${headerLogoPosX}px, ${headerLogoPosY}px);
             }
             .d2-header .menu-btn {
                 background: none;

@@ -57,6 +57,24 @@ class D2HeaderEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Posição horizontal',
+                        value: window.d2State.get(`${this.basePath}.logo.posX`, 0),
+                        min: -30, max: 30, step: 1, unit: 'px',
+                        path: `${this.basePath}.logo.posX`
+                    })
+                );
+
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Posição vertical',
+                        value: window.d2State.get(`${this.basePath}.logo.posY`, 0),
+                        min: -20, max: 20, step: 1, unit: 'px',
+                        path: `${this.basePath}.logo.posY`
+                    })
+                );
+
                 return container;
             }
         );
