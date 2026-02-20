@@ -288,12 +288,19 @@ const UserData = (function () {
 
             const merged = Array.from(mergedMap.values());
 
-            // Split data into separate keys (matching new storage architecture)
+            // Clear old bloated array FIRST to free localStorage space
+            save(_scopedKey(KEYS.PROJECTS), []);
+
+            // Split data into separate keys — ONLY strip if save succeeds
             const metadataOnly = merged.map(p => {
                 if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
-                    save(`demeni-proj-data-${p.id}`, p.data);
-                    const { data, ...meta } = p;
-                    return meta;
+                    const saved = save(`demeni-proj-data-${p.id}`, p.data);
+                    if (saved) {
+                        const { data, ...meta } = p;
+                        return meta;
+                    }
+                    console.warn(`⚠️ Failed to save data for project ${p.id.substring(0, 8)}, keeping inline`);
+                    return p; // Keep data inline as fallback
                 }
                 return p;
             });
@@ -421,12 +428,17 @@ const UserData = (function () {
         }
 
         // Pass 3: Migrate embedded data to separate keys (one-time)
+        // SAFETY: only strip data if save to separate key succeeds
         let dataMigrated = false;
         projects.forEach(p => {
             if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
-                save(`demeni-proj-data-${p.id}`, p.data);
-                delete p.data;
-                dataMigrated = true;
+                const saved = save(`demeni-proj-data-${p.id}`, p.data);
+                if (saved) {
+                    delete p.data;
+                    dataMigrated = true;
+                } else {
+                    console.warn(`⚠️ Migration: failed to save data for ${p.id.substring(0, 8)}, keeping inline`);
+                }
             }
         });
         if (dataMigrated) {
@@ -519,18 +531,27 @@ const UserData = (function () {
 
         if (index === -1) return null;
 
-        // If updates contain data, save it separately
+        // If updates contain data, try to save it separately
         if (updates.data) {
-            save(`demeni-proj-data-${projectId}`, updates.data);
-            // Don't store data in the main projects array
-            const updatesWithoutData = { ...updates };
-            delete updatesWithoutData.data;
-
-            projects[index] = {
-                ...projects[index],
-                ...updatesWithoutData,
-                updatedAt: new Date().toISOString()
-            };
+            const dataSaved = save(`demeni-proj-data-${projectId}`, updates.data);
+            if (dataSaved) {
+                // Success: don't store data in the main projects array
+                const updatesWithoutData = { ...updates };
+                delete updatesWithoutData.data;
+                projects[index] = {
+                    ...projects[index],
+                    ...updatesWithoutData,
+                    updatedAt: new Date().toISOString()
+                };
+            } else {
+                // Fallback: keep data inline (better than losing it)
+                console.warn('⚠️ Separate data save failed, keeping inline');
+                projects[index] = {
+                    ...projects[index],
+                    ...updates,
+                    updatedAt: new Date().toISOString()
+                };
+            }
         } else {
             projects[index] = {
                 ...projects[index],
@@ -539,7 +560,7 @@ const UserData = (function () {
             };
         }
 
-        // Save metadata (without bulky data)
+        // Save metadata
         save(_scopedKey(KEYS.PROJECTS), projects);
 
         // Schedule cloud save (debounced 3s)
