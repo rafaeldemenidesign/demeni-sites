@@ -319,6 +319,13 @@ class D2ProdutosEditor {
                 const container = document.createElement('div');
                 const dividerStyle = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
 
+                container.appendChild(C.createTextInput({
+                    label: 'Texto do botão',
+                    value: window.d2State.get(`${this.basePath}.btn.text`, 'Comprar'),
+                    placeholder: 'Ex: Comprar, Ver mais...',
+                    path: `${this.basePath}.btn.text`
+                }));
+
                 container.appendChild(C.createSlider({
                     label: 'Tamanho da fonte',
                     value: window.d2State.get(`${this.basePath}.btn.size`, 13),
@@ -333,16 +340,66 @@ class D2ProdutosEditor {
                 }));
 
                 container.appendChild(C.createColorPicker({
-                    label: 'Cor de fundo',
-                    value: window.d2State.get(`${this.basePath}.btn.bgColor`, '#25D366'),
-                    path: `${this.basePath}.btn.bgColor`
-                }));
-
-                container.appendChild(C.createColorPicker({
                     label: 'Cor do texto',
                     value: window.d2State.get(`${this.basePath}.btn.color`, '#ffffff'),
                     path: `${this.basePath}.btn.color`
                 }));
+
+                // ── COR DE FUNDO ──
+                const bgDiv = document.createElement('div');
+                bgDiv.style.cssText = dividerStyle;
+                bgDiv.textContent = 'Cor de fundo';
+                container.appendChild(bgDiv);
+
+                const currentBgType = window.d2State.get(`${this.basePath}.btn.bgType`, 'solid');
+
+                container.appendChild(C.createSelect({
+                    label: 'Tipo de fundo',
+                    value: currentBgType,
+                    options: [
+                        { value: 'solid', label: 'Cor chapada' },
+                        { value: 'gradient', label: 'Degradê' }
+                    ],
+                    path: `${this.basePath}.btn.bgType`
+                }));
+
+                // Cor sólida
+                const solidColorEl = C.createColorPicker({
+                    label: 'Cor de fundo',
+                    value: window.d2State.get(`${this.basePath}.btn.bgColor`, '#25D366'),
+                    path: `${this.basePath}.btn.bgColor`
+                });
+                solidColorEl.dataset.btnBgControl = 'solid';
+                if (currentBgType !== 'solid') solidColorEl.style.display = 'none';
+                container.appendChild(solidColorEl);
+
+                // Degradê presets
+                const gradientWrapper = document.createElement('div');
+                gradientWrapper.dataset.btnBgControl = 'gradient';
+                if (currentBgType !== 'gradient') gradientWrapper.style.display = 'none';
+
+                const gradLabel = document.createElement('label');
+                gradLabel.className = 'control-label';
+                gradLabel.textContent = 'Degradê';
+                gradLabel.style.cssText = 'font-size: 12px; color: var(--d2-text-secondary); margin-bottom: 6px; display: block;';
+                gradientWrapper.appendChild(gradLabel);
+
+                gradientWrapper.appendChild(
+                    C.createGradientPresets({
+                        value: window.d2State.get(`${this.basePath}.btn.bgGradient`, 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)'),
+                        path: `${this.basePath}.btn.bgGradient`
+                    })
+                );
+                container.appendChild(gradientWrapper);
+
+                // Toggle visibility
+                window.d2State.subscribe(({ path }) => {
+                    if (path === `${this.basePath}.btn.bgType`) {
+                        const newType = window.d2State.get(`${this.basePath}.btn.bgType`, 'solid');
+                        solidColorEl.style.display = newType === 'solid' ? '' : 'none';
+                        gradientWrapper.style.display = newType === 'gradient' ? '' : 'none';
+                    }
+                });
 
                 container.appendChild(C.createSlider({
                     label: 'Arredondamento',

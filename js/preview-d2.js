@@ -342,6 +342,10 @@ function renderPreviewD2New(frame, state) {
     const produtoBtnPaddingH = get('produtos.btn.paddingH', 14);
     const produtoBtnPaddingV = get('produtos.btn.paddingV', 6);
     const produtoBtnMarginTop = get('produtos.btn.marginTop', 0);
+    const produtoBtnText = get('produtos.btn.text', 'Comprar');
+    const produtoBtnBgType = get('produtos.btn.bgType', 'solid');
+    const produtoBtnBgGradient = get('produtos.btn.bgGradient', 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)');
+    const produtoBtnBackground = produtoBtnBgType === 'gradient' ? produtoBtnBgGradient : produtoBtnBgColor;
 
     // =============================================
     // FEEDBACKS - Valores dinâmicos
@@ -968,7 +972,7 @@ function renderPreviewD2New(frame, state) {
             .d2-produto-btn {
                 display: inline-block;
                 padding: ${produtoBtnPaddingV}px ${produtoBtnPaddingH}px;
-                background: ${produtoBtnBgColor};
+                background: ${produtoBtnBackground};
                 color: ${produtoBtnColor};
                 font-size: ${produtoBtnSize}px;
                 font-weight: ${produtoBtnWeight};
@@ -1348,15 +1352,16 @@ function renderPreviewD2New(frame, state) {
                 } else {
                     priceHtml = rawPrice;
                 }
+                const prodLink = p.link && p.link !== '#' && !p.link.startsWith('http') && !p.link.startsWith('#') && !p.link.startsWith('mailto:') && !p.link.startsWith('tel:') ? 'https://' + p.link : (p.link || '#');
                 return `
-                    <a href="${p.link || '#'}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
+                    <a href="${prodLink}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
                         <div class="d2-produto-img">
                             <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}" style="transform:scale(${(p.imageZoom || 100) / 100}) translate(${(p.imagePosX ?? 50) - 50}%, ${(p.imagePosY ?? 50) - 50}%);transform-origin:center center;">
                         </div>
                         <h3>${p.title || 'Nome do Produto'}</h3>
                         <div class="d2-produto-footer">
                             <span class="d2-preco">${priceHtml}</span>
-                            <span class="d2-produto-btn">Comprar</span>
+                            <span class="d2-produto-btn">${produtoBtnText}</span>
                         </div>
                     </a>`;
             }).join('')}
