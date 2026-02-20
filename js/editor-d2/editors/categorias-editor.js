@@ -175,13 +175,58 @@ class D2CategoriasEditor {
                     })
                 );
 
+                // ── Tipo de fundo do ícone ──
+                const currentBgType = window.d2State.get(`${this.basePath}.icon.bgType`, 'solid');
+
                 container.appendChild(
-                    C.createColorPicker({
-                        label: 'Cor de fundo',
-                        value: window.d2State.get(`${this.basePath}.icon.bgColor`, '#f5f5f5'),
-                        path: `${this.basePath}.icon.bgColor`
+                    C.createSelect({
+                        label: 'Tipo de fundo',
+                        value: currentBgType,
+                        options: [
+                            { value: 'solid', label: 'Cor chapada' },
+                            { value: 'gradient', label: 'Degradê' }
+                        ],
+                        path: `${this.basePath}.icon.bgType`
                     })
                 );
+
+                // Cor sólida (condicional)
+                const solidColorEl = C.createColorPicker({
+                    label: 'Cor de fundo',
+                    value: window.d2State.get(`${this.basePath}.icon.bgColor`, '#f5f5f5'),
+                    path: `${this.basePath}.icon.bgColor`
+                });
+                solidColorEl.dataset.iconBgControl = 'solid';
+                if (currentBgType !== 'solid') solidColorEl.style.display = 'none';
+                container.appendChild(solidColorEl);
+
+                // Degradê presets (condicional)
+                const gradientWrapper = document.createElement('div');
+                gradientWrapper.dataset.iconBgControl = 'gradient';
+                if (currentBgType !== 'gradient') gradientWrapper.style.display = 'none';
+
+                const gradLabel = document.createElement('label');
+                gradLabel.className = 'control-label';
+                gradLabel.textContent = 'Degradê';
+                gradLabel.style.cssText = 'font-size: 12px; color: var(--d2-text-secondary); margin-bottom: 6px; display: block;';
+                gradientWrapper.appendChild(gradLabel);
+
+                gradientWrapper.appendChild(
+                    C.createGradientPresets({
+                        value: window.d2State.get(`${this.basePath}.icon.bgGradient`, 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'),
+                        path: `${this.basePath}.icon.bgGradient`
+                    })
+                );
+                container.appendChild(gradientWrapper);
+
+                // Toggle visibility on bgType change
+                window.d2State.subscribe(({ path }) => {
+                    if (path === `${this.basePath}.icon.bgType`) {
+                        const newType = window.d2State.get(`${this.basePath}.icon.bgType`, 'solid');
+                        solidColorEl.style.display = newType === 'solid' ? '' : 'none';
+                        gradientWrapper.style.display = newType === 'gradient' ? '' : 'none';
+                    }
+                });
 
                 container.appendChild(
                     C.createColorPicker({

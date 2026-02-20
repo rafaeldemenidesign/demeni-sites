@@ -525,6 +525,29 @@ class D2ProdutosEditor {
                                     );
                                 }
 
+                                // ── Botão individual ──
+                                const btnDiv = document.createElement('div');
+                                btnDiv.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 12px 0 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);';
+                                btnDiv.textContent = 'Botão';
+                                itemContainer.appendChild(btnDiv);
+
+                                itemContainer.appendChild(
+                                    C.createTextInput({
+                                        label: 'Texto do botão',
+                                        value: product.btnText || '',
+                                        placeholder: window.d2State.get(`${this.basePath}.btn.text`, 'Comprar'),
+                                        path: `d2Products.${index}.btnText`
+                                    })
+                                );
+
+                                itemContainer.appendChild(
+                                    C.createColorPicker({
+                                        label: 'Cor do botão',
+                                        value: product.btnBgColor || window.d2State.get(`${this.basePath}.btn.bgColor`, '#25D366'),
+                                        path: `d2Products.${index}.btnBgColor`
+                                    })
+                                );
+
                                 // Botão de remover
                                 const deleteBtn = document.createElement('button');
                                 deleteBtn.className = 'btn-delete-item';

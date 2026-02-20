@@ -273,6 +273,9 @@ function renderPreviewD2New(frame, state) {
     const categoriaIconRadius = get('categorias.icon.radius', 16);
     const categoriaIconColor = get('categorias.icon.color', '#333333');
     const categoriaIconBgColor = get('categorias.icon.bgColor', '#f5f5f5');
+    const categoriaIconBgType = get('categorias.icon.bgType', 'solid');
+    const categoriaIconBgGradient = get('categorias.icon.bgGradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+    const categoriaIconBackground = categoriaIconBgType === 'gradient' ? categoriaIconBgGradient : categoriaIconBgColor;
     const categoriaLabelSize = get('categorias.label.size', 10);
     const categoriaLabelColor = get('categorias.label.color', '#222222');
     const categoriaLabelWeight = get('categorias.label.weight', 500);
@@ -829,7 +832,7 @@ function renderPreviewD2New(frame, state) {
                 width: ${categoriaIconSize}px;
                 height: ${categoriaIconSize}px;
                 border-radius: ${categoriaIconRadius}px;
-                background: ${categoriaIconBgColor};
+                background: ${categoriaIconBackground};
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -1369,7 +1372,7 @@ function renderPreviewD2New(frame, state) {
                         <h3>${p.title || 'Nome do Produto'}</h3>
                         <div class="d2-produto-footer">
                             <span class="d2-preco">${priceHtml}</span>
-                            <span class="d2-produto-btn">${produtoBtnText}</span>
+                            <span class="d2-produto-btn"${p.btnBgColor ? ` style="background:${p.btnBgColor}"` : ''}>${p.btnText || produtoBtnText}</span>
                         </div>
                     </a>`;
             }).join('')}
