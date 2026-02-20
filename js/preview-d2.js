@@ -241,7 +241,10 @@ function renderPreviewD2New(frame, state) {
 
     // Botão CTA
     const heroBtnText = get('hero.btn.text', 'QUERO SABER MAIS');
-    const heroBtnLink = get('hero.btn.link', '#');
+    const heroBtnLinkRaw = get('hero.btn.link', '#');
+    const heroBtnLink = heroBtnLinkRaw && heroBtnLinkRaw !== '#' && !heroBtnLinkRaw.startsWith('http') && !heroBtnLinkRaw.startsWith('#') && !heroBtnLinkRaw.startsWith('mailto:') && !heroBtnLinkRaw.startsWith('tel:')
+        ? 'https://' + heroBtnLinkRaw
+        : heroBtnLinkRaw;
     const heroBtnFontSize = get('hero.btn.textStyle.size', 16);
     const heroBtnFontColor = get('hero.btn.textStyle.color', '#ffffff');
     const heroBtnFontWeight = get('hero.btn.textStyle.weight', 400);

@@ -44,6 +44,19 @@ class D2HeaderEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createSelect({
+                        label: 'Posição do logo',
+                        value: window.d2State.get(`${this.basePath}.logoPosition`, 'left'),
+                        options: [
+                            { value: 'left', label: 'Esquerda' },
+                            { value: 'center', label: 'Centro' },
+                            { value: 'right', label: 'Direita' }
+                        ],
+                        path: `${this.basePath}.logoPosition`
+                    })
+                );
+
                 return container;
             }
         );
