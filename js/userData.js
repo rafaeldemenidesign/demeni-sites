@@ -287,7 +287,18 @@ const UserData = (function () {
             });
 
             const merged = Array.from(mergedMap.values());
-            save(_scopedKey(KEYS.PROJECTS), merged);
+
+            // Split data into separate keys (matching new storage architecture)
+            const metadataOnly = merged.map(p => {
+                if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
+                    save(`demeni-proj-data-${p.id}`, p.data);
+                    const { data, ...meta } = p;
+                    return meta;
+                }
+                return p;
+            });
+
+            save(_scopedKey(KEYS.PROJECTS), metadataOnly);
             console.log(`☁️ Synced ${aliveCloudProjects.length} projects from cloud (merged with ${localProjects.length} local, ${zombieIds.length} zombies filtered)`);
             return true;
         } catch (e) {
