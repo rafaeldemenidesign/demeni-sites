@@ -604,11 +604,11 @@ function closeModelSelectionModal() {
 }
 
 async function selectModel(modelType) {
-    // Model costs (D-1=40, D-2=80, D-3=140)
+    // Model costs (D-1=40, D-2=60, D-3=80)
     const modelCosts = {
         'd1': 40,
-        'd2': 80,
-        'prime': 140
+        'd2': 60,
+        'prime': 80
     };
 
     // Create project with model type
