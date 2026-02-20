@@ -2481,7 +2481,7 @@ async function saveAffiliateConfig() {
 // ========== EDITOR D2 INITIALIZATION ==========
 let editorD2Initialized = false;
 
-function initEditorD2() {
+async function initEditorD2() {
     console.log('[Editor D2] Initializing...');
 
     // Check if required modules are loaded - retry with delay if not
@@ -2501,10 +2501,13 @@ function initEditorD2() {
         return;
     }
 
+    // ====== PRELOAD CACHE FROM INDEXEDDB ======
+    await UserData.preloadCache();
+
     // ====== LOAD SAVED PROJECT DATA ======
     const projectId = UserData.getCurrentProjectId();
     if (projectId) {
-        const project = UserData.getProject(projectId);
+        const project = await UserData.getProjectAsync(projectId);
         if (project && project.data) {
             console.log('[Editor D2] Loading saved project data for:', projectId);
             window.d2State.loadState(project.data);

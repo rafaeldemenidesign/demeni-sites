@@ -244,15 +244,16 @@ const UserData = (function () {
     // Sync wrapper: saves to IndexedDB AND keeps in-memory cache for sync access
     const _dataCache = {};
 
-    function saveProjectData(projectId, data) {
+    async function saveProjectData(projectId, data) {
         _dataCache[projectId] = data;
-        // Fire async IndexedDB save (don't await)
-        idbSave(`proj-data-${projectId}`, data).then(ok => {
-            if (!ok) console.warn('⚠️ IndexedDB save failed for', projectId.substring(0, 8));
-        });
-        // Also try localStorage as backup (will fail gracefully if full)
-        save(`demeni-proj-data-${projectId}`, data);
-        return true;
+        // Await IndexedDB save to ensure data is persisted before returning
+        const ok = await idbSave(`proj-data-${projectId}`, data);
+        if (!ok) {
+            console.warn('⚠️ IndexedDB save failed for', projectId.substring(0, 8));
+            // Last resort: try localStorage (may fail if quota exceeded)
+            save(`demeni-proj-data-${projectId}`, data);
+        }
+        return ok;
     }
 
     function loadProjectDataSync(projectId) {
@@ -264,6 +265,10 @@ const UserData = (function () {
             _dataCache[projectId] = lsData;
             return lsData;
         }
+        // Trigger background IndexedDB load for future sync access
+        loadProjectData(projectId).then(data => {
+            if (data) console.log('📦 Loaded from IndexedDB into cache:', projectId.substring(0, 8));
+        });
         return null;
     }
 
@@ -814,6 +819,23 @@ const UserData = (function () {
         return true;
     }
 
+    // Preload all project data from IndexedDB into _dataCache (call on startup)
+    async function preloadCache() {
+        const projects = getProjects();
+        let loaded = 0;
+        for (const p of projects) {
+            if (!_dataCache[p.id]) {
+                const data = await idbLoad(`proj-data-${p.id}`);
+                if (data) {
+                    _dataCache[p.id] = data;
+                    loaded++;
+                }
+            }
+        }
+        if (loaded > 0) console.log(`📦 Preloaded ${loaded} project(s) from IndexedDB into cache`);
+        return loaded;
+    }
+
     // ========== PUBLIC API ==========
     return {
         // User
@@ -847,6 +869,7 @@ const UserData = (function () {
         clearAllData,
         exportData,
         importData,
+        preloadCache,
 
         // Helpers
         generateUUID,
