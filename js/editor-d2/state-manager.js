@@ -403,6 +403,7 @@ class D2StateManager {
         if (oldValue !== value) {
             this.notifyListeners(path, value, oldValue);
             this.schedulePreviewUpdate();
+            this.scheduleSave();
         }
 
         return this;

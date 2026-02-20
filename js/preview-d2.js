@@ -422,7 +422,10 @@ function renderPreviewD2New(frame, state) {
 
     // Button: replicate hero or custom
     const ctaBtnText = get('cta.btn.text', '') || heroBtnText;
-    const ctaBtnLink = get('cta.btn.link', '') || heroBtnLink;
+    const ctaBtnLinkRaw = get('cta.btn.link', '') || heroBtnLink;
+    const ctaBtnLink = ctaBtnLinkRaw && ctaBtnLinkRaw !== '#' && !ctaBtnLinkRaw.startsWith('http') && !ctaBtnLinkRaw.startsWith('#') && !ctaBtnLinkRaw.startsWith('mailto:') && !ctaBtnLinkRaw.startsWith('tel:')
+        ? 'https://' + ctaBtnLinkRaw
+        : ctaBtnLinkRaw;
     const ctaBtnHoverAnimation = ctaReplicateHero ? true : get('cta.btn.hoverAnimation', true);
     const ctaBtnFontSize = ctaReplicateHero ? heroBtnFontSize : get('cta.btn.textStyle.size', 16);
     const ctaBtnFontWeight = ctaReplicateHero ? heroBtnFontWeight : get('cta.btn.textStyle.weight', 600);
