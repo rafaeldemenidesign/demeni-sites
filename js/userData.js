@@ -409,8 +409,21 @@ const UserData = (function () {
             projects = dedupedProjects;
         }
 
-        // Save if any deduplication happened
-        if (seenById.size < (load(_scopedKey(KEYS.PROJECTS)) || []).length || urlDupes > 0) {
+        // Pass 3: Migrate embedded data to separate keys (one-time)
+        let dataMigrated = false;
+        projects.forEach(p => {
+            if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
+                save(`demeni-proj-data-${p.id}`, p.data);
+                delete p.data;
+                dataMigrated = true;
+            }
+        });
+        if (dataMigrated) {
+            console.log('📦 Migrated project data to separate storage keys');
+        }
+
+        // Save if any deduplication or migration happened
+        if (seenById.size < (load(_scopedKey(KEYS.PROJECTS)) || []).length || urlDupes > 0 || dataMigrated) {
             save(_scopedKey(KEYS.PROJECTS), projects);
         }
 
@@ -426,9 +439,20 @@ const UserData = (function () {
     }
 
     // Get single project (SYNC — reads from cache)
+    // Reassembles the full object by loading data from its separate key
     function getProject(projectId) {
         const projects = getProjects();
-        return projects.find(p => p.id === projectId) || null;
+        const project = projects.find(p => p.id === projectId) || null;
+        if (!project) return null;
+
+        // Load data from separate key if not already present
+        if (!project.data || Object.keys(project.data).length === 0) {
+            const storedData = load(`demeni-proj-data-${projectId}`);
+            if (storedData) {
+                project.data = storedData;
+            }
+        }
+        return project;
     }
 
     // Create project (async — creates in cloud + local)
@@ -444,9 +468,13 @@ const UserData = (function () {
                     const cloudProject = fromSupabase(data);
                     cloudProject.data = newProject.data; // Keep default data structure
 
-                    // Save locally with cloud ID
+                    // Store data separately and save metadata to projects array
+                    save(`demeni-proj-data-${cloudProject.id}`, cloudProject.data);
+                    const projectMeta = { ...cloudProject };
+                    delete projectMeta.data;
+
                     const projects = getProjects();
-                    projects.unshift(cloudProject);
+                    projects.unshift(projectMeta);
                     save(_scopedKey(KEYS.PROJECTS), projects);
 
                     // Also push the full data to cloud
@@ -461,33 +489,55 @@ const UserData = (function () {
             }
         }
 
-        // Fallback: local only
+        // Fallback: local only - store data separately
+        save(`demeni-proj-data-${newProject.id}`, newProject.data);
+        const projectMeta = { ...newProject };
+        delete projectMeta.data;
+
         const projects = getProjects();
-        projects.unshift(newProject);
+        projects.unshift(projectMeta);
         save(_scopedKey(KEYS.PROJECTS), projects);
         return newProject;
     }
 
     // Update project — local IMMEDIATE + cloud DEBOUNCED
+    // Stores data in a separate key to avoid localStorage quota issues
     function updateProject(projectId, updates) {
         const projects = getProjects();
         const index = projects.findIndex(p => p.id === projectId);
 
         if (index === -1) return null;
 
-        projects[index] = {
-            ...projects[index],
-            ...updates,
-            updatedAt: new Date().toISOString()
-        };
+        // If updates contain data, save it separately
+        if (updates.data) {
+            save(`demeni-proj-data-${projectId}`, updates.data);
+            // Don't store data in the main projects array
+            const updatesWithoutData = { ...updates };
+            delete updatesWithoutData.data;
 
-        // Save local immediately
+            projects[index] = {
+                ...projects[index],
+                ...updatesWithoutData,
+                updatedAt: new Date().toISOString()
+            };
+        } else {
+            projects[index] = {
+                ...projects[index],
+                ...updates,
+                updatedAt: new Date().toISOString()
+            };
+        }
+
+        // Save metadata (without bulky data)
         save(_scopedKey(KEYS.PROJECTS), projects);
 
         // Schedule cloud save (debounced 3s)
         _scheduleCloudSave(projectId);
 
-        return projects[index];
+        // Return full project with data
+        const fullProject = { ...projects[index] };
+        if (updates.data) fullProject.data = updates.data;
+        return fullProject;
     }
 
     function updateProjectData(projectId, data) {
@@ -503,6 +553,8 @@ const UserData = (function () {
         let projects = getProjects();
         projects = projects.filter(p => p.id !== projectId);
         save(_scopedKey(KEYS.PROJECTS), projects);
+        // Clean up separate data key
+        try { localStorage.removeItem(`demeni-proj-data-${projectId}`); } catch (e) { }
 
         // Cancel any pending cloud saves
         if (_pendingCloudSaves[projectId]) {
