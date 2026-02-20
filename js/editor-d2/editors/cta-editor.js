@@ -282,11 +282,55 @@ class D2CTAEditor {
                     bgDiv.textContent = 'Aparência';
                     container.appendChild(bgDiv);
 
-                    container.appendChild(C.createColorPicker({
+                    const currentBgType = window.d2State.get(`${this.basePath}.btn.bgType`, 'solid');
+
+                    container.appendChild(C.createSelect({
+                        label: 'Tipo de fundo',
+                        value: currentBgType,
+                        options: [
+                            { value: 'solid', label: 'Cor chapada' },
+                            { value: 'gradient', label: 'Degradê' }
+                        ],
+                        path: `${this.basePath}.btn.bgType`
+                    }));
+
+                    // Cor sólida (condicional)
+                    const solidColorEl = C.createColorPicker({
                         label: 'Cor de fundo',
                         value: window.d2State.get(`${this.basePath}.btn.bgColor`, '#5167E7'),
                         path: `${this.basePath}.btn.bgColor`
-                    }));
+                    });
+                    solidColorEl.dataset.ctaBtnBgControl = 'solid';
+                    if (currentBgType !== 'solid') solidColorEl.style.display = 'none';
+                    container.appendChild(solidColorEl);
+
+                    // Degradê presets (condicional)
+                    const gradientWrapper = document.createElement('div');
+                    gradientWrapper.dataset.ctaBtnBgControl = 'gradient';
+                    if (currentBgType !== 'gradient') gradientWrapper.style.display = 'none';
+
+                    const gradLabel = document.createElement('label');
+                    gradLabel.className = 'control-label';
+                    gradLabel.textContent = 'Degradê';
+                    gradLabel.style.cssText = 'font-size: 12px; color: var(--d2-text-secondary); margin-bottom: 6px; display: block;';
+                    gradientWrapper.appendChild(gradLabel);
+
+                    gradientWrapper.appendChild(
+                        C.createGradientPresets({
+                            value: window.d2State.get(`${this.basePath}.btn.bgGradient`, 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'),
+                            path: `${this.basePath}.btn.bgGradient`
+                        })
+                    );
+                    container.appendChild(gradientWrapper);
+
+                    // Toggle visibility on bgType change
+                    window.d2State.subscribe(({ path }) => {
+                        if (path === `${this.basePath}.btn.bgType`) {
+                            const newType = window.d2State.get(`${this.basePath}.btn.bgType`, 'solid');
+                            solidColorEl.style.display = newType === 'solid' ? '' : 'none';
+                            gradientWrapper.style.display = newType === 'gradient' ? '' : 'none';
+                        }
+                    });
 
                     container.appendChild(C.createSlider({
                         label: 'Arredondamento',

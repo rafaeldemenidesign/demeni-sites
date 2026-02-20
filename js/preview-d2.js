@@ -433,7 +433,9 @@ function renderPreviewD2New(frame, state) {
     const ctaBtnFontWeight = ctaReplicateHero ? heroBtnFontWeight : get('cta.btn.textStyle.weight', 600);
     const ctaBtnFontColor = ctaReplicateHero ? heroBtnFontColor : get('cta.btn.textStyle.color', '#ffffff');
     const ctaBtnBgColor = ctaReplicateHero ? heroBtnBgColor : get('cta.btn.bgColor', '#5167E7');
-    const ctaBtnBackground = ctaReplicateHero ? heroBtnBackground : ctaBtnBgColor;
+    const ctaBtnBgType = get('cta.btn.bgType', 'solid');
+    const ctaBtnBgGradient = get('cta.btn.bgGradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+    const ctaBtnBackground = ctaReplicateHero ? heroBtnBackground : (ctaBtnBgType === 'gradient' ? ctaBtnBgGradient : ctaBtnBgColor);
     const ctaBtnPaddingV = ctaReplicateHero ? heroBtnPaddingV : get('cta.btn.paddingInner.vertical', 12);
     const ctaBtnPaddingH = ctaReplicateHero ? heroBtnPaddingH : get('cta.btn.paddingInner.horizontal', 40);
     const ctaBtnBorderRadius = ctaReplicateHero ? heroBtnBorderRadius : get('cta.btn.borderRadius', 30);
