@@ -162,6 +162,131 @@ const UserData = (function () {
         }
     }
 
+    // ========== IndexedDB for bulky project data (50MB+ limit) ==========
+    const IDB_NAME = 'demeni-sites-db';
+    const IDB_VERSION = 1;
+    const IDB_STORE = 'project-data';
+    let _dbPromise = null;
+
+    function _getDB() {
+        if (_dbPromise) return _dbPromise;
+        _dbPromise = new Promise((resolve, reject) => {
+            try {
+                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+                req.onupgradeneeded = () => {
+                    const db = req.result;
+                    if (!db.objectStoreNames.contains(IDB_STORE)) {
+                        db.createObjectStore(IDB_STORE);
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => {
+                    console.error('IndexedDB open error:', req.error);
+                    _dbPromise = null;
+                    reject(req.error);
+                };
+            } catch (e) {
+                _dbPromise = null;
+                reject(e);
+            }
+        });
+        return _dbPromise;
+    }
+
+    async function idbSave(key, data) {
+        try {
+            const db = await _getDB();
+            return new Promise((resolve) => {
+                const tx = db.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).put(data, key);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => {
+                    console.error('IndexedDB save error:', tx.error);
+                    resolve(false);
+                };
+            });
+        } catch (e) {
+            console.error('IndexedDB save exception:', e);
+            return false;
+        }
+    }
+
+    async function idbLoad(key) {
+        try {
+            const db = await _getDB();
+            return new Promise((resolve) => {
+                const tx = db.transaction(IDB_STORE, 'readonly');
+                const req = tx.objectStore(IDB_STORE).get(key);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => {
+                    console.error('IndexedDB load error:', req.error);
+                    resolve(null);
+                };
+            });
+        } catch (e) {
+            console.error('IndexedDB load exception:', e);
+            return null;
+        }
+    }
+
+    async function idbDelete(key) {
+        try {
+            const db = await _getDB();
+            return new Promise((resolve) => {
+                const tx = db.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).delete(key);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+            });
+        } catch (e) { return false; }
+    }
+
+    // Sync wrapper: saves to IndexedDB AND keeps in-memory cache for sync access
+    const _dataCache = {};
+
+    function saveProjectData(projectId, data) {
+        _dataCache[projectId] = data;
+        // Fire async IndexedDB save (don't await)
+        idbSave(`proj-data-${projectId}`, data).then(ok => {
+            if (!ok) console.warn('⚠️ IndexedDB save failed for', projectId.substring(0, 8));
+        });
+        // Also try localStorage as backup (will fail gracefully if full)
+        save(`demeni-proj-data-${projectId}`, data);
+        return true;
+    }
+
+    function loadProjectDataSync(projectId) {
+        // Check in-memory cache first
+        if (_dataCache[projectId]) return _dataCache[projectId];
+        // Fallback to localStorage
+        const lsData = load(`demeni-proj-data-${projectId}`);
+        if (lsData) {
+            _dataCache[projectId] = lsData;
+            return lsData;
+        }
+        return null;
+    }
+
+    async function loadProjectData(projectId) {
+        // Check in-memory cache first
+        if (_dataCache[projectId]) return _dataCache[projectId];
+        // Try IndexedDB
+        const idbData = await idbLoad(`proj-data-${projectId}`);
+        if (idbData) {
+            _dataCache[projectId] = idbData;
+            return idbData;
+        }
+        // Fallback to localStorage
+        const lsData = load(`demeni-proj-data-${projectId}`);
+        if (lsData) {
+            _dataCache[projectId] = lsData;
+            // Migrate to IndexedDB
+            idbSave(`proj-data-${projectId}`, lsData);
+            return lsData;
+        }
+        return null;
+    }
+
     // ========== FIELD MAPPING (camelCase ↔ snake_case) ==========
     function toSupabase(localProject) {
         // Include thumbnail inside data JSONB so it persists in cloud
@@ -288,19 +413,12 @@ const UserData = (function () {
 
             const merged = Array.from(mergedMap.values());
 
-            // Clear old bloated array FIRST to free localStorage space
-            save(_scopedKey(KEYS.PROJECTS), []);
-
-            // Split data into separate keys — ONLY strip if save succeeds
+            // Save data to IndexedDB (50MB+), strip from metadata array
             const metadataOnly = merged.map(p => {
                 if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
-                    const saved = save(`demeni-proj-data-${p.id}`, p.data);
-                    if (saved) {
-                        const { data, ...meta } = p;
-                        return meta;
-                    }
-                    console.warn(`⚠️ Failed to save data for project ${p.id.substring(0, 8)}, keeping inline`);
-                    return p; // Keep data inline as fallback
+                    saveProjectData(p.id, p.data);
+                    const { data, ...meta } = p;
+                    return meta;
                 }
                 return p;
             });
@@ -427,22 +545,17 @@ const UserData = (function () {
             projects = dedupedProjects;
         }
 
-        // Pass 3: Migrate embedded data to separate keys (one-time)
-        // SAFETY: only strip data if save to separate key succeeds
+        // Pass 3: Migrate embedded data to IndexedDB (one-time)
         let dataMigrated = false;
         projects.forEach(p => {
             if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
-                const saved = save(`demeni-proj-data-${p.id}`, p.data);
-                if (saved) {
-                    delete p.data;
-                    dataMigrated = true;
-                } else {
-                    console.warn(`⚠️ Migration: failed to save data for ${p.id.substring(0, 8)}, keeping inline`);
-                }
+                saveProjectData(p.id, p.data);
+                delete p.data;
+                dataMigrated = true;
             }
         });
         if (dataMigrated) {
-            console.log('📦 Migrated project data to separate storage keys');
+            console.log('📦 Migrated project data to IndexedDB');
         }
 
         // Save if any deduplication or migration happened
@@ -461,16 +574,30 @@ const UserData = (function () {
         return getProjects();
     }
 
-    // Get single project (SYNC — reads from cache)
-    // Reassembles the full object by loading data from its separate key
+    // Get single project (SYNC — reads from cache + IndexedDB cache)
     function getProject(projectId) {
         const projects = getProjects();
         const project = projects.find(p => p.id === projectId) || null;
         if (!project) return null;
 
-        // Load data from separate key if not already present
+        // Load data from IndexedDB/cache if not already present
         if (!project.data || Object.keys(project.data).length === 0) {
-            const storedData = load(`demeni-proj-data-${projectId}`);
+            const storedData = loadProjectDataSync(projectId);
+            if (storedData) {
+                project.data = storedData;
+            }
+        }
+        return project;
+    }
+
+    // Async version — tries IndexedDB first (for initial load)
+    async function getProjectAsync(projectId) {
+        const projects = getProjects();
+        const project = projects.find(p => p.id === projectId) || null;
+        if (!project) return null;
+
+        if (!project.data || Object.keys(project.data).length === 0) {
+            const storedData = await loadProjectData(projectId);
             if (storedData) {
                 project.data = storedData;
             }
@@ -491,8 +618,8 @@ const UserData = (function () {
                     const cloudProject = fromSupabase(data);
                     cloudProject.data = newProject.data; // Keep default data structure
 
-                    // Store data separately and save metadata to projects array
-                    save(`demeni-proj-data-${cloudProject.id}`, cloudProject.data);
+                    // Store data in IndexedDB and save metadata to projects array
+                    saveProjectData(cloudProject.id, cloudProject.data);
                     const projectMeta = { ...cloudProject };
                     delete projectMeta.data;
 
@@ -512,8 +639,8 @@ const UserData = (function () {
             }
         }
 
-        // Fallback: local only - store data separately
-        save(`demeni-proj-data-${newProject.id}`, newProject.data);
+        // Fallback: local only - store data in IndexedDB
+        saveProjectData(newProject.id, newProject.data);
         const projectMeta = { ...newProject };
         delete projectMeta.data;
 
@@ -531,27 +658,16 @@ const UserData = (function () {
 
         if (index === -1) return null;
 
-        // If updates contain data, try to save it separately
+        // Save data to IndexedDB (never in main array)
         if (updates.data) {
-            const dataSaved = save(`demeni-proj-data-${projectId}`, updates.data);
-            if (dataSaved) {
-                // Success: don't store data in the main projects array
-                const updatesWithoutData = { ...updates };
-                delete updatesWithoutData.data;
-                projects[index] = {
-                    ...projects[index],
-                    ...updatesWithoutData,
-                    updatedAt: new Date().toISOString()
-                };
-            } else {
-                // Fallback: keep data inline (better than losing it)
-                console.warn('⚠️ Separate data save failed, keeping inline');
-                projects[index] = {
-                    ...projects[index],
-                    ...updates,
-                    updatedAt: new Date().toISOString()
-                };
-            }
+            saveProjectData(projectId, updates.data);
+            const updatesWithoutData = { ...updates };
+            delete updatesWithoutData.data;
+            projects[index] = {
+                ...projects[index],
+                ...updatesWithoutData,
+                updatedAt: new Date().toISOString()
+            };
         } else {
             projects[index] = {
                 ...projects[index],
@@ -560,7 +676,7 @@ const UserData = (function () {
             };
         }
 
-        // Save metadata
+        // Save metadata (lightweight, no bulky data)
         save(_scopedKey(KEYS.PROJECTS), projects);
 
         // Schedule cloud save (debounced 3s)
@@ -585,7 +701,9 @@ const UserData = (function () {
         let projects = getProjects();
         projects = projects.filter(p => p.id !== projectId);
         save(_scopedKey(KEYS.PROJECTS), projects);
-        // Clean up separate data key
+        // Clean up separate data key (IndexedDB + localStorage + cache)
+        idbDelete(`proj-data-${projectId}`);
+        delete _dataCache[projectId];
         try { localStorage.removeItem(`demeni-proj-data-${projectId}`); } catch (e) { }
 
         // Cancel any pending cloud saves
@@ -712,6 +830,7 @@ const UserData = (function () {
         createProject,
         updateProject,
         updateProjectData,
+        getProjectAsync,
         deleteProject,
         publishProject,
         unpublishProject,
