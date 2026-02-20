@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 
 <head>
-        <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#7c3aed">
     <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
     <link rel="icon" type="image/png" href="img/favicon.png">
@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/affiliates.css">
     <link rel="stylesheet" href="css/editor-d2.css">
     <link rel="stylesheet" href="css/feed.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 </head>
 
 <body>
@@ -40,6 +41,26 @@
 
             <!-- Right: Credits + Editor Buttons -->
             <div class="header-actions">
+                <!-- Sort dropdown (projects page only) -->
+                <div class="sort-dropdown projects-only" id="sort-dropdown-header" style="display:none;">
+                    <button class="btn-sort" id="btn-sort-projects">
+                        <i class="fas fa-sort-amount-down"></i>
+                        <span id="sort-label">Mais Recentes</span>
+                        <i class="fas fa-chevron-down sort-arrow"></i>
+                    </button>
+                    <div class="sort-options" id="sort-options">
+                        <button class="sort-option active" data-sort="recent">
+                            <i class="fas fa-clock"></i> Mais Recentes
+                        </button>
+                        <button class="sort-option" data-sort="online">
+                            <i class="fas fa-globe"></i> Online Primeiro
+                        </button>
+                        <button class="sort-option" data-sort="alpha">
+                            <i class="fas fa-sort-alpha-down"></i> Ordem Alfabética
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Credits (always visible) -->
                 <div class="credits-pill">
                     <div class="credits-info">
@@ -109,7 +130,8 @@
                         <img class="sidebar-avatar" id="sidebar-avatar"
                             src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=000&size=80"
                             alt="Avatar">
-                        <span id="notif-badge-avatar" style="display: none; position: absolute; top: -4px; right: -4px; background: #3b82f6; color: #fff; font-size: 0.75rem; font-weight: 700; min-width: 22px; height: 22px; border-radius: 11px; align-items: center; justify-content: center; border: 2px solid var(--bg-dark, #0f0f23);">0</span>
+                        <span id="notif-badge-avatar"
+                            style="display: none; position: absolute; top: -4px; right: -4px; background: #3b82f6; color: #fff; font-size: 0.75rem; font-weight: 700; min-width: 22px; height: 22px; border-radius: 11px; align-items: center; justify-content: center; border: 2px solid var(--bg-dark, #0f0f23);">0</span>
                         <div class="sidebar-hamburger-icon">
                             <i class="fas fa-bars"></i>
                         </div>
@@ -171,47 +193,42 @@
 
                 <!-- Page: Projects -->
                 <section class="page" id="page-projects">
-                    <div class="page-header">
-                        <p class="page-subtitle">Gerencie seus sites criados</p>
-                        <button class="btn-primary" id="btn-new-project">
-                            <i class="fas fa-plus"></i> Novo Projeto
-                        </button>
+                    <!-- Top Banner (same as homepage) -->
+                    <div class="feed-top-banner">
+                        <img src="img/Banner-03_Demeni-Sites.png" alt="Demeni Sites - Banner Promocional">
                     </div>
 
-                    <!-- Sites Ativos (Publicados) -->
-                    <div class="section-divider" id="active-section">
-                        <h3 class="section-label"><i class="fas fa-globe"></i> Sites Online <span
-                                class="count-badge online" id="active-count">0</span></h3>
-                    </div>
-                    <div class="projects-grid" id="active-projects-grid">
-                        <!-- Published projects rendered here -->
-                    </div>
-
-                    <!-- Rascunhos: Bio Link (D-1) -->
-                    <div class="section-divider" id="drafts-d1-section">
+                    <!-- Bio Link (D-1) -->
+                    <div class="section-divider" id="section-d1">
                         <h3 class="section-label"><i class="fas fa-mobile-alt"></i> Bio Link (D-1) <span
-                                class="count-badge drafts" id="drafts-d1-count">0</span></h3>
+                                class="count-badge" id="count-d1">0</span></h3>
                     </div>
-                    <div class="projects-grid" id="drafts-d1-grid">
-                        <!-- D-1 draft projects rendered here -->
+                    <div class="projects-grid" id="grid-d1">
+                    </div>
+                    <div class="see-more-container" id="see-more-d1" style="display:none">
+                        <button class="btn-see-more" data-model="d1">ver mais deste modelo</button>
                     </div>
 
-                    <!-- Rascunhos: Landing Page (D-2) -->
-                    <div class="section-divider" id="drafts-d2-section">
+                    <!-- Landing Page (D-2) -->
+                    <div class="section-divider" id="section-d2">
                         <h3 class="section-label"><i class="fas fa-laptop"></i> Landing Page (D-2) <span
-                                class="count-badge drafts" id="drafts-d2-count">0</span></h3>
+                                class="count-badge" id="count-d2">0</span></h3>
                     </div>
-                    <div class="projects-grid" id="drafts-d2-grid">
-                        <!-- D-2 draft projects rendered here -->
+                    <div class="projects-grid" id="grid-d2">
+                    </div>
+                    <div class="see-more-container" id="see-more-d2" style="display:none">
+                        <button class="btn-see-more" data-model="d2">ver mais deste modelo</button>
                     </div>
 
-                    <!-- Rascunhos: Cardápio (D-3) -->
-                    <div class="section-divider" id="drafts-prime-section">
+                    <!-- Cardápio (D-3) -->
+                    <div class="section-divider" id="section-prime">
                         <h3 class="section-label"><i class="fas fa-utensils"></i> Cardápio (D-3) <span
-                                class="count-badge drafts" id="drafts-prime-count">0</span></h3>
+                                class="count-badge" id="count-prime">0</span></h3>
                     </div>
-                    <div class="projects-grid" id="drafts-prime-grid">
-                        <!-- Prime-D draft projects rendered here -->
+                    <div class="projects-grid" id="grid-prime">
+                    </div>
+                    <div class="see-more-container" id="see-more-prime" style="display:none">
+                        <button class="btn-see-more" data-model="prime">ver mais deste modelo</button>
                     </div>
 
                     <div class="empty-state" id="empty-projects">
@@ -451,7 +468,8 @@
                     </div>
                     <div id="notifications-list" style="max-width: 600px;">
                         <div class="empty-state" id="notif-empty">
-                            <i class="fas fa-bell-slash" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 12px;"></i>
+                            <i class="fas fa-bell-slash"
+                                style="font-size: 3rem; color: var(--text-muted); margin-bottom: 12px;"></i>
                             <h3>Nenhuma notificação</h3>
                             <p>Quando houver algo importante, você será notificado aqui.</p>
                         </div>
@@ -554,22 +572,22 @@
                     <div class="editor-d1-container">
                         <!-- Coluna 1: Navegação por Abas -->
                         <nav class="editor-d1-tabs" id="editor-d1-tabs">
-                            <button class="tab-btn active" data-tab="perfil">
+                            <button class="tab-btn-d1 active" data-tab-d1="perfil">
                                 <i class="fas fa-user"></i> Perfil
                             </button>
-                            <button class="tab-btn" data-tab="links">
+                            <button class="tab-btn-d1" data-tab-d1="links">
                                 <i class="fas fa-link"></i> Links
                             </button>
-                            <button class="tab-btn" data-tab="banners">
+                            <button class="tab-btn-d1" data-tab-d1="banners">
                                 <i class="fas fa-images"></i> Banners
                             </button>
-                            <button class="tab-btn" data-tab="video">
+                            <button class="tab-btn-d1" data-tab-d1="video">
                                 <i class="fas fa-video"></i> Vídeo
                             </button>
-                            <button class="tab-btn" data-tab="estilo">
+                            <button class="tab-btn-d1" data-tab-d1="estilo">
                                 <i class="fas fa-palette"></i> Estilo
                             </button>
-                            <button class="tab-btn" data-tab="ordem">
+                            <button class="tab-btn-d1" data-tab-d1="ordem">
                                 <i class="fas fa-layer-group"></i> Ordem
                             </button>
                         </nav>
@@ -577,8 +595,9 @@
                         <!-- Coluna 2: Painel de Controle -->
                         <aside class="editor-d1-controls" id="controls-d1">
                             <div class="panel-content" id="panel-content-d1">
-                                <!-- Conteúdo das tabs renderizado via JS -->
-                                <div class="tab-content active" id="tab-d1-perfil">
+
+                                <!-- TAB: PERFIL -->
+                                <div class="tab-content-d1 active" id="tab-d1-perfil">
                                     <div class="control-section">
                                         <h3>Foto de Perfil</h3>
                                         <div class="avatar-upload">
@@ -612,158 +631,474 @@
                                                 placeholder="Uma breve descrição sobre você"></textarea>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="tab-content" id="tab-d1-links">
                                     <div class="control-section">
-                                        <h3>Links Úteis</h3>
-                                        <div id="links-container-d1">
+                                        <h3>Contato</h3>
+                                        <div class="form-group">
+                                            <label for="input-whatsapp-d1">
+                                                <i class="fab fa-whatsapp"></i> WhatsApp
+                                            </label>
+                                            <input type="text" id="input-whatsapp-d1" placeholder="84999779798">
+                                            <small>DDD + número (sem espaços ou +55)</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- FOOTER/ASSINATURA DO CRIADOR -->
+                                    <div class="control-section">
+                                        <h3><i class="fas fa-signature"></i> Sua Assinatura</h3>
+                                        <p class="section-desc">Aparece no rodapé - marketing para você!</p>
+                                        <div class="form-group">
+                                            <label>Sua Logo</label>
+                                            <div class="footer-logo-upload">
+                                                <div class="footer-logo-preview" id="footer-logo-preview-d1">
+                                                    <i class="fas fa-image"></i>
+                                                </div>
+                                                <input type="file" id="footer-logo-input-d1" accept="image/*" hidden>
+                                                <button class="btn-text" id="btn-upload-footer-logo-d1">
+                                                    <i class="fas fa-upload"></i> Enviar Logo
+                                                </button>
+                                            </div>
+                                            <small>PNG transparente recomendado</small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="footer-text-d1">Texto/CTA</label>
+                                            <input type="text" id="footer-text-d1" placeholder="Feito por @seunome">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="footer-link-d1">Seu Link</label>
+                                            <input type="text" id="footer-link-d1"
+                                                placeholder="https://wa.me/5511999999999">
+                                            <small>WhatsApp, Instagram ou seu site</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TAB: LINKS -->
+                                <div class="tab-content-d1" id="tab-d1-links">
+                                    <div class="control-section">
+                                        <h3>Seus Links</h3>
+                                        <div id="links-list-d1" class="links-list">
                                             <!-- Links renderizados via JS -->
                                         </div>
-                                        <button class="btn-primary btn-add-link" id="btn-add-link-d1">
+                                        <button class="btn-add-link" id="btn-add-link-d1">
                                             <i class="fas fa-plus"></i> Adicionar Link
                                         </button>
                                     </div>
-                                </div>
-                                <div class="tab-content" id="tab-d1-banners">
                                     <div class="control-section">
-                                        <h3>Banners</h3>
-                                        <div id="banners-container-d1">
-                                            <!-- Banners renderizados via JS -->
+                                        <h3>Links Rápidos</h3>
+                                        <div class="quick-links-d1">
+                                            <button class="quick-link-btn-d1" data-type="instagram">
+                                                <i class="fab fa-instagram"></i>
+                                            </button>
+                                            <button class="quick-link-btn-d1" data-type="youtube">
+                                                <i class="fab fa-youtube"></i>
+                                            </button>
+                                            <button class="quick-link-btn-d1" data-type="linkedin">
+                                                <i class="fab fa-linkedin"></i>
+                                            </button>
+                                            <button class="quick-link-btn-d1" data-type="tiktok">
+                                                <i class="fab fa-tiktok"></i>
+                                            </button>
+                                            <button class="quick-link-btn-d1" data-type="email">
+                                                <i class="fas fa-envelope"></i>
+                                            </button>
+                                            <button class="quick-link-btn-d1" data-type="website">
+                                                <i class="fas fa-globe"></i>
+                                            </button>
                                         </div>
-                                        <button class="btn-primary btn-add-banner" id="btn-add-banner-d1">
-                                            <i class="fas fa-plus"></i> Adicionar Banner
-                                        </button>
                                     </div>
                                 </div>
-                                <div class="tab-content" id="tab-d1-video">
+
+                                <!-- TAB: BANNERS -->
+                                <div class="tab-content-d1" id="tab-d1-banners">
+                                    <!-- BANNER DE DESTAQUE -->
                                     <div class="control-section">
-                                        <h3>Vídeo de Apresentação</h3>
+                                        <h3><i class="fas fa-star"></i> Banner de Destaque</h3>
+                                        <p class="section-desc">Fixo abaixo do perfil • Ativar/desativar</p>
                                         <div class="form-group">
-                                            <label for="input-video-d1">URL do YouTube</label>
-                                            <input type="text" id="input-video-d1"
-                                                placeholder="https://youtube.com/watch?v=...">
+                                            <label>Imagem do Banner</label>
+                                            <div class="banner-upload">
+                                                <div class="banner-preview-d1" id="banner-preview-d1">
+                                                    <span>Clique para adicionar imagem</span>
+                                                </div>
+                                                <input type="file" id="banner-input-d1" accept="image/*" hidden>
+                                            </div>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="banner-tag-d1">Etiqueta (Tag)</label>
+                                            <input type="text" id="banner-tag-d1"
+                                                placeholder="Ex: Mentoria, E-book, Curso">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="banner-title-d1">Título</label>
+                                            <input type="text" id="banner-title-d1"
+                                                placeholder="Nome do produto ou serviço">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="banner-desc-d1">Descrição</label>
+                                            <textarea id="banner-desc-d1" rows="2"
+                                                placeholder="Breve descrição ou benefícios"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="banner-cta-d1">Texto do Botão</label>
+                                            <input type="text" id="banner-cta-d1" placeholder="Ex: Saiba Mais, Comprar">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="banner-link-d1">Link do Botão</label>
+                                            <input type="text" id="banner-link-d1" placeholder="https://...">
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="banner-active-d1">
+                                            <span class="toggle-slider"></span>
+                                            <span class="toggle-label">Exibir Banner de Destaque</span>
+                                        </label>
+                                    </div>
+
+                                    <hr class="section-divider">
+
+                                    <!-- CARROSSEL DE BANNERS -->
+                                    <div class="control-section">
+                                        <h3><i class="fas fa-images"></i> Carrossel de Banners</h3>
+                                        <p class="section-desc">Até 3 banners • Pode reordenar</p>
+
+                                        <!-- Banner 1 -->
+                                        <div class="banner-slot" id="banner-slot-d1-1">
+                                            <h4>Banner 1</h4>
+                                            <div class="banner-upload-zone" id="banner-preview-1-d1">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <span>Clique para enviar</span>
+                                            </div>
+                                            <input type="file" id="banner-input-1-d1" accept="image/*" hidden>
+                                            <div class="form-group">
+                                                <input type="text" id="banner-title-1-d1"
+                                                    placeholder="Título do banner">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" id="banner-link-1-d1" placeholder="https://...">
+                                            </div>
+                                            <div class="form-group orientation-group">
+                                                <label>Orientação:</label>
+                                                <div class="orientation-options">
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="orientation-1-d1" value="horizontal"
+                                                            checked>
+                                                        <span><i class="fas fa-arrows-alt-h"></i> Horizontal</span>
+                                                    </label>
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="orientation-1-d1" value="vertical">
+                                                        <span><i class="fas fa-arrows-alt-v"></i> Vertical</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Banner 2 -->
+                                        <div class="banner-slot" id="banner-slot-d1-2">
+                                            <h4>Banner 2</h4>
+                                            <div class="banner-upload-zone" id="banner-preview-2-d1">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <span>Clique para enviar</span>
+                                            </div>
+                                            <input type="file" id="banner-input-2-d1" accept="image/*" hidden>
+                                            <div class="form-group">
+                                                <input type="text" id="banner-title-2-d1"
+                                                    placeholder="Título do banner">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" id="banner-link-2-d1" placeholder="https://...">
+                                            </div>
+                                            <div class="form-group orientation-group">
+                                                <label>Orientação:</label>
+                                                <div class="orientation-options">
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="orientation-2-d1" value="horizontal"
+                                                            checked>
+                                                        <span><i class="fas fa-arrows-alt-h"></i> Horizontal</span>
+                                                    </label>
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="orientation-2-d1" value="vertical">
+                                                        <span><i class="fas fa-arrows-alt-v"></i> Vertical</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Banner 3 -->
+                                        <div class="banner-slot" id="banner-slot-d1-3">
+                                            <h4>Banner 3</h4>
+                                            <div class="banner-upload-zone" id="banner-preview-3-d1">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <span>Clique para enviar</span>
+                                            </div>
+                                            <input type="file" id="banner-input-3-d1" accept="image/*" hidden>
+                                            <div class="form-group">
+                                                <input type="text" id="banner-title-3-d1"
+                                                    placeholder="Título do banner">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" id="banner-link-3-d1" placeholder="https://...">
+                                            </div>
+                                            <div class="form-group orientation-group">
+                                                <label>Orientação:</label>
+                                                <div class="orientation-options">
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="orientation-3-d1" value="horizontal"
+                                                            checked>
+                                                        <span><i class="fas fa-arrows-alt-h"></i> Horizontal</span>
+                                                    </label>
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="orientation-3-d1" value="vertical">
+                                                        <span><i class="fas fa-arrows-alt-v"></i> Vertical</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="banners-carousel-active-d1">
+                                            <span class="toggle-slider"></span>
+                                            <span class="toggle-label">Ativar carrossel de banners</span>
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="tab-content" id="tab-d1-estilo">
-                                    <!-- 1. COR DE DESTAQUE -->
+
+                                <!-- TAB: VÍDEO -->
+                                <div class="tab-content-d1" id="tab-d1-video">
                                     <div class="control-section">
-                                        <h3><i class="fas fa-palette"></i> Cor de Destaque</h3>
-                                        <div class="color-presets accent-colors-d1" id="accent-colors-d1">
-                                            <button class="color-preset active" data-accent="#D4AF37"
-                                                style="background:#D4AF37" title="Dourado"></button>
-                                            <button class="color-preset" data-accent="#C0C0C0"
-                                                style="background:#C0C0C0" title="Prata"></button>
-                                            <button class="color-preset" data-accent="#FF6B6B"
-                                                style="background:#FF6B6B" title="Coral"></button>
-                                            <button class="color-preset" data-accent="#4ECDC4"
-                                                style="background:#4ECDC4" title="Turquesa"></button>
-                                            <button class="color-preset" data-accent="#A855F7"
-                                                style="background:#A855F7" title="Roxo"></button>
-                                            <button class="color-preset" data-accent="#3B82F6"
-                                                style="background:#3B82F6" title="Azul"></button>
-                                            <button class="color-preset" data-accent="#22C55E"
-                                                style="background:#22C55E" title="Verde"></button>
+                                        <h3><i class="fas fa-video"></i> Vídeo em Destaque</h3>
+                                        <p class="section-desc">Adicione um vídeo do YouTube ou Vimeo</p>
+                                        <div class="form-group">
+                                            <label for="video-url-d1">URL do Vídeo</label>
+                                            <input type="text" id="video-url-d1"
+                                                placeholder="https://youtube.com/watch?v=...">
+                                            <small>Cole a URL do YouTube ou Vimeo</small>
+                                        </div>
+                                        <div class="video-preview-box" id="video-preview-box-d1">
+                                            <i class="fas fa-play-circle"></i>
+                                            <span>Preview do vídeo aparece aqui</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="video-title-d1">Título do Vídeo (opcional)</label>
+                                            <input type="text" id="video-title-d1"
+                                                placeholder="Ex: Assista meu último vídeo">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="video-cta-text-d1">Texto do Botão CTA (opcional)</label>
+                                            <input type="text" id="video-cta-text-d1" placeholder="Ex: Ver mais vídeos">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="video-cta-link-d1">Link do Botão CTA</label>
+                                            <input type="text" id="video-cta-link-d1"
+                                                placeholder="https://youtube.com/@seunome">
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="video-active-d1">
+                                            <span class="toggle-slider"></span>
+                                            <span class="toggle-label">Exibir vídeo no site</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- TAB: ESTILO -->
+                                <div class="tab-content-d1" id="tab-d1-estilo">
+                                    <div class="control-section">
+                                        <h3>Cor de Destaque</h3>
+
+                                        <!-- Solid Colors -->
+                                        <div class="form-group">
+                                            <label>Cores Sólidas</label>
+                                            <div class="color-presets accent-colors-d1" id="accent-colors-d1">
+                                                <button class="color-preset-d1 active" data-accent="#D4AF37"
+                                                    style="background:#D4AF37" title="Dourado"></button>
+                                                <button class="color-preset-d1" data-accent="#C0C0C0"
+                                                    style="background:#C0C0C0" title="Prata"></button>
+                                                <button class="color-preset-d1" data-accent="#FF6B6B"
+                                                    style="background:#FF6B6B" title="Coral"></button>
+                                                <button class="color-preset-d1" data-accent="#4ECDC4"
+                                                    style="background:#4ECDC4" title="Turquesa"></button>
+                                                <button class="color-preset-d1" data-accent="#A855F7"
+                                                    style="background:#A855F7" title="Roxo"></button>
+                                                <button class="color-preset-d1" data-accent="#3B82F6"
+                                                    style="background:#3B82F6" title="Azul"></button>
+                                                <button class="color-preset-d1" data-accent="#22C55E"
+                                                    style="background:#22C55E" title="Verde"></button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Gradient Colors -->
+                                        <div class="form-group">
+                                            <label>Degradês</label>
+                                            <div class="color-presets gradient-colors-d1">
+                                                <button class="gradient-preset-d1"
+                                                    data-gradient="linear-gradient(135deg, #D4AF37 0%, #F5D75A 100%)"
+                                                    style="background:linear-gradient(135deg, #D4AF37, #F5D75A)"
+                                                    title="Dourado"></button>
+                                                <button class="gradient-preset-d1"
+                                                    data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                                                    style="background:linear-gradient(135deg, #667eea, #764ba2)"
+                                                    title="Violeta"></button>
+                                                <button class="gradient-preset-d1"
+                                                    data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                                                    style="background:linear-gradient(135deg, #f093fb, #f5576c)"
+                                                    title="Rosa"></button>
+                                                <button class="gradient-preset-d1"
+                                                    data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+                                                    style="background:linear-gradient(135deg, #4facfe, #00f2fe)"
+                                                    title="Ciano"></button>
+                                                <button class="gradient-preset-d1"
+                                                    data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                                                    style="background:linear-gradient(135deg, #43e97b, #38f9d7)"
+                                                    title="Verde"></button>
+                                                <button class="gradient-preset-d1"
+                                                    data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+                                                    style="background:linear-gradient(135deg, #fa709a, #fee140)"
+                                                    title="Sunset"></button>
+                                                <button class="gradient-preset-d1"
+                                                    data-gradient="linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"
+                                                    style="background:linear-gradient(135deg, #a8edea, #fed6e3)"
+                                                    title="Pastel"></button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Advanced Color Picker -->
+                                        <div class="form-group">
+                                            <button class="btn-advanced-toggle" id="btn-advanced-color-d1">
+                                                <i class="fas fa-sliders-h"></i> Avançado
+                                            </button>
+                                            <div class="advanced-color-picker" id="advanced-color-picker-d1"
+                                                style="display:none;">
+                                                <div class="color-input-wrapper">
+                                                    <input type="color" id="color-accent-d1" value="#D4AF37">
+                                                    <span class="color-value-d1">#D4AF37</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <!-- 2. COR DE FUNDO -->
+                                    <!-- Background -->
                                     <div class="control-section">
                                         <h3><i class="fas fa-fill-drip"></i> Cor de Fundo</h3>
+
                                         <p class="section-desc">Cores Claras</p>
                                         <div class="color-presets bg-colors-d1" id="bg-colors-light-d1">
-                                            <button class="color-preset" data-bg="#ffffff"
+                                            <button class="color-preset-d1" data-color="#ffffff"
                                                 style="background:#ffffff; border:1px solid #ccc"
                                                 title="Branco"></button>
-                                            <button class="color-preset active" data-bg="#f8f9fa"
+                                            <button class="color-preset-d1" data-color="#f8f9fa"
                                                 style="background:#f8f9fa; border:1px solid #ccc"
                                                 title="Cinza Claro"></button>
-                                            <button class="color-preset" data-bg="#e8f5e9"
+                                            <button class="color-preset-d1" data-color="#e8f5e9"
                                                 style="background:#e8f5e9; border:1px solid #ccc"
                                                 title="Verde Claro"></button>
-                                            <button class="color-preset" data-bg="#e3f2fd"
+                                            <button class="color-preset-d1" data-color="#e3f2fd"
                                                 style="background:#e3f2fd; border:1px solid #ccc"
                                                 title="Azul Claro"></button>
-                                            <button class="color-preset" data-bg="#f3e5f5"
+                                            <button class="color-preset-d1" data-color="#f3e5f5"
                                                 style="background:#f3e5f5; border:1px solid #ccc"
                                                 title="Roxo Claro"></button>
-                                            <button class="color-preset" data-bg="#fff3e0"
+                                            <button class="color-preset-d1" data-color="#fff3e0"
                                                 style="background:#fff3e0; border:1px solid #ccc"
                                                 title="Laranja Claro"></button>
-                                            <button class="color-preset" data-bg="#fce4ec"
+                                            <button class="color-preset-d1" data-color="#fce4ec"
                                                 style="background:#fce4ec; border:1px solid #ccc"
                                                 title="Rosa Claro"></button>
                                         </div>
+
                                         <p class="section-desc" style="margin-top: 12px;">Cores Escuras</p>
                                         <div class="color-presets bg-colors-d1" id="bg-colors-dark-d1">
-                                            <button class="color-preset" data-bg="#000000" style="background:#000000"
-                                                title="Preto"></button>
-                                            <button class="color-preset" data-bg="#1a1a2e" style="background:#1a1a2e"
-                                                title="Índigo"></button>
-                                            <button class="color-preset" data-bg="#1f1f1f" style="background:#1f1f1f"
-                                                title="Cinza Escuro"></button>
-                                            <button class="color-preset" data-bg="#1a1f1a" style="background:#1a1f1a"
-                                                title="Verde Escuro"></button>
-                                            <button class="color-preset" data-bg="#2d1f1f" style="background:#2d1f1f"
-                                                title="Vinho"></button>
-                                            <button class="color-preset" data-bg="#1f1a2d" style="background:#1f1a2d"
-                                                title="Roxo Escuro"></button>
-                                            <button class="color-preset" data-bg="#0f172a" style="background:#0f172a"
-                                                title="Azul Escuro"></button>
+                                            <button class="color-preset-d1 active" data-color="#000000"
+                                                style="background:#000000" title="Preto"></button>
+                                            <button class="color-preset-d1" data-color="#1a1a2e"
+                                                style="background:#1a1a2e" title="Índigo Escuro"></button>
+                                            <button class="color-preset-d1" data-color="#1f1f1f"
+                                                style="background:#1f1f1f" title="Cinza Escuro"></button>
+                                            <button class="color-preset-d1" data-color="#1a1f1a"
+                                                style="background:#1a1f1a" title="Verde Escuro"></button>
+                                            <button class="color-preset-d1" data-color="#2d1f1f"
+                                                style="background:#2d1f1f" title="Vinho Escuro"></button>
+                                            <button class="color-preset-d1" data-color="#1f1a2d"
+                                                style="background:#1f1a2d" title="Roxo Escuro"></button>
+                                            <button class="color-preset-d1" data-color="#0f172a"
+                                                style="background:#0f172a" title="Azul Escuro"></button>
+                                        </div>
+
+                                        <!-- Background Image -->
+                                        <p class="section-desc" style="margin-top: 12px;">Imagem de Fundo</p>
+                                        <div class="bg-image-upload">
+                                            <div class="bg-preview" id="bg-preview-d1">
+                                                <span>Sem imagem</span>
+                                            </div>
+                                            <input type="file" id="bg-input-d1" accept="image/*" hidden>
+                                            <div class="bg-actions">
+                                                <button class="btn-text" id="btn-upload-bg-d1">
+                                                    <i class="fas fa-upload"></i> Enviar
+                                                </button>
+                                                <button class="btn-text btn-danger" id="btn-remove-bg-d1">
+                                                    <i class="fas fa-trash"></i> Remover
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <!-- 3. ESTILO DE BOTÃO -->
+                                    <!-- Estilo dos Botões -->
                                     <div class="control-section">
-                                        <h3><i class="fas fa-square"></i> Estilo do Botão</h3>
+                                        <h3>Estilo dos Botões</h3>
                                         <div class="button-styles-d1" id="button-styles-d1">
-                                            <button class="style-preset-d1 active" data-style="glass" title="Glass">
+                                            <button class="style-preset-d1 active" data-style="glass">
                                                 <div class="style-demo-d1 glass"></div>
                                                 <span>Glass</span>
                                             </button>
-                                            <button class="style-preset-d1" data-style="solid" title="Sólido">
+                                            <button class="style-preset-d1" data-style="solid">
                                                 <div class="style-demo-d1 solid"></div>
                                                 <span>Sólido</span>
                                             </button>
-                                            <button class="style-preset-d1" data-style="outline" title="Contorno">
+                                            <button class="style-preset-d1" data-style="outline">
                                                 <div class="style-demo-d1 outline"></div>
                                                 <span>Contorno</span>
                                             </button>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <!-- 4. COR DO BOTÃO -->
+                                <!-- TAB: ORDEM -->
+                                <div class="tab-content-d1" id="tab-d1-ordem">
                                     <div class="control-section">
-                                        <h3><i class="fas fa-paint-brush"></i> Cor do Botão</h3>
-                                        <div class="color-picker-row-d1">
-                                            <input type="color" id="btn-color-d1" value="#D4AF37">
-                                            <span class="color-hex-d1" id="btn-color-hex-d1">#D4AF37</span>
-                                        </div>
-                                    </div>
+                                        <h3><i class="fas fa-sort"></i> Ordem dos Blocos</h3>
+                                        <p class="section-desc">Arraste para reorganizar os blocos do seu site</p>
 
-                                    <!-- 5. COR DO TEXTO DO BOTÃO -->
-                                    <div class="control-section">
-                                        <h3><i class="fas fa-font"></i> Cor do Texto</h3>
-                                        <div class="color-picker-row-d1">
-                                            <input type="color" id="btn-text-color-d1" value="#000000">
-                                            <span class="color-hex-d1" id="btn-text-color-hex-d1">#000000</span>
+                                        <div class="fixed-block">
+                                            <i class="fas fa-lock"></i>
+                                            <span>Perfil (fixo no topo)</span>
                                         </div>
+
+                                        <div id="block-order-list-d1" class="block-order-list">
+                                            <!-- Renderizado via JS -->
+                                        </div>
+
+                                        <div class="fixed-block">
+                                            <i class="fas fa-lock"></i>
+                                            <span>Marca d'água (fixo no fim)</span>
+                                        </div>
+
+                                        <button class="btn-text" id="btn-reset-order-d1" style="margin-top: 16px;">
+                                            <i class="fas fa-undo"></i> Restaurar ordem padrão
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="tab-content" id="tab-d1-ordem">
-                                    <div class="control-section">
-                                        <h3>Ordem das Seções</h3>
-                                        <p class="hint">Arraste para reordenar</p>
-                                        <div id="order-list-d1" class="order-list">
-                                            <!-- Ordem renderizada via JS -->
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </aside>
 
                         <!-- Coluna 3: Preview -->
                         <aside class="editor-d1-preview">
+                            <div class="preview-header">
+                                <span class="preview-title"><i class="fas fa-eye"></i> Preview</span>
+                                <div class="preview-actions">
+                                    <button class="btn-preview-action" id="btn-fullpreview-d1" title="Tela cheia"
+                                        onclick="d1OpenFullPreview()">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                </div>
+                            </div>
                             <div class="preview-frame-container">
                                 <div class="device-frame">
                                     <div class="device-screen">
@@ -778,6 +1113,109 @@
                         </aside>
                     </div>
                 </section>
+
+                <!-- MODAL D1: IMAGE CROP -->
+                <div class="modal" id="modal-crop-d1">
+                    <div class="modal-content modal-large">
+                        <div class="modal-header">
+                            <h2>Ajustar Imagem</h2>
+                            <button class="modal-close" id="crop-cancel-d1">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="crop-container">
+                                <img id="crop-image-d1" src="" alt="Crop">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-secondary" id="crop-cancel-btn-d1">Cancelar</button>
+                            <button class="btn-primary" id="crop-confirm-d1">
+                                <i class="fas fa-check"></i> Aplicar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL D1: PUBLISH -->
+                <div class="modal" id="modal-publish-d1">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2><i class="fas fa-rocket"></i> Publicar Site</h2>
+                            <button class="modal-close" id="publish-close-d1">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Step 1: Subdomain -->
+                            <div id="publish-step-subdomain-d1">
+                                <h3>Escolha o subdomínio</h3>
+                                <p class="publish-text">O endereço do site não poderá ser alterado depois.</p>
+                                <div class="subdomain-input-wrapper">
+                                    <input type="text" id="subdomain-input-d1" placeholder="meuprojeto"
+                                        pattern="[a-z0-9-]+" maxlength="30"
+                                        oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')">
+                                    <span class="subdomain-suffix">.rafaeldemeni.com</span>
+                                </div>
+                                <p id="subdomain-error-d1" class="error-text" style="display: none;"></p>
+                                <p id="subdomain-available-d1" class="success-text" style="display: none;">
+                                    <i class="fas fa-check"></i> Disponível!
+                                </p>
+                                <div class="publish-cost">
+                                    <span class="cost-label">Custo:</span>
+                                    <span class="cost-value">50 créditos</span>
+                                </div>
+                                <div class="publish-balance">
+                                    <span>Seu saldo:</span>
+                                    <span id="publish-credits-balance-d1">0</span> créditos
+                                </div>
+                                <button class="btn-gold" id="btn-confirm-publish-d1" disabled>
+                                    <i class="fas fa-rocket"></i> Publicar Agora
+                                </button>
+                                <p class="publish-note">Atualizações futuras são gratuitas</p>
+                            </div>
+
+                            <!-- Step 2: Update -->
+                            <div id="publish-step-update-d1" style="display: none;">
+                                <div class="publish-icon success"><i class="fas fa-sync-alt"></i></div>
+                                <h3>Atualizar Site</h3>
+                                <p class="publish-text">
+                                    Seu site já está publicado em:<br>
+                                    <a id="published-url-d1" href="#" target="_blank" class="site-url"></a>
+                                </p>
+                                <button class="btn-gold" id="btn-update-site-d1">
+                                    <i class="fas fa-sync-alt"></i> Atualizar Conteúdo (Grátis)
+                                </button>
+                            </div>
+
+                            <!-- Step 3: Success -->
+                            <div id="publish-step-success-d1" style="display: none;">
+                                <div class="publish-icon success"><i class="fas fa-check-circle"></i></div>
+                                <h3>Site Publicado!</h3>
+                                <p class="publish-text">
+                                    Seu site está no ar em:<br>
+                                    <a id="success-url-d1" href="#" target="_blank" class="site-url"></a>
+                                </p>
+                                <button class="btn-secondary" id="btn-close-publish-d1">
+                                    <i class="fas fa-times"></i> Fechar
+                                </button>
+                            </div>
+
+                            <!-- No credits -->
+                            <div id="publish-step-nocredits-d1" style="display: none;">
+                                <div class="publish-icon warning"><i class="fas fa-exclamation-triangle"></i></div>
+                                <h3>Créditos Insuficientes</h3>
+                                <p class="publish-text">
+                                    Você precisa de 50 créditos para publicar.<br>
+                                    Saldo atual: <strong id="nocredits-balance-d1">0</strong> créditos
+                                </p>
+                                <a href="app.html#wallet" class="btn-gold">
+                                    <i class="fas fa-coins"></i> Comprar Créditos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Page: Editor D2 -->
                 <section class="page page-editor-d2" id="page-editor-d2">
@@ -867,10 +1305,12 @@
                     <span class="drawer-xp-text" id="drawer-xp-text">0 / 200 XP</span>
                 </div>
                 <div class="settings-divider"></div>
-                <button class="settings-item" data-action="notifications" onclick="navigateTo('notifications'); closeSettingsDrawer();">
+                <button class="settings-item" data-action="notifications"
+                    onclick="navigateTo('notifications'); closeSettingsDrawer();">
                     <i class="fas fa-bell"></i>
                     <span>Notificações</span>
-                    <span id="notif-badge-menu" style="display: none; background: #3b82f6; color: #fff; font-size: 0.7rem; font-weight: 700; min-width: 20px; height: 20px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin-left: auto;">0</span>
+                    <span id="notif-badge-menu"
+                        style="display: none; background: #3b82f6; color: #fff; font-size: 0.7rem; font-weight: 700; min-width: 20px; height: 20px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin-left: auto;">0</span>
                 </button>
                 <button class="settings-item" data-action="edit-profile">
                     <i class="fas fa-user-edit"></i>
@@ -1144,13 +1584,15 @@
     <script src="js/xpSystem.js"></script>
     <script src="js/payments.js"></script>
     <script src="js/affiliates.js"></script>
+    <script src="js/thumbnail.js"></script>
     <script src="js/dashboard.js"></script>
 
     <!-- html2canvas for thumbnail capture (both D1 and D2) -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
     <!-- Editor D1 Embedded Module -->
-    <script src="js/editor-d1-embedded.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <script src="js/editor-d1-full.js"></script>
 
     <!-- PWA Utilities -->
     <script src="js/pwa-utils.js"></script>
@@ -1236,7 +1678,7 @@
     <script src="js/feed.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {});
+            navigator.serviceWorker.register('/sw.js').catch(() => { });
         }
     </script>
 </body>

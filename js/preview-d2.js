@@ -203,7 +203,7 @@ function renderPreviewD2New(frame, state) {
     const heroContentPadding = get('hero.contentPadding', 60);
     // _REMOVED_ = usuário removeu explicitamente, usar null
     const rawHeroBg = get('hero.bgImage', null);
-    const heroBgImage = rawHeroBg === '_REMOVED_' ? null : (rawHeroBg || 'hero-bg.webp');
+    const heroBgImage = rawHeroBg === '_REMOVED_' ? null : (rawHeroBg || 'img/hero-bg.webp');
     const heroBgColor = get('hero.bgColor', '#1a1a2e');
     const heroBgPositionX = get('hero.bgPositionX', 50);
     const heroBgPositionY = get('hero.bgPositionY', 50);

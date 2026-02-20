@@ -103,7 +103,7 @@ class D2SectionList {
 
         // Subscribe para mudanças no state
         window.d2State.subscribe((change) => {
-            if (change.path === 'd2Sections' || change.path === 'selectedSection') {
+            if (change.path === 'd2Sections' || change.path === 'selectedSection' || change.path === '*') {
                 this.render();
             }
         });

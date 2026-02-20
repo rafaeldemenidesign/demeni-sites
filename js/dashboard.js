@@ -1,4 +1,4 @@
-﻿/* ===========================
+/* ===========================
    DEMENI SITES - DASHBOARD JS
    =========================== */
 
@@ -15,6 +15,7 @@ function init() {
     refreshUserCard();
     refreshCredits();
     loadProjects();
+    initSortDropdown();
     loadPackages();
     loadTransactions();
     loadNotifications();
@@ -78,6 +79,8 @@ function navigateTo(page) {
         return;
     }
 
+    // Thumbnail capture removed — now only captured on Publish/Update (thumbnail.js)
+
     // Update nav
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
@@ -104,6 +107,14 @@ function navigateTo(page) {
     const isEditorPage = page === 'editor-d2' || page === 'editor-d1';
     toggleHeaderMode(isEditorPage);
 
+    // Toggle sort dropdown (visible only on projects page)
+    const sortDropdown = document.getElementById('sort-dropdown-header');
+    if (sortDropdown) {
+        sortDropdown.style.display = page === 'projects' ? '' : 'none';
+    }
+
+    // "Novo Projeto" always visible in sidebar (removed conditional hide)
+
     // Save navigation state for persistence across page reloads
     saveNavigationState(page);
 
@@ -118,6 +129,9 @@ function navigateTo(page) {
     }
     if (page === 'editor-d1') {
         initEditorD1();
+    }
+    if (page === 'affiliates') {
+        initAffiliatePage();
     }
 
     // Close mobile menu
@@ -280,164 +294,294 @@ function renderDiscountBadge() {
     `;
 }
 
+// ========== MODEL CONFIG (shared by all card renderers) ==========
+const MODEL_CONFIG = {
+    'd1': { name: 'D-1', icon: 'fa-link', color: '#9333ea', bgColor: 'rgba(147, 51, 234, 0.15)' },
+    'd2': { name: 'D-2', icon: 'fa-store', color: '#0ea5e9', bgColor: 'rgba(14, 165, 233, 0.15)' },
+    'prime': { name: 'D-3', icon: 'fa-utensils', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' }
+};
+
 // ========== PROJECTS ==========
+// Current sort mode (persisted in session)
+let _projectSortMode = sessionStorage.getItem('demeni-sort-mode') || 'recent';
+// How many cards are currently visible per section (progressive +4)
+const _visibleCount = { d1: 4, d2: 4, prime: 4 };
+// Cached sorted lists per model (avoids re-sorting on "ver mais")
+let _projectCache = { d1: [], d2: [], prime: [] };
+const CARDS_PER_BATCH = 4;
+
+// Sort dropdown setup (called once on init)
+function initSortDropdown() {
+    const btn = document.getElementById('btn-sort-projects');
+    const options = document.getElementById('sort-options');
+    if (!btn || !options) return;
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => options.classList.remove('open'));
+
+    options.querySelectorAll('.sort-option').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const mode = opt.dataset.sort;
+            _projectSortMode = mode;
+            sessionStorage.setItem('demeni-sort-mode', mode);
+
+            document.getElementById('sort-label').textContent = opt.textContent.trim();
+            options.querySelectorAll('.sort-option').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            options.classList.remove('open');
+
+            // Reset visible counts and re-render
+            Object.keys(_visibleCount).forEach(k => _visibleCount[k] = CARDS_PER_BATCH);
+            loadProjects();
+        });
+    });
+
+    // "ver mais" — event delegation (buttons survive re-renders)
+    document.getElementById('page-projects')?.addEventListener('click', (e) => {
+        const seeMoreBtn = e.target.closest('.btn-see-more');
+        if (!seeMoreBtn) return;
+
+        const model = seeMoreBtn.dataset.model;
+        if (!model) return;
+
+        const total = _projectCache[model]?.length || 0;
+        const currentlyVisible = _visibleCount[model] || CARDS_PER_BATCH;
+
+        if (currentlyVisible >= total) {
+            // Collapse back to 4
+            _visibleCount[model] = CARDS_PER_BATCH;
+            loadProjects();
+            return;
+        }
+
+        // Show next batch (+4) progressively
+        const newLimit = Math.min(currentlyVisible + CARDS_PER_BATCH, total);
+        _visibleCount[model] = newLimit;
+        _appendNextBatch(model, currentlyVisible, newLimit);
+
+        // Update button text
+        if (newLimit >= total) {
+            seeMoreBtn.textContent = 'ver menos';
+        }
+    });
+}
+
+/**
+ * Append the next batch of cards to a section grid (no re-render of existing).
+ * Cards appear with staggered fade-in animation.
+ */
+function _appendNextBatch(model, fromIndex, toIndex) {
+    const grid = document.getElementById(`grid-${model}`);
+    if (!grid) return;
+
+    const items = _projectCache[model] || [];
+    const batch = items.slice(fromIndex, toIndex);
+
+    batch.forEach((project, i) => {
+        const cardHTML = renderProjectCard(project, true); // lazy=true
+        const temp = document.createElement('div');
+        temp.innerHTML = cardHTML.trim();
+        const card = temp.firstElementChild;
+        if (!card) return;
+
+        // Start hidden, fade in with stagger
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(12px)';
+        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        grid.appendChild(card);
+
+        // Trigger fade-in on next frame with stagger delay
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+            // Load lazy image after fade starts
+            const img = card.querySelector('img[data-src]');
+            if (img) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+            }
+        }, i * 100);
+    });
+}
+
+function _sortProjects(projects) {
+    switch (_projectSortMode) {
+        case 'online':
+            return projects.sort((a, b) => {
+                if (a.published && !b.published) return -1;
+                if (!a.published && b.published) return 1;
+                return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+            });
+        case 'alpha':
+            return projects.sort((a, b) => {
+                const nameA = (a.name || '').toLowerCase();
+                const nameB = (b.name || '').toLowerCase();
+                return nameA.localeCompare(nameB, 'pt-BR');
+            });
+        case 'recent':
+        default:
+            return projects.sort((a, b) => {
+                return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+            });
+    }
+}
+
 async function loadProjects() {
     // Sync from cloud first (if available)
     if (window.SupabaseClient && SupabaseClient.isConfigured()) {
         await UserData.syncFromCloud();
     }
-    let projects = UserData.getProjects();
-
-    // Ordenar por data de atualização (mais recentes primeiro)
-    projects = projects.sort((a, b) => {
-        const dateA = new Date(a.updatedAt || a.createdAt || 0);
-        const dateB = new Date(b.updatedAt || b.createdAt || 0);
-        return dateB - dateA; // Decrescente (mais recente primeiro)
-    });
-
-    const activeGrid = document.getElementById('active-projects-grid');
-    const activeSection = document.getElementById('active-section');
+    const allProjects = UserData.getProjects();
     const empty = document.getElementById('empty-projects');
 
-    // Grids por modelo (conforme HTML)
-    const d1Grid = document.getElementById('drafts-d1-grid');
-    const d2Grid = document.getElementById('drafts-d2-grid');
-    const primeGrid = document.getElementById('drafts-prime-grid');
-    const d1Section = document.getElementById('drafts-d1-section');
-    const d2Section = document.getElementById('drafts-d2-section');
-    const primeSection = document.getElementById('drafts-prime-section');
-
-    // Separar por status e modelo
-    const published = projects.filter(p => p.published);
-    const draftsD1 = projects.filter(p => !p.published && (!p.modelType || p.modelType === 'd1'));
-    const draftsD2 = projects.filter(p => !p.published && p.modelType === 'd2');
-    const draftsPrime = projects.filter(p => !p.published && p.modelType === 'prime');
-
-    // Atualizar contadores
-    document.getElementById('active-count').textContent = published.length;
-    document.getElementById('drafts-d1-count').textContent = draftsD1.length;
-    document.getElementById('drafts-d2-count').textContent = draftsD2.length;
-    document.getElementById('drafts-prime-count').textContent = draftsPrime.length;
-
-    if (projects.length === 0) {
-        activeSection.style.display = 'none';
-        activeGrid.style.display = 'none';
-        d1Section.style.display = 'none';
-        d1Grid.style.display = 'none';
-        d2Section.style.display = 'none';
-        d2Grid.style.display = 'none';
-        primeSection.style.display = 'none';
-        primeGrid.style.display = 'none';
+    if (allProjects.length === 0) {
+        ['d1', 'd2', 'prime'].forEach(m => {
+            const s = document.getElementById(`section-${m}`);
+            const g = document.getElementById(`grid-${m}`);
+            const sm = document.getElementById(`see-more-${m}`);
+            if (s) s.style.display = 'none';
+            if (g) g.style.display = 'none';
+            if (sm) sm.style.display = 'none';
+        });
         empty.style.display = 'block';
         return;
     }
 
     empty.style.display = 'none';
 
-    // Mostrar/esconder seções conforme necessário
-    activeSection.style.display = published.length > 0 ? 'block' : 'none';
-    activeGrid.style.display = published.length > 0 ? 'grid' : 'none';
-    d1Section.style.display = draftsD1.length > 0 ? 'block' : 'none';
-    d1Grid.style.display = draftsD1.length > 0 ? 'grid' : 'none';
-    d2Section.style.display = draftsD2.length > 0 ? 'block' : 'none';
-    d2Grid.style.display = draftsD2.length > 0 ? 'grid' : 'none';
-    primeSection.style.display = draftsPrime.length > 0 ? 'block' : 'none';
-    primeGrid.style.display = draftsPrime.length > 0 ? 'grid' : 'none';
+    // Group by model type and cache sorted lists
+    _projectCache = {
+        d1: _sortProjects([...allProjects.filter(p => !p.modelType || p.modelType === 'd1')]),
+        d2: _sortProjects([...allProjects.filter(p => p.modelType === 'd2')]),
+        prime: _sortProjects([...allProjects.filter(p => p.modelType === 'prime')])
+    };
 
-    // Renderizar sites ativos (com botão copiar link e badge de modelo)
-    activeGrid.innerHTML = published.map(project => {
-        // Model badge configuration
-        const modelType = project.modelType || 'd1';
-        const modelConfig = {
-            'd1': { name: 'D-1', icon: 'fa-link', color: '#9333ea', bgColor: 'rgba(147, 51, 234, 0.15)' },
-            'd2': { name: 'D-2', icon: 'fa-store', color: '#0ea5e9', bgColor: 'rgba(14, 165, 233, 0.15)' },
-            'prime': { name: 'D-3', icon: 'fa-utensils', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' }
-        };
-        const model = modelConfig[modelType] || modelConfig['d1'];
+    // Render each section
+    Object.keys(_projectCache).forEach(model => {
+        const section = document.getElementById(`section-${model}`);
+        const grid = document.getElementById(`grid-${model}`);
+        const seeMore = document.getElementById(`see-more-${model}`);
+        const counter = document.getElementById(`count-${model}`);
+        const items = _projectCache[model];
 
-        return `
-        <div class="project-card published model-${modelType}" data-id="${project.id}">
-            <div class="project-preview">
-                <img src="${project.data?.profile?.avatar || 'https://ui-avatars.com/api/?name=Site&background=D4AF37&color=000'}" alt="${project.name}">
-                <span class="project-status published">
-                    <i class="fas fa-check-circle"></i> Ativo
-                </span>
-                <span class="model-badge" style="background: ${model.bgColor}; color: ${model.color};">
-                    <i class="fas ${model.icon}"></i> ${model.name}
-                </span>
-            </div>
-            <div class="project-info">
-                <h3 class="project-name">${project.name}</h3>
-                <p class="project-url">${project.publishedUrl || ''}</p>
-                <div class="project-actions">
-                    <button class="btn-secondary" onclick="editProject('${project.id}')">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                    <button class="btn-secondary" onclick="copyProjectLink('${project.publishedUrl}')" title="Copiar link">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <a href="${project.publishedUrl}" target="_blank" class="btn-secondary">
-                        <i class="fas fa-external-link-alt"></i>
-                    </a>
-                </div>
-            </div>
+        if (!section || !grid) return;
+
+        if (items.length === 0) {
+            section.style.display = 'none';
+            grid.style.display = 'none';
+            if (seeMore) seeMore.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        grid.style.display = 'grid';
+        if (counter) counter.textContent = items.length;
+
+        // Show only up to _visibleCount
+        const limit = Math.min(_visibleCount[model], items.length);
+        const firstBatch = items.slice(0, Math.min(CARDS_PER_BATCH, limit));
+        const restBatch = items.slice(CARDS_PER_BATCH, limit);
+
+        // First 4: images loaded immediately (priority)
+        grid.innerHTML = firstBatch.map(p => renderProjectCard(p, false)).join('');
+
+        // Already expanded beyond 4: render with lazy images
+        if (restBatch.length > 0) {
+            restBatch.forEach(p => {
+                grid.insertAdjacentHTML('beforeend', renderProjectCard(p, true));
+            });
+            // Load their images after a short delay
+            setTimeout(() => {
+                grid.querySelectorAll('img[data-src]').forEach(img => {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                });
+            }, 150);
+        }
+
+        // Show/hide "ver mais" button
+        if (seeMore) {
+            seeMore.style.display = items.length > CARDS_PER_BATCH ? 'flex' : 'none';
+            const btn = seeMore.querySelector('.btn-see-more');
+            if (btn) {
+                btn.textContent = limit >= items.length ? 'ver menos' : 'ver mais deste modelo';
+            }
+        }
+    });
+}
+
+// Unified card renderer for all projects (published + drafts)
+// If lazy=true, images use data-src (loaded when card becomes visible)
+function renderProjectCard(project, lazy) {
+    const hasThumbnail = !!project.thumbnail;
+    const previewImage = project.thumbnail
+        || project.data?.style?.bgImage
+        || project.data?.profile?.avatar
+        || 'https://ui-avatars.com/api/?name=Site&background=666&color=fff';
+    const previewClass = (hasThumbnail || project.data?.style?.bgImage) ? 'project-thumbnail' : '';
+    const displayName = project.name || project.data?.profile?.name || 'Novo Site';
+    const thumbnailStyle = hasThumbnail
+        ? 'style="object-fit: cover; object-position: top center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; border-radius: 20px; margin: 0; box-shadow: none; z-index: 1;"'
+        : '';
+    const modelType = project.modelType || 'd1';
+    const model = MODEL_CONFIG[modelType] || MODEL_CONFIG['d1'];
+    const isPublished = project.published;
+
+    // Lazy: use transparent 1px gif as placeholder, load real image later
+    const imgAttr = lazy
+        ? `data-src="${previewImage}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"`
+        : `src="${previewImage}"`;
+
+    const activeBadge = isPublished
+        ? `<span class="project-status published"><i class="fas fa-check-circle"></i> Ativo</span>`
+        : '';
+
+    const publishedActions = isPublished
+        ? `<button class="btn-secondary" onclick="copyProjectLink('${project.publishedUrl}')" title="Copiar link">
+               <i class="fas fa-copy"></i>
+           </button>
+           <a href="${project.publishedUrl}" target="_blank" class="btn-secondary" title="Abrir site">
+               <i class="fas fa-external-link-alt"></i>
+           </a>
+           <button class="btn-secondary btn-deactivate" onclick="deactivateProject('${project.id}')" title="Desativar site">
+               <i class="fas fa-power-off"></i>
+           </button>
+           <button class="btn-secondary btn-change-url" onclick="showChangeSubdomainModal('${project.id}')" title="Alterar URL (10 créditos)">
+               <i class="fas fa-link"></i>
+           </button>`
+        : `<button class="btn-action duplicate" onclick="duplicateProject('${project.id}')" title="Duplicar">
+               <i class="fas fa-copy"></i>
+           </button>
+           <button class="btn-action publish" onclick="showPublishModal('${project.id}')">
+               <i class="fas fa-rocket"></i> Publicar
+           </button>`;
+
+    return `
+    <div class="project-card ${isPublished ? 'published' : 'draft'} model-${modelType}" data-id="${project.id}">
+        <div class="project-preview">
+            <img ${imgAttr} alt="${displayName}" class="${previewClass}" ${thumbnailStyle}>
+            ${activeBadge}
+            <button class="btn-delete-project" onclick="deleteProjectConfirm('${project.id}')" title="Excluir">
+                <i class="fas fa-trash"></i>
+            </button>
         </div>
-    `}).join('');
-
-    // Helper para renderizar card de rascunho
-    const renderDraftCard = (project) => {
-        const hasThumbnail = !!project.thumbnail;
-        const previewImage = project.thumbnail
-            || project.data?.style?.bgImage
-            || project.data?.profile?.avatar
-            || 'https://ui-avatars.com/api/?name=Site&background=666&color=fff';
-        const previewClass = (hasThumbnail || project.data?.style?.bgImage) ? 'project-thumbnail' : '';
-        // Prioriza project.name (editado pelo usuário) sobre profile.name
-        const displayName = project.name || project.data?.profile?.name || 'Novo Site';
-        const thumbnailStyle = hasThumbnail
-            ? 'style="object-fit: cover; object-position: top center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; border-radius: 20px; margin: 0; box-shadow: none; z-index: 1;"'
-            : '';
-        const modelType = project.modelType || 'd1';
-        const modelConfig = {
-            'd1': { name: 'D-1', icon: 'fa-link', color: '#9333ea', bgColor: 'rgba(147, 51, 234, 0.15)' },
-            'd2': { name: 'D-2', icon: 'fa-store', color: '#0ea5e9', bgColor: 'rgba(14, 165, 233, 0.15)' },
-            'prime': { name: 'D-3', icon: 'fa-utensils', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' }
-        };
-        const model = modelConfig[modelType] || modelConfig['d1'];
-
-        return `
-        <div class="project-card draft model-${modelType}" data-id="${project.id}">
-            <div class="project-preview">
-                <img src="${previewImage}" alt="${displayName}" class="${previewClass}" ${thumbnailStyle}>
-                <span class="model-badge" style="background: ${model.bgColor}; color: ${model.color};">
-                    <i class="fas ${model.icon}"></i> ${model.name}
-                </span>
-                <button class="btn-delete-project" onclick="deleteProjectConfirm('${project.id}')" title="Excluir">
-                    <i class="fas fa-trash"></i>
+        <div class="project-info">
+            <h3 class="project-name">${displayName}</h3>
+            <p class="project-date">${isPublished ? (project.publishedUrl || '') : formatDate(project.updatedAt)}</p>
+            <div class="project-actions">
+                <button class="btn-action" onclick="editProject('${project.id}')">
+                    <i class="fas fa-edit"></i> Editar
                 </button>
-            </div>
-            <div class="project-info">
-                <h3 class="project-name">${displayName}</h3>
-                <p class="project-date">${formatDate(project.updatedAt)}</p>
-                <div class="project-actions">
-                    <button class="btn-action" onclick="editProject('${project.id}')">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                    <button class="btn-action duplicate" onclick="duplicateProject('${project.id}')" title="Duplicar projeto">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <button class="btn-action publish" onclick="publishProject('${project.id}')">
-                        <i class="fas fa-rocket"></i> Publicar
-                    </button>
-                </div>
+                ${publishedActions}
             </div>
         </div>
-    `};
-
-    // Renderizar rascunhos por modelo
-    d1Grid.innerHTML = draftsD1.map(renderDraftCard).join('');
-    d2Grid.innerHTML = draftsD2.map(renderDraftCard).join('');
-    primeGrid.innerHTML = draftsPrime.map(renderDraftCard).join('');
+    </div>
+    `;
 }
 
 function createNewProject() {
@@ -543,7 +687,12 @@ async function duplicateProject(id) {
 }
 
 // ========== PUBLISH MODAL ==========
-function showPublishModal(projectId) {
+async function showPublishModal(projectId) {
+    // THUMBNAIL: Capture BEFORE opening modal while preview is fully visible
+    if (window.ThumbnailCapture) {
+        await ThumbnailCapture.capture(projectId);
+    }
+
     const project = UserData.getProject(projectId);
     const projectName = project?.name || window.d2State?.get('projectName') || 'Novo Site';
     const currentCredits = Credits.getCredits();
@@ -628,59 +777,7 @@ function showPublishModal(projectId) {
         </div>
     `;
 
-    // Styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .publish-modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
-        .publish-modal-overlay.visible { opacity:1; }
-        .publish-modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); }
-        .publish-modal-content { position:relative; background:#fff; border-radius:16px; width:420px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; transform:translateY(20px); transition:transform .2s; }
-        .publish-modal-overlay.visible .publish-modal-content { transform:translateY(0); }
-        .publish-modal-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; }
-        .publish-modal-header h3 { margin:0; font-size:16px; font-weight:600; }
-        .publish-modal-header h3 i { margin-right:8px; }
-        .publish-modal-close { background:none; border:none; color:#fff; font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px; }
-        .publish-modal-close:hover { background:rgba(255,255,255,0.2); }
-        .publish-modal-body { padding:20px; }
-        .publish-project-name { font-size:15px; font-weight:600; color:#2d3436; margin-bottom:16px; padding:10px 14px; background:#f8f9fa; border-radius:8px; }
-        .publish-project-name i { margin-right:8px; color:#6c5ce7; }
-        .publish-label { font-size:12px; font-weight:600; color:#636e72; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px; }
-        .publish-domain-input { display:flex; align-items:center; border:2px solid #dfe6e9; border-radius:10px; overflow:hidden; transition:border-color .2s; }
-        .publish-domain-input:focus-within { border-color:#6c5ce7; }
-        .publish-domain-input input { flex:1; border:none; padding:10px 12px; font-size:14px; outline:none; font-family:inherit; }
-        .publish-domain-suffix { padding:10px 12px; background:#f0f0f0; color:#636e72; font-size:13px; white-space:nowrap; border-left:1px solid #dfe6e9; }
-        .publish-domain-hint { font-size:11px; color:#b2bec3; margin:4px 0 16px; }
-        .publish-cost-box { padding:14px; border-radius:10px; background:#f8f9fa; border:1px solid #dfe6e9; }
-        .publish-cost-box.has-credits { border-color:#00b894; background:#f0fff4; }
-        .publish-cost-box.no-credits { border-color:#e74c3c; background:#fff5f5; }
-        .publish-cost-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:13px; color:#2d3436; }
-        .publish-cost-value { font-weight:700; color:#6c5ce7; }
-        .publish-cost-value i { margin-right:4px; }
-        .publish-balance-value { font-weight:600; }
-        .publish-cost-remaining { font-weight:600; }
-        .publish-cost-box hr { border:none; border-top:1px solid #dfe6e9; margin:8px 0; }
-        .publish-warning { margin-top:12px; padding:10px 14px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; font-size:13px; color:#856404; display:flex; align-items:center; gap:8px; }
-        .publish-modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:16px 20px; border-top:1px solid #eee; }
-        .publish-btn-cancel { padding:10px 20px; border:1px solid #dfe6e9; background:#fff; border-radius:8px; cursor:pointer; font-size:13px; color:#636e72; transition:all .2s; }
-        .publish-btn-cancel:hover { background:#f8f9fa; }
-        .publish-btn-confirm { padding:10px 24px; border:none; background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; }
-        .publish-btn-confirm:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(108,92,231,0.4); }
-        .publish-btn-buy { padding:10px 24px; border:none; background:linear-gradient(135deg,#00b894,#55efc4); color:#fff; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
-        .publish-success-overlay { position:fixed; top:0; left:0; right:0; bottom:0; z-index:10001; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
-        .publish-success-overlay.visible { opacity:1; }
-        .publish-success-content { position:relative; background:#fff; border-radius:16px; width:400px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; text-align:center; padding:32px 24px; transform:scale(0.9); transition:transform .3s ease; }
-        .publish-success-overlay.visible .publish-success-content { transform:scale(1); }
-        .publish-success-icon { font-size:48px; color:#00b894; margin-bottom:16px; }
-        .publish-success-title { font-size:20px; font-weight:700; color:#2d3436; margin-bottom:8px; }
-        .publish-success-url { font-size:14px; color:#6c5ce7; font-weight:600; margin-bottom:20px; word-break:break-all; }
-        .publish-success-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-        .publish-success-actions a, .publish-success-actions button { padding:10px 20px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .2s; }
-        .publish-success-view { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border:none; }
-        .publish-success-view:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(108,92,231,0.4); }
-        .publish-success-copy { background:#f8f9fa; color:#2d3436; border:1px solid #dfe6e9; }
-        .publish-success-close { background:none; border:none; color:#636e72; cursor:pointer; font-size:13px; margin-top:12px; }
-    `;
-    overlay.appendChild(style);
+    // Styles are in app.css (publish-modal-* classes)
     document.body.appendChild(overlay);
 
     // Animate in
@@ -708,7 +805,7 @@ function showPublishModal(projectId) {
     // Confirm publish/update
     const confirmBtn = overlay.querySelector('.publish-btn-confirm');
     if (confirmBtn) {
-        confirmBtn.addEventListener('click', () => {
+        confirmBtn.addEventListener('click', async () => {
             const subdomain = subdomainInput.value.trim();
             if (!subdomain) {
                 showNotification('⚠️ Digite um subdomínio');
@@ -731,7 +828,7 @@ function showPublishModal(projectId) {
                 // Deploy updated HTML to Supabase
                 const state = window.d2State ? window.d2State.getState() : null;
                 const pName = window.d2State?.get('projectName') || projectName;
-                const htmlContent = generatePublishableHTML(state, pName);
+                const htmlContent = await generatePublishableHTML(state, pName);
                 if (htmlContent && window.SupabaseClient?.isConfigured()) {
                     SupabaseClient.publishSite(projectId, subdomain, htmlContent).then(({ error }) => {
                         if (error) console.error('❌ [Update] Deploy error:', error);
@@ -846,10 +943,42 @@ function updateHeaderPublishButton(projectId) {
 }
 
 /**
+ * Resizes an image data URL to a max size suitable for PWA icons.
+ * Returns a promise that resolves to a smaller data URL.
+ */
+function resizeImageForPWA(dataUrl, maxSize = 192) {
+    return new Promise((resolve) => {
+        // If it's not a data URL or already small, return as-is
+        if (!dataUrl || !dataUrl.startsWith('data:') || dataUrl.length < 50000) {
+            resolve(dataUrl);
+            return;
+        }
+        const img = new Image();
+        img.onload = function () {
+            const canvas = document.createElement('canvas');
+            canvas.width = maxSize;
+            canvas.height = maxSize;
+            const ctx = canvas.getContext('2d');
+            // Draw image scaled to fit in square
+            const size = Math.min(img.width, img.height);
+            const sx = (img.width - size) / 2;
+            const sy = (img.height - size) / 2;
+            ctx.drawImage(img, sx, sy, size, size, 0, 0, maxSize, maxSize);
+            resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = function () {
+            console.warn('⚠️ Failed to resize favicon, using original');
+            resolve(dataUrl);
+        };
+        img.src = dataUrl;
+    });
+}
+
+/**
  * Generates a self-contained HTML document from the D2 editor state.
  * This HTML is what gets served at subdomain.rafaeldemeni.com
  */
-function generatePublishableHTML(state, projectName) {
+async function generatePublishableHTML(state, projectName) {
     // Render the D2 preview into a temporary container
     const tempFrame = document.createElement('div');
     if (window.renderPreviewD2New) {
@@ -860,7 +989,73 @@ function generatePublishableHTML(state, projectName) {
     }
 
     const rawHTML = tempFrame.innerHTML;
-    const description = state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
+
+    // SEO fields — use custom values from editor, with intelligent fallbacks
+    const pwaState = state?.d2Adjustments?.pwa || state?.pwa || {};
+    const seo = pwaState.seo || {};
+    const seoTitle = seo.title || projectName || 'Meu Site';
+    const seoDescription = seo.description || state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
+    // OG Image: custom upload > hero background > null
+    const heroBgImage = state?.d2Adjustments?.hero?.bgImage || '';
+    const ogImageUrl = seo.ogImage || (heroBgImage && heroBgImage !== 'img/hero-bg.webp' ? heroBgImage : '');
+
+    // Favicon & PWA — use editor settings from state.pwa.* or d2State._pwaExportData
+    let pwaExport = window.d2State?._pwaExportData || null;
+
+    // If no cached export data (e.g. we're on the dashboard), generate from state directly
+    if (!pwaExport && window.PWAUtils && state) {
+        const pwaState = state.d2Adjustments?.pwa || state.pwa || {};
+        const fav = pwaState.favicon || {};
+        const faviconMode = fav.mode || 'auto';
+        const faviconBgColor = fav.bgColor || '#1a365d';
+        const faviconTextColor = fav.textColor || '#ffffff';
+        const faviconShape = fav.shape || 'circle';
+        const faviconImage = fav.image || null;
+        const pwaThemeColor = pwaState.themeColor || faviconBgColor;
+        const pwaAppName = pwaState.appName || projectName || 'Meu Site';
+        // hero.title can be an object {text, color, font, ...} — extract the text string
+        const heroTitleRaw = state.heroTitle || state.d2Adjustments?.hero?.title || projectName || 'Meu Site';
+        const heroTitle = typeof heroTitleRaw === 'object' ? (heroTitleRaw.text || projectName || 'Meu Site') : heroTitleRaw;
+
+        let faviconDataUrl;
+        if (faviconMode === 'upload' && faviconImage) {
+            faviconDataUrl = faviconImage;
+        } else {
+            faviconDataUrl = window.PWAUtils.generateFavicon(heroTitle, faviconBgColor, faviconTextColor, faviconShape);
+        }
+
+        pwaExport = {
+            faviconDataUrl,
+            themeColor: pwaThemeColor,
+            appName: pwaAppName
+        };
+    }
+
+    // Resize favicon to 192x192 if it's too large (uploaded images can be several MB)
+    let faviconUrl = pwaExport?.faviconDataUrl || 'https://sites.rafaeldemeni.com/img/favicon.png';
+    if (faviconUrl.length > 50000) {
+        console.log(`🔄 Resizing favicon from ${(faviconUrl.length / 1024).toFixed(0)}KB...`);
+        faviconUrl = await resizeImageForPWA(faviconUrl, 192);
+        console.log(`✅ Favicon resized to ${(faviconUrl.length / 1024).toFixed(0)}KB`);
+    }
+    const themeColor = pwaExport?.themeColor || '#6c5ce7';
+    const appName = pwaExport?.appName || projectName || 'Meu Site';
+
+    // Build PWA manifest as inline data URI
+    // Note: start_url must be '/' (absolute) because data URI manifests can't resolve relative URLs
+    const pwaManifest = JSON.stringify({
+        name: appName,
+        short_name: appName.substring(0, 12),
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#0a0a0f',
+        theme_color: themeColor,
+        icons: [
+            { src: faviconUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: faviconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ]
+    });
+    const manifestDataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(pwaManifest);
 
     // Post-process: convert viewport units (vh/vw) to fixed pixel values
     // This ensures the published site looks identical to the phone preview
@@ -877,12 +1072,20 @@ function generatePublishableHTML(state, projectName) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>${projectName || 'Meu Site'}</title>
-    <meta name="description" content="${description}">
+    <title>${seoTitle}</title>
+    <meta name="description" content="${seoDescription}">
     <meta name="generator" content="Demeni Sites">
-    <meta property="og:title" content="${projectName || 'Meu Site'}">
-    <meta property="og:description" content="${description}">
+    <meta name="theme-color" content="${themeColor}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="${appName}">
+    <meta property="og:title" content="${seoTitle}">
+    <meta property="og:description" content="${seoDescription}">
     <meta property="og:type" content="website">
+    ${ogImageUrl ? `<meta property="og:image" content="${ogImageUrl}">` : ''}
+    <link rel="icon" type="image/png" href="${faviconUrl}">
+    <link rel="apple-touch-icon" href="${faviconUrl}">
+    <link rel="manifest" href="${manifestDataUri}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Bebas+Neue&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -967,6 +1170,121 @@ function generatePublishableHTML(state, projectName) {
             w.innerHTML='Criado com <a href="https://sites.rafaeldemeni.com" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none;">Demeni Sites</a>';
             document.body.appendChild(w);
         })();
+
+        // Force favicon — document.write() doesn't always re-process <link> tags
+        (function(){
+            var faviconHref='${faviconUrl}';
+            if(!faviconHref)return;
+            // Remove any existing favicon links
+            var existing=document.querySelectorAll('link[rel="icon"],link[rel="shortcut icon"]');
+            existing.forEach(function(el){el.remove()});
+            // Create new favicon link
+            var link=document.createElement('link');
+            link.rel='icon';
+            link.type='image/png';
+            link.href=faviconHref;
+            document.head.appendChild(link);
+            // Also set apple-touch-icon
+            var apple=document.createElement('link');
+            apple.rel='apple-touch-icon';
+            apple.href=faviconHref;
+            document.head.appendChild(apple);
+        })();
+
+        // PWA: register minimal service worker (via blob) to enable install prompt
+        (function(){
+            if('serviceWorker' in navigator){
+                var swCode='self.addEventListener("fetch",function(e){e.respondWith(fetch(e.request))});';
+                var blob=new Blob([swCode],{type:'application/javascript'});
+                navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:'/'}).catch(function(){});
+            }
+        })();
+
+        // PWA Install Banner — mobile only
+        (function(){
+            var deferredPrompt=null;
+            var themeColor='${themeColor}';
+            var appName='${appName}';
+            var faviconUrl='${faviconUrl}';
+
+            window.addEventListener('beforeinstallprompt',function(e){
+                e.preventDefault();
+                deferredPrompt=e;
+                showInstallBanner();
+            });
+
+            function showInstallBanner(){
+                if(document.querySelector('.pwa-install-banner'))return;
+                var banner=document.createElement('div');
+                banner.className='pwa-install-banner';
+                banner.innerHTML='\
+                    <div style="display:flex;align-items:center;gap:12px;flex:1">\
+                        <div style="width:44px;height:44px;border-radius:12px;background:'+themeColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">\
+                            <img src="'+faviconUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">\
+                        </div>\
+                        <div style="flex:1">\
+                            <div style="font-weight:700;font-size:14px;color:#fff">'+appName+'</div>\
+                            <div style="font-size:12px;color:rgba(255,255,255,0.7)">Adicionar à tela inicial</div>\
+                        </div>\
+                    </div>\
+                    <button id="pwa-install-btn" style="background:#fff;color:'+themeColor+';border:none;padding:8px 18px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Instalar</button>\
+                    <button id="pwa-dismiss-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px 8px;margin-left:4px">&times;</button>\
+                ';
+                banner.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,'+themeColor+','+themeColor+'dd);backdrop-filter:blur(10px);padding:14px 16px;display:flex;align-items:center;gap:8px;font-family:sans-serif;box-shadow:0 -4px 20px rgba(0,0,0,0.3);animation:pwa-slide-up .4s ease';
+                document.body.appendChild(banner);
+
+                // Add animation keyframes
+                var style=document.createElement('style');
+                style.textContent='@keyframes pwa-slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}';
+                document.head.appendChild(style);
+
+                document.getElementById('pwa-install-btn').addEventListener('click',function(){
+                    if(deferredPrompt){
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function(r){
+                            deferredPrompt=null;
+                            banner.remove();
+                        });
+                    }
+                });
+                document.getElementById('pwa-dismiss-btn').addEventListener('click',function(){
+                    banner.style.transform='translateY(100%)';
+                    banner.style.transition='transform .3s ease';
+                    setTimeout(function(){banner.remove()},300);
+                });
+            }
+
+            // Fallback for iOS (no beforeinstallprompt)
+            if(/iPhone|iPad|iPod/.test(navigator.userAgent)&&!navigator.standalone&&!window.matchMedia('(display-mode:standalone)').matches){
+                setTimeout(function(){
+                    if(document.querySelector('.pwa-install-banner'))return;
+                    var banner=document.createElement('div');
+                    banner.className='pwa-install-banner';
+                    banner.innerHTML='\
+                        <div style="display:flex;align-items:center;gap:12px;flex:1">\
+                            <div style="width:44px;height:44px;border-radius:12px;background:'+themeColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">\
+                                <img src="'+faviconUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">\
+                            </div>\
+                            <div style="flex:1">\
+                                <div style="font-weight:700;font-size:14px;color:#fff">'+appName+'</div>\
+                                <div style="font-size:12px;color:rgba(255,255,255,0.7)">Toque em <strong>Compartilhar</strong> ➜ <strong>Adicionar à Tela</strong></div>\
+                            </div>\
+                        </div>\
+                        <button id="pwa-dismiss-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px 8px">&times;</button>\
+                    ';
+                    banner.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,'+themeColor+','+themeColor+'dd);backdrop-filter:blur(10px);padding:14px 16px;display:flex;align-items:center;gap:8px;font-family:sans-serif;box-shadow:0 -4px 20px rgba(0,0,0,0.3);animation:pwa-slide-up .4s ease';
+                    var style=document.createElement('style');
+                    style.textContent='@keyframes pwa-slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}';
+                    document.head.appendChild(style);
+                    document.body.appendChild(banner);
+                    document.getElementById('pwa-dismiss-btn').addEventListener('click',function(){
+                        banner.style.transform='translateY(100%)';
+                        banner.style.transition='transform .3s ease';
+                        setTimeout(function(){banner.remove()},300);
+                    });
+                },2000);
+            }
+        })();
     </script>
 </body>
 </html>`;
@@ -980,13 +1298,15 @@ async function publishProject(id, subdomain) {
         subdomain = project?.subdomain;
     }
 
+    // NOTE: Thumbnail was already captured in showPublishModal BEFORE the modal opened
+
     const result = Credits.attemptPublish(id, subdomain);
 
     if (result.success) {
         // Generate HTML from editor preview
         const state = window.d2State ? window.d2State.getState() : null;
         const projectName = window.d2State?.get('projectName') || UserData.getProject(id)?.name || 'Meu Site';
-        const htmlContent = generatePublishableHTML(state, projectName);
+        const htmlContent = await generatePublishableHTML(state, projectName);
 
         if (htmlContent && window.SupabaseClient?.isConfigured()) {
             try {
@@ -1252,13 +1572,252 @@ function copyProjectLink(url) {
     });
 }
 
+// ========== DEACTIVATE PROJECT ==========
+async function deactivateProject(id) {
+    const project = UserData.getProject(id);
+    if (!project) return;
+
+    // Create confirmation modal
+    document.querySelector('.deactivate-modal-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'deactivate-modal-overlay';
+    overlay.innerHTML = `
+        <div class="publish-modal-backdrop"></div>
+        <div class="publish-modal-content">
+            <div class="publish-modal-header" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">
+                <h3><i class="fas fa-power-off"></i> Desativar Site</h3>
+                <button class="publish-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="publish-modal-body">
+                <div class="publish-project-name">
+                    <i class="fas fa-globe"></i> ${project.name || 'Meu Site'}
+                </div>
+                <div class="publish-warning" style="background:#fff3cd;border:1px solid #ffc107;margin-bottom:16px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Atenção:</strong> O site ficará offline e não poderá mais ser acessado pela URL atual.
+                        Você poderá republicá-lo depois.
+                    </div>
+                </div>
+                <div class="publish-cost-box" style="border-color:#e74c3c;background:#fff5f5;">
+                    <div class="publish-cost-row">
+                        <span>URL atual</span>
+                        <span style="font-size:12px;color:#636e72;">${project.publishedUrl || ''}</span>
+                    </div>
+                    <div class="publish-cost-row">
+                        <span>Custo</span>
+                        <span style="color:#00b894;font-weight:700;"><i class="fas fa-check-circle"></i> Gratuito</span>
+                    </div>
+                </div>
+            </div>
+            <div class="publish-modal-footer">
+                <button class="publish-btn-cancel">Cancelar</button>
+                <button class="publish-btn-confirm" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">
+                    <i class="fas fa-power-off"></i> Desativar
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+
+    const closeModal = () => {
+        overlay.classList.remove('visible');
+        setTimeout(() => overlay.remove(), 200);
+    };
+    overlay.querySelector('.publish-modal-backdrop').addEventListener('click', closeModal);
+    overlay.querySelector('.publish-modal-close').addEventListener('click', closeModal);
+    overlay.querySelector('.publish-btn-cancel').addEventListener('click', closeModal);
+
+    overlay.querySelector('.publish-btn-confirm').addEventListener('click', async () => {
+        closeModal();
+
+        // Unpublish locally
+        UserData.unpublishProject(id);
+
+        // Delete from Supabase hosting (if available)
+        if (window.SupabaseClient?.isConfigured() && project.subdomain) {
+            try {
+                await SupabaseClient.unpublishSite(project.subdomain);
+                console.log('✅ Site removed from hosting');
+            } catch (e) {
+                console.warn('⚠️ Failed to remove from hosting:', e.message);
+            }
+        }
+
+        showNotification('✅ Site desativado com sucesso!');
+        loadProjects();
+    });
+}
+
+// ========== CHANGE SUBDOMAIN MODAL ==========
+function showChangeSubdomainModal(projectId) {
+    const project = UserData.getProject(projectId);
+    if (!project) return;
+
+    const URL_CHANGE_COST = 10;
+    const currentCredits = Credits.getCredits();
+    const hasEnough = currentCredits >= URL_CHANGE_COST;
+    const currentSubdomain = project.subdomain || extractSubdomain(project.publishedUrl) || '';
+
+    document.querySelector('.change-url-modal-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'change-url-modal-overlay publish-modal-overlay';
+    overlay.innerHTML = `
+        <div class="publish-modal-backdrop"></div>
+        <div class="publish-modal-content">
+            <div class="publish-modal-header" style="background:linear-gradient(135deg,#0984e3,#74b9ff);">
+                <h3><i class="fas fa-link"></i> Alterar URL</h3>
+                <button class="publish-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="publish-modal-body">
+                <div class="publish-project-name">
+                    <i class="fas fa-globe"></i> ${project.name || 'Meu Site'}
+                </div>
+
+                <label class="publish-label">URL atual</label>
+                <div class="publish-domain-input" style="margin-bottom:12px;opacity:0.6;">
+                    <input type="text" value="${currentSubdomain}" readonly style="cursor:not-allowed;" />
+                    <span class="publish-domain-suffix">.rafaeldemeni.com</span>
+                </div>
+
+                <label class="publish-label">Nova URL</label>
+                <div class="publish-domain-input">
+                    <input type="text" id="new-subdomain-input" value="" placeholder="nova-url" maxlength="30" />
+                    <span class="publish-domain-suffix">.rafaeldemeni.com</span>
+                </div>
+                <p class="publish-domain-hint">Apenas letras minúsculas, números e hífens</p>
+
+                <div class="publish-cost-box ${hasEnough ? 'has-credits' : 'no-credits'}">
+                    <div class="publish-cost-row">
+                        <span>Custo de alteração</span>
+                        <span class="publish-cost-value"><i class="fas fa-coins"></i> ${URL_CHANGE_COST} créditos</span>
+                    </div>
+                    <div class="publish-cost-row">
+                        <span>Seu saldo atual</span>
+                        <span class="publish-balance-value">${currentCredits} créditos</span>
+                    </div>
+                    <hr>
+                    <div class="publish-cost-row publish-cost-remaining">
+                        <span>Saldo após alteração</span>
+                        <span>${hasEnough ? (currentCredits - URL_CHANGE_COST) + ' créditos' : '<span style="color:#e74c3c">Insuficiente</span>'}</span>
+                    </div>
+                </div>
+
+                ${!hasEnough ? `
+                    <div class="publish-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Você não tem créditos suficientes para alterar a URL.
+                    </div>
+                ` : ''}
+            </div>
+            <div class="publish-modal-footer">
+                <button class="publish-btn-cancel">Cancelar</button>
+                ${hasEnough
+            ? `<button class="publish-btn-confirm" style="background:linear-gradient(135deg,#0984e3,#74b9ff);">
+                        <i class="fas fa-link"></i> Alterar URL
+                       </button>`
+            : `<button class="publish-btn-buy" onclick="navigateTo('carteira')"><i class="fas fa-shopping-cart"></i> Comprar Créditos</button>`
+        }
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+
+    // Sanitize input
+    const newSubdomainInput = overlay.querySelector('#new-subdomain-input');
+    newSubdomainInput.addEventListener('input', () => {
+        newSubdomainInput.value = newSubdomainInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    });
+    newSubdomainInput.focus();
+
+    const closeModal = () => {
+        overlay.classList.remove('visible');
+        setTimeout(() => overlay.remove(), 200);
+    };
+    overlay.querySelector('.publish-modal-backdrop').addEventListener('click', closeModal);
+    overlay.querySelector('.publish-modal-close').addEventListener('click', closeModal);
+    overlay.querySelector('.publish-btn-cancel').addEventListener('click', closeModal);
+
+    const confirmBtn = overlay.querySelector('.publish-btn-confirm');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            const newSubdomain = newSubdomainInput.value.trim();
+            if (!newSubdomain) {
+                showNotification('⚠️ Digite a nova URL');
+                newSubdomainInput.focus();
+                return;
+            }
+            if (newSubdomain === currentSubdomain) {
+                showNotification('⚠️ A nova URL é igual à atual');
+                newSubdomainInput.focus();
+                return;
+            }
+
+            closeModal();
+
+            // Deduct credits
+            const deductResult = Credits.deductCredits(URL_CHANGE_COST, 'url_change');
+            if (!deductResult.success) {
+                showNotification('❌ Erro ao deduzir créditos');
+                return;
+            }
+
+            // Update project with new subdomain & URL
+            const newUrl = `https://${newSubdomain}.rafaeldemeni.com`;
+            UserData.updateProject(projectId, {
+                subdomain: newSubdomain,
+                publishedUrl: newUrl
+            });
+
+            // Re-deploy to new subdomain (if SupabaseClient available)
+            if (window.SupabaseClient?.isConfigured()) {
+                try {
+                    // Delete old site
+                    if (currentSubdomain) {
+                        await SupabaseClient.unpublishSite(currentSubdomain);
+                    }
+
+                    // Deploy to new subdomain — use project.data (stored state) instead of d2State
+                    // d2State is only available in the editor; from dashboard we use saved data
+                    const state = project.data || null;
+                    const pName = project.name || 'Meu Site';
+                    const htmlContent = await generatePublishableHTML(state, pName);
+                    if (htmlContent) {
+                        const { error } = await SupabaseClient.publishSite(projectId, newSubdomain, htmlContent);
+                        if (error) {
+                            console.error('❌ [URL Change] Deploy error:', error);
+                            showNotification('⚠️ URL alterada localmente mas falhou no deploy');
+                        } else {
+                            console.log('✅ [URL Change] Site redeployed to:', newUrl);
+                        }
+                    }
+                } catch (e) {
+                    console.error('❌ [URL Change] Exception:', e);
+                }
+            }
+
+            showNotification(`✅ URL alterada para ${newSubdomain}.rafaeldemeni.com`);
+            refreshCredits();
+            loadProjects();
+        });
+    }
+}
+
 // Expose functions globally
 window.editProject = editProject;
 window.publishProject = publishProject;
+window.showPublishModal = showPublishModal;
+window.duplicateProject = duplicateProject;
 window.copyProjectLink = copyProjectLink;
 window.buyPackage = buyPackage;
 window.buyPackageMP = buyPackageMP;
 window.deleteProjectConfirm = deleteProjectConfirm;
+window.deactivateProject = deactivateProject;
+window.showChangeSubdomainModal = showChangeSubdomainModal;
 window.closeBuyModal = closeBuyModal;
 window.closeLevelUpModal = closeLevelUpModal;
 window.testAddCredits = testAddCredits;
@@ -1917,18 +2476,7 @@ async function saveAffiliateConfig() {
     }
 }
 
-// Override navigateTo to handle affiliates page initialization
-const originalNavigateTo = navigateTo;
-navigateTo = function (page) {
-    originalNavigateTo(page);
-
-    if (page === 'affiliates') {
-        initAffiliatePage();
-    }
-    if (page === 'editor-d2') {
-        initEditorD2();
-    }
-};
+// navigateTo override removed — affiliates + editor-d2 init now in main navigateTo()
 
 // ========== EDITOR D2 INITIALIZATION ==========
 let editorD2Initialized = false;

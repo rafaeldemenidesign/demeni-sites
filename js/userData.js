@@ -10,7 +10,8 @@ const UserData = (function () {
     const KEYS = {
         USER: 'demeni-user',
         PROJECTS: 'demeni-projects',
-        SESSION: 'demeni-session'
+        SESSION: 'demeni-session',
+        DELETED_IDS: 'demeni-deleted-ids'
     };
 
     // Debounce timer for cloud saves
@@ -19,6 +20,24 @@ const UserData = (function () {
 
     // Current user ID for scoped storage
     let _currentUserId = null;
+
+    // Tombstone helpers — track deleted project IDs to prevent cloud sync resurrection
+    function _getDeletedIds() {
+        try {
+            return JSON.parse(localStorage.getItem(_scopedKey(KEYS.DELETED_IDS)) || '[]');
+        } catch { return []; }
+    }
+    function _addDeletedId(id) {
+        const ids = _getDeletedIds();
+        if (!ids.includes(id)) {
+            ids.push(id);
+            localStorage.setItem(_scopedKey(KEYS.DELETED_IDS), JSON.stringify(ids));
+        }
+    }
+    function _removeDeletedId(id) {
+        const ids = _getDeletedIds().filter(x => x !== id);
+        localStorage.setItem(_scopedKey(KEYS.DELETED_IDS), JSON.stringify(ids));
+    }
 
     // Auto-initialize from existing session (prevents race condition with auth.init)
     try {
@@ -145,12 +164,17 @@ const UserData = (function () {
 
     // ========== FIELD MAPPING (camelCase ↔ snake_case) ==========
     function toSupabase(localProject) {
+        // Include thumbnail inside data JSONB so it persists in cloud
+        const dataWithThumbnail = {
+            ...(localProject.data || {}),
+            thumbnail: localProject.thumbnail || null
+        };
         return {
             id: localProject.id,
             user_id: _currentUserId,
             name: localProject.name,
             slug: localProject.slug || null,
-            data: localProject.data || {},
+            data: dataWithThumbnail,
             published: localProject.published || false,
             published_url: localProject.publishedUrl || null,
             published_at: localProject.publishedAt || null,
@@ -181,8 +205,25 @@ const UserData = (function () {
     }
 
     // Sync all projects from Supabase to localStorage (smart merge)
+    let _syncPromise = null;
     async function syncFromCloud() {
         if (!_isCloudAvailable()) return false;
+
+        // Prevent concurrent syncs (race condition guard)
+        if (_syncPromise) {
+            console.log('☁️ Sync already in progress, waiting...');
+            return _syncPromise;
+        }
+
+        _syncPromise = _doSyncFromCloud();
+        try {
+            return await _syncPromise;
+        } finally {
+            _syncPromise = null;
+        }
+    }
+
+    async function _doSyncFromCloud() {
 
         try {
             const { data, error } = await SupabaseClient.getProjects(_currentUserId);
@@ -194,11 +235,38 @@ const UserData = (function () {
             const cloudProjects = (data || []).map(fromSupabase);
             const localProjects = getProjects();
 
+            // Tombstone filter: skip cloud projects that were deleted locally
+            const deletedIds = _getDeletedIds();
+            const aliveCloudProjects = [];
+            const zombieIds = []; // IDs to retry cloud deletion
+
+            cloudProjects.forEach(cp => {
+                if (deletedIds.includes(cp.id)) {
+                    zombieIds.push(cp.id);
+                } else {
+                    aliveCloudProjects.push(cp);
+                }
+            });
+
+            // Retry cloud deletion for zombie projects
+            if (zombieIds.length > 0) {
+                console.log(`🧹 Retrying cloud delete for ${zombieIds.length} zombie project(s)`);
+                for (const zid of zombieIds) {
+                    try {
+                        await SupabaseClient.deleteProject(zid);
+                        _removeDeletedId(zid);
+                        console.log(`☁️ Zombie project ${zid.substring(0, 8)} deleted from cloud`);
+                    } catch (e) {
+                        console.warn(`⚠️ Retry delete failed for ${zid.substring(0, 8)}:`, e.message);
+                    }
+                }
+            }
+
             // Smart merge: for each project, keep the version with the newest updatedAt
             const mergedMap = new Map();
 
-            // Start with cloud projects
-            cloudProjects.forEach(cp => mergedMap.set(cp.id, cp));
+            // Start with alive cloud projects (zombies filtered out)
+            aliveCloudProjects.forEach(cp => mergedMap.set(cp.id, cp));
 
             // Merge local projects — local wins if newer
             localProjects.forEach(lp => {
@@ -220,7 +288,7 @@ const UserData = (function () {
 
             const merged = Array.from(mergedMap.values());
             save(_scopedKey(KEYS.PROJECTS), merged);
-            console.log(`☁️ Synced ${cloudProjects.length} projects from cloud (merged with ${localProjects.length} local)`);
+            console.log(`☁️ Synced ${aliveCloudProjects.length} projects from cloud (merged with ${localProjects.length} local, ${zombieIds.length} zombies filtered)`);
             return true;
         } catch (e) {
             console.error('❌ Cloud sync exception:', e);
@@ -289,6 +357,63 @@ const UserData = (function () {
             projects = [];
             save(_scopedKey(KEYS.PROJECTS), projects);
         }
+
+        // Pass 1: Dedup by ID — if multiple entries share the same ID, keep newest
+        const seenById = new Map();
+        projects.forEach(p => {
+            const existing = seenById.get(p.id);
+            if (!existing) {
+                seenById.set(p.id, p);
+            } else {
+                const existingTime = new Date(existing.updatedAt || 0).getTime();
+                const currentTime = new Date(p.updatedAt || 0).getTime();
+                if (currentTime > existingTime) {
+                    seenById.set(p.id, p);
+                }
+            }
+        });
+
+        if (seenById.size < projects.length) {
+            console.warn(`⚠️ Deduped ${projects.length - seenById.size} duplicate ID(s)`);
+            projects = Array.from(seenById.values());
+        }
+
+        // Pass 2: Dedup by publishedUrl — if multiple published projects share
+        // the same URL (e.g. from cloud sync issues), keep the newest
+        const seenByUrl = new Map();
+        let urlDupes = 0;
+        const dedupedProjects = [];
+        projects.forEach(p => {
+            if (p.published && p.publishedUrl) {
+                const existing = seenByUrl.get(p.publishedUrl);
+                if (!existing) {
+                    seenByUrl.set(p.publishedUrl, dedupedProjects.length);
+                    dedupedProjects.push(p);
+                } else {
+                    // Keep the one with the newest updatedAt
+                    const existingProject = dedupedProjects[existing];
+                    const existingTime = new Date(existingProject.updatedAt || 0).getTime();
+                    const currentTime = new Date(p.updatedAt || 0).getTime();
+                    if (currentTime > existingTime) {
+                        dedupedProjects[existing] = p;
+                    }
+                    urlDupes++;
+                }
+            } else {
+                dedupedProjects.push(p);
+            }
+        });
+
+        if (urlDupes > 0) {
+            console.warn(`⚠️ Deduped ${urlDupes} duplicate publishedUrl(s)`);
+            projects = dedupedProjects;
+        }
+
+        // Save if any deduplication happened
+        if (seenById.size < (load(_scopedKey(KEYS.PROJECTS)) || []).length || urlDupes > 0) {
+            save(_scopedKey(KEYS.PROJECTS), projects);
+        }
+
         return projects;
     }
 
@@ -371,7 +496,10 @@ const UserData = (function () {
 
     // Delete project (async — deletes from cloud + local)
     async function deleteProject(projectId) {
-        // Delete locally first for instant feedback
+        // Mark as deleted FIRST (tombstone) to prevent cloud sync resurrection
+        _addDeletedId(projectId);
+
+        // Delete locally for instant feedback
         let projects = getProjects();
         projects = projects.filter(p => p.id !== projectId);
         save(_scopedKey(KEYS.PROJECTS), projects);
@@ -386,9 +514,11 @@ const UserData = (function () {
         if (_isCloudAvailable()) {
             try {
                 await SupabaseClient.deleteProject(projectId);
+                _removeDeletedId(projectId); // Cloud delete succeeded, remove tombstone
                 console.log(`☁️ Project deleted from cloud`);
             } catch (e) {
-                console.warn('⚠️ Cloud delete failed:', e.message);
+                console.warn('⚠️ Cloud delete failed (will retry on next sync):', e.message);
+                // Tombstone stays — _doSyncFromCloud will retry
             }
         }
 
@@ -396,9 +526,20 @@ const UserData = (function () {
     }
 
     function publishProject(projectId, url) {
+        // Extract subdomain from URL for reliable retrieval later
+        let subdomain = '';
+        if (url) {
+            try {
+                const hostname = new URL(url).hostname;
+                const parts = hostname.split('.');
+                if (parts.length >= 3) subdomain = parts[0];
+            } catch { /* ignore */ }
+        }
+
         const result = updateProject(projectId, {
             published: true,
-            publishedUrl: url
+            publishedUrl: url,
+            subdomain: subdomain
         });
 
         // CRITICAL: Save to cloud IMMEDIATELY (bypass debounce)

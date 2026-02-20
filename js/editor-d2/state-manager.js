@@ -55,16 +55,16 @@ class D2StateManager {
 
             // Produtos para a seção de produtos
             d2Products: [
-                { id: 1, title: 'iPhone 15 Pro', price: 'R$ 7.499,00', image: 'http://localhost:8081/produto-1.png', link: '' },
-                { id: 2, title: 'Samsung Galaxy S24', price: 'R$ 5.999,00', image: 'http://localhost:8081/produto-2.png', link: '' },
-                { id: 3, title: 'Kit Acessórios', price: 'R$ 299,90', image: 'http://localhost:8081/produto-3.png', link: '' },
-                { id: 4, title: 'Smartwatch Pro', price: 'R$ 1.299,00', image: 'http://localhost:8081/produto-4.png', link: '' }
+                { id: 1, title: 'iPhone 15 Pro', price: 'R$ 7.499,00', image: 'img/produto-1.png', link: '' },
+                { id: 2, title: 'Samsung Galaxy S24', price: 'R$ 5.999,00', image: 'img/produto-2.png', link: '' },
+                { id: 3, title: 'Kit Acessórios', price: 'R$ 299,90', image: 'img/produto-3.png', link: '' },
+                { id: 4, title: 'Smartwatch Pro', price: 'R$ 1.299,00', image: 'img/produto-4.png', link: '' }
             ],
 
             // Feedbacks/depoimentos
             d2Feedbacks: [
-                { id: 1, name: 'Carla Fernandes', text: 'Comprei meu iPhone aqui e foi a melhor decisão! Atendimento excelente e preço justo.', avatar: 'http://localhost:8081/avatar-1.png', link: '' },
-                { id: 2, name: 'Roberto Almeida', text: 'Troca de tela super rápida e profissional. Recomendo demais!', avatar: 'http://localhost:8081/avatar-2.png', link: '' }
+                { id: 1, name: 'Carla Fernandes', text: 'Comprei meu iPhone aqui e foi a melhor decisão! Atendimento excelente e preço justo.', avatar: 'img/avatar-1.png', link: '' },
+                { id: 2, name: 'Roberto Almeida', text: 'Troca de tela super rápida e profissional. Recomendo demais!', avatar: 'img/avatar-2.png', link: '' }
             ],
 
             // === AJUSTES VISUAIS GRANULARES ===
@@ -104,7 +104,7 @@ class D2StateManager {
                     sectionHeight: 56, // vh - altura da seção (max ~16:9)
                     contentPadding: 60, // px - padding do conteúdo (embaixo)
                     textPosition: 'bottom', // 'top', 'center', 'bottom' - posição vertical do texto
-                    bgImage: 'hero-bg.webp', // Imagem pré-carregada do template
+                    bgImage: 'img/hero-bg.webp', // Imagem pré-carregada do template
                     bgColor: '#1a1a2e', // Cor de fundo quando sem imagem
                     gradient: {
                         enabled: true,
@@ -484,70 +484,10 @@ class D2StateManager {
         const stateData = this.exportState();
         UserData.updateProject(projectId, { data: stateData });
         console.log('[D2 State Manager] Auto-saved to storage');
-
-        // Captura thumbnail com debounce separado (mais lento)
-        this.scheduleThumbnailCapture();
     }
 
-    /**
-     * Agenda captura de thumbnail com debounce de 3s
-     */
-    scheduleThumbnailCapture() {
-        if (this.thumbnailDebounceTimer) {
-            clearTimeout(this.thumbnailDebounceTimer);
-        }
-        this.thumbnailDebounceTimer = setTimeout(() => {
-            this.captureThumbnail();
-        }, 3000); // 3s após última mudança - não impacta UX
-    }
-
-    /**
-     * Captura o preview como WebP thumbnail e salva no projeto
-     * Usa html2canvas para capturar e redimensiona para o aspect ratio do card
-     */
-    async captureThumbnail() {
-        if (typeof html2canvas !== 'function') {
-            console.warn('[D2 State Manager] html2canvas not loaded');
-            return;
-        }
-
-        const frame = document.getElementById('preview-frame')
-            || document.getElementById('preview-frame-d2');
-        if (!frame) {
-            console.warn('[D2 State Manager] Preview frame not found');
-            return;
-        }
-
-        try {
-            const srcCanvas = await html2canvas(frame, {
-                scale: 1,
-                useCORS: true,
-                allowTaint: true,
-                logging: false
-            });
-
-            // CROP: recorta para 300×580 a partir do topo (sem achatar/esticar)
-            const PHONE_W = 300;
-            const PHONE_H = 580;
-            const outputCanvas = document.createElement('canvas');
-            outputCanvas.width = PHONE_W;
-            outputCanvas.height = PHONE_H;
-            const ctx = outputCanvas.getContext('2d');
-
-            // Copia só os primeiros 300×580 pixels do source (crop, não resize)
-            ctx.drawImage(srcCanvas, 0, 0, PHONE_W, PHONE_H, 0, 0, PHONE_W, PHONE_H);
-
-            const webpDataUrl = outputCanvas.toDataURL('image/webp', 0.8);
-
-            const projectId = window.UserData?.getCurrentProjectId();
-            if (projectId && webpDataUrl.length < 500000) {
-                UserData.updateProject(projectId, { thumbnail: webpDataUrl });
-                console.log(`[D2 State Manager] Thumbnail CROP: ${srcCanvas.width}×${srcCanvas.height} → ${PHONE_W}×${PHONE_H}, ${Math.round(webpDataUrl.length / 1024)}kb`);
-            }
-        } catch (err) {
-            console.warn('[D2 State Manager] Thumbnail capture failed:', err.message);
-        }
-    }
+    // Thumbnail capture removed — now handled by ThumbnailCapture module (thumbnail.js)
+    // Called only on Publish/Update, never realtime
 
     /**
      * Agenda atualização do preview com debounce

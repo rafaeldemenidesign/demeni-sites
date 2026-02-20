@@ -41,6 +41,10 @@ class D2EditPanel {
             if (change.path === 'selectedSection') {
                 this.render(change.newValue);
             }
+            // Re-render on full state reload (project switch) to clear stale DOM
+            if (change.path === '*' && this.currentSection) {
+                this.render(this.currentSection);
+            }
         });
     }
 

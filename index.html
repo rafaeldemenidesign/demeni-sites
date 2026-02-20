@@ -139,6 +139,32 @@
         function renderSite(site) {
             // D2 sites: serve pre-rendered HTML content directly
             if (site.html_content) {
+                // Inject OG meta tags into current page BEFORE document.write()
+                // This helps crawlers (WhatsApp, Facebook) that don't execute document.write()
+                const siteData = site.data || {};
+                const pwa = siteData.d2Adjustments?.pwa || {};
+                const seo = pwa.seo || {};
+                const ogTitle = seo.title || site.name || 'Site';
+                const ogDescription = seo.description || siteData.heroDescription || '';
+                const ogImage = seo.ogImage || siteData.d2Adjustments?.hero?.bgImage || '';
+
+                document.title = ogTitle;
+                // Helper to inject meta tags
+                const setMeta = (prop, content) => {
+                    if (!content) return;
+                    const meta = document.createElement('meta');
+                    meta.setAttribute(prop.startsWith('og:') ? 'property' : 'name', prop);
+                    meta.setAttribute('content', content);
+                    document.head.appendChild(meta);
+                };
+                setMeta('og:title', ogTitle);
+                setMeta('og:description', ogDescription);
+                setMeta('og:type', 'website');
+                if (ogImage && !ogImage.startsWith('data:') && ogImage !== 'img/hero-bg.webp') {
+                    setMeta('og:image', ogImage);
+                }
+                setMeta('description', ogDescription);
+
                 document.open();
                 document.write(site.html_content);
                 document.close();
@@ -235,7 +261,14 @@
             const slug = getClientSubdomain();
 
             if (slug) {
-                // É um site de cliente
+                // É um site de cliente — remove favicon da plataforma IMEDIATAMENTE
+                // para que o browser não cache o ícone do Demeni Sites
+                document.querySelectorAll('link[rel="icon"],link[rel="apple-touch-icon"]').forEach(el => el.remove());
+                // Set transparent 1px favicon to prevent browser default
+                var tempIcon = document.createElement('link');
+                tempIcon.rel = 'icon';
+                tempIcon.href = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+                document.head.appendChild(tempIcon);
                 loadClientSite(slug);
             } else {
                 // É a plataforma - capturar referral code se existir

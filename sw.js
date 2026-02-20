@@ -1,5 +1,5 @@
 // Demeni Sites — Service Worker
-const CACHE_NAME = 'demeni-v1';
+const CACHE_NAME = 'demeni-v2';
 const PRECACHE = [
     '/app.html',
     '/css/app.css',

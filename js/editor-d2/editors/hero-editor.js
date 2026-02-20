@@ -986,7 +986,7 @@ class D2HeroEditor {
         // - 'url...' → Imagem customizada
         const rawValue = window.d2State.get(`${this.basePath}.bgImage`);
         const wasRemoved = rawValue === '_REMOVED_';
-        const bgImage = wasRemoved ? '' : (rawValue && rawValue !== 'null' ? rawValue : 'hero-bg.webp');
+        const bgImage = wasRemoved ? '' : (rawValue && rawValue !== 'null' ? rawValue : 'img/hero-bg.webp');
 
         console.log('[Hero Editor] BG Image:', bgImage, 'Raw:', rawValue, 'Removed:', wasRemoved);
 
