@@ -244,19 +244,31 @@ const UserData = (function () {
     // Sync wrapper: saves to IndexedDB AND keeps in-memory cache for sync access
     const _dataCache = {};
 
-    async function saveProjectData(projectId, data) {
-        // 🛡️ Backup: salvar versão anterior antes de sobrescrever
+    async function saveProjectData(projectId, data, { force = false } = {}) {
+        // 🛡️ Proteção 3: Anti-downgrade — verificar se dados novos são piores
         const existingData = _dataCache[projectId];
+        if (!force && existingData && typeof existingData === 'object') {
+            const existingSize = JSON.stringify(existingData).length;
+            const newSize = JSON.stringify(data).length;
+            const existingKeys = Object.keys(existingData).length;
+            const newKeys = Object.keys(data).length;
+
+            // Se dados novos são muito menores (< 60% do tamanho), é provável downgrade
+            if (existingSize > 500 && newSize < existingSize * 0.6) {
+                console.warn(`🛡️ Anti-downgrade: bloqueando save de ${projectId.substring(0, 8)} — existente=${existingSize}B/${existingKeys}keys, novo=${newSize}B/${newKeys}keys`);
+                return false;
+            }
+        }
+
+        // 🛡️ Backup: salvar versão anterior antes de sobrescrever
         if (existingData && typeof existingData === 'object' && Object.keys(existingData).length > 5) {
             await idbSave(`proj-backup-${projectId}`, existingData);
         }
 
         _dataCache[projectId] = data;
-        // Await IndexedDB save to ensure data is persisted before returning
         const ok = await idbSave(`proj-data-${projectId}`, data);
         if (!ok) {
             console.warn('⚠️ IndexedDB save failed for', projectId.substring(0, 8));
-            // Last resort: try localStorage (may fail if quota exceeded)
             save(`demeni-proj-data-${projectId}`, data);
         }
         return ok;
@@ -424,15 +436,25 @@ const UserData = (function () {
 
             const merged = Array.from(mergedMap.values());
 
-            // Save data to IndexedDB (50MB+), strip from metadata array
-            const metadataOnly = merged.map(p => {
+            // 🛡️ Proteção 1: Cloud sync inteligente — comparar qualidade dos dados
+            const metadataOnly = [];
+            for (const p of merged) {
                 if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
-                    saveProjectData(p.id, p.data);
+                    const cloudSize = JSON.stringify(p.data).length;
+                    const localData = await idbLoad(`proj-data-${p.id}`);
+                    const localSize = localData ? JSON.stringify(localData).length : 0;
+
+                    if (localSize > 0 && localSize >= cloudSize) {
+                        console.log(`🛡️ Sync: mantendo local de ${p.id.substring(0, 8)} (local=${localSize}B >= cloud=${cloudSize}B)`);
+                    } else {
+                        await saveProjectData(p.id, p.data, { force: true });
+                    }
                     const { data, ...meta } = p;
-                    return meta;
+                    metadataOnly.push(meta);
+                } else {
+                    metadataOnly.push(p);
                 }
-                return p;
-            });
+            }
 
             save(_scopedKey(KEYS.PROJECTS), metadataOnly);
             console.log(`☁️ Synced ${aliveCloudProjects.length} projects from cloud (merged with ${localProjects.length} local, ${zombieIds.length} zombies filtered)`);
@@ -601,17 +623,23 @@ const UserData = (function () {
         return project;
     }
 
-    // Async version — tries IndexedDB first (for initial load)
+    // 🛡️ Proteção 2: Async version — SEMPRE tenta IndexedDB primeiro
     async function getProjectAsync(projectId) {
         const projects = getProjects();
         const project = projects.find(p => p.id === projectId) || null;
         if (!project) return null;
 
-        if (!project.data || Object.keys(project.data).length === 0) {
-            const storedData = await loadProjectData(projectId);
-            if (storedData) {
+        // IndexedDB é a fonte de verdade para dados de projeto
+        const storedData = await loadProjectData(projectId);
+        if (storedData && Object.keys(storedData).length > 0) {
+            // Usar IndexedDB se mais rico que project.data embutido
+            const storedSize = JSON.stringify(storedData).length;
+            const embeddedSize = project.data ? JSON.stringify(project.data).length : 0;
+            if (storedSize >= embeddedSize) {
                 project.data = storedData;
             }
+        } else if (!project.data || Object.keys(project.data).length === 0) {
+            console.log('[UserData] Sem dados para projeto', projectId.substring(0, 8));
         }
         return project;
     }
@@ -842,6 +870,37 @@ const UserData = (function () {
         return loaded;
     }
 
+    // 🛡️ Proteção 5: Export completo de todos os projetos para backup
+    async function exportAllProjects() {
+        const projects = getProjects();
+        const fullExport = {};
+        let count = 0;
+        for (const p of projects) {
+            const data = await loadProjectData(p.id);
+            if (data && Object.keys(data).length > 0) {
+                fullExport[p.id] = {
+                    id: p.id,
+                    name: p.name,
+                    data: data,
+                    updatedAt: p.updatedAt,
+                    exportedAt: new Date().toISOString()
+                };
+                count++;
+            }
+        }
+        console.log(`📦 Exportados ${count} projetos com dados`);
+
+        // Auto-download JSON
+        const blob = new Blob([JSON.stringify(fullExport, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `demeni-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return fullExport;
+    }
+
     // ========== PUBLIC API ==========
     return {
         // User
@@ -876,6 +935,11 @@ const UserData = (function () {
         exportData,
         importData,
         preloadCache,
+
+        // 🛡️ Proteção 4: API expandida para recovery
+        saveProjectData,
+        loadProjectData,
+        exportAllProjects,
 
         // Helpers
         generateUUID,
