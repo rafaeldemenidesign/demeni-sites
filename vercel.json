@@ -33,7 +33,7 @@
         },
         {
             "source": "/s/:slug",
-            "destination": "/site.html?s=:slug"
+            "destination": "/api/subdomain?s=:slug"
         }
     ],
     "headers": [
