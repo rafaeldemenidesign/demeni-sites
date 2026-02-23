@@ -15,6 +15,9 @@ class D2StateManager {
         // Listeners para mudanças de estado
         this.listeners = new Set();
 
+        // 🛡️ Proteção: bloqueia save até loadState() carregar dados reais
+        this._dataLoaded = false;
+
         // Debounce para preview
         this.previewDebounceTimer = null;
         this.previewDebounceMs = 50;
@@ -37,8 +40,8 @@ class D2StateManager {
 
             // Dados do perfil (usados no Hero e CTA)
             profile: {
-                name: 'TechCell Store',
-                role: 'Loja de Celulares e Acessórios',
+                name: 'Meu Negócio',
+                role: 'Descrição do seu negócio',
                 logo: null
             },
 
@@ -55,16 +58,16 @@ class D2StateManager {
 
             // Produtos para a seção de produtos
             d2Products: [
-                { id: 1, title: 'iPhone 15 Pro', price: 'R$ 7.499,00', image: 'img/produto-1.png', link: '' },
-                { id: 2, title: 'Samsung Galaxy S24', price: 'R$ 5.999,00', image: 'img/produto-2.png', link: '' },
-                { id: 3, title: 'Kit Acessórios', price: 'R$ 299,90', image: 'img/produto-3.png', link: '' },
-                { id: 4, title: 'Smartwatch Pro', price: 'R$ 1.299,00', image: 'img/produto-4.png', link: '' }
+                { id: 1, title: 'Produto 1', price: 'R$ 99,90', image: '', link: '' },
+                { id: 2, title: 'Produto 2', price: 'R$ 149,90', image: '', link: '' },
+                { id: 3, title: 'Produto 3', price: 'R$ 199,90', image: '', link: '' },
+                { id: 4, title: 'Produto 4', price: 'R$ 249,90', image: '', link: '' }
             ],
 
             // Feedbacks/depoimentos
             d2Feedbacks: [
-                { id: 1, name: 'Carla Fernandes', text: 'Comprei meu iPhone aqui e foi a melhor decisão! Atendimento excelente e preço justo.', avatar: 'img/avatar-1.png', link: '' },
-                { id: 2, name: 'Roberto Almeida', text: 'Troca de tela super rápida e profissional. Recomendo demais!', avatar: 'img/avatar-2.png', link: '' }
+                { id: 1, name: 'Cliente 1', text: 'Excelente experiência! Recomendo muito.', avatar: '', link: '' },
+                { id: 2, name: 'Cliente 2', text: 'Ótimo atendimento e qualidade impecável!', avatar: '', link: '' }
             ],
 
             // === AJUSTES VISUAIS GRANULARES ===
@@ -458,6 +461,12 @@ class D2StateManager {
      * Agenda salvamento com debounce para evitar salvamentos excessivos
      */
     scheduleSave() {
+        // 🛡️ Proteção: bloqueia save se dados reais ainda não foram carregados
+        if (!this._dataLoaded) {
+            console.warn('[D2 State] ⛔ Save bloqueado — dados ainda não carregados do IndexedDB');
+            return;
+        }
+
         if (this.saveDebounceTimer) {
             clearTimeout(this.saveDebounceTimer);
         }
@@ -473,6 +482,12 @@ class D2StateManager {
     saveToStorage() {
         if (!window.UserData) {
             console.warn('[D2 State Manager] UserData not available');
+            return;
+        }
+
+        // 🛡️ Proteção dupla: recusar save se dados não foram carregados
+        if (!this._dataLoaded) {
+            console.warn('[D2 State] ⛔ saveToStorage bloqueado — _dataLoaded = false');
             return;
         }
 
@@ -710,16 +725,25 @@ class D2StateManager {
      * Carrega estado de um projeto existente
      */
     loadState(savedState) {
+        // 🛡️ Proteção: rejeitar estado vazio/null para não sobrescrever com defaults
+        if (!savedState || typeof savedState !== 'object' || Object.keys(savedState).length === 0) {
+            console.warn('[D2 State] ⚠️ Tentou carregar estado vazio — ignorando para proteger dados');
+            return;
+        }
+
         // Merge com o estado padrão para garantir que todas as propriedades existam
         this.state = this.deepMerge(this.getDefaultState(), savedState);
 
         // Migração: garante que seções novas existam (ex: PWA)
         this._migrateSections();
 
+        // 🛡️ Desbloqueia save — dados reais foram carregados
+        this._dataLoaded = true;
+
         this.notifyListeners('*', this.state, null);
         this.updatePreview();
 
-        console.log('[D2 State Manager] State loaded');
+        console.log('[D2 State Manager] ✅ State loaded — save desbloqueado');
     }
 
     /**

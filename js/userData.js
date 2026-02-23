@@ -245,6 +245,12 @@ const UserData = (function () {
     const _dataCache = {};
 
     async function saveProjectData(projectId, data) {
+        // 🛡️ Backup: salvar versão anterior antes de sobrescrever
+        const existingData = _dataCache[projectId];
+        if (existingData && typeof existingData === 'object' && Object.keys(existingData).length > 5) {
+            await idbSave(`proj-backup-${projectId}`, existingData);
+        }
+
         _dataCache[projectId] = data;
         // Await IndexedDB save to ensure data is persisted before returning
         const ok = await idbSave(`proj-data-${projectId}`, data);

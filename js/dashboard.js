@@ -120,7 +120,9 @@ function navigateTo(page) {
 
     // Initialize editors when navigating
     if (page === 'editor-d2') {
-        initEditorD2();
+        initEditorD2().catch(err => {
+            console.error('[Editor D2] ❌ Falha na inicialização:', err);
+        });
         // Ensure publish button state is correct after full editor init
         setTimeout(() => {
             const pid = UserData.getCurrentProjectId();
