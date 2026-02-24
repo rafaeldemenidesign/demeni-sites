@@ -18,7 +18,8 @@ class D2AddSectionModal {
             { id: 'galeria', name: 'Galeria', icon: 'fa-images', desc: 'Grade de imagens/fotos' },
             { id: 'video', name: 'Vídeo', icon: 'fa-play-circle', desc: 'Vídeo incorporado do YouTube' },
             { id: 'faq', name: 'FAQ', icon: 'fa-question-circle', desc: 'Perguntas frequentes' },
-            { id: 'texto', name: 'Texto Livre', icon: 'fa-align-left', desc: 'Bloco de texto customizável' }
+            { id: 'texto', name: 'Texto Livre', icon: 'fa-align-left', desc: 'Bloco de texto customizável' },
+            { id: 'banner', name: 'Banner Divisor', icon: 'fa-minus', desc: 'Destaque curto entre seções (múltiplos)' }
         ];
     }
 
@@ -65,7 +66,7 @@ class D2AddSectionModal {
         const existingSections = window.d2State.get('d2Sections', []).map(s => s.id);
 
         const availableSections = this.sectionTypes.filter(type =>
-            !existingSections.includes(type.id)
+            type.id === 'banner' || !existingSections.includes(type.id)
         );
 
         let optionsHtml = '';

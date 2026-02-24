@@ -22,6 +22,7 @@ serve(async (req) => {
     try {
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
+        const body = await req.json()
         const {
             package_id,
             package_name,
@@ -29,18 +30,110 @@ serve(async (req) => {
             price,
             user_id,
             user_email,
-            discount_percent
-        } = await req.json()
+            discount_percent,
+            // Franchise checkout fields
+            is_franchise_checkout,
+            referral_code
+        } = body
 
-        // Validate required fields
+        // ========== FRANCHISE CHECKOUT (no auth required) ==========
+        if (is_franchise_checkout) {
+            if (!package_id || !credits || !price) {
+                throw new Error('Missing required fields for franchise checkout')
+            }
+
+            // MP requires valid public URLs for back_urls (localhost rejected)
+            const franchiseBaseUrl = 'https://sites.rafaeldemeni.com'
+
+            const preference = {
+                items: [{
+                    id: 'franquia',
+                    title: `Franquia Demeni Sites — ${credits} Créditos`,
+                    description: `Plano Franqueado com ${credits} créditos para criar sites profissionais`,
+                    quantity: 1,
+                    currency_id: 'BRL',
+                    unit_price: parseFloat(price.toFixed(2))
+                }],
+                payer: {
+                    email: 'contato@rafaeldemeni.com'
+                },
+                back_urls: {
+                    success: `${franchiseBaseUrl}/franquia.html?payment=success`,
+                    failure: `${franchiseBaseUrl}/franquia.html?payment=failure`,
+                    pending: `${franchiseBaseUrl}/franquia.html?payment=pending`
+                },
+                auto_return: 'approved',
+                external_reference: JSON.stringify({
+                    type: 'franchise',
+                    referral_code: referral_code || null,
+                    credits,
+                    package_id,
+                    discount_percent: discount_percent || 0
+                }),
+                notification_url: `${SUPABASE_URL}/functions/v1/mp-webhook`,
+                statement_descriptor: 'DEMENI FRANQUIA',
+                payment_methods: {
+                    excluded_payment_types: [],
+                    excluded_payment_methods: [],
+                    installments: 12
+                }
+            }
+
+            // Call Mercado Pago API
+            const mpResponse = await fetch('https://api.mercadopago.com/checkout/preferences', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(preference)
+            })
+
+            if (!mpResponse.ok) {
+                const error = await mpResponse.text()
+                console.error('MP Error (franchise):', error)
+                throw new Error('Mercado Pago API error')
+            }
+
+            const mpData = await mpResponse.json()
+
+            // Log franchise payment (no user_id yet — admin creates account after)
+            await supabase.from('transactions').insert({
+                user_id: null,
+                type: 'franchise_purchase',
+                amount: credits,
+                description: `Franquia: ${credits} créditos${referral_code ? ` (ref: ${referral_code})` : ''}`,
+                payment_id: mpData.id,
+                payment_status: 'pending',
+                price_paid: price,
+                metadata: {
+                    package_id,
+                    discount_percent: discount_percent || 0,
+                    referral_code: referral_code || null,
+                    is_franchise: true
+                }
+            })
+
+            return new Response(
+                JSON.stringify({
+                    preference_id: mpData.id,
+                    init_point: mpData.init_point,
+                    sandbox_init_point: mpData.sandbox_init_point
+                }),
+                {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 200
+                }
+            )
+        }
+
+        // ========== NORMAL CREDIT PURCHASE (authenticated) ==========
         if (!package_id || !credits || !price || !user_id) {
             throw new Error('Missing required fields')
         }
 
-        // Use origin header if available, otherwise fallback to production URL
         const origin = req.headers.get('origin') || 'https://rafaeldemeni.com'
 
-        // Create Mercado Pago preference
         const preference = {
             items: [{
                 id: package_id,
@@ -107,8 +200,8 @@ serve(async (req) => {
         return new Response(
             JSON.stringify({
                 preference_id: mpData.id,
-                init_point: mpData.init_point, // Checkout URL
-                sandbox_init_point: mpData.sandbox_init_point // Test URL
+                init_point: mpData.init_point,
+                sandbox_init_point: mpData.sandbox_init_point
             }),
             {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },

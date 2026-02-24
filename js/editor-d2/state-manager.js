@@ -70,6 +70,9 @@ class D2StateManager {
                 { id: 2, name: 'Cliente 2', text: 'Ótimo atendimento e qualidade impecável!', avatar: '', link: '' }
             ],
 
+            // Dados dos banners divisores (mapa por ID)
+            d2Banners: {},
+
             // === AJUSTES VISUAIS GRANULARES ===
             d2Adjustments: {
                 // Header
@@ -564,17 +567,24 @@ class D2StateManager {
             galeria: { id: 'galeria', name: 'Galeria', icon: 'fa-images' },
             video: { id: 'video', name: 'Vídeo', icon: 'fa-play-circle' },
             faq: { id: 'faq', name: 'FAQ', icon: 'fa-question-circle' },
-            texto: { id: 'texto', name: 'Texto Livre', icon: 'fa-align-left' }
+            texto: { id: 'texto', name: 'Texto Livre', icon: 'fa-align-left' },
+            banner: { id: 'banner', name: 'Banner Divisor', icon: 'fa-minus' }
         };
 
         const def = sectionDefs[sectionType];
         if (!def) return null;
 
-        // Verifica se já existe uma seção desse tipo
-        const exists = this.state.d2Sections.some(s => s.id === def.id);
-        if (exists) {
-            console.warn(`[D2 State Manager] Seção ${sectionType} já existe`);
-            return null;
+        // Banner permite múltiplas instâncias (ID único)
+        const isBanner = sectionType === 'banner';
+        const sectionId = isBanner ? `banner-${Date.now()}` : def.id;
+
+        // Verifica duplicata (exceto para banner)
+        if (!isBanner) {
+            const exists = this.state.d2Sections.some(s => s.id === def.id);
+            if (exists) {
+                console.warn(`[D2 State Manager] Seção ${sectionType} já existe`);
+                return null;
+            }
         }
 
         // Encontra o índice do Footer (sempre deve ser o último)
@@ -583,19 +593,32 @@ class D2StateManager {
 
         // Cria a nova seção
         const newSection = {
-            id: def.id,
-            name: def.name,
+            id: sectionId,
+            name: isBanner ? 'Banner Divisor' : def.name,
             icon: def.icon,
             enabled: true,
             locked: false
         };
+
+        // Inicializa dados do banner
+        if (isBanner) {
+            if (!this.state.d2Banners) this.state.d2Banners = {};
+            this.state.d2Banners[sectionId] = {
+                title: 'Título do Banner',
+                subtitle: '',
+                bgColor: '#1a365d',
+                bgType: 'solid',
+                bgGradient: 'linear-gradient(135deg, #5167E7 0%, #2D3A81 100%)',
+                textColor: '#ffffff'
+            };
+        }
 
         // Insere antes do Footer
         this.state.d2Sections.splice(insertIndex, 0, newSection);
         this.notifyListeners('d2Sections', this.state.d2Sections, null);
         this.schedulePreviewUpdate();
 
-        console.log(`[D2 State Manager] Seção ${sectionType} adicionada`);
+        console.log(`[D2 State Manager] Seção ${sectionType} adicionada (id: ${sectionId})`);
         return newSection;
     }
 
@@ -610,6 +633,12 @@ class D2StateManager {
         }
 
         this.state.d2Sections = this.state.d2Sections.filter(s => s.id !== sectionId);
+
+        // Limpa dados do banner se for banner
+        if (sectionId.startsWith('banner-') && this.state.d2Banners) {
+            delete this.state.d2Banners[sectionId];
+        }
+
         this.notifyListeners('d2Sections', this.state.d2Sections, null);
         this.schedulePreviewUpdate();
 

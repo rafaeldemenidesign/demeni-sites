@@ -279,10 +279,13 @@
                 </div>
             </section>
 
-            <!-- Affiliates Page -->
+                        <!-- Affiliates Page (Pending Payouts) -->
             <section id="page-affiliates" class="page">
                 <div class="page-header">
-                    <h2>Sistema de Afiliados</h2>
+                    <h2>Indicações & Pendências</h2>
+                    <button class="btn-secondary" onclick="loadAffiliates()">
+                        <i class="fas fa-sync"></i> Atualizar
+                    </button>
                 </div>
 
                 <!-- Affiliate Stats -->
@@ -291,53 +294,55 @@
                         <div class="stat-icon users"><i class="fas fa-user-friends"></i></div>
                         <div class="stat-info">
                             <div class="stat-value" id="stat-affiliates">0</div>
-                            <div class="stat-label">Afiliados Ativos</div>
+                            <div class="stat-label">Indicações Totais</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon revenue"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="stat-icon revenue"><i class="fas fa-exclamation-triangle"></i></div>
                         <div class="stat-info">
-                            <div class="stat-value" id="stat-referrals">0</div>
-                            <div class="stat-label">Indicações</div>
+                            <div class="stat-value" id="stat-pending-amount">R$ 0</div>
+                            <div class="stat-label">Pendência Acumulada</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon credits"><i class="fas fa-percentage"></i></div>
+                        <div class="stat-icon credits"><i class="fas fa-check-circle"></i></div>
                         <div class="stat-info">
-                            <div class="stat-value" id="stat-commission">10%</div>
-                            <div class="stat-label">Comissão</div>
+                            <div class="stat-value" id="stat-paid-amount">R$ 0</div>
+                            <div class="stat-label">Já Pago</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Commission Settings -->
+                <!-- Commission Config -->
                 <div class="settings-card">
-                    <h3><i class="fas fa-sliders-h"></i> Configuração de Comissão</h3>
+                    <h3><i class="fas fa-sliders-h"></i> Comissão por Indicação</h3>
                     <div class="settings-row">
-                        <label>Porcentagem de comissão</label>
-                        <input type="number" id="affiliate-commission" value="10" min="0" max="50">%
+                        <label>Valor atual por indicação convertida</label>
+                        <strong id="affiliate-commission-display">R$ 50</strong>
                     </div>
-                    <div class="settings-row">
-                        <label>Créditos bônus por indicação</label>
-                        <input type="number" id="affiliate-bonus" value="20" min="0">
-                    </div>
-                    <button class="btn-primary" onclick="saveAffiliateSettings()">
-                        <i class="fas fa-save"></i> Salvar
-                    </button>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">
+                        Escala: R$400→R$50 | R$800→R$100 | R$1.200→R$150 | R$1.600→R$200 | R$2.000→R$250
+                    </p>
                 </div>
 
-                <!-- Affiliates Table -->
+                <!-- Pending Payouts Table -->
                 <div class="settings-card">
-                    <h3><i class="fas fa-list"></i> Top Afiliados</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0;"><i class="fas fa-list"></i> Todas as Indicações</h3>
+                        <button class="btn-primary" onclick="markAllPaid()" id="btn-mark-all-paid" style="display: none;">
+                            <i class="fas fa-check-double"></i> Marcar Todos Pago
+                        </button>
+                    </div>
                     <div class="table-container" style="border: none;">
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Afiliado</th>
-                                    <th>Link</th>
-                                    <th>Indicações</th>
-                                    <th>Comissão Gerada</th>
+                                    <th>Quem Indicou</th>
+                                    <th>Indicado</th>
+                                    <th>Data</th>
+                                    <th>Comissão</th>
                                     <th>Status</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="affiliates-table">
@@ -348,7 +353,7 @@
                 </div>
             </section>
 
-            <!-- Analytics Page -->
+<!-- Analytics Page -->
             <section id="page-analytics" class="page">
                 <div class="page-header">
                     <h2>Analytics Avançado</h2>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demeni Sites — Seja Franqueado</title>
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: #0a0a0f;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .checkout-card {
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(145deg, #141420, #1a1a2e);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header */
+        .checkout-header {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            padding: 32px 28px 28px;
+            text-align: center;
+            position: relative;
+        }
+
+        .checkout-header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a855f7, #6c5ce7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .checkout-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .checkout-header p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        /* Badge indicação */
+        .referral-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .referral-badge i {
+            color: #fbbf24;
+        }
+
+        /* Body */
+        .checkout-body {
+            padding: 40px 28px 28px;
+        }
+
+        /* Pricing */
+        .pricing {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .original-price {
+            font-size: 1.1rem;
+            color: #666;
+            text-decoration: line-through;
+            margin-bottom: 4px;
+        }
+
+        .final-price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .final-price span {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #a78bfa;
+            vertical-align: super;
+        }
+
+        .discount-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* Features */
+        .features {
+            list-style: none;
+            margin-bottom: 28px;
+        }
+
+        .features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.95rem;
+            color: #ccc;
+        }
+
+        .features li:last-child {
+            border: none;
+        }
+
+        .features li i {
+            color: #a855f7;
+            width: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .features li strong {
+            color: #fff;
+        }
+
+        /* CTA Button */
+        .btn-checkout {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-checkout:active {
+            transform: translateY(0);
+        }
+
+        .btn-checkout.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-checkout .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        .btn-checkout.loading .spinner {
+            display: block;
+        }
+
+        .btn-checkout.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Security badges */
+        .security {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 16px;
+        }
+
+        .security span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .security i {
+            color: #10b981;
+            font-size: 0.7rem;
+        }
+
+        /* Footer */
+        .checkout-footer {
+            text-align: center;
+            padding: 0 28px 24px;
+        }
+
+        .checkout-footer a {
+            color: #666;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        .checkout-footer a:hover {
+            color: #a855f7;
+        }
+
+        /* Indicado por badge */
+        .referred-by {
+            text-align: center;
+            padding: 12px;
+            background: rgba(168, 85, 247, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .referred-by strong {
+            color: #a78bfa;
+        }
+
+        /* Error state */
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .checkout-card {
+                border-radius: 20px;
+            }
+
+            .checkout-header {
+                padding: 24px 20px 20px;
+            }
+
+            .checkout-body {
+                padding: 32px 20px 20px;
+            }
+
+            .final-price {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="checkout-card">
+        <div class="checkout-header">
+            <div class="brand">Demeni Sites</div>
+            <h1>Plano Franqueado</h1>
+            <p>Crie sites profissionais em minutos</p>
+            <div class="referral-badge" id="referral-badge" style="display: none;">
+                <i class="fas fa-gift"></i>
+                <span>Indicação com desconto!</span>
+            </div>
+        </div>
+
+        <div class="checkout-body">
+            <div class="pricing">
+                <div class="original-price" id="original-price" style="display: none;">R$ 400</div>
+                <div class="final-price">
+                    <span>R$</span><span class="price-value" id="price-value">400</span>
+                </div>
+                <div class="discount-tag" id="discount-tag" style="display: none;">10% OFF por indicação</div>
+            </div>
+
+            <ul class="features">
+                <li>
+                    <i class="fas fa-coins"></i>
+                    <span><strong>500 créditos</strong> para criar sites</span>
+                </li>
+                <li>
+                    <i class="fas fa-globe"></i>
+                    <span>Crie até <strong>12 sites</strong> profissionais</span>
+                </li>
+                <li>
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Editor visual <strong>drag & drop</strong></span>
+                </li>
+                <li>
+                    <i class="fas fa-rocket"></i>
+                    <span>Publicação com <strong>domínio próprio</strong></span>
+                </li>
+                <li>
+                    <i class="fas fa-infinity"></i>
+                    <span>Acesso <strong>vitalício</strong> à plataforma</span>
+                </li>
+                <li>
+                    <i class="fas fa-handshake"></i>
+                    <span>Programa de <strong>indicação + comissão</strong></span>
+                </li>
+            </ul>
+
+            <div class="error-msg" id="error-msg"></div>
+
+            <button class="btn-checkout" id="btn-checkout" onclick="startCheckout()">
+                <div class="spinner"></div>
+                <span class="btn-text"><i class="fab fa-pix"></i> Pagar via PIX</span>
+            </button>
+
+            <div class="security">
+                <span><i class="fas fa-lock"></i> Pagamento seguro</span>
+                <span><i class="fas fa-shield-alt"></i> Mercado Pago</span>
+            </div>
+        </div>
+
+        <div class="referred-by" id="referred-by" style="display: none;">
+            Indicado por <strong id="referrer-code"></strong>
+        </div>
+
+        <div class="checkout-footer">
+            <a href="/app.html">Já tenho conta → Acessar plataforma</a>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Config
+        const SUPABASE_URL = 'https://aeyxdqggngapczohqvbo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleXhkcWdnbmdhcGN6b2hxdmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTc3MTcsImV4cCI6MjA4NDU5MzcxN30.eq9Feo9dj6T1KUO-F4AN7j4x7HECb8f0B9WddFLD9C4';
+        const API_URL = SUPABASE_URL + '/functions/v1';
+
+        const PLAN = {
+            id: 'franquia',
+            name: 'Plano Franqueado',
+            price: 400,
+            credits: 500,
+            discountPercent: 10
+        };
+
+        let refCode = null;
+        let hasDiscount = false;
+
+        // Init
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            refCode = params.get('ref');
+
+            if (refCode) {
+                // Save to localStorage
+                localStorage.setItem('demeni_referral_code', refCode);
+
+                // Show referral UI
+                hasDiscount = true;
+                const discountedPrice = Math.floor(PLAN.price * (1 - PLAN.discountPercent / 100));
+
+                document.getElementById('referral-badge').style.display = 'inline-flex';
+                document.getElementById('original-price').style.display = 'block';
+                document.getElementById('price-value').textContent = discountedPrice;
+                document.getElementById('discount-tag').style.display = 'inline-block';
+                document.getElementById('referred-by').style.display = 'block';
+                document.getElementById('referrer-code').textContent = refCode;
+            }
+        })();
+
+        // Start checkout
+        async function startCheckout() {
+            const btn = document.getElementById('btn-checkout');
+            const errorEl = document.getElementById('error-msg');
+            errorEl.style.display = 'none';
+            btn.classList.add('loading');
+
+            try {
+                const finalPrice = hasDiscount
+                    ? Math.floor(PLAN.price * (1 - PLAN.discountPercent / 100))
+                    : PLAN.price;
+
+                // Create Mercado Pago preference via Edge Function
+                const response = await fetch(API_URL + '/create-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        package_id: PLAN.id,
+                        package_name: PLAN.name,
+                        credits: PLAN.credits,
+                        price: finalPrice,
+                        referral_code: refCode || null,
+                        is_franchise_checkout: true,
+                        discount_percent: hasDiscount ? PLAN.discountPercent : 0
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => null);
+                    throw new Error(errData?.error || 'Erro ao criar checkout');
+                }
+
+                const data = await response.json();
+
+                if (data.init_point) {
+                    // Redirect to Mercado Pago
+                    window.location.href = data.init_point;
+                } else {
+                    throw new Error('Link de pagamento não disponível');
+                }
+            } catch (err) {
+                console.error('Checkout error:', err);
+                errorEl.textContent = err.message || 'Erro ao processar. Tente novamente.';
+                errorEl.style.display = 'block';
+                btn.classList.remove('loading');
+            }
+        }
+    </script>
+</body>
+
+</html>

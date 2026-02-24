@@ -271,15 +271,17 @@
                 document.head.appendChild(tempIcon);
                 loadClientSite(slug);
             } else {
-                // É a plataforma - capturar referral code se existir
+                // É a plataforma - verificar se é indicação
                 const urlParams = new URLSearchParams(window.location.search);
                 const refCode = urlParams.get('ref');
                 if (refCode) {
+                    // Indicação direta → checkout da franquia
                     localStorage.setItem('demeni_referral_code', refCode);
-                    console.log('Referral code saved:', refCode);
+                    window.location.href = '/franquia.html?ref=' + encodeURIComponent(refCode);
+                } else {
+                    // Sem indicação → dashboard normal
+                    window.location.href = '/app.html';
                 }
-                // Redirecionar para dashboard
-                window.location.href = '/app.html';
             }
         })();
     </script>

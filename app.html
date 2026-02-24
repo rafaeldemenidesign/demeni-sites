@@ -342,116 +342,51 @@
                     </div>
                 </section>
 
-                <!-- Page: Affiliates -->
+                <!-- Page: Affiliates (Franqueado → Franqueado) -->
                 <section class="page" id="page-affiliates">
                     <div class="page-header">
-                        <p class="page-subtitle">Indique e ganhe recompensas</p>
+                        <p class="page-subtitle">Indique novos franqueados e ganhe recompensas</p>
                     </div>
 
-                    <!-- Affiliate Tabs -->
-                    <div class="affiliate-tabs">
-                        <button class="affiliate-tab active" data-tab="my-referrals">Minhas Indicações</button>
-                        <button class="affiliate-tab" data-tab="my-affiliates">Meus Afiliados</button>
-                    </div>
-
-                    <!-- Tab: My Referrals (I refer franchisees to Demeni) -->
-                    <div class="affiliate-tab-content active" id="tab-my-referrals">
-                        <div class="affiliate-card">
-                            <div class="affiliate-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value" id="aff-total-referrals">0</span>
-                                    <span class="stat-label">Indicações</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value" id="aff-total-earned">0</span>
-                                    <span class="stat-label">Créditos Ganhos</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value" id="aff-pending">0</span>
-                                    <span class="stat-label">Pendentes</span>
-                                </div>
+                    <!-- Stats -->
+                    <div class="affiliate-card">
+                        <div class="affiliate-stats">
+                            <div class="stat-item">
+                                <span class="stat-value" id="aff-total-referrals">0</span>
+                                <span class="stat-label">Indicações</span>
                             </div>
-                        </div>
-
-                        <div class="affiliate-share-box">
-                            <h4><i class="fas fa-link"></i> Seu Link de Indicação</h4>
-                            <div class="share-link-container">
-                                <input type="text" id="aff-referral-link" readonly placeholder="Carregando...">
-                                <button class="btn-copy" onclick="copyAffiliateLink()">
-                                    <i class="fas fa-copy"></i>
-                                </button>
+                            <div class="stat-item">
+                                <span class="stat-value" id="aff-total-earned">0</span>
+                                <span class="stat-label">Créditos Ganhos</span>
                             </div>
-                            <p class="share-info">Compartilhe este link e ganhe <strong>100 créditos</strong> ou
-                                <strong>R$50</strong> por cada novo franqueado!
-                            </p>
-                        </div>
-
-                        <h4 class="section-title">Histórico de Indicações</h4>
-                        <div class="referrals-list" id="referrals-list">
-                            <div class="empty-state small">
-                                <i class="fas fa-user-plus"></i>
-                                <p>Nenhuma indicação ainda. Compartilhe seu link!</p>
+                            <div class="stat-item">
+                                <span class="stat-value" id="aff-pending">0</span>
+                                <span class="stat-label">Pendentes</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tab: My Affiliates (others refer clients for me) -->
-                    <div class="affiliate-tab-content" id="tab-my-affiliates">
-                        <div class="affiliate-config-box">
-                            <div class="config-header">
-                                <h4><i class="fas fa-cog"></i> Programa de Afiliados</h4>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="aff-program-enabled">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                            <p class="config-desc">Ative para permitir que outras pessoas indiquem clientes para você.
-                            </p>
-
-                            <div class="commission-config" id="commission-config" style="display: none;">
-                                <h5>Comissões por Modelo</h5>
-                                <div class="commission-grid">
-                                    <div class="commission-item">
-                                        <label>D-1 (Bio Link)</label>
-                                        <div class="input-group">
-                                            <span>R$</span>
-                                            <input type="number" id="comm-d1" value="20" min="0">
-                                        </div>
-                                    </div>
-                                    <div class="commission-item">
-                                        <label>D-2 (Landing)</label>
-                                        <div class="input-group">
-                                            <span>R$</span>
-                                            <input type="number" id="comm-d2" value="40" min="0">
-                                        </div>
-                                    </div>
-                                    <div class="commission-item">
-                                        <label>D-3</label>
-                                        <div class="input-group">
-                                            <span>R$</span>
-                                            <input type="number" id="comm-prime" value="80" min="0">
-                                        </div>
-                                    </div>
-                                    <div class="commission-item">
-                                        <label>NFC</label>
-                                        <div class="input-group">
-                                            <span>R$</span>
-                                            <input type="number" id="comm-nfc" value="10" min="0">
-                                        </div>
-                                    </div>
-                                </div>
-                                <button class="btn-primary" onclick="saveAffiliateConfig()">
-                                    <i class="fas fa-save"></i> Salvar Configurações
-                                </button>
-                            </div>
+                    <!-- Referral Link -->
+                    <div class="affiliate-share-box">
+                        <h4><i class="fas fa-link"></i> Seu Link de Indicação</h4>
+                        <div class="share-link-container">
+                            <input type="text" id="aff-referral-link" readonly placeholder="Carregando...">
+                            <button class="btn-copy" onclick="copyAffiliateLink()">
+                                <i class="fas fa-copy"></i>
+                            </button>
                         </div>
+                        <p class="share-info">Quando alguém comprar pelo seu link:
+                            <strong>Você ganha 100 créditos + R$50</strong> e
+                            o indicado ganha <strong>10% de desconto</strong>!
+                        </p>
+                    </div>
 
-                        <h4 class="section-title">Meus Afiliados</h4>
-                        <div class="affiliates-list" id="my-affiliates-list">
-                            <div class="empty-state small">
-                                <i class="fas fa-users"></i>
-                                <p>Ative o programa acima para cadastrar afiliados.</p>
-                            </div>
+                    <!-- Referrals History -->
+                    <h4 class="section-title">Histórico de Indicações</h4>
+                    <div class="referrals-list" id="referrals-list">
+                        <div class="empty-state small">
+                            <i class="fas fa-user-plus"></i>
+                            <p>Nenhuma indicação ainda. Compartilhe seu link!</p>
                         </div>
                     </div>
                 </section>

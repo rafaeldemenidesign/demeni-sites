@@ -4,27 +4,97 @@
    =========================== */
 
 const Affiliates = (function () {
-    // ========== API ENDPOINTS ==========
-    const SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem('supabase_url');
-    const SUPABASE_KEY = window.SUPABASE_ANON_KEY || localStorage.getItem('supabase_key');
+    // ========== AFFILIATE COMMISSION TIERS ==========
+    // Estrutura escalável: quando o preço de entrada subir, a comissão acompanha
+    const AFFILIATE_TIERS = [
+        { entryPrice: 400, commission: 50, discount: 0.10 },  // Atual
+        { entryPrice: 800, commission: 100, discount: 0.10 },
+        { entryPrice: 1200, commission: 150, discount: 0.10 },
+        { entryPrice: 1600, commission: 200, discount: 0.10 },
+        { entryPrice: 2000, commission: 250, discount: 0.10 }
+    ];
+
+    // Tier ativo (alterar index quando mudar o preço de entrada)
+    let _activeTierIndex = 0;
+
+    function getActiveTier() {
+        return AFFILIATE_TIERS[_activeTierIndex] || AFFILIATE_TIERS[0];
+    }
+
+    function setActiveTierByPrice(price) {
+        const idx = AFFILIATE_TIERS.findIndex(t => t.entryPrice === price);
+        if (idx >= 0) _activeTierIndex = idx;
+    }
+
+    function _supabase() {
+        return SupabaseClient.getClient();
+    }
 
     // ========== GET CURRENT USER AFFILIATE ==========
     async function getMyAffiliate() {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await _supabase().auth.getUser();
             if (!user) return null;
 
-            const { data, error } = await supabase
+            const { data, error } = await _supabase()
                 .from('affiliates')
                 .select('*')
                 .eq('user_id', user.id)
                 .eq('type', 'demeni')
-                .single();
+                .maybeSingle();
 
             if (error) throw error;
-            return data;
+
+            // If affiliate exists, return it
+            if (data) return data;
+
+            // Auto-create affiliate record for this user
+            return await _createAffiliateForUser(user);
         } catch (e) {
             console.error('Error getting affiliate:', e);
+            return null;
+        }
+    }
+
+    // Auto-create affiliate record with unique referral code
+    async function _createAffiliateForUser(user) {
+        try {
+            // Get user profile for name
+            const { data: profile } = await _supabase()
+                .from('profiles')
+                .select('name')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            // Generate code: first 4 chars of name (uppercase) + 4 random digits
+            const baseName = (profile?.name || user.email?.split('@')[0] || 'USER')
+                .replace(/[^a-zA-Z]/g, '')
+                .toUpperCase()
+                .slice(0, 4);
+            const randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 digits
+            const referralCode = `${baseName}${randomSuffix}`;
+
+            const { data: newAffiliate, error } = await _supabase()
+                .from('affiliates')
+                .insert({
+                    user_id: user.id,
+                    referral_code: referralCode,
+                    type: 'demeni',
+                    total_referrals: 0,
+                    total_earned: 0
+                })
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error creating affiliate:', error);
+                return null;
+            }
+
+            console.log('✅ Affiliate auto-created:', referralCode);
+            return newAffiliate;
+        } catch (e) {
+            console.error('Error auto-creating affiliate:', e);
             return null;
         }
     }
@@ -40,8 +110,11 @@ const Affiliates = (function () {
         const code = await getMyReferralCode();
         if (!code) return null;
 
-        const baseUrl = window.location.origin;
-        return `${baseUrl}/index.html?ref=${code}`;
+        // Use production URL for sharing (not localhost)
+        const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? window.location.origin
+            : 'https://sites.rafaeldemeni.com';
+        return `${baseUrl}/franquia.html?ref=${code}`;
     }
 
     // ========== GET MY REFERRALS (people I referred) ==========
@@ -50,7 +123,7 @@ const Affiliates = (function () {
             const affiliate = await getMyAffiliate();
             if (!affiliate) return [];
 
-            const { data, error } = await supabase
+            const { data, error } = await _supabase()
                 .from('referrals')
                 .select(`
                     *,
@@ -119,7 +192,7 @@ const Affiliates = (function () {
             if (!refCode) return null;
 
             // Find the affiliate with this code
-            const { data: affiliate, error: affError } = await supabase
+            const { data: affiliate, error: affError } = await _supabase()
                 .from('affiliates')
                 .select('id, user_id')
                 .eq('referral_code', refCode)
@@ -139,7 +212,7 @@ const Affiliates = (function () {
             }
 
             // Update profile with referred_by
-            const { error: profileError } = await supabase
+            const { error: profileError } = await _supabase()
                 .from('profiles')
                 .update({ referred_by: affiliate.id })
                 .eq('id', newUserId);
@@ -147,7 +220,7 @@ const Affiliates = (function () {
             if (profileError) throw profileError;
 
             // Create pending referral record
-            const { data: referral, error: refError } = await supabase
+            const { data: referral, error: refError } = await _supabase()
                 .from('referrals')
                 .insert({
                     affiliate_id: affiliate.id,
@@ -173,10 +246,10 @@ const Affiliates = (function () {
     // Get my affiliate config
     async function getMyAffiliateConfig() {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await _supabase().auth.getUser();
             if (!user) return null;
 
-            const { data, error } = await supabase
+            const { data, error } = await _supabase()
                 .from('affiliate_configs')
                 .select('*')
                 .eq('user_id', user.id)
@@ -193,10 +266,10 @@ const Affiliates = (function () {
     // Create or update affiliate config
     async function saveAffiliateConfig(config) {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await _supabase().auth.getUser();
             if (!user) return null;
 
-            const { data, error } = await supabase
+            const { data, error } = await _supabase()
                 .from('affiliate_configs')
                 .upsert({
                     user_id: user.id,
@@ -217,10 +290,10 @@ const Affiliates = (function () {
     // Get my franchisee affiliates (people who affiliate for me)
     async function getMyFranchiseeAffiliates() {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await _supabase().auth.getUser();
             if (!user) return [];
 
-            const { data, error } = await supabase
+            const { data, error } = await _supabase()
                 .from('affiliates')
                 .select(`
                     *,
@@ -241,13 +314,13 @@ const Affiliates = (function () {
     // Add a franchisee affiliate
     async function addFranchiseeAffiliate(name, email) {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await _supabase().auth.getUser();
             if (!user) return null;
 
             // Generate referral code for this affiliate
             const code = `${name.split(' ')[0].toUpperCase().slice(0, 4)}${Math.floor(Math.random() * 10000)}`;
 
-            const { data, error } = await supabase
+            const { data, error } = await _supabase()
                 .from('affiliates')
                 .insert({
                     user_id: user.id, // The affiliate record belongs to current user
@@ -278,7 +351,7 @@ const Affiliates = (function () {
 
     // ========== PUBLIC API ==========
     return {
-        // Demeni Affiliates (I refer franchisees)
+        // Demeni Affiliates (Franqueado → Franqueado)
         getMyAffiliate,
         getMyReferralCode,
         getReferralLink,
@@ -292,11 +365,10 @@ const Affiliates = (function () {
         clearSavedReferralCode,
         registerReferralOnSignup,
 
-        // Franchisee Affiliates (others refer clients for me)
-        getMyAffiliateConfig,
-        saveAffiliateConfig,
-        getMyFranchiseeAffiliates,
-        addFranchiseeAffiliate
+        // Commission Tiers
+        getActiveTier,
+        setActiveTierByPrice,
+        AFFILIATE_TIERS
     };
 })();
 

@@ -90,8 +90,10 @@ RAFAEL (Plataforma) → cobra créditos → FRANQUEADO → cobra mensalidade →
 1. Franqueado edita no Editor D2 → estado salvo em IndexedDB + sync Supabase
 2. Clica "Publicar" → HTML completo gerado (auto-contido, com CSS/JS inline)
 3. HTML salvo no Supabase `projects.html_content`
-4. Site acessível em `slug.rafaeldemeni.com`
-5. (Futuro) HTML também salvo como arquivo estático no Vercel CDN
+4. Visitante acessa `slug.rafaeldemeni.com` ou `/s/slug`
+5. **Edge Function** (`api/subdomain.js`) busca HTML no Supabase via REST API
+6. Resposta servida com **cache CDN** (1h cache, 24h stale-while-revalidate)
+7. Visitantes na mesma região recebem resposta instantânea do cache sem tocar no Supabase
 
 ### Custos de infraestrutura
 
@@ -128,6 +130,13 @@ RAFAEL (Plataforma) → cobra créditos → FRANQUEADO → cobra mensalidade →
 - Personalização granular de cores, fontes, gradientes, imagens
 - Publicação com slug customizado
 
+#### Seções planejadas para o D2:
+
+| Seção | Tipo | Descrição |
+|---|---|---|
+| **Banner Divisor** | Destaque | Seção curta com título + subtítulo. Funciona como separador/destaque entre seções. Pode ser inserido em qualquer posição, múltiplas vezes. |
+| **Acordeão** | Conteúdo | Cards que expandem/recolhem verticalmente. Ideal para currículo digital (experiências, formações, habilidades). Cada card tem título + conteúdo detalhado. |
+
 ### Editor D1 (Link-na-Bio) — 🔧 Em desenvolvimento
 - Template de links tipo Linktree
 - Previsão: fim de fevereiro/2026
@@ -156,9 +165,11 @@ O Demeni Core é o sistema de gestão interna do SaaS, organizado em 8 frentes (
 ## 7. ROADMAP / PENDÊNCIAS
 
 ### Prioridade Alta
-- [ ] Finalizar proteção de dados (backup automático + error catch)
+- [x] Proteção de dados (4 camadas anti-overwrite) — commit `c9f14dd`
+- [x] Edge Function com cache CDN — commit `008b523`
 - [ ] Implementar limites de itens por seção no editor
-- [ ] Otimização HTML estático no Vercel CDN (elimina custo de bandwidth)
+- [ ] Nova seção: **Banner Divisor** (destaque entre seções)
+- [ ] Nova seção: **Acordeão** (cards expansíveis para currículo)
 - [ ] Sistema de despublicação automática (renovação anual)
 
 ### Prioridade Média

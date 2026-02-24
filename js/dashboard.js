@@ -2320,69 +2320,36 @@ function setupSupportForm() {
     });
 }
 
-// ========== AFFILIATES PAGE ==========
+// ========== AFFILIATES PAGE (Franqueado → Franqueado) ==========
 
 // Initialize affiliates page when navigated to
 function initAffiliatePage() {
-    setupAffiliateTabs();
     loadAffiliateStats();
-    setupAffiliateConfigToggle();
 }
 
-// Setup tab switching
-function setupAffiliateTabs() {
-    const tabs = document.querySelectorAll('.affiliate-tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetTab = tab.dataset.tab;
-
-            // Update tabs
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-
-            // Update content
-            document.querySelectorAll('.affiliate-tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${targetTab}`)?.classList.add('active');
-        });
-    });
-}
-
-// Load affiliate stats
+// Load affiliate stats and referral link
 async function loadAffiliateStats() {
     if (!window.Affiliates) return;
 
     try {
         const stats = await Affiliates.getMyStats();
-        if (stats) {
-            document.getElementById('aff-total-referrals').textContent = stats.totalReferrals || 0;
-            document.getElementById('aff-total-earned').textContent = stats.totalEarned || 0;
-            document.getElementById('aff-pending').textContent = stats.pendingReferrals || 0;
-        }
+        document.getElementById('aff-total-referrals').textContent = stats?.totalReferrals || 0;
+        document.getElementById('aff-total-earned').textContent = stats?.totalEarned || 0;
+        document.getElementById('aff-pending').textContent = stats?.pendingReferrals || 0;
 
         const link = await Affiliates.getReferralLink();
-        if (link) {
-            document.getElementById('aff-referral-link').value = link;
+        const linkInput = document.getElementById('aff-referral-link');
+        if (linkInput) {
+            linkInput.value = link || 'Erro ao gerar link. Recarregue a página.';
         }
 
         // Load referrals list
         const referrals = await Affiliates.getMyReferrals();
         renderReferralsList(referrals);
-
-        // Load affiliate config
-        const config = await Affiliates.getMyAffiliateConfig();
-        if (config) {
-            document.getElementById('aff-program-enabled').checked = config.enabled;
-            document.getElementById('comm-d1').value = config.d1_commission || 20;
-            document.getElementById('comm-d2').value = config.d2_commission || 40;
-            document.getElementById('comm-prime').value = config.prime_commission || 80;
-            document.getElementById('comm-nfc').value = config.nfc_commission || 10;
-
-            if (config.enabled) {
-                document.getElementById('commission-config').style.display = 'block';
-            }
-        }
     } catch (e) {
         console.error('Error loading affiliate stats:', e);
+        const linkInput = document.getElementById('aff-referral-link');
+        if (linkInput) linkInput.value = 'Erro ao carregar. Recarregue a página.';
     }
 }
 
@@ -2412,6 +2379,7 @@ function renderReferralsList(referrals) {
         const name = ref.referred_user?.name || ref.referred_email || 'Usuário';
         const initial = name.charAt(0).toUpperCase();
         const date = new Date(ref.created_at).toLocaleDateString('pt-BR');
+        const tier = window.Affiliates?.getActiveTier?.() || { commission: 50 };
 
         return `
             <div class="referral-item">
@@ -2419,25 +2387,13 @@ function renderReferralsList(referrals) {
                     <div class="referral-avatar">${initial}</div>
                     <div class="referral-info">
                         <h5>${name}</h5>
-                        <p>${date}</p>
+                        <p>${date} · R$${tier.commission}</p>
                     </div>
                 </div>
                 <span class="referral-status ${statusClass}">${statusText}</span>
             </div>
         `;
     }).join('');
-}
-
-// Setup config toggle
-function setupAffiliateConfigToggle() {
-    const toggle = document.getElementById('aff-program-enabled');
-    const configPanel = document.getElementById('commission-config');
-
-    if (toggle && configPanel) {
-        toggle.addEventListener('change', () => {
-            configPanel.style.display = toggle.checked ? 'block' : 'none';
-        });
-    }
 }
 
 // Copy affiliate link
@@ -2455,26 +2411,6 @@ async function copyAffiliateLink() {
             document.execCommand('copy');
             showNotification('✅ Link copiado!');
         }
-    }
-}
-
-// Save affiliate config
-async function saveAffiliateConfig() {
-    if (!window.Affiliates) return;
-
-    const config = {
-        enabled: document.getElementById('aff-program-enabled').checked,
-        d1_commission: parseFloat(document.getElementById('comm-d1').value) || 20,
-        d2_commission: parseFloat(document.getElementById('comm-d2').value) || 40,
-        prime_commission: parseFloat(document.getElementById('comm-prime').value) || 80,
-        nfc_commission: parseFloat(document.getElementById('comm-nfc').value) || 10
-    };
-
-    const result = await Affiliates.saveAffiliateConfig(config);
-    if (result) {
-        showNotification('✅ Configurações salvas!');
-    } else {
-        showNotification('❌ Erro ao salvar', 'error');
     }
 }
 

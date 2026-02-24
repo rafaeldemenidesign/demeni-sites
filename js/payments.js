@@ -76,13 +76,13 @@ const Payments = (function () {
             id: 'plus',
             name: 'Plus',
             icon: 'fa-crown',
-            credits: 400,
+            credits: 500,
             price: 400.00,
-            bonus_credits: 200,
+            bonus_credits: 0,
             is_featured: true,
             features: [
-                '400 créditos + 200 bônus',
-                '600 créditos = 15 sites'
+                '500 créditos',
+                '500 créditos = 12 sites'
             ]
         },
         {

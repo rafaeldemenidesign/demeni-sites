@@ -1264,6 +1264,27 @@ function renderPreviewD2New(frame, state) {
             ${feedbacksTopLine.css}
             ${ctaTopLine.css}
             ${footerTopLine.css}
+
+            /* BANNER DIVISOR */
+            .d2-banner-section {
+                padding: 28px 24px;
+                text-align: center;
+                margin: 0;
+                position: relative;
+            }
+            .d2-banner-section h2 {
+                font-family: '${baseFont}', sans-serif;
+                font-size: 22px;
+                font-weight: 600;
+                margin-bottom: 6px;
+                line-height: 1.3;
+            }
+            .d2-banner-section p {
+                font-size: 14px;
+                font-weight: 400;
+                opacity: 0.85;
+                line-height: 1.4;
+            }
         </style>
 
         <div class="d2-preview-container">
@@ -1280,14 +1301,21 @@ function renderPreviewD2New(frame, state) {
             <nav class="d2-sidebar">
                 <button class="sidebar-close" onclick="var s=this.closest('.d2-preview-container');s.querySelector('.d2-sidebar').classList.remove('open');s.querySelector('.d2-sidebar-overlay').classList.remove('open')">&times;</button>
                 <div class="sidebar-title">Menu</div>
-                ${enabledSections.map(s => `
+                ${enabledSections.filter(s => !s.id.startsWith('banner-')).map(s => `
                 <a class="sidebar-item" onclick="var c=this.closest('.d2-preview-container');c.querySelector('.d2-sidebar').classList.remove('open');c.querySelector('.d2-sidebar-overlay').classList.remove('open');var target=c.querySelector('#section-${s.id}');if(target)target.scrollIntoView({behavior:'smooth',block:'start'})">
                     <i class="fas ${s.icon || 'fa-circle'}"></i>
                     <span>${s.name}</span>
                 </a>`).join('')}
             </nav>
 
-            <!-- HERO -->
+            <!-- SEÇÕES DINÂMICAS (ordem do d2Sections) -->
+            ${sections.filter(s => s.enabled).map(s => {
+                // Identifica o tipo base (banner-123456 → banner)
+                const baseType = s.id.startsWith('banner-') ? 'banner' : s.id;
+
+                switch (baseType) {
+                    case 'hero':
+                        return `
             <section class="d2-hero" id="section-hero">
                 <div class="hero-bg">
                     ${heroBgImage ? `<div class="hero-bg-image" style="background-image: url('${heroBgImage}')"></div>` : ''}
@@ -1299,72 +1327,69 @@ function renderPreviewD2New(frame, state) {
                     <a href="${heroBtnLink}" class="d2-cta-btn">${heroBtnText}</a>
                 </div>
                 ${heroScrollIndicatorEnabled ? `<div class="scroll-indicator"><i class="fas fa-chevron-down"></i></div>` : ''}
-            </section>
+            </section>`;
 
-            <!-- CATEGORIAS -->
-            ${isSectionEnabled('categorias') ? `
+                    case 'categorias':
+                        return `
             ${categoriasTopLine.html}
             <section class="d2-categorias" id="section-categorias">
                 ${categoriasSectionTitleEnabled ? `<h2>${categoriasSectionTitle}</h2>` : ''}
                 ${categoriasSectionSubtitleEnabled ? `<p class="section-subtitle">${categoriasSectionSubtitle}</p>` : ''}
                 <div class="d2-categorias-grid">
                     ${categoriasItems.map(cat => {
-                // Custom icon takes priority
-                let iconHtml;
-                if (cat.customIcon) {
-                    const cZoom = (cat.customIconZoom || 100) / 100;
-                    const cPosX = cat.customIconPosX ?? 50;
-                    const cPosY = cat.customIconPosY ?? 50;
-                    iconHtml = `<img src="${cat.customIcon}" alt="${cat.label}" style="transform:scale(${cZoom}) translate(${cPosX - 50}%, ${cPosY - 50}%);transform-origin:center center;">`;
-                } else {
-                    // Fallback: old PNGs → FontAwesome
-                    const pngFallback = {
-                        'img/Pen Tool.png': 'fa-box-open',
-                        'img/Engrenagem.png': 'fa-concierge-bell',
-                        'img/Aulas.png': 'fa-graduation-cap',
-                        'img/Sobre.png': 'fa-info-circle'
-                    };
-                    let iconRef = pngFallback[cat.icon] || cat.icon || 'fa-circle';
-                    const isFa = iconRef.startsWith('fa-');
-                    const isUrl = iconRef.startsWith('http') || iconRef.startsWith('data:');
-                    iconHtml = isFa
-                        ? `<i class="fas ${iconRef}" style="color:${categoriaIconColor}"></i>`
-                        : `<img src="${isUrl ? iconRef : baseUrl + '/' + iconRef}" alt="${cat.label}">`;
-                }
-                return `
+                            let iconHtml;
+                            if (cat.customIcon) {
+                                const cZoom = (cat.customIconZoom || 100) / 100;
+                                const cPosX = cat.customIconPosX ?? 50;
+                                const cPosY = cat.customIconPosY ?? 50;
+                                iconHtml = `<img src="${cat.customIcon}" alt="${cat.label}" style="transform:scale(${cZoom}) translate(${cPosX - 50}%, ${cPosY - 50}%);transform-origin:center center;">`;
+                            } else {
+                                const pngFallback = {
+                                    'img/Pen Tool.png': 'fa-box-open',
+                                    'img/Engrenagem.png': 'fa-concierge-bell',
+                                    'img/Aulas.png': 'fa-graduation-cap',
+                                    'img/Sobre.png': 'fa-info-circle'
+                                };
+                                let iconRef = pngFallback[cat.icon] || cat.icon || 'fa-circle';
+                                const isFa = iconRef.startsWith('fa-');
+                                const isUrl = iconRef.startsWith('http') || iconRef.startsWith('data:');
+                                iconHtml = isFa
+                                    ? `<i class="fas ${iconRef}" style="color:${categoriaIconColor}"></i>`
+                                    : `<img src="${isUrl ? iconRef : baseUrl + '/' + iconRef}" alt="${cat.label}">`;
+                            }
+                            return `
                     <a href="${cat.link || '#'}" class="d2-categoria-item">
                         <div class="d2-categoria-icon">
                             ${iconHtml}
                         </div>
                         <span>${cat.label}</span>
                     </a>`;
-            }).join('')}
+                        }).join('')}
                 </div>
-            </section>
-            ` : ''}
+            </section>`;
 
-            <!-- PRODUTOS (Dinâmico) -->
-            ${isSectionEnabled('produtos') ? `
+                    case 'produtos':
+                        return `
             ${produtosTopLine.html}
             <section class="d2-produtos" id="section-produtos">
                 ${produtosSectionTitleEnabled ? `<h2>${produtosSectionTitle}</h2>` : ''}
                 ${produtosSectionSubtitleEnabled ? `<p class="section-subtitle">${produtosSectionSubtitle}</p>` : ''}
                 <div class="d2-produtos-grid">
                     ${(state?.d2Products || []).map(p => {
-                const rawPrice = p.price || 'R$ 0,00';
-                let priceHtml;
-                if (produtoPrecoCurrencyStyle === 'small') {
-                    const match = rawPrice.match(/R\$\s*([\d.]+),(\d{2})/);
-                    if (match) {
-                        priceHtml = `<span class="currency">R$</span><span class="value">${match[1]}</span><span class="cents">,${match[2]}</span>`;
-                    } else {
-                        priceHtml = rawPrice;
-                    }
-                } else {
-                    priceHtml = rawPrice;
-                }
-                const prodLink = p.link && p.link !== '#' && !p.link.startsWith('http') && !p.link.startsWith('#') && !p.link.startsWith('mailto:') && !p.link.startsWith('tel:') ? 'https://' + p.link : (p.link || '#');
-                return `
+                            const rawPrice = p.price || 'R$ 0,00';
+                            let priceHtml;
+                            if (produtoPrecoCurrencyStyle === 'small') {
+                                const match = rawPrice.match(/R\$\s*([\d.]+),(\d{2})/);
+                                if (match) {
+                                    priceHtml = `<span class="currency">R$</span><span class="value">${match[1]}</span><span class="cents">,${match[2]}</span>`;
+                                } else {
+                                    priceHtml = rawPrice;
+                                }
+                            } else {
+                                priceHtml = rawPrice;
+                            }
+                            const prodLink = p.link && p.link !== '#' && !p.link.startsWith('http') && !p.link.startsWith('#') && !p.link.startsWith('mailto:') && !p.link.startsWith('tel:') ? 'https://' + p.link : (p.link || '#');
+                            return `
                     <a href="${prodLink}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
                         <div class="d2-produto-img">
                             <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}" style="transform:scale(${(p.imageZoom || 100) / 100}) translate(${(p.imagePosX ?? 50) - 50}%, ${(p.imagePosY ?? 50) - 50}%);transform-origin:center center;">
@@ -1375,23 +1400,22 @@ function renderPreviewD2New(frame, state) {
                             <span class="d2-produto-btn"${p.btnBgColor ? ` style="background:${p.btnBgColor}"` : ''}>${p.btnText || produtoBtnText}</span>
                         </div>
                     </a>`;
-            }).join('')}
+                        }).join('')}
                 </div>
-            </section>
-            ` : ''}
+            </section>`;
 
-            <!-- FEEDBACKS (Dinâmico) -->
-            ${isSectionEnabled('feedbacks') ? `
+                    case 'feedbacks':
+                        return `
             ${feedbacksTopLine.html}
             <section class="d2-feedbacks" id="section-feedbacks">
                 ${feedbacksSectionTitleEnabled ? `<h2>${feedbacksSectionTitle}</h2>` : ''}
                 ${feedbacksSectionSubtitleEnabled ? `<p class="section-subtitle">${feedbacksSectionSubtitle}</p>` : ''}
                 <div class="d2-feedbacks-list">
                     ${(state?.d2Feedbacks || []).map(f => {
-                const aZoom = (f.avatarZoom || 100) / 100;
-                const aPosX = f.avatarPosX ?? 50;
-                const aPosY = f.avatarPosY ?? 50;
-                return `
+                            const aZoom = (f.avatarZoom || 100) / 100;
+                            const aPosX = f.avatarPosX ?? 50;
+                            const aPosY = f.avatarPosY ?? 50;
+                            return `
                     <div class="d2-feedback-card">
                         <div style="width:${feedbackAvatarSize}px;height:${feedbackAvatarSize}px;border-radius:${feedbackAvatarRadius}px;overflow:hidden;flex-shrink:0;">
                             <img src="${f.avatar || baseUrl + '/avatar.webp'}" alt="${f.name || 'Cliente'}" class="d2-feedback-avatar" style="transform:scale(${aZoom}) translate(${(aPosX - 50)}%, ${(aPosY - 50)}%);transform-origin:center center;">
@@ -1401,14 +1425,13 @@ function renderPreviewD2New(frame, state) {
                             <p>${f.text || 'Texto do depoimento aqui...'}</p>
                         </div>
                     </div>`;
-            }).join('')}
+                        }).join('')}
                 </div>
                 ${feedbackBottomCtaEnabled ? `<p class="d2-feedbacks-cta">${feedbackBottomCtaText}</p>` : ''}
-            </section>
-            ` : ''}
+            </section>`;
 
-            <!-- CTA SECUNDÁRIO -->
-            ${isSectionEnabled('cta') ? `
+                    case 'cta':
+                        return `
             ${ctaTopLine.html}
             <section class="d2-cta-secundario" id="section-cta">
                 <div class="cta-content">
@@ -1416,12 +1439,12 @@ function renderPreviewD2New(frame, state) {
                     <p>${ctaSubtitleText}</p>
                     <a href="${ctaBtnLink}" class="d2-cta-btn">${ctaBtnText}</a>
                 </div>
-            </section>
-            ` : ''}
+            </section>`;
 
-            <!-- FOOTER -->
+                    case 'footer':
+                        return `
             ${footerTopLine.html}
-            <footer class="d2-footer">
+            <footer class="d2-footer" id="section-footer">
                 <h3>${footerTitleText}</h3>
                 ${footerSubtitleText ? `<p class="d2-footer-subtitle">${footerSubtitleText}</p>` : ''}
                 <div class="d2-footer-info">
@@ -1454,7 +1477,31 @@ function renderPreviewD2New(frame, state) {
                         </a>` : ''}
                     </div>
                 </div>
-            </footer>
+            </footer>`;
+
+                    case 'banner': {
+                        const bannerData = (state?.d2Banners || {})[s.id] || {};
+                        const bTitle = bannerData.title || 'Título do Banner';
+                        const bSubtitle = bannerData.subtitle || '';
+                        const bBgColor = bannerData.bgColor || '#1a365d';
+                        const bTextColor = bannerData.textColor || '#ffffff';
+                        const bBgType = bannerData.bgType || 'solid';
+                        const bBgGradient = bannerData.bgGradient || 'linear-gradient(135deg, #5167E7 0%, #2D3A81 100%)';
+                        const bBackground = bBgType === 'gradient' ? bBgGradient : bBgColor;
+                        return `
+            <section class="d2-banner-section" id="section-${s.id}" style="background:${bBackground};color:${bTextColor};">
+                <h2>${bTitle}</h2>
+                ${bSubtitle ? `<p>${bSubtitle}</p>` : ''}
+            </section>`;
+                    }
+
+                    case 'pwa':
+                        return ''; // PWA não renderiza visualmente
+
+                    default:
+                        return '';
+                }
+            }).join('')}
         </div>
     `;
 

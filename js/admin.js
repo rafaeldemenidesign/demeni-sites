@@ -635,7 +635,7 @@ function updateCreditsPreview() {
     const newTotal = _creditOp === 'add' ? current + amount : Math.max(0, current - amount);
     const sign = _creditOp === 'add' ? '+' : '-';
     const color = _creditOp === 'add' ? '#22c55e' : '#dc3545';
-    document.getElementById('credits-preview').innerHTML = 
+    document.getElementById('credits-preview').innerHTML =
         `<span style="color:${color}">${sign}${amount}</span> → Novo saldo: <strong>${newTotal}</strong>`;
 }
 
@@ -696,7 +696,7 @@ async function saveCredits() {
 
             // Create notification for user
             try {
-                const notifMsg = _creditOp === 'add' 
+                const notifMsg = _creditOp === 'add'
                     ? `Você recebeu +${amount} créditos. Motivo: ${reason}`
                     : `Foram retirados ${Math.abs(delta)} créditos. Motivo: ${reason}`;
                 await SupabaseClient.getClient()
@@ -708,7 +708,7 @@ async function saveCredits() {
                         message: notifMsg,
                         read: false
                     });
-            } catch(ne) { console.warn('Notifications table may not exist yet:', ne); }
+            } catch (ne) { console.warn('Notifications table may not exist yet:', ne); }
         }
 
         const user = franchisees.find(f => f.id === editingUserId);
@@ -1081,7 +1081,7 @@ function loadPackageSettings() {
     const packages = [
         { id: 'starter', name: 'Primeira Compra', price: 1, credits: 40 },
         { id: 'essencial', name: 'Essencial', price: 200, credits: 200 },
-        { id: 'profissional', name: 'Profissional', price: 400, credits: 600 },
+        { id: 'profissional', name: 'Profissional', price: 400, credits: 500 },
         { id: 'empresarial', name: 'Empresarial', price: 600, credits: 1000 }
     ];
 
@@ -1173,15 +1173,63 @@ window.sendAnnouncement = sendAnnouncement;
 window.savePackageSettings = savePackageSettings;
 window.saveSystemSettings = saveSystemSettings;
 
-// ========== PHASE 3: AFFILIATES ==========
-let affiliates = [];
+// ========== PHASE 3: AFFILIATES (Indicações & Pendências) ==========
+let affiliateReferrals = [];
 
-function loadAffiliates() {
-    // Demo data
-    affiliates = [
-        { id: '1', name: 'Rafael Demeni', code: 'rafael123', referrals: 5, commission: 250, active: true },
-        { id: '2', name: 'João Silva', code: 'joao456', referrals: 3, commission: 150, active: true },
-        { id: '3', name: 'Maria Santos', code: 'maria789', referrals: 0, commission: 0, active: false }
+// Commission tiers - mirrors affiliates.js
+const ADMIN_AFFILIATE_TIERS = [
+    { entryPrice: 400, commission: 50 },
+    { entryPrice: 800, commission: 100 },
+    { entryPrice: 1200, commission: 150 },
+    { entryPrice: 1600, commission: 200 },
+    { entryPrice: 2000, commission: 250 }
+];
+const CURRENT_COMMISSION = ADMIN_AFFILIATE_TIERS[0].commission; // R$50 ativo
+
+async function loadAffiliates() {
+    // Try real data from Supabase
+    if (SupabaseClient?.isConfigured()) {
+        try {
+            const { data, error } = await SupabaseClient.getClient()
+                .from('referrals')
+                .select(`
+                    *,
+                    affiliate:affiliates!referrals_affiliate_id_fkey(
+                        referral_code,
+                        user:profiles!affiliates_user_id_fkey(name, email)
+                    ),
+                    referred:profiles!referrals_referred_user_id_fkey(name, email)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                affiliateReferrals = data;
+                renderAffiliates();
+                updateAffiliateStats();
+                return;
+            }
+        } catch (e) {
+            console.log('🤝 Affiliates: fallback to demo', e);
+        }
+    }
+
+    // Demo data fallback
+    affiliateReferrals = [
+        {
+            id: '1', status: 'converted', created_at: '2026-02-20T10:00:00',
+            affiliate: { referral_code: 'RAF1234', user: { name: 'Rafael Demeni', email: 'rafael@demeni.com' } },
+            referred: { name: 'João Silva', email: 'joao@teste.com' }
+        },
+        {
+            id: '2', status: 'pending', created_at: '2026-02-22T14:30:00',
+            affiliate: { referral_code: 'RAF1234', user: { name: 'Rafael Demeni', email: 'rafael@demeni.com' } },
+            referred: { name: 'Maria Santos', email: 'maria@teste.com' }
+        },
+        {
+            id: '3', status: 'paid', created_at: '2026-02-15T09:00:00',
+            affiliate: { referral_code: 'JOA5678', user: { name: 'João Silva', email: 'joao@teste.com' } },
+            referred: { name: 'Carlos Souza', email: 'carlos@teste.com' }
+        }
     ];
     renderAffiliates();
     updateAffiliateStats();
@@ -1191,49 +1239,120 @@ function renderAffiliates() {
     const tbody = document.getElementById('affiliates-table');
     if (!tbody) return;
 
-    tbody.innerHTML = affiliates.map(a => `
+    if (!affiliateReferrals || affiliateReferrals.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 32px;">Nenhuma indicação registrada</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = affiliateReferrals.map(r => {
+        const referrerName = r.affiliate?.user?.name || 'Desconhecido';
+        const referredName = r.referred?.name || r.referred?.email || 'Desconhecido';
+        const date = formatDate(r.created_at);
+        const statusLabel = {
+            pending: 'Pendente',
+            converted: 'A Pagar',
+            paid: 'Pago'
+        }[r.status] || r.status;
+        const statusClass = r.status === 'paid' ? 'active' :
+            r.status === 'converted' ? 'pending' : 'inactive';
+        const showPayBtn = r.status === 'converted';
+
+        return `
         <tr>
             <td>
                 <div class="user-cell">
-                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(a.name)}&background=D4AF37&color=000&size=36" alt="">
-                    <span>${a.name}</span>
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(referrerName)}&background=D4AF37&color=000&size=36" alt="">
+                    <span>${referrerName}</span>
                 </div>
             </td>
+            <td>${referredName}</td>
+            <td>${date}</td>
+            <td><strong>R$ ${CURRENT_COMMISSION}</strong></td>
+            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
             <td>
-                <div class="affiliate-link">
-                    <span>rafaeldemeni.com/?ref=${a.code}</span>
-                    <button onclick="copyLink('${a.code}')"><i class="fas fa-copy"></i></button>
-                </div>
+                ${showPayBtn ? `
+                    <button class="action-btn" onclick="markReferralPaid('${r.id}')" title="Marcar como Pago (após PIX)">
+                        <i class="fas fa-check"></i>
+                    </button>
+                ` : r.status === 'pending' ? '<span style="color: var(--text-muted); font-size: 0.75rem;">Aguardando compra</span>' : '✓'}
             </td>
-            <td>${a.referrals}</td>
-            <td><strong>R$ ${a.commission.toLocaleString('pt-BR')}</strong></td>
-            <td><span class="status-badge ${a.active ? 'active' : 'inactive'}">${a.active ? 'Ativo' : 'Inativo'}</span></td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 }
 
 function updateAffiliateStats() {
-    const activeCount = affiliates.filter(a => a.active).length;
-    const totalReferrals = affiliates.reduce((sum, a) => sum + a.referrals, 0);
+    const total = affiliateReferrals.length;
+    const converted = affiliateReferrals.filter(r => r.status === 'converted');
+    const paid = affiliateReferrals.filter(r => r.status === 'paid');
 
-    const statAffiliates = document.getElementById('stat-affiliates');
-    const statReferrals = document.getElementById('stat-referrals');
+    const pendingAmount = converted.length * CURRENT_COMMISSION;
+    const paidAmount = paid.length * CURRENT_COMMISSION;
 
-    if (statAffiliates) statAffiliates.textContent = activeCount;
-    if (statReferrals) statReferrals.textContent = totalReferrals;
+    const statTotal = document.getElementById('stat-affiliates');
+    const statPending = document.getElementById('stat-pending-amount');
+    const statPaid = document.getElementById('stat-paid-amount');
+    const commDisplay = document.getElementById('affiliate-commission-display');
+    const btnMarkAll = document.getElementById('btn-mark-all-paid');
+
+    if (statTotal) statTotal.textContent = total;
+    if (statPending) statPending.textContent = `R$ ${pendingAmount.toLocaleString('pt-BR')}`;
+    if (statPaid) statPaid.textContent = `R$ ${paidAmount.toLocaleString('pt-BR')}`;
+    if (commDisplay) commDisplay.textContent = `R$ ${CURRENT_COMMISSION}`;
+    if (btnMarkAll) btnMarkAll.style.display = converted.length > 0 ? 'inline-flex' : 'none';
 }
 
-function copyLink(code) {
-    navigator.clipboard.writeText(`https://rafaeldemeni.com/?ref=${code}`);
-    alert('Link copiado!');
+async function markReferralPaid(id) {
+    if (!confirm('Confirma que o PIX de R$ ' + CURRENT_COMMISSION + ' foi enviado?')) return;
+
+    // Update in Supabase
+    if (SupabaseClient?.isConfigured()) {
+        try {
+            await SupabaseClient.getClient()
+                .from('referrals')
+                .update({ status: 'paid', paid_at: new Date().toISOString() })
+                .eq('id', id);
+        } catch (e) {
+            console.error('Error marking paid:', e);
+        }
+    }
+
+    // Update local
+    const ref = affiliateReferrals.find(r => r.id === id);
+    if (ref) ref.status = 'paid';
+
+    renderAffiliates();
+    updateAffiliateStats();
+    logActivity(`Marcou pagamento de indicação como pago (R$ ${CURRENT_COMMISSION})`);
+    alert('✅ Pagamento registrado!');
 }
 
-function saveAffiliateSettings() {
-    const commission = document.getElementById('affiliate-commission')?.value;
-    const bonus = document.getElementById('affiliate-bonus')?.value;
-    console.log('Affiliate settings:', { commission, bonus });
-    logActivity('Atualizou configurações de afiliados');
-    alert('✅ Configurações de afiliados salvas!');
+async function markAllPaid() {
+    const pending = affiliateReferrals.filter(r => r.status === 'converted');
+    if (pending.length === 0) return;
+
+    const total = pending.length * CURRENT_COMMISSION;
+    if (!confirm(`Marcar ${pending.length} indicações como pagas (total R$ ${total})?`)) return;
+
+    // Update in Supabase
+    if (SupabaseClient?.isConfigured()) {
+        try {
+            const ids = pending.map(r => r.id);
+            await SupabaseClient.getClient()
+                .from('referrals')
+                .update({ status: 'paid', paid_at: new Date().toISOString() })
+                .in('id', ids);
+        } catch (e) {
+            console.error('Error marking all paid:', e);
+        }
+    }
+
+    // Update local
+    pending.forEach(r => r.status = 'paid');
+
+    renderAffiliates();
+    updateAffiliateStats();
+    logActivity(`Marcou ${pending.length} indicações como pagas (R$ ${total})`);
+    alert(`✅ ${pending.length} pagamentos registrados!`);
 }
 
 // ========== PHASE 3: ANALYTICS ==========
@@ -1488,8 +1607,8 @@ setTimeout(() => {
 }, 200);
 
 // Expose Phase 3 functions
-window.copyLink = copyLink;
-window.saveAffiliateSettings = saveAffiliateSettings;
+window.markReferralPaid = markReferralPaid;
+window.markAllPaid = markAllPaid;
 window.loadAnalytics = loadAnalytics;
 window.exportReport = exportReport;
 window.refreshWebhooks = refreshWebhooks;

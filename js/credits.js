@@ -14,7 +14,7 @@ const Credits = (function () {
         PACKAGES: [
             { id: 'basic', price: 100, credits: 100, bonus: 0, label: 'Básico' },
             { id: 'silver', price: 200, credits: 250, bonus: 50, label: 'Prata' },
-            { id: 'gold', price: 400, credits: 500, bonus: 100, label: 'Ouro' },
+            { id: 'gold', price: 400, credits: 500, bonus: 0, label: 'Ouro' },
             { id: 'diamond', price: 600, credits: 1000, bonus: 400, label: 'Diamante' }
         ],
 
