@@ -2532,6 +2532,105 @@ async function initEditorD2() {
             showPublishModal(projectId);
         });
 
+        // 💾 SAVE BUTTON — flush to IndexedDB + cloud immediately
+        document.getElementById('btn-save-header')?.addEventListener('click', async () => {
+            const btn = document.getElementById('btn-save-header');
+            const projectId = UserData.getCurrentProjectId();
+            if (!projectId) {
+                showNotification('⚠️ Nenhum projeto selecionado');
+                return;
+            }
+
+            btn.classList.add('saving');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+            try {
+                // First, gather current D2 state into the project
+                saveD2Project();
+                // Then flush explicitly to IndexedDB + cloud
+                const ok = await UserData.explicitSave(projectId);
+                if (ok) {
+                    btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
+                    btn.classList.remove('saving');
+                    btn.classList.add('saved');
+                    showNotification('💾 Projeto salvo com sucesso!');
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+                        btn.classList.remove('saved');
+                    }, 2000);
+                } else {
+                    throw new Error('Save returned false');
+                }
+            } catch (e) {
+                console.error('Save failed:', e);
+                btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+                btn.classList.remove('saving');
+                showNotification('❌ Erro ao salvar. Tente novamente.');
+            }
+        });
+
+        // 📌 CHECKPOINT — create snapshot
+        document.getElementById('btn-checkpoint-header')?.addEventListener('click', async () => {
+            const btnPin = document.getElementById('btn-checkpoint-header');
+            const btnRestore = document.getElementById('btn-restore-header');
+            const projectId = UserData.getCurrentProjectId();
+            if (!projectId) return;
+
+            // Save current state first
+            saveD2Project();
+
+            const ok = await UserData.saveCheckpoint(projectId);
+            if (ok) {
+                btnPin.classList.add('pinned');
+                btnRestore.disabled = false;
+                showNotification('📌 Checkpoint criado! Você pode voltar a este ponto.');
+                setTimeout(() => btnPin.classList.remove('pinned'), 1000);
+            } else {
+                showNotification('⚠️ Falha ao criar checkpoint');
+            }
+        });
+
+        // ⏪ RESTORE — revert to last checkpoint
+        document.getElementById('btn-restore-header')?.addEventListener('click', async () => {
+            const projectId = UserData.getCurrentProjectId();
+            if (!projectId) return;
+
+            const checkpoint = await UserData.loadCheckpoint(projectId);
+            if (!checkpoint) {
+                showNotification('⚠️ Nenhum checkpoint encontrado');
+                return;
+            }
+
+            const savedAt = new Date(checkpoint.savedAt).toLocaleTimeString('pt-BR');
+            if (!confirm(`Restaurar projeto para o checkpoint de ${savedAt}?\n\nAs alterações atuais serão substituídas.`)) {
+                return;
+            }
+
+            const ok = await UserData.restoreCheckpoint(projectId);
+            if (ok) {
+                showNotification('📌 Projeto restaurado ao checkpoint!');
+                // Reload editor with restored data
+                const project = await UserData.getProjectAsync(projectId);
+                if (project?.data && window.d2State) {
+                    window.d2State.setState(project.data);
+                    renderD2Preview();
+                }
+            } else {
+                showNotification('❌ Falha ao restaurar checkpoint');
+            }
+        });
+
+        // Check if checkpoint already exists on editor open
+        (async () => {
+            const projectId = UserData.getCurrentProjectId();
+            if (projectId) {
+                const cp = await UserData.hasCheckpoint(projectId);
+                if (cp.exists) {
+                    document.getElementById('btn-restore-header').disabled = false;
+                }
+            }
+        })();
+
         // Add section button
         document.getElementById('btn-add-section-d2')?.addEventListener('click', () => {
             if (window.D2AddSectionModal) {

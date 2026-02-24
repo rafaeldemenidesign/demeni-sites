@@ -21,6 +21,27 @@ const UserData = (function () {
     // Current user ID for scoped storage
     let _currentUserId = null;
 
+    // 🛡️ V1 FIX: Salvar dados pendentes no localStorage ao fechar a aba
+    // (IndexedDB é async e pode não completar; localStorage é síncrono e confiável)
+    window.addEventListener('beforeunload', () => {
+        const pendingIds = Object.keys(_pendingCloudSaves);
+        if (pendingIds.length === 0) return;
+        console.log(`🛡️ beforeunload: salvando ${pendingIds.length} projeto(s) pendente(s) no localStorage`);
+        for (const projectId of pendingIds) {
+            clearTimeout(_pendingCloudSaves[projectId]);
+            delete _pendingCloudSaves[projectId];
+            try {
+                // Salvar dados do cache no localStorage como fallback seguro
+                if (_dataCache[projectId]) {
+                    localStorage.setItem(`demeni-proj-data-${projectId}`, JSON.stringify(_dataCache[projectId]));
+                    console.log(`🛡️ Dados de ${projectId.substring(0, 8)} salvos no localStorage`);
+                }
+            } catch (e) {
+                console.error('❌ beforeunload save failed:', e);
+            }
+        }
+    });
+
     // Tombstone helpers — track deleted project IDs to prevent cloud sync resurrection
     function _getDeletedIds() {
         try {
@@ -446,8 +467,11 @@ const UserData = (function () {
 
                     if (localSize > 0 && localSize >= cloudSize) {
                         console.log(`🛡️ Sync: mantendo local de ${p.id.substring(0, 8)} (local=${localSize}B >= cloud=${cloudSize}B)`);
-                    } else {
+                    } else if (cloudSize > 50) {
+                        // 🛡️ V2 FIX: Só aceitar dados do cloud se ele realmente tem conteúdo substancial
                         await saveProjectData(p.id, p.data, { force: true });
+                    } else {
+                        console.warn(`🛡️ V2: Bloqueando sync de dados vazios do cloud para ${p.id.substring(0, 8)} (cloudSize=${cloudSize}B)`);
                     }
                     const { data, ...meta } = p;
                     metadataOnly.push(meta);
@@ -699,7 +723,11 @@ const UserData = (function () {
 
         // Save data to IndexedDB (never in main array)
         if (updates.data) {
-            saveProjectData(projectId, updates.data);
+            // 🛡️ V4 FIX: Catch async errors and fallback to localStorage
+            saveProjectData(projectId, updates.data).catch(e => {
+                console.error('❌ CRITICAL: IndexedDB save failed, using localStorage fallback:', e);
+                save(`demeni-proj-data-${projectId}`, updates.data);
+            });
             const updatesWithoutData = { ...updates };
             delete updatesWithoutData.data;
             projects[index] = {
@@ -901,6 +929,125 @@ const UserData = (function () {
         return fullExport;
     }
 
+    // 🛡️ V5 FIX: Import completo de projetos (partner de exportAllProjects)
+    async function importAllProjects(exportData) {
+        if (!exportData || typeof exportData !== 'object') {
+            console.error('❌ importAllProjects: dados inválidos');
+            return 0;
+        }
+        let count = 0;
+        const projects = getProjects();
+        for (const [projectId, entry] of Object.entries(exportData)) {
+            if (!entry.data || !entry.id) continue;
+            // Save project data to IndexedDB
+            await saveProjectData(entry.id, entry.data, { force: true });
+            // Add to projects list if not already there
+            if (!projects.find(p => p.id === entry.id)) {
+                projects.unshift({
+                    id: entry.id,
+                    name: entry.name || 'Projeto Importado',
+                    updatedAt: entry.updatedAt || new Date().toISOString()
+                });
+            }
+            count++;
+        }
+        save(_scopedKey(KEYS.PROJECTS), projects);
+        console.log(`📦 Importados ${count} projetos com dados`);
+        return count;
+    }
+
+    // ========== CHECKPOINT SYSTEM ==========
+
+    // Save a checkpoint (snapshot) of the current project data
+    async function saveCheckpoint(projectId) {
+        const data = await loadProjectData(projectId);
+        if (!data || Object.keys(data).length === 0) {
+            console.warn('⚠️ Checkpoint: sem dados para salvar');
+            return false;
+        }
+        // Store checkpoint with timestamp
+        const checkpoint = {
+            data: JSON.parse(JSON.stringify(data)), // deep clone
+            savedAt: new Date().toISOString(),
+            size: JSON.stringify(data).length
+        };
+        const ok = await idbSave(`proj-checkpoint-${projectId}`, checkpoint);
+        if (ok) {
+            console.log(`📌 Checkpoint salvo para ${projectId.substring(0, 8)} (${checkpoint.size}B)`);
+        }
+        return ok;
+    }
+
+    // Load the last checkpoint for a project
+    async function loadCheckpoint(projectId) {
+        const checkpoint = await idbLoad(`proj-checkpoint-${projectId}`);
+        return checkpoint || null;
+    }
+
+    // Restore project to last checkpoint
+    async function restoreCheckpoint(projectId) {
+        const checkpoint = await loadCheckpoint(projectId);
+        if (!checkpoint || !checkpoint.data) {
+            console.warn('⚠️ Nenhum checkpoint encontrado para restaurar');
+            return false;
+        }
+        // Save current as backup before restoring
+        const currentData = await loadProjectData(projectId);
+        if (currentData) {
+            await idbSave(`proj-pre-restore-${projectId}`, currentData);
+        }
+        // Restore checkpoint data
+        await saveProjectData(projectId, checkpoint.data, { force: true });
+        // Update metadata timestamp
+        const projects = getProjects();
+        const idx = projects.findIndex(p => p.id === projectId);
+        if (idx !== -1) {
+            projects[idx].updatedAt = new Date().toISOString();
+            save(_scopedKey(KEYS.PROJECTS), projects);
+        }
+        // Push restored data to cloud
+        _scheduleCloudSave(projectId);
+        console.log(`📌 Projeto ${projectId.substring(0, 8)} restaurado do checkpoint (${checkpoint.savedAt})`);
+        return true;
+    }
+
+    // Check if a checkpoint exists
+    async function hasCheckpoint(projectId) {
+        const checkpoint = await idbLoad(`proj-checkpoint-${projectId}`);
+        return checkpoint ? { exists: true, savedAt: checkpoint.savedAt, size: checkpoint.size } : { exists: false };
+    }
+
+    // Explicit save: flush to IndexedDB + cloud immediately (for Save button)
+    async function explicitSave(projectId) {
+        const project = getProject(projectId);
+        if (!project) return false;
+
+        // Ensure data is in IndexedDB
+        const data = await loadProjectData(projectId);
+        if (data) {
+            await saveProjectData(projectId, data, { force: true });
+        }
+
+        // Flush to cloud immediately (cancel any pending debounce)
+        if (_isCloudAvailable()) {
+            if (_pendingCloudSaves[projectId]) {
+                clearTimeout(_pendingCloudSaves[projectId]);
+                delete _pendingCloudSaves[projectId];
+            }
+            try {
+                const supabaseData = toSupabase(project);
+                const { id, user_id, ...updates } = supabaseData;
+                await SupabaseClient.updateProject(projectId, updates);
+                console.log(`💾 Explicit save: projeto "${project.name}" salvo no cloud`);
+            } catch (e) {
+                console.error('❌ Explicit cloud save failed:', e);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // ========== PUBLIC API ==========
     return {
         // User
@@ -940,6 +1087,14 @@ const UserData = (function () {
         saveProjectData,
         loadProjectData,
         exportAllProjects,
+        importAllProjects,
+
+        // 💾 Save + Checkpoint
+        explicitSave,
+        saveCheckpoint,
+        loadCheckpoint,
+        restoreCheckpoint,
+        hasCheckpoint,
 
         // Helpers
         generateUUID,

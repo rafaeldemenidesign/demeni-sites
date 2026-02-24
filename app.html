@@ -72,6 +72,19 @@
 
                 <!-- Editor Buttons (only in editor mode) -->
                 <div class="editor-actions editor-only" style="display: none;">
+                    <button class="btn-save" id="btn-save-header" title="Salvar projeto (IndexedDB + Cloud)">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <div class="checkpoint-group">
+                        <button class="btn-checkpoint" id="btn-checkpoint-header"
+                            title="Criar checkpoint (ponto de restauração)">
+                            <i class="fas fa-map-pin"></i>
+                        </button>
+                        <button class="btn-restore" id="btn-restore-header" title="Voltar ao último checkpoint"
+                            disabled>
+                            <i class="fas fa-undo-alt"></i>
+                        </button>
+                    </div>
                     <button class="btn-secondary" id="btn-preview-header">
                         <i class="fas fa-eye"></i> Preview
                     </button>
