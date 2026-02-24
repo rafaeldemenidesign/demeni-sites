@@ -997,19 +997,18 @@ async function generatePublishableHTML(state, projectName) {
     const seo = pwaState.seo || {};
     const seoTitle = seo.title || projectName || 'Meu Site';
     const seoDescription = seo.description || state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
-    // OG Image: custom upload > hero background > null
+    // OG Image: custom upload > hero background > API endpoint
     const heroBgImage = state?.d2Adjustments?.hero?.bgImage || '';
-    let ogImageUrl = seo.ogImage || (heroBgImage && heroBgImage !== 'img/hero-bg.webp' ? heroBgImage : '');
+    let ogImageUrl = seo.ogImage || '';
 
-    // Data URIs can't be loaded by WhatsApp/Facebook crawlers — upload to Supabase Storage
-    if (ogImageUrl && ogImageUrl.startsWith('data:') && window.SupabaseClient?.uploadOgImage) {
+    // If no custom OG image, check if hero has an image
+    if (!ogImageUrl && heroBgImage && heroBgImage !== 'img/hero-bg.webp') {
         const slug = state?.subdomain || window.d2State?.get('subdomain') || '';
-        if (slug) {
-            const publicUrl = await window.SupabaseClient.uploadOgImage(slug, ogImageUrl);
-            if (publicUrl) ogImageUrl = publicUrl;
-            else ogImageUrl = ''; // Don't include a data URI in og:image
-        } else {
-            ogImageUrl = ''; // No slug, can't upload — skip og:image
+        if (heroBgImage.startsWith('data:') && slug) {
+            // Data URIs can't be loaded by crawlers — use the OG image API endpoint
+            ogImageUrl = `https://sites.rafaeldemeni.com/api/og-image?s=${slug}`;
+        } else if (!heroBgImage.startsWith('data:')) {
+            ogImageUrl = heroBgImage; // Already a public URL
         }
     }
 

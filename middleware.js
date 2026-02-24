@@ -60,8 +60,16 @@ export default async function middleware(request) {
             return;  // pass through to index.html (will show 404 via JS)
         }
 
+        // Patch og:image data URIs with the API endpoint URL
+        // (data URIs can't be loaded by WhatsApp/Facebook crawlers)
+        let html = data[0].html_content;
+        html = html.replace(
+            /(<meta\s+property="og:image"\s+content=")data:image\/[^"]+(")/i,
+            `$1https://sites.rafaeldemeni.com/api/og-image?s=${slug}$2`
+        );
+
         // Serve the published HTML directly — crawlers get OG tags, users get the full site
-        return new Response(data[0].html_content, {
+        return new Response(html, {
             status: 200,
             headers: {
                 'Content-Type': 'text/html; charset=utf-8',
