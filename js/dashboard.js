@@ -2532,9 +2532,10 @@ async function initEditorD2() {
             showPublishModal(projectId);
         });
 
-        // 💾 SAVE BUTTON — flush to IndexedDB + cloud immediately
+        // 💾 SAVE BUTTON — save project + create checkpoint automatically
         document.getElementById('btn-save-header')?.addEventListener('click', async () => {
             const btn = document.getElementById('btn-save-header');
+            const btnCheckpoint = document.getElementById('btn-checkpoint-header');
             const projectId = UserData.getCurrentProjectId();
             if (!projectId) {
                 showNotification('⚠️ Nenhum projeto selecionado');
@@ -2545,21 +2546,25 @@ async function initEditorD2() {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
             try {
-                // First, gather current D2 state into the project
+                // 1. Gather current D2 state into the project
                 saveD2Project();
-                // Then flush explicitly to IndexedDB + cloud
+                // 2. Flush to IndexedDB + cloud
                 const ok = await UserData.explicitSave(projectId);
+                // 3. Create checkpoint automatically
+                await UserData.saveCheckpoint(projectId);
+
                 if (ok) {
                     btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
                     btn.classList.remove('saving');
                     btn.classList.add('saved');
-                    showNotification('💾 Projeto salvo com sucesso!');
+                    btnCheckpoint.disabled = false; // Enable restore
+                    showNotification('💾 Projeto salvo + checkpoint criado!');
                     setTimeout(() => {
                         btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
                         btn.classList.remove('saved');
                     }, 2000);
                 } else {
-                    throw new Error('Save returned false');
+                    throw new Error('Save failed');
                 }
             } catch (e) {
                 console.error('Save failed:', e);
@@ -2569,46 +2574,25 @@ async function initEditorD2() {
             }
         });
 
-        // 📌 CHECKPOINT — create snapshot
+        // ⏪ CHECKPOINT BUTTON — restore to last saved point
         document.getElementById('btn-checkpoint-header')?.addEventListener('click', async () => {
-            const btnPin = document.getElementById('btn-checkpoint-header');
-            const btnRestore = document.getElementById('btn-restore-header');
-            const projectId = UserData.getCurrentProjectId();
-            if (!projectId) return;
-
-            // Save current state first
-            saveD2Project();
-
-            const ok = await UserData.saveCheckpoint(projectId);
-            if (ok) {
-                btnPin.classList.add('pinned');
-                btnRestore.disabled = false;
-                showNotification('📌 Checkpoint criado! Você pode voltar a este ponto.');
-                setTimeout(() => btnPin.classList.remove('pinned'), 1000);
-            } else {
-                showNotification('⚠️ Falha ao criar checkpoint');
-            }
-        });
-
-        // ⏪ RESTORE — revert to last checkpoint
-        document.getElementById('btn-restore-header')?.addEventListener('click', async () => {
             const projectId = UserData.getCurrentProjectId();
             if (!projectId) return;
 
             const checkpoint = await UserData.loadCheckpoint(projectId);
             if (!checkpoint) {
-                showNotification('⚠️ Nenhum checkpoint encontrado');
+                showNotification('⚠️ Nenhum checkpoint encontrado. Salve primeiro.');
                 return;
             }
 
             const savedAt = new Date(checkpoint.savedAt).toLocaleTimeString('pt-BR');
-            if (!confirm(`Restaurar projeto para o checkpoint de ${savedAt}?\n\nAs alterações atuais serão substituídas.`)) {
+            if (!confirm(`Voltar ao último ponto salvo (${savedAt})?\n\nAs alterações feitas depois serão perdidas.`)) {
                 return;
             }
 
             const ok = await UserData.restoreCheckpoint(projectId);
             if (ok) {
-                showNotification('📌 Projeto restaurado ao checkpoint!');
+                showNotification('⏪ Projeto restaurado ao último ponto salvo!');
                 // Reload editor with restored data
                 const project = await UserData.getProjectAsync(projectId);
                 if (project?.data && window.d2State) {
@@ -2616,7 +2600,7 @@ async function initEditorD2() {
                     renderD2Preview();
                 }
             } else {
-                showNotification('❌ Falha ao restaurar checkpoint');
+                showNotification('❌ Falha ao restaurar');
             }
         });
 
@@ -2626,7 +2610,7 @@ async function initEditorD2() {
             if (projectId) {
                 const cp = await UserData.hasCheckpoint(projectId);
                 if (cp.exists) {
-                    document.getElementById('btn-restore-header').disabled = false;
+                    document.getElementById('btn-checkpoint-header').disabled = false;
                 }
             }
         })();
