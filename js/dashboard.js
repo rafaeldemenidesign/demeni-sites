@@ -2552,6 +2552,12 @@ async function initEditorD2() {
                 const ok = await UserData.explicitSave(projectId);
                 // 3. Create checkpoint automatically
                 await UserData.saveCheckpoint(projectId);
+                // 4. Capture preview thumbnail (for dashboard card)
+                if (window.ThumbnailCapture) {
+                    ThumbnailCapture.capture(projectId).catch(e => {
+                        console.warn('[Save] Thumbnail capture failed:', e.message);
+                    });
+                }
 
                 if (ok) {
                     btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
