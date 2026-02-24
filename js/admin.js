@@ -1641,7 +1641,7 @@ async function loadFeedPosts() {
                 id: 'demo-1',
                 title: '🚀 Novidades Demeni Sites',
                 text: 'Estamos lançando novas funcionalidades para turbinar seus sites! Fiquem ligados nas próximas atualizações.',
-                image_url: 'assets/feed/post-1.png',
+                image_url: 'assets/feed/post-1.webp',
                 status: 'published',
                 likes_count: 12,
                 created_at: '2026-02-10T10:00:00'
@@ -1650,7 +1650,7 @@ async function loadFeedPosts() {
                 id: 'demo-2',
                 title: '📱 Templates Mobile-First',
                 text: 'Todos os novos templates agora são otimizados para mobile. Seus clientes vão amar a experiência.',
-                image_url: 'assets/feed/post-2.png',
+                image_url: 'assets/feed/post-2.webp',
                 status: 'published',
                 likes_count: 8,
                 created_at: '2026-02-09T15:30:00'
@@ -1659,7 +1659,7 @@ async function loadFeedPosts() {
                 id: 'demo-3',
                 title: '💡 Dica: Use o Editor D-2',
                 text: 'O Editor D-2 tem controle total sobre cada seção do site. Experimente os temas de estilo para personalizar rapidamente.',
-                image_url: 'assets/feed/post-3.png',
+                image_url: 'assets/feed/post-3.webp',
                 status: 'draft',
                 likes_count: 0,
                 created_at: '2026-02-08T09:00:00'

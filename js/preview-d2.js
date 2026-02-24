@@ -1291,7 +1291,7 @@ function renderPreviewD2New(frame, state) {
             <!-- HEADER -->
             <header class="d2-header">
                 <div class="logo">
-                    <img src="${state?.profile?.logo || baseUrl + '/img/Logo-Tipográfica-Demeni.png'}" alt="Logo">
+                    <img src="${state?.profile?.logo || baseUrl + '/img/Logo-Tipográfica-Demeni.webp'}" alt="Logo">
                 </div>
                 <button class="menu-btn" onclick="var s=this.closest('.d2-preview-container');s.querySelector('.d2-sidebar').classList.add('open');s.querySelector('.d2-sidebar-overlay').classList.add('open')">☰</button>
             </header>
@@ -1454,7 +1454,7 @@ function renderPreviewD2New(frame, state) {
                 </div>
                 <div class="d2-footer-bottom">
                     <div class="d2-footer-logo">
-                        <img src="${state?.profile?.logo || baseUrl + '/img/Logo-Tipográfica-Demeni.png'}" alt="Logo">
+                        <img src="${state?.profile?.logo || baseUrl + '/img/Logo-Tipográfica-Demeni.webp'}" alt="Logo">
                     </div>
                     <div class="d2-footer-social">
                         ${footerSocialInstagram ? `
