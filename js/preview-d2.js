@@ -1389,10 +1389,13 @@ function renderPreviewD2New(frame, state) {
                                 priceHtml = rawPrice;
                             }
                             const prodLink = p.link && p.link !== '#' && !p.link.startsWith('http') && !p.link.startsWith('#') && !p.link.startsWith('mailto:') && !p.link.startsWith('tel:') ? 'https://' + p.link : (p.link || '#');
+                            const _pZoom = (p.imageZoom || 100) / 100;
+                            const _pPosX = p.imagePosX ?? 50;
+                            const _pPosY = p.imagePosY ?? 50;
                             return `
                     <a href="${prodLink}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
                         <div class="d2-produto-img">
-                            <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}" style="transform:scale(${(p.imageZoom || 100) / 100}) translate(${(p.imagePosX ?? 50) - 50}%, ${(p.imagePosY ?? 50) - 50}%);transform-origin:center center;">
+                            <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}" style="object-position:${_pPosX}% ${_pPosY}%;${_pZoom !== 1 ? `transform:scale(${_pZoom});transform-origin:${_pPosX}% ${_pPosY}%;` : ''}">
                         </div>
                         <h3>${p.title || 'Nome do Produto'}</h3>
                         <div class="d2-produto-footer">

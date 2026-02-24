@@ -2658,7 +2658,8 @@ function saveD2Project() {
         d2Adjustments: window.d2State.get('d2Adjustments'),
         d2Products: window.d2State.get('d2Products'),
         d2Feedbacks: window.d2State.get('d2Feedbacks'),
-        d2Categorias: window.d2State.get('d2Categorias')
+        d2Categorias: window.d2State.get('d2Categorias'),
+        d2Banners: window.d2State.get('d2Banners')
     };
 
     UserData.updateProject(projectId, { data: d2Data });

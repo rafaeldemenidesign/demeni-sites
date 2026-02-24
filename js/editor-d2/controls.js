@@ -175,6 +175,33 @@ window.D2Controls = {
     createColorPicker(options) {
         const { label, value = '#ffffff', path, showAlpha = false } = options;
 
+        // Convert any CSS color (rgba, rgb, named) to hex for <input type="color">
+        function _toHex(cssColor) {
+            if (!cssColor) return '#ffffff';
+            // Already hex
+            if (/^#[0-9A-Fa-f]{6}$/.test(cssColor)) return cssColor;
+            if (/^#[0-9A-Fa-f]{3}$/.test(cssColor)) {
+                const r = cssColor[1], g = cssColor[2], b = cssColor[3];
+                return `#${r}${r}${g}${g}${b}${b}`;
+            }
+            // Parse rgba/rgb via a temporary element
+            try {
+                const tmp = document.createElement('div');
+                tmp.style.color = cssColor;
+                document.body.appendChild(tmp);
+                const computed = getComputedStyle(tmp).color;
+                document.body.removeChild(tmp);
+                const m = computed.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+                if (m) {
+                    const hex = '#' + [m[1], m[2], m[3]].map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+                    return hex;
+                }
+            } catch (e) { /* fallback */ }
+            return '#ffffff';
+        }
+
+        const hexValue = _toHex(value);
+
         const container = document.createElement('div');
         container.className = 'control-item';
 
@@ -182,9 +209,9 @@ window.D2Controls = {
             <label>${label}</label>
             <div class="color-control">
                 <div class="color-swatch" style="background: ${value}">
-                    <input type="color" value="${value}" data-path="${path}">
+                    <input type="color" value="${hexValue}" data-path="${path}">
                 </div>
-                <input type="text" class="color-hex-input" value="${value}" maxlength="7" data-path="${path}">
+                <input type="text" class="color-hex-input" value="${value}" maxlength="30" data-path="${path}">
             </div>
         `;
 
@@ -203,13 +230,19 @@ window.D2Controls = {
         });
 
         hexInput.addEventListener('input', (e) => {
-            let color = e.target.value;
-            if (!color.startsWith('#')) {
+            let color = e.target.value.trim();
+
+            // Accept hex format
+            if (!color.startsWith('#') && !color.startsWith('r')) {
                 color = '#' + color;
             }
 
-            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
-                colorInput.value = color;
+            // Validate hex or rgba/rgb
+            const isHex = /^#[0-9A-Fa-f]{3,6}$/.test(color);
+            const isRgba = /^rgba?\(\s*\d+/.test(color);
+
+            if (isHex || isRgba) {
+                if (isHex) colorInput.value = _toHex(color);
                 swatch.style.background = color;
 
                 if (path && window.d2State) {
@@ -721,6 +754,20 @@ window.D2Controls = {
                         value: window.d2State.get(`${bp}.bgOverlay`, d.bgOverlay),
                         path: `${bp}.bgOverlay`
                     }));
+
+                    // Re-render panel when overlay toggle or type changes
+                    // Guard: subscribe only once per section to prevent listener accumulation
+                    const _overlaySubKey = `__d2OverlaySub_${sectionId}`;
+                    if (!window[_overlaySubKey]) {
+                        window[_overlaySubKey] = true;
+                        window.d2State.subscribe(({ path }) => {
+                            if (path === `${bp}.bgOverlay` || path === `${bp}.bgOverlayType`) {
+                                document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                                    detail: { sectionId }
+                                }));
+                            }
+                        });
+                    }
 
                     if (window.d2State.get(`${bp}.bgOverlay`, d.bgOverlay)) {
                         container.appendChild(C.createSelect({

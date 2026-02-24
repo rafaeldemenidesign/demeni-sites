@@ -569,6 +569,19 @@ class D2ProdutosEditor {
                     });
                 }
 
+                // Re-render panel when product image changes (show/hide zoom/position controls)
+                // Guard: subscribe only once globally to prevent listener accumulation
+                if (!window.__d2ProductImageSubActive) {
+                    window.__d2ProductImageSubActive = true;
+                    window.d2State.subscribe(({ path }) => {
+                        if (/^d2Products\.\d+\.image$/.test(path)) {
+                            document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                                detail: { sectionId: 'produtos' }
+                            }));
+                        }
+                    });
+                }
+
                 // Botão adicionar produto
                 const addBtn = document.createElement('button');
                 addBtn.className = 'btn-add-item';
