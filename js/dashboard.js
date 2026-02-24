@@ -997,20 +997,27 @@ async function generatePublishableHTML(state, projectName) {
     const seo = pwaState.seo || {};
     const seoTitle = seo.title || projectName || 'Meu Site';
     const seoDescription = seo.description || state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
-    // OG Image: custom upload > hero background > API endpoint
+    // OG Image: custom upload > hero background > API endpoint fallback
     const heroBgImage = state?.d2Adjustments?.hero?.bgImage || '';
+    const siteSlug = state?.subdomain || window.d2State?.get('subdomain') || '';
     let ogImageUrl = seo.ogImage || '';
 
     // If no custom OG image, check if hero has an image
     if (!ogImageUrl && heroBgImage && heroBgImage !== 'img/hero-bg.webp') {
-        const slug = state?.subdomain || window.d2State?.get('subdomain') || '';
-        if (heroBgImage.startsWith('data:') && slug) {
+        if (heroBgImage.startsWith('data:') && siteSlug) {
             // Data URIs can't be loaded by crawlers — use the OG image API endpoint
-            ogImageUrl = `https://sites.rafaeldemeni.com/api/og-image?s=${slug}`;
+            ogImageUrl = `https://sites.rafaeldemeni.com/api/og-image?s=${siteSlug}`;
         } else if (!heroBgImage.startsWith('data:')) {
             ogImageUrl = heroBgImage; // Already a public URL
         }
     }
+    // Fallback: always provide the API endpoint if we have a slug (it handles its own fallback)
+    if (!ogImageUrl && siteSlug) {
+        ogImageUrl = `https://sites.rafaeldemeni.com/api/og-image?s=${siteSlug}`;
+    }
+
+    // Canonical URL
+    const ogUrl = siteSlug ? `https://${siteSlug}.rafaeldemeni.com` : '';
 
     // Favicon & PWA — use editor settings from state.pwa.* or d2State._pwaExportData
     let pwaExport = window.d2State?._pwaExportData || null;
@@ -1095,7 +1102,12 @@ async function generatePublishableHTML(state, projectName) {
     <meta property="og:title" content="${seoTitle}">
     <meta property="og:description" content="${seoDescription}">
     <meta property="og:type" content="website">
+    ${ogUrl ? `<meta property="og:url" content="${ogUrl}">` : ''}
     ${ogImageUrl ? `<meta property="og:image" content="${ogImageUrl}">` : ''}
+    <meta name="twitter:card" content="${ogImageUrl ? 'summary_large_image' : 'summary'}">
+    <meta name="twitter:title" content="${seoTitle}">
+    <meta name="twitter:description" content="${seoDescription}">
+    ${ogImageUrl ? `<meta name="twitter:image" content="${ogImageUrl}">` : ''}
     <link rel="icon" type="image/png" href="${faviconUrl}">
     <link rel="apple-touch-icon" href="${faviconUrl}">
     <link rel="manifest" href="${manifestDataUri}">

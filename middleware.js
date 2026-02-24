@@ -60,13 +60,42 @@ export default async function middleware(request) {
             return;  // pass through to index.html (will show 404 via JS)
         }
 
-        // Patch og:image data URIs with the API endpoint URL
-        // (data URIs can't be loaded by WhatsApp/Facebook crawlers)
+        // === PATCH HTML for social sharing ===
         let html = data[0].html_content;
+        const ogImageApiUrl = `https://sites.rafaeldemeni.com/api/og-image?s=${slug}`;
+        const siteUrl = `https://${slug}.rafaeldemeni.com`;
+
+        // 1. Replace data URI in og:image with API endpoint URL
         html = html.replace(
             /(<meta\s+property="og:image"\s+content=")data:image\/[^"]+(")/i,
-            `$1https://sites.rafaeldemeni.com/api/og-image?s=${slug}$2`
+            `$1${ogImageApiUrl}$2`
         );
+
+        // 2. Inject og:url if missing
+        if (!html.includes('og:url')) {
+            html = html.replace(
+                /(<meta\s+property="og:type"\s+content="website">)/i,
+                `$1\n    <meta property="og:url" content="${siteUrl}">`
+            );
+        }
+
+        // 3. Inject Twitter Card tags if missing
+        if (!html.includes('twitter:card')) {
+            // Extract existing OG values for Twitter tags
+            const titleMatch = html.match(/og:title"\s+content="([^"]*)"/i);
+            const descMatch = html.match(/og:description"\s+content="([^"]*)"/i);
+            const t = titleMatch ? titleMatch[1] : (data[0].name || slug);
+            const d = descMatch ? descMatch[1] : '';
+            const hasImage = html.includes('og:image');
+
+            const twitterTags = `
+    <meta name="twitter:card" content="${hasImage ? 'summary_large_image' : 'summary'}">
+    <meta name="twitter:title" content="${t}">
+    <meta name="twitter:description" content="${d}">
+    ${hasImage ? `<meta name="twitter:image" content="${ogImageApiUrl}">` : ''}`;
+
+            html = html.replace('</head>', `${twitterTags}\n</head>`);
+        }
 
         // Serve the published HTML directly — crawlers get OG tags, users get the full site
         return new Response(html, {
