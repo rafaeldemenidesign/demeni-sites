@@ -256,6 +256,51 @@ const SupabaseClient = (function () {
         return { data, error };
     }
 
+    // ========== OG IMAGE UPLOAD ==========
+    /**
+     * Upload a data URI image to Supabase Storage for use as og:image.
+     * Returns the public URL or null on failure.
+     * Bucket 'og-images' must exist in Supabase with public access.
+     */
+    async function uploadOgImage(slug, dataUri) {
+        if (!supabase || !dataUri || !dataUri.startsWith('data:')) return null;
+
+        try {
+            // Convert data URI to Blob
+            const res = await fetch(dataUri);
+            const blob = await res.blob();
+
+            // Determine extension from mime type
+            const mime = blob.type || 'image/webp';
+            const ext = mime.split('/')[1] || 'webp';
+            const filePath = `${slug}/og-image.${ext}`;
+
+            // Upload to Supabase Storage (upsert to overwrite on republish)
+            const { data, error } = await supabase.storage
+                .from('og-images')
+                .upload(filePath, blob, {
+                    contentType: mime,
+                    upsert: true
+                });
+
+            if (error) {
+                console.warn('⚠️ OG image upload failed:', error.message);
+                return null;
+            }
+
+            // Get public URL
+            const { data: urlData } = supabase.storage
+                .from('og-images')
+                .getPublicUrl(filePath);
+
+            console.log('✅ OG image uploaded:', urlData.publicUrl);
+            return urlData.publicUrl;
+        } catch (e) {
+            console.warn('⚠️ OG image upload error:', e.message);
+            return null;
+        }
+    }
+
     // ========== UTILITY ==========
     function isConfigured() {
         return SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_URL';
@@ -290,7 +335,8 @@ const SupabaseClient = (function () {
 
         // Publish
         publishSite,
-        getPublishedSite
+        getPublishedSite,
+        uploadOgImage
     };
 })();
 

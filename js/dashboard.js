@@ -999,7 +999,19 @@ async function generatePublishableHTML(state, projectName) {
     const seoDescription = seo.description || state?.heroDescription || state?.profileBio || `${projectName} - Criado com Demeni Sites`;
     // OG Image: custom upload > hero background > null
     const heroBgImage = state?.d2Adjustments?.hero?.bgImage || '';
-    const ogImageUrl = seo.ogImage || (heroBgImage && heroBgImage !== 'img/hero-bg.webp' ? heroBgImage : '');
+    let ogImageUrl = seo.ogImage || (heroBgImage && heroBgImage !== 'img/hero-bg.webp' ? heroBgImage : '');
+
+    // Data URIs can't be loaded by WhatsApp/Facebook crawlers — upload to Supabase Storage
+    if (ogImageUrl && ogImageUrl.startsWith('data:') && window.SupabaseClient?.uploadOgImage) {
+        const slug = state?.subdomain || window.d2State?.get('subdomain') || '';
+        if (slug) {
+            const publicUrl = await window.SupabaseClient.uploadOgImage(slug, ogImageUrl);
+            if (publicUrl) ogImageUrl = publicUrl;
+            else ogImageUrl = ''; // Don't include a data URI in og:image
+        } else {
+            ogImageUrl = ''; // No slug, can't upload — skip og:image
+        }
+    }
 
     // Favicon & PWA — use editor settings from state.pwa.* or d2State._pwaExportData
     let pwaExport = window.d2State?._pwaExportData || null;
