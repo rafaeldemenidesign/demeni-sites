@@ -164,7 +164,7 @@ const Credits = (function () {
     }
 
     // ========== PUBLISH FLOW ==========
-    function attemptPublish(projectId, subdomain) {
+    async function attemptPublish(projectId, subdomain) {
         // Users enter via Starter Pack (R$1) or credit packages
 
         // Custo dinâmico por patente
@@ -200,7 +200,8 @@ const Credits = (function () {
 
         if (result.success) {
             const publishedUrl = subdomain ? `https://${subdomain}.rafaeldemeni.com` : `https://demeni.bio/${projectId.slice(0, 8)}`;
-            UserData.publishProject(projectId, publishedUrl);
+            // 🛡️ FIX: AWAIT publishProject to prevent race condition with syncFromCloud
+            await UserData.publishProject(projectId, publishedUrl);
 
             // Incrementar contador diário
             incrementTodayPublishes();

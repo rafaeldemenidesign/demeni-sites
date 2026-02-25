@@ -22,7 +22,130 @@ class D2StateManager {
         this.previewDebounceTimer = null;
         this.previewDebounceMs = 50;
 
+        // 🛡️ Checkpoint / Recovery — agora via IndexedDB (sem limite de tamanho)
+        this._checkpointDbName = 'demeni_checkpoints';
+        this._checkpointStoreName = 'checkpoints';
+        this._checkpointKey = 'last_checkpoint';
+        this._crashFlagKey = 'demeni_d2_editorActive';
+        this._checkpointDb = null; // Será inicializado async
+
+        // Detecta crash na sessão anterior
+        this._crashDetected = localStorage.getItem(this._crashFlagKey) === 'true';
+        if (this._crashDetected) {
+            console.warn('[D2 State] ⚠️ Crash detectado na sessão anterior — checkpoint disponível');
+        }
+
+        // Marca editor como ativo (será limpo no beforeunload)
+        this._setupCrashDetection();
+
+        // Inicializa IndexedDB para checkpoints
+        this._initCheckpointDB();
+
         console.log('[D2 State Manager] Initialized');
+    }
+
+    /**
+     * 🛡️ Inicializa IndexedDB dedicado para checkpoints
+     * Separado do DB principal para evitar conflitos
+     */
+    async _initCheckpointDB() {
+        try {
+            const request = indexedDB.open(this._checkpointDbName, 1);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(this._checkpointStoreName)) {
+                    db.createObjectStore(this._checkpointStoreName);
+                }
+            };
+            this._checkpointDb = await new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            console.log('[D2 State] ✅ Checkpoint IndexedDB inicializado');
+
+            // Migrar checkpoint antigo do localStorage (se existir)
+            this._migrateLocalStorageCheckpoint();
+        } catch (e) {
+            console.warn('[D2 State] ⚠️ IndexedDB para checkpoints falhou:', e.message);
+        }
+    }
+
+    /**
+     * 🛡️ Migra checkpoint do localStorage para IndexedDB (one-time)
+     */
+    async _migrateLocalStorageCheckpoint() {
+        try {
+            const raw = localStorage.getItem('demeni_d2_checkpoint');
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (data && data.state) {
+                await this._idbSaveCheckpoint(this._checkpointKey, data);
+                localStorage.removeItem('demeni_d2_checkpoint');
+                console.log('[D2 State] 📦 Checkpoint migrado de localStorage → IndexedDB');
+            }
+        } catch (e) {
+            console.warn('[D2 State] Falha ao migrar checkpoint:', e.message);
+        }
+    }
+
+    /**
+     * 🛡️ Salva dados no IndexedDB de checkpoints
+     */
+    async _idbSaveCheckpoint(key, data) {
+        if (!this._checkpointDb) {
+            console.warn('[D2 State] Checkpoint DB não disponível');
+            return false;
+        }
+        try {
+            const tx = this._checkpointDb.transaction(this._checkpointStoreName, 'readwrite');
+            const store = tx.objectStore(this._checkpointStoreName);
+            store.put(data, key);
+            await new Promise((resolve, reject) => {
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+            return true;
+        } catch (e) {
+            console.warn('[D2 State] Falha ao salvar no IndexedDB:', e.message);
+            return false;
+        }
+    }
+
+    /**
+     * 🛡️ Carrega dados do IndexedDB de checkpoints
+     */
+    async _idbLoadCheckpoint(key) {
+        if (!this._checkpointDb) return null;
+        try {
+            const tx = this._checkpointDb.transaction(this._checkpointStoreName, 'readonly');
+            const store = tx.objectStore(this._checkpointStoreName);
+            const request = store.get(key);
+            return await new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result || null);
+                request.onerror = () => reject(request.error);
+            });
+        } catch (e) {
+            console.warn('[D2 State] Falha ao ler IndexedDB:', e.message);
+            return null;
+        }
+    }
+
+    /**
+     * 🛡️ Remove dados do IndexedDB de checkpoints
+     */
+    async _idbDeleteCheckpoint(key) {
+        if (!this._checkpointDb) return;
+        try {
+            const tx = this._checkpointDb.transaction(this._checkpointStoreName, 'readwrite');
+            const store = tx.objectStore(this._checkpointStoreName);
+            store.delete(key);
+            await new Promise((resolve, reject) => {
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+        } catch (e) {
+            console.warn('[D2 State] Falha ao deletar IndexedDB:', e.message);
+        }
     }
 
     /**
@@ -360,6 +483,98 @@ class D2StateManager {
     }
 
     /**
+     * 🛡️ Configura detecção de crash via flag no localStorage
+     */
+    _setupCrashDetection() {
+        // Marca editor como ativo
+        localStorage.setItem(this._crashFlagKey, 'true');
+
+        // Limpa flag quando o editor fecha normalmente
+        window.addEventListener('beforeunload', () => {
+            localStorage.removeItem(this._crashFlagKey);
+        });
+
+        // Também limpa ao navegar dentro do SPA (sair do editor)
+        document.addEventListener('demeni:leaving-editor', () => {
+            localStorage.removeItem(this._crashFlagKey);
+        });
+    }
+
+    /**
+     * 🛡️ Salva checkpoint do estado atual no IndexedDB
+     * Persiste por 24h — sem limite de tamanho (suporta imagens base64)
+     */
+    async saveCheckpoint() {
+        try {
+            const data = {
+                state: this.exportState(),
+                timestamp: Date.now(),
+                projectId: this.state.projectId
+            };
+            const ok = await this._idbSaveCheckpoint(this._checkpointKey, data);
+            if (ok) {
+                const size = JSON.stringify(data.state).length;
+                console.log(`[D2 State] 📌 Checkpoint salvo no IndexedDB (${(size / 1024).toFixed(1)}KB)`);
+            }
+        } catch (e) {
+            console.warn('[D2 State] Falha ao salvar checkpoint:', e.message);
+        }
+    }
+
+    /**
+     * 🛡️ Verifica se há checkpoint de recuperação disponível (async — IndexedDB)
+     * @returns {Promise<boolean>}
+     */
+    async hasRecoveryCheckpoint() {
+        try {
+            const data = await this._idbLoadCheckpoint(this._checkpointKey);
+            if (!data) return false;
+            // Checkpoint precisa não ser muito antigo (< 24h)
+            const age = Date.now() - (data.timestamp || 0);
+            return age < 24 * 60 * 60 * 1000;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * 🛡️ Restaura estado do checkpoint (async — IndexedDB)
+     * @returns {Promise<boolean>} true se restaurou com sucesso
+     */
+    async restoreFromCheckpoint() {
+        try {
+            const data = await this._idbLoadCheckpoint(this._checkpointKey);
+            if (!data || !data.state) return false;
+
+            // Validar que checkpoint não expirou (24h)
+            const age = Date.now() - (data.timestamp || 0);
+            if (age > 24 * 60 * 60 * 1000) {
+                console.warn('[D2 State] ⚠️ Checkpoint expirado (> 24h) — ignorando');
+                await this.clearCheckpoint();
+                return false;
+            }
+
+            this.loadState(data.state);
+            console.log('[D2 State] ✅ Restaurado do checkpoint de', new Date(data.timestamp).toLocaleString());
+
+            // Limpa crash flag
+            this._crashDetected = false;
+            return true;
+        } catch (e) {
+            console.error('[D2 State] Falha ao restaurar checkpoint:', e);
+            return false;
+        }
+    }
+
+    /**
+     * 🛡️ Limpa checkpoint (após recuperação ou descarte)
+     */
+    async clearCheckpoint() {
+        await this._idbDeleteCheckpoint(this._checkpointKey);
+        this._crashDetected = false;
+    }
+
+    /**
      * Obtém o estado atual
      */
     getState() {
@@ -502,7 +717,25 @@ class D2StateManager {
 
         const stateData = this.exportState();
         UserData.updateProject(projectId, { data: stateData });
+
+        // 🛡️ Salva checkpoint para recuperação
+        this.saveCheckpoint();
+
+        // 📊 Monitor de tamanho do estado
+        if (window.StateValidator) {
+            const size = window.StateValidator.estimateSize(stateData);
+            if (size.bytes > 3 * 1024 * 1024) {
+                console.warn(`[D2 State] ⚠️ Estado grande: ${size.mb}MB (${size.imageCount} imagens) — considere otimizar`);
+            }
+        }
+
         console.log('[D2 State Manager] Auto-saved to storage');
+
+        // ✓ Indicador visual de salvamento
+        if (window.UIEnhancements) {
+            window.UIEnhancements.showSaved();
+            window.UIEnhancements.markSaved();
+        }
     }
 
     // Thumbnail capture removed — now handled by ThumbnailCapture module (thumbnail.js)
@@ -762,6 +995,19 @@ class D2StateManager {
 
         // Merge com o estado padrão para garantir que todas as propriedades existam
         this.state = this.deepMerge(this.getDefaultState(), savedState);
+
+        // 🛡️ Validação e reparo automático de estado
+        if (window.StateValidator) {
+            const { state: validatedState, repairs, isValid } = window.StateValidator.validate(
+                this.state,
+                this.getDefaultState()
+            );
+            this.state = validatedState;
+
+            if (!isValid) {
+                console.warn(`[D2 State Manager] ${repairs.length} reparo(s) aplicado(s) ao carregar`);
+            }
+        }
 
         // Migração: garante que seções novas existam (ex: PWA)
         this._migrateSections();

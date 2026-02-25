@@ -437,19 +437,23 @@ const UserData = (function () {
             // Start with alive cloud projects (zombies filtered out)
             aliveCloudProjects.forEach(cp => mergedMap.set(cp.id, cp));
 
-            // Merge local projects — local wins if newer
+            // Merge local projects — local wins if newer OR if cloud has no real data
             localProjects.forEach(lp => {
                 const cp = mergedMap.get(lp.id);
                 if (!cp) {
                     // Local-only project (not yet in cloud), keep it
                     mergedMap.set(lp.id, lp);
                 } else {
-                    // Both exist — compare timestamps
+                    // Both exist — compare timestamps AND data quality
                     const localTime = new Date(lp.updatedAt || 0).getTime();
                     const cloudTime = new Date(cp.updatedAt || 0).getTime();
-                    if (localTime > cloudTime) {
-                        // Local is newer, keep local version
+                    const cloudHasData = cp.data && typeof cp.data === 'object' && Object.keys(cp.data).length > 3;
+                    if (localTime > cloudTime || !cloudHasData) {
+                        // Local wins: is newer, or cloud has no substantial data
                         mergedMap.set(lp.id, lp);
+                        if (!cloudHasData && cloudTime > localTime) {
+                            console.warn(`🛡️ Merge: local ganha sobre cloud vazio para ${lp.id.substring(0, 8)} (cloud sem dados)`);
+                        }
                     }
                     // Otherwise cloud version (already in map) wins
                 }
@@ -500,15 +504,22 @@ const UserData = (function () {
 
         _pendingCloudSaves[projectId] = setTimeout(async () => {
             delete _pendingCloudSaves[projectId];
-            const project = getProject(projectId);
+            // 🛡️ FIX: Usar getProjectAsync para garantir dados frescos do IndexedDB
+            const project = await getProjectAsync(projectId);
             if (!project) return;
+
+            // 🛡️ Garantir que dados existem antes de enviar ao cloud
+            if (!project.data || Object.keys(project.data).length === 0) {
+                console.warn(`⚠️ Cloud save skipped: dados vazios para ${projectId.substring(0, 8)}`);
+                return;
+            }
 
             try {
                 const supabaseData = toSupabase(project);
                 // Remove id and user_id from updates (they're the key)
                 const { id, user_id, ...updates } = supabaseData;
                 await SupabaseClient.updateProject(projectId, updates);
-                console.log(`☁️ Saved project "${project.name}" to cloud`);
+                console.log(`☁️ Saved project "${project.name}" to cloud (${JSON.stringify(updates.data || {}).length}B)`);
             } catch (e) {
                 console.error('❌ Cloud save failed for project:', projectId, e);
             }
@@ -687,7 +698,10 @@ const UserData = (function () {
                     delete projectMeta.data;
 
                     const projects = getProjects();
-                    projects.unshift(projectMeta);
+                    // 🛡️ Guard: evitar duplicata se ID já existe
+                    if (!projects.some(p => p.id === cloudProject.id)) {
+                        projects.unshift(projectMeta);
+                    }
                     save(_scopedKey(KEYS.PROJECTS), projects);
 
                     // Also push the full data to cloud
@@ -708,7 +722,10 @@ const UserData = (function () {
         delete projectMeta.data;
 
         const projects = getProjects();
-        projects.unshift(projectMeta);
+        // 🛡️ Guard: evitar duplicata se ID já existe
+        if (!projects.some(p => p.id === newProject.id)) {
+            projects.unshift(projectMeta);
+        }
         save(_scopedKey(KEYS.PROJECTS), projects);
         return newProject;
     }
@@ -794,7 +811,7 @@ const UserData = (function () {
         return true;
     }
 
-    function publishProject(projectId, url) {
+    async function publishProject(projectId, url) {
         // Extract subdomain from URL for reliable retrieval later
         let subdomain = '';
         if (url) {
@@ -812,19 +829,24 @@ const UserData = (function () {
         });
 
         // CRITICAL: Save to cloud IMMEDIATELY (bypass debounce)
-        // This prevents losing published state if user reloads before debounce fires
+        // Must AWAIT to prevent syncFromCloud race condition that causes duplication
         if (_isCloudAvailable() && result) {
             // Cancel any pending debounced save
             if (_pendingCloudSaves[projectId]) {
                 clearTimeout(_pendingCloudSaves[projectId]);
                 delete _pendingCloudSaves[projectId];
             }
-            // Save immediately
-            const supabaseData = toSupabase(result);
+            // 🛡️ FIX: Include REAL data from IndexedDB/cache (not empty metadata)
+            const fullData = _dataCache[projectId] || await loadProjectData(projectId);
+            const projectWithData = { ...result, data: fullData || {} };
+            const supabaseData = toSupabase(projectWithData);
             const { id, user_id, ...updates } = supabaseData;
-            SupabaseClient.updateProject(projectId, updates)
-                .then(() => console.log('☁️ Published state saved to cloud immediately'))
-                .catch(e => console.error('❌ Failed to save published state to cloud:', e));
+            try {
+                await SupabaseClient.updateProject(projectId, updates);
+                console.log(`☁️ Published state saved to cloud (${JSON.stringify(updates.data || {}).length}B data)`);
+            } catch (e) {
+                console.error('❌ Failed to save published state to cloud:', e);
+            }
         }
 
         return result;
@@ -1022,11 +1044,25 @@ const UserData = (function () {
         const project = getProject(projectId);
         if (!project) return false;
 
-        // Ensure data is in IndexedDB
-        const data = await loadProjectData(projectId);
+        // 🛡️ FIX: Prefer fresh in-memory cache over (potentially stale) IndexedDB
+        const cachedData = _dataCache[projectId];
+        const idbData = await loadProjectData(projectId);
+        const data = cachedData || idbData;
+
         if (data) {
+            // Forçar gravação no IndexedDB com dados mais frescos
             await saveProjectData(projectId, data, { force: true });
+            // Atualizar o project.data para cloud upload abaixo
+            project.data = data;
         }
+
+        // 🛡️ Garantir que temos dados substanciais antes de enviar
+        if (!project.data || Object.keys(project.data).length === 0) {
+            console.warn(`⚠️ explicitSave: sem dados para ${projectId.substring(0, 8)}`);
+            return false;
+        }
+
+        console.log(`💾 explicitSave: ${Object.keys(project.data).length} chaves, ${JSON.stringify(project.data).length}B`);
 
         // Flush to cloud immediately (cancel any pending debounce)
         if (_isCloudAvailable()) {

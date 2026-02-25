@@ -25,12 +25,12 @@ function init() {
 }
 
 /**
- * Restore navigation state from sessionStorage
- * This ensures user stays in the editor after page reload
+ * Restore navigation state from localStorage
+ * This ensures user stays in the editor after page reload or browser restart
  */
 function restoreNavigationState() {
-    const savedPage = sessionStorage.getItem('demeni_currentPage');
-    const savedProjectId = sessionStorage.getItem('demeni_currentProjectId');
+    const savedPage = localStorage.getItem('demeni_currentPage');
+    const savedProjectId = localStorage.getItem('demeni_currentProjectId');
 
     if (savedPage && savedPage !== 'projects') {
         // Small delay to ensure DOM is ready
@@ -48,14 +48,14 @@ function restoreNavigationState() {
 }
 
 /**
- * Save current navigation state to sessionStorage
+ * Save current navigation state to localStorage
  * @param {string} page - The current page name
  * @param {string} projectId - Optional project ID being edited
  */
 function saveNavigationState(page, projectId = null) {
-    sessionStorage.setItem('demeni_currentPage', page);
+    localStorage.setItem('demeni_currentPage', page);
     if (projectId) {
-        sessionStorage.setItem('demeni_currentProjectId', projectId);
+        localStorage.setItem('demeni_currentProjectId', projectId);
     }
 }
 
@@ -1325,7 +1325,7 @@ async function publishProject(id, subdomain) {
 
     // NOTE: Thumbnail was already captured in showPublishModal BEFORE the modal opened
 
-    const result = Credits.attemptPublish(id, subdomain);
+    const result = await Credits.attemptPublish(id, subdomain);
 
     if (result.success) {
         // Generate HTML from editor preview
@@ -1334,17 +1334,39 @@ async function publishProject(id, subdomain) {
         const htmlContent = await generatePublishableHTML(state, projectName);
 
         if (htmlContent && window.SupabaseClient?.isConfigured()) {
-            try {
-                console.log('📤 [Publish] Uploading site to Supabase...', subdomain);
-                const { data, error } = await SupabaseClient.publishSite(id, subdomain, htmlContent);
-                if (error) {
-                    console.error('❌ [Publish] Supabase error:', error);
-                    showNotification(`⚠️ Site salvo localmente mas falhou no deploy: ${error.message}`);
-                } else {
-                    console.log('✅ [Publish] Site deployed successfully:', `https://${subdomain}.rafaeldemeni.com`);
+            const MAX_RETRIES = 3;
+            let lastError = null;
+
+            for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                try {
+                    console.log(`📤 [Publish] Tentativa ${attempt}/${MAX_RETRIES} — uploading to Supabase...`, subdomain);
+                    const { data, error } = await SupabaseClient.publishSite(id, subdomain, htmlContent);
+                    if (error) {
+                        lastError = error;
+                        console.warn(`⚠️ [Publish] Tentativa ${attempt} falhou:`, error.message);
+                        if (attempt < MAX_RETRIES) {
+                            const delay = Math.pow(2, attempt) * 500; // 1s, 2s, 4s
+                            await new Promise(r => setTimeout(r, delay));
+                            continue;
+                        }
+                    } else {
+                        console.log('✅ [Publish] Site deployed successfully:', `https://${subdomain}.rafaeldemeni.com`);
+                        lastError = null;
+                        break;
+                    }
+                } catch (e) {
+                    lastError = e;
+                    console.warn(`⚠️ [Publish] Tentativa ${attempt} exceção:`, e.message);
+                    if (attempt < MAX_RETRIES) {
+                        const delay = Math.pow(2, attempt) * 500;
+                        await new Promise(r => setTimeout(r, delay));
+                    }
                 }
-            } catch (e) {
-                console.error('❌ [Publish] Deploy exception:', e);
+            }
+
+            if (lastError) {
+                console.error('❌ [Publish] Todas as tentativas falharam:', lastError);
+                showNotification(`⚠️ Site salvo localmente mas falhou no deploy após ${MAX_RETRIES} tentativas`);
             }
         }
 
@@ -2221,7 +2243,12 @@ function updateAvatarCanvas() {
 
 function confirmAvatarEdit() {
     const canvas = document.getElementById('avatar-canvas');
-    _pendingAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    // WebP para consistência — fallback para JPEG se não suportado
+    let dataUrl = canvas.toDataURL('image/webp', 0.85);
+    if (!dataUrl.startsWith('data:image/webp')) {
+        dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    }
+    _pendingAvatarDataUrl = dataUrl;
 
     // Update preview
     document.getElementById('edit-profile-avatar-preview').src = _pendingAvatarDataUrl;
@@ -2544,15 +2571,33 @@ async function initEditorD2() {
         });
 
         // Publish button - shows confirmation modal
-        document.getElementById('btn-publish-header')?.addEventListener('click', () => {
+        document.getElementById('btn-publish-header')?.addEventListener('click', async () => {
             const projectId = UserData.getCurrentProjectId();
             if (!projectId) {
                 showNotification('⚠️ Nenhum projeto selecionado');
                 return;
             }
-            // Auto-save before showing modal
-            saveD2Project();
-            showPublishModal(projectId);
+            // 🛡️ FIX: Forçar save COMPLETO antes de publicar
+            const btn = document.getElementById('btn-publish-header');
+            const prevHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btn.disabled = true;
+
+            try {
+                saveD2Project();
+                const ok = await UserData.explicitSave(projectId);
+                if (!ok) {
+                    showNotification('⚠️ Erro ao salvar. Tente novamente antes de publicar.');
+                    return;
+                }
+                showPublishModal(projectId);
+            } catch (e) {
+                console.error('[Publish] Save before publish failed:', e);
+                showNotification('⚠️ Erro ao salvar. Tente novamente.');
+            } finally {
+                btn.innerHTML = prevHTML;
+                btn.disabled = false;
+            }
         });
 
         // 💾 SAVE BUTTON — save project + create checkpoint automatically
@@ -2671,22 +2716,24 @@ function saveD2Project() {
     const projectId = UserData.getCurrentProject();
     if (!projectId) {
         showNotification('❌ Nenhum projeto selecionado');
-        return;
+        return false;
     }
 
-    // Get state from d2State and save to project
-    const d2Data = {
-        profile: window.d2State.get('profile'),
-        d2Sections: window.d2State.get('d2Sections'),
-        d2Adjustments: window.d2State.get('d2Adjustments'),
-        d2Products: window.d2State.get('d2Products'),
-        d2Feedbacks: window.d2State.get('d2Feedbacks'),
-        d2Categorias: window.d2State.get('d2Categorias'),
-        d2Banners: window.d2State.get('d2Banners')
-    };
+    // 🛡️ FIX: Capturar ESTADO COMPLETO — nunca perde nenhuma chave
+    // Antes: pegava apenas 7 keys manualmente, ignorando projectName, pwa, subdomain, etc.
+    // Agora: getState() retorna TODO o estado do editor
+    const d2Data = window.d2State.getState();
+
+    if (!d2Data || typeof d2Data !== 'object') {
+        console.error('[Save] Estado vazio ou inválido!');
+        showNotification('❌ Erro: estado do editor está vazio');
+        return false;
+    }
+
+    console.log(`[Save] Salvando estado completo: ${Object.keys(d2Data).length} chaves, ${JSON.stringify(d2Data).length} bytes`);
 
     UserData.updateProject(projectId, { data: d2Data });
-    showNotification('✅ Projeto salvo!');
+    return true;
 }
 
 window.initEditorD2 = initEditorD2;
