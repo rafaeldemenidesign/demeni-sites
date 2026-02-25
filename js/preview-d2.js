@@ -272,6 +272,8 @@ function renderPreviewD2New(frame, state) {
     const categoriaIconSize = get('categorias.icon.size', 55);
     const categoriaIconRadius = get('categorias.icon.radius', 16);
     const categoriaIconColor = get('categorias.icon.color', '#333333');
+    const categoriaIconColorMode = get('categorias.icon.colorMode', 'original');
+    const categoriaIconFilter = categoriaIconColorMode === 'white' ? 'brightness(0) invert(1)' : categoriaIconColorMode === 'black' ? 'brightness(0)' : 'none';
     const categoriaIconBgColor = get('categorias.icon.bgColor', '#f5f5f5');
     const categoriaIconBgType = get('categorias.icon.bgType', 'solid');
     const categoriaIconBgGradient = get('categorias.icon.bgGradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
@@ -1342,7 +1344,7 @@ function renderPreviewD2New(frame, state) {
                                 const cZoom = (cat.customIconZoom || 100) / 100;
                                 const cPosX = cat.customIconPosX ?? 50;
                                 const cPosY = cat.customIconPosY ?? 50;
-                                iconHtml = `<img src="${cat.customIcon}" alt="${cat.label}" style="transform:scale(${cZoom}) translate(${cPosX - 50}%, ${cPosY - 50}%);transform-origin:center center;">`;
+                                iconHtml = `<img src="${cat.customIcon}" alt="${cat.label}" style="transform:scale(${cZoom}) translate(${cPosX - 50}%, ${cPosY - 50}%);transform-origin:center center;filter:${categoriaIconFilter};">`;
                             } else {
                                 const pngFallback = {
                                     'img/Pen Tool.png': 'fa-box-open',

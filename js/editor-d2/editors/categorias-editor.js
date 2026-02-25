@@ -236,6 +236,20 @@ class D2CategoriasEditor {
                     })
                 );
 
+                // ── Cor de ícone PNG (para imagens customizadas) ──
+                container.appendChild(
+                    C.createSelect({
+                        label: 'Cor do ícone (PNG)',
+                        value: window.d2State.get(`${this.basePath}.icon.colorMode`, 'original'),
+                        options: [
+                            { value: 'white', label: 'Branco' },
+                            { value: 'black', label: 'Preto' },
+                            { value: 'original', label: 'Original' }
+                        ],
+                        path: `${this.basePath}.icon.colorMode`
+                    })
+                );
+
                 return container;
             }
         );

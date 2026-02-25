@@ -1571,9 +1571,47 @@ function showLevelUp(newLevel, borderName) {
 }
 
 // ========== NOTIFICATIONS ==========
-function showNotification(message) {
-    // Simple alert for now, can be enhanced later
-    alert(message);
+function showNotification(message, type = 'info') {
+    // Remove existing toast if any
+    const existing = document.getElementById('demeni-toast');
+    if (existing) existing.remove();
+
+    const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+    const colors = { success: '#00b894', error: '#e74c3c', info: '#5167E7' };
+    const icon = icons[type] || icons.info;
+    const color = colors[type] || colors.info;
+
+    const toast = document.createElement('div');
+    toast.id = 'demeni-toast';
+    toast.style.cssText = `
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+        background: #1e1e2e; color: #fff; padding: 12px 20px; border-radius: 12px;
+        font-size: 14px; font-family: inherit; z-index: 99999;
+        display: flex; align-items: center; gap: 10px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        opacity: 0; max-width: 90vw;
+    `;
+    toast.innerHTML = `
+        <i class="fas ${icon}" style="color:${color};font-size:16px"></i>
+        <span>${message}</span>
+        <i class="fas fa-times" style="cursor:pointer;opacity:0.5;margin-left:8px;font-size:12px"
+           onclick="this.parentElement.remove()"></i>
+    `;
+    document.body.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+        toast.style.opacity = '1';
+    });
+
+    // Auto-dismiss after 3s
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(-100px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
 }
 
 // ========== UTILITIES ==========
@@ -2632,7 +2670,8 @@ async function initEditorD2() {
                     btn.classList.remove('saving');
                     btn.classList.add('saved');
                     btnCheckpoint.disabled = false; // Enable restore
-                    showNotification('💾 Projeto salvo + checkpoint criado!');
+                    console.log('💾 Projeto salvo + checkpoint criado');
+                    showNotification('💾 Projeto salvo com sucesso!', 'success');
                     setTimeout(() => {
                         btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
                         btn.classList.remove('saved');
