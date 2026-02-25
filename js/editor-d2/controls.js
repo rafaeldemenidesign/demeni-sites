@@ -419,8 +419,9 @@ window.D2Controls = {
             if (!file) return;
 
             try {
-                // Converter para WebP
-                const webpDataUrl = await this.convertToWebP(file, 0.85);
+                // Comprimir + converter para WebP via módulo central
+                const compressor = window.ImageUtils ? window.ImageUtils.compressProductImage : this.convertToWebP.bind(this);
+                const webpDataUrl = await compressor(file);
 
                 previewBox.innerHTML = `
                     <img src="${webpDataUrl}" alt="Preview">
@@ -448,7 +449,7 @@ window.D2Controls = {
                     window.d2State.set(path, webpDataUrl);
                 }
 
-                console.log('[D2 Controls] Image converted to WebP and saved');
+                console.log('[D2 Controls] Image compressed to WebP and saved');
             } catch (error) {
                 console.error('[D2 Controls] Error converting image:', error);
                 // Fallback: usar imagem original

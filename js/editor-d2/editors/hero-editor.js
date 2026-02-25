@@ -1074,31 +1074,17 @@ class D2HeroEditor {
     }
 
     /**
-     * Processa arquivo de imagem e converte para WebP
+     * Processa arquivo de imagem — comprime + converte para WebP
+     * Usa o módulo centralizado ImageUtils
      */
     async processImageFile(file) {
+        if (window.ImageUtils) {
+            return window.ImageUtils.compressBannerImage(file);
+        }
+        // Fallback mínimo caso ImageUtils não esteja carregado
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-
-                    // Tenta converter para WebP
-                    try {
-                        const webpData = canvas.toDataURL('image/webp', 0.85);
-                        resolve(webpData);
-                    } catch {
-                        resolve(e.target.result); // Fallback para original
-                    }
-                };
-                img.onerror = reject;
-                img.src = e.target.result;
-            };
+            reader.onload = (e) => resolve(e.target.result);
             reader.onerror = reject;
             reader.readAsDataURL(file);
         });

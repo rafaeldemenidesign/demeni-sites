@@ -73,6 +73,18 @@ const Auth = (function () {
 
     // ========== LOGIN ==========
     async function login(email, password) {
+        // 🛡️ Rate limiting — máx 5 tentativas por 5 minutos
+        if (window.Security) {
+            const rateCheck = Security.checkRateLimit('login', 5, 300000);
+            if (!rateCheck.allowed) {
+                const waitMin = Math.ceil(rateCheck.retryAfterMs / 60000);
+                return {
+                    success: false,
+                    error: `Muitas tentativas. Aguarde ${waitMin} minuto(s) e tente novamente.`
+                };
+            }
+        }
+
         if (useSupabase) {
             try {
                 const { data, error } = await SupabaseClient.signIn(email, password);
@@ -85,6 +97,8 @@ const Auth = (function () {
                 }
 
                 if (data.user) {
+                    // ✅ Login OK — reseta rate limiter
+                    if (window.Security) Security.resetRateLimit('login');
                     await syncSupabaseUserToLocal(data.user);
                     return { success: true, user: getCurrentUser() };
                 }
@@ -300,6 +314,9 @@ const Auth = (function () {
         if (user.password !== hashPassword(password)) {
             return { success: false, error: 'Senha incorreta' };
         }
+
+        // ✅ Login OK — reseta rate limiter
+        if (window.Security) Security.resetRateLimit('login');
 
         createLocalSession(user);
         return { success: true, user: sanitizeUser(user) };

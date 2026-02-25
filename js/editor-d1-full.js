@@ -329,12 +329,18 @@ function d1ApplyCrop() {
         imageSmoothingQuality: 'high'
     });
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    // Tenta WebP para consistência
+    let finalUrl = dataUrl;
+    try {
+        const webpUrl = canvas.toDataURL('image/webp', 0.85);
+        if (webpUrl.startsWith('data:image/webp')) finalUrl = webpUrl;
+    } catch { /* mantém JPEG */ }
     if (d1CropTarget === 'avatar') {
-        D1State.profile.avatar = dataUrl;
+        D1State.profile.avatar = finalUrl;
         const avatarImg = d1El('avatar-img');
-        if (avatarImg) avatarImg.src = dataUrl;
+        if (avatarImg) avatarImg.src = finalUrl;
     } else {
-        D1State.style.bgImage = dataUrl;
+        D1State.style.bgImage = finalUrl;
         d1UpdateBgPreview();
     }
     d1CloseCropModal();
@@ -425,6 +431,21 @@ function d1SetupFooter() {
 
 // ========== COMPRESS IMAGE ==========
 function d1CompressImage(file, maxKB, callback) {
+    // Usa módulo centralizado se disponível
+    if (window.ImageUtils) {
+        window.ImageUtils.compressImageToDataUrl(file, {
+            maxWidth: 1200,
+            quality: 0.80
+        }).then(dataUrl => callback(dataUrl))
+            .catch(() => {
+                // Fallback: lê original
+                const reader = new FileReader();
+                reader.onload = () => callback(reader.result);
+                reader.readAsDataURL(file);
+            });
+        return;
+    }
+    // Fallback legado
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {

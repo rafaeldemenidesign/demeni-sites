@@ -8,15 +8,47 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN')!
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// Domínios permitidos
+const ALLOWED_ORIGINS = [
+    'https://rafaeldemeni.com',
+    'https://www.rafaeldemeni.com',
+    'https://sites.rafaeldemeni.com',
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+]
+
+function getCorsHeaders(req: Request) {
+    const origin = req.headers.get('origin') || ''
+    const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+    return {
+        'Access-Control-Allow-Origin': allowed,
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY'
+    }
+}
+
+// Limites de segurança para validação
+const LIMITS = {
+    MAX_PRICE: 5000,      // R$ 5.000 máximo por transação
+    MAX_CREDITS: 10000,   // 10.000 créditos máximo
+    MIN_PRICE: 1,         // R$ 1 mínimo
 }
 
 serve(async (req) => {
+    const corsHeaders = getCorsHeaders(req)
+
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
+    }
+
+    // Rejeitar métodos não-POST
+    if (req.method !== 'POST') {
+        return new Response('Method not allowed', { headers: corsHeaders, status: 405 })
     }
 
     try {
@@ -35,6 +67,24 @@ serve(async (req) => {
             is_franchise_checkout,
             referral_code
         } = body
+
+        // ========== VALIDAÇÕES DE SEGURANÇA ==========
+        // Validar tipos e limites
+        if (credits !== undefined && (typeof credits !== 'number' || credits < 1 || credits > LIMITS.MAX_CREDITS)) {
+            throw new Error('Invalid credits value')
+        }
+        if (price !== undefined && (typeof price !== 'number' || price < LIMITS.MIN_PRICE || price > LIMITS.MAX_PRICE)) {
+            throw new Error('Invalid price value')
+        }
+        if (user_email && typeof user_email === 'string' && !user_email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            throw new Error('Invalid email format')
+        }
+        if (package_id && typeof package_id !== 'string') {
+            throw new Error('Invalid package_id')
+        }
+        if (referral_code && (typeof referral_code !== 'string' || referral_code.length > 50)) {
+            throw new Error('Invalid referral_code')
+        }
 
         // ========== FRANCHISE CHECKOUT (no auth required) ==========
         if (is_franchise_checkout) {

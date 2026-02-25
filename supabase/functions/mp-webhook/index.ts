@@ -8,6 +8,48 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN')!
+const MP_WEBHOOK_SECRET = Deno.env.get('MP_WEBHOOK_SECRET') || ''
+
+/**
+ * Verifica a assinatura do Mercado Pago (x-signature header)
+ * Protege contra webhooks forjados
+ */
+async function verifyMPSignature(req: Request, dataId: string): Promise<boolean> {
+    if (!MP_WEBHOOK_SECRET) {
+        console.warn('[Webhook] ⚠️ MP_WEBHOOK_SECRET não configurado — pulando verificação')
+        return true // Permite operação enquanto secret não é configurado
+    }
+
+    const xSignature = req.headers.get('x-signature')
+    const xRequestId = req.headers.get('x-request-id')
+    if (!xSignature || !xRequestId) return false
+
+    // Parse x-signature: "ts=...,v1=..."
+    const parts: Record<string, string> = {}
+    xSignature.split(',').forEach(part => {
+        const [key, value] = part.split('=')
+        if (key && value) parts[key.trim()] = value.trim()
+    })
+
+    const ts = parts['ts']
+    const hash = parts['v1']
+    if (!ts || !hash) return false
+
+    // Montar template de validação conforme docs MP
+    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`
+
+    // HMAC-SHA256
+    const encoder = new TextEncoder()
+    const key = await crypto.subtle.importKey(
+        'raw', encoder.encode(MP_WEBHOOK_SECRET),
+        { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    )
+    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(manifest))
+    const computed = Array.from(new Uint8Array(signature))
+        .map(b => b.toString(16).padStart(2, '0')).join('')
+
+    return computed === hash
+}
 
 serve(async (req) => {
     try {
@@ -27,11 +69,24 @@ serve(async (req) => {
         const paymentId = id || body.data?.id
         const notificationType = topic || body.type
 
-        console.log('Webhook received:', { notificationType, paymentId, body })
+        console.log('Webhook received:', { notificationType, paymentId })
 
         // Only process payment notifications
         if (notificationType !== 'payment' || !paymentId) {
             return new Response('OK', { status: 200 })
+        }
+
+        // 🛡️ Validar que paymentId é numérico (MP sempre envia IDs numéricos)
+        if (!/^\d+$/.test(String(paymentId))) {
+            console.error('[Webhook] ⚠️ paymentId inválido (não numérico):', paymentId)
+            return new Response('Invalid payment ID', { status: 400 })
+        }
+
+        // 🛡️ Verificar assinatura do Mercado Pago
+        const signatureValid = await verifyMPSignature(req, String(paymentId))
+        if (!signatureValid) {
+            console.error('[Webhook] ❌ Assinatura inválida — possível webhook forjado')
+            return new Response('Invalid signature', { status: 403 })
         }
 
         // Fetch payment details from Mercado Pago

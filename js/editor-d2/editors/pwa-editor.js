@@ -101,7 +101,9 @@ class D2PWAEditor {
                     const file = e.target.files[0];
                     if (!file) return;
                     try {
-                        const dataUrl = await this._convertAndResize(file, 1200, 0.85);
+                        const dataUrl = window.ImageUtils
+                            ? await window.ImageUtils.compressBannerImage(file)
+                            : await this._convertAndResize(file, 1200, 0.85);
                         window.d2State.set(`${this.basePath}.seo.ogImage`, dataUrl);
                         document.dispatchEvent(new CustomEvent('d2:section-selected', {
                             detail: { sectionId: 'pwa' }
@@ -255,9 +257,11 @@ class D2PWAEditor {
                 if (!file) return;
 
                 try {
-                    // Converte para WebP e redimensiona para 512x512
-                    const dataUrl = await this._convertAndResize(file, 512, 0.90);
-                    console.log(`[PWA Editor] Favicon converted: ${(dataUrl.length / 1024).toFixed(0)}KB`);
+                    // Comprimir + WebP via módulo central (preserva transparência para ícones)
+                    const dataUrl = window.ImageUtils
+                        ? await window.ImageUtils.compressIcon(file)
+                        : await this._convertAndResize(file, 512, 0.90);
+                    console.log(`[PWA Editor] Favicon compressed: ${(dataUrl.length / 1024).toFixed(0)}KB`);
                     window.d2State.set(`${this.basePath}.favicon.image`, dataUrl);
                     this._renderModeControls(container);
                 } catch (err) {

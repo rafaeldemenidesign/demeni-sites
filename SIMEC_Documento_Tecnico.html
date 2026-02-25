@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMEC — Documento Técnico</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --green-primary: #8FA53A;
+            --green-bg: #A4B544;
+            --teal: #1A6B6A;
+            --teal-dark: #145553;
+            --white: #ffffff;
+            --gray-50: #f8f9fa;
+            --gray-100: #f0f2f0;
+            --gray-600: #4a5548;
+            --gray-800: #2d332b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--gray-800);
+            font-size: 11pt;
+            line-height: 1.6;
+            background: white;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm 15mm;
+        }
+
+        /* ===== COVER ===== */
+        .cover {
+            width: 100%;
+            height: 100vh;
+            background: var(--green-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            page-break-after: always;
+            margin: -10mm -15mm;
+            padding: 15mm;
+            width: calc(100% + 30mm);
+            background-image: repeating-radial-gradient(circle at center, transparent 0, transparent 40px, rgba(255, 255, 255, 0.04) 40px, rgba(255, 255, 255, 0.04) 42px);
+        }
+
+        .cover h1 {
+            font-size: 28pt;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .cover .subtitle {
+            font-size: 14pt;
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 500px;
+            margin-bottom: 60px;
+        }
+
+        .cover-badge {
+            background: var(--teal);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 16px;
+            font-size: 13pt;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        .cover-footer {
+            font-size: 9pt;
+            opacity: 0.7;
+            margin-top: auto;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .new-page {
+            page-break-before: always;
+        }
+
+        h2 {
+            font-size: 16pt;
+            font-weight: 700;
+            color: var(--teal-dark);
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            border-bottom: 3px solid var(--green-primary);
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 12pt;
+            font-weight: 600;
+            color: var(--teal);
+            margin: 14px 0 8px;
+        }
+
+        p {
+            margin-bottom: 8px;
+            text-align: justify;
+        }
+
+        .highlight-box {
+            background: var(--gray-100);
+            border-left: 4px solid var(--green-primary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            font-size: 10pt;
+            page-break-inside: avoid;
+        }
+
+        .teal-box {
+            background: var(--teal);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 14px 0;
+            page-break-inside: avoid;
+        }
+
+        .teal-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 9.5pt;
+        }
+
+        th {
+            background: var(--teal);
+            color: white;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 9pt;
+        }
+
+        td {
+            padding: 7px 12px;
+            border-bottom: 1px solid #e0e4da;
+        }
+
+        tr:nth-child(even) td {
+            background: var(--gray-50);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .feature-card {
+            background: var(--gray-100);
+            border-radius: 8px;
+            padding: 12px 14px;
+            border: 1px solid #e0e4da;
+            page-break-inside: avoid;
+        }
+
+        .feature-card .icon {
+            font-size: 18pt;
+            margin-bottom: 4px;
+        }
+
+        .feature-card h4 {
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: var(--teal-dark);
+            margin-bottom: 3px;
+        }
+
+        .feature-card p {
+            font-size: 8.5pt;
+            margin: 0;
+            color: var(--gray-600);
+            text-align: left;
+        }
+
+        ul,
+        ol {
+            margin: 6px 0 10px 20px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .section-number {
+            display: inline-block;
+            background: var(--green-primary);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 26px;
+            font-size: 11pt;
+            font-weight: 700;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin: 12px 0;
+            page-break-inside: avoid;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--green-bg);
+            color: white;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 22pt;
+            font-weight: 800;
+        }
+
+        .stat-card .label {
+            font-size: 8.5pt;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 7px 0;
+            page-break-inside: avoid;
+        }
+
+        .flow-step .step-num {
+            background: var(--teal);
+            color: white;
+            min-width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 10pt;
+        }
+
+        .flow-step .step-content {
+            padding-top: 3px;
+            font-size: 10pt;
+        }
+
+        .flow-step .step-content strong {
+            color: var(--teal-dark);
+        }
+
+        .page-bar {
+            height: 5px;
+            background: linear-gradient(90deg, var(--green-primary), var(--teal));
+            margin-bottom: 20px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- COVER -->
+    <div class="cover">
+        <div style="font-size:56pt; font-weight:800; letter-spacing:-2px; margin-bottom:8px;">SIMEC</div>
+        <div style="font-size:11pt; font-weight:500; letter-spacing:3px; margin-bottom:40px;">SISTEMA MUNICIPAL DE
+            EMPREGOS DE CABACEIRAS</div>
+        <h1>Documento Técnico</h1>
+        <p class="subtitle">Apresentação completa do sistema que conecta empresa e trabalhador</p>
+        <div class="cover-badge">Prefeitura Municipal de Cabaceiras</div>
+        <p class="cover-footer">Secretaria de Desenvolvimento Econômico • Casa do Empreendedor • Fevereiro 2026</p>
+    </div>
+
+    <!-- VISÃO GERAL -->
+    <div class="page-bar"></div>
+
+    <div class="section">
+        <h2><span class="section-number">1</span> Visão Geral</h2>
+        <p>O <strong>SIMEC</strong> (Sistema Municipal de Empregos de Cabaceiras) é uma plataforma digital criada pela
+            <strong>Prefeitura Municipal de Cabaceiras</strong>, por meio da <strong>Secretaria de Desenvolvimento
+                Econômico</strong>, com base operacional na <strong>Casa do Empreendedor</strong>.</p>
+
+        <div class="teal-box">
+            <h3>Missão</h3>
+            <p style="margin:0">Aproximar empresas e trabalhadores, reduzindo o tempo e a burocracia para contratação,
+                fortalecendo o comércio e o desenvolvimento econômico local.</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="number">3</div>
+                <div class="label">Tipos de Usuário</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">4</div>
+                <div class="label">Administradores</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">5</div>
+                <div class="label">Canais de Divulgação</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">8+</div>
+                <div class="label">Funcionalidades Core</div>
+            </div>
+        </div>
+
+        <h3>Impacto para Cabaceiras</h3>
+        <ul>
+            <li>Organização do mercado de trabalho local</li>
+            <li>Agilização dos processos de contratação</li>
+            <li>Fortalecimento da economia cabaceirense</li>
+            <li>Acesso transparente e democrático às oportunidades de emprego</li>
+        </ul>
+
+        <div class="highlight-box">
+            <strong>Base física:</strong> Casa do Empreendedor, Cabaceiras — onde a equipe administrativa opera e presta
+            suporte presencial a empregadores e trabalhadores.
+        </div>
+    </div>
+
+    <!-- PERFIS DE USUÁRIO -->
+    <div class="section">
+        <h2><span class="section-number">2</span> Perfis de Usuário</h2>
+        <p>O SIMEC opera com <strong>três perfis distintos</strong>, cada um com permissões e funcionalidades
+            específicas:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Perfil</th>
+                    <th>Permissões</th>
+                    <th>Detalhes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Empregador</strong></td>
+                    <td>Publicar vagas, visualizar currículos, contatar candidatos</td>
+                    <td>Empresas e comércios locais</td>
+                </tr>
+                <tr>
+                    <td><strong>Trabalhador</strong></td>
+                    <td>Buscar vagas, sinalizar interesse, anexar currículo</td>
+                    <td>Pessoas em busca de emprego</td>
+                </tr>
+                <tr>
+                    <td><strong>Administrador</strong></td>
+                    <td>Abrir/fechar vagas, cadastrar interessados, gestão total</td>
+                    <td>4 admins (Casa do Empreendedor)<br>Acesso principal: <strong>Emerson Gusmão</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- CADASTRO -->
+    <div class="section">
+        <h2><span class="section-number">3</span> Cadastro</h2>
+        <p>O cadastro é realizado <strong>diretamente no site oficial do SIMEC</strong>, de forma
+            <strong>gratuita</strong> e <strong>rápida</strong>.</p>
+
+        <h3>Processo de Cadastro</h3>
+        <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-content"><strong>Acessa o site</strong> — Usuário entra na plataforma SIMEC</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-content"><strong>Seleciona o perfil</strong> — Empregador ou Trabalhador</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-content"><strong>Preenche os dados</strong> — Informações pessoais/empresariais</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-content"><strong>Anexa currículo</strong> — Trabalhadores podem anexar seu currículo no
+                cadastro</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-content"><strong>Aprovação e acesso</strong> — Perfil ativo para uso imediato</div>
+        </div>
+
+        <div class="highlight-box">
+            <strong>Importante:</strong> A equipe administrativa (Casa do Empreendedor) também pode cadastrar
+            interessados em vagas diretamente no sistema, facilitando o acesso para pessoas com dificuldade digital.
+        </div>
+    </div>
+
+    <!-- FUNCIONALIDADES -->
+    <div class="section new-page">
+        <div class="page-bar"></div>
+        <h2><span class="section-number">4</span> Funcionalidades do Sistema</h2>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">👤</div>
+                <h4>Cadastro Dual</h4>
+                <p>Registro como Empregador ou Trabalhador com dados específicos para cada perfil</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💼</div>
+                <h4>Publicação de Vagas</h4>
+                <p>Empregadores e administradores podem publicar, editar e fechar vagas</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📄</div>
+                <h4>Gestão de Currículos</h4>
+                <p>Trabalhadores anexam currículo; empregadores visualizam e filtram candidatos</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔍</div>
+                <h4>Busca de Vagas</h4>
+                <p>Trabalhadores pesquisam vagas disponíveis e sinalizam interesse</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🏷️</div>
+                <h4>Tags de Disponibilidade</h4>
+                <p>Trabalhadores indicam sua disponibilidade via tags visíveis aos empregadores</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💬</div>
+                <h4>Contato Direto</h4>
+                <p>Comunicação direta entre empregadores e candidatos compatíveis</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📢</div>
+                <h4>Divulgação Multicanal</h4>
+                <p>Vagas divulgadas via Site, Instagram, WhatsApp e meios de comunicação locais</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚙️</div>
+                <h4>Painel Administrativo</h4>
+                <p>4 administradores com controle total: abertura/fechamento de vagas e cadastro manual</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CANAIS DE DIVULGAÇÃO -->
+    <div class="section">
+        <h2><span class="section-number">5</span> Canais de Divulgação</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Canal</th>
+                    <th>Descrição</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>Site Oficial</strong></td>
+                    <td>Plataforma principal com listagem completa de vagas</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Instagram</strong></td>
+                    <td>Publicações visuais com vagas em destaque</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>Grupo de WhatsApp</strong></td>
+                    <td>Notificações diretas para comunidade cadastrada</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Meios de Comunicação</strong></td>
+                    <td>Veículos populares no município de Cabaceiras</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Contato Direto</strong></td>
+                    <td>WhatsApp individual com informações sobre vagas específicas</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- FLUXOS OPERACIONAIS -->
+    <div class="section new-page">
+        <div class="page-bar"></div>
+        <h2><span class="section-number">6</span> Fluxos Operacionais</h2>
+
+        <h3>Fluxo do Trabalhador</h3>
+        <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-content"><strong>Acessa o site</strong> do SIMEC</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-content"><strong>Consulta vagas</strong> disponíveis</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-content"><strong>Sinaliza interesse</strong> na vaga desejada</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-content"><strong>Entra em contato</strong> com a empresa responsável</div>
+        </div>
+
+        <h3>Fluxo do Empregador</h3>
+        <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-content"><strong>Publica vaga</strong> com descrição e requisitos</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-content"><strong>Visualiza currículos</strong> dos trabalhadores cadastrados</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-content"><strong>Filtra por tags</strong> de disponibilidade</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-content"><strong>Contata diretamente</strong> candidatos compatíveis</div>
+        </div>
+
+        <h3>Fluxo Administrativo (Casa do Empreendedor)</h3>
+        <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-content"><strong>Abre e fecha vagas</strong> diretamente no sistema</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-content"><strong>Cadastra interessados</strong> manualmente (suporte presencial)</div>
+        </div>
+        <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-content"><strong>Gerencia plataforma</strong> e modera conteúdo</div>
+        </div>
+    </div>
+
+    <!-- GOVERNANÇA -->
+    <div class="section">
+        <h2><span class="section-number">7</span> Governança</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Detalhe</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Realização</strong></td>
+                    <td>Prefeitura Municipal de Cabaceiras</td>
+                </tr>
+                <tr>
+                    <td><strong>Órgão responsável</strong></td>
+                    <td>Secretaria de Desenvolvimento Econômico</td>
+                </tr>
+                <tr>
+                    <td><strong>Base operacional</strong></td>
+                    <td>Casa do Empreendedor</td>
+                </tr>
+                <tr>
+                    <td><strong>Administradores</strong></td>
+                    <td>4 pessoas da equipe da Casa do Empreendedor</td>
+                </tr>
+                <tr>
+                    <td><strong>Acesso principal</strong></td>
+                    <td>Emerson Gusmão</td>
+                </tr>
+                <tr>
+                    <td><strong>Propósito</strong></td>
+                    <td>Unir setor produtivo e promover emprego e renda</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="highlight-box">
+            <strong>Roadmap futuro:</strong> Implementação de suporte a grupos prioritários e minorias para inclusão
+            direcionada no mercado de trabalho.
+        </div>
+    </div>
+
+    <!-- RESUMO TÉCNICO -->
+    <div class="section new-page">
+        <div class="page-bar"></div>
+        <h2><span class="section-number">8</span> Resumo Técnico</h2>
+
+        <h3>Funcionalidades Core</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Funcionalidade</th>
+                    <th>Usuário Alvo</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Cadastro de usuários (Empregador / Trabalhador)</td>
+                    <td>Ambos</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Anexo de currículo no cadastro</td>
+                    <td>Trabalhador</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Publicação de vagas</td>
+                    <td>Empregador / Admin</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Abertura e fechamento de vagas</td>
+                    <td>Admin</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Visualização de currículos</td>
+                    <td>Empregador</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Busca/listagem de vagas disponíveis</td>
+                    <td>Trabalhador</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Tags de disponibilidade</td>
+                    <td>Empregador (visualiza)</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>Contato direto candidato-empresa</td>
+                    <td>Ambos</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Cadastro manual de interessados</td>
+                    <td>Admin</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Divulgação multicanal</td>
+                    <td>Sistema</td>
+                    <td>Ativo</td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>Grupos prioritários e minorias</td>
+                    <td>Sistema</td>
+                    <td>Futuro</td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>Integrações externas (SINE, CTPS)</td>
+                    <td>Sistema</td>
+                    <td>Não previsto</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Definições Técnicas Pendentes</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Responsável</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Backend e banco de dados</td>
+                    <td>Programador</td>
+                    <td>A definir</td>
+                </tr>
+                <tr>
+                    <td>Domínio/URL do site</td>
+                    <td>Programador</td>
+                    <td>A definir</td>
+                </tr>
+                <tr>
+                    <td>Hospedagem e infraestrutura</td>
+                    <td>Programador</td>
+                    <td>A definir</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="teal-box" style="margin-top: 20px;">
+            <h3>O SIMEC é mais do que uma plataforma digital</h3>
+            <p style="margin:0; font-size: 10.5pt;">É uma ferramenta de <strong>transformação social</strong> que coloca
+                Cabaceiras na vanguarda da gestão municipal de empregos. Ao digitalizar e organizar o encontro entre
+                oferta e demanda de trabalho, o SIMEC contribui diretamente para a <strong>redução do
+                    desemprego</strong>, o <strong>fortalecimento da economia local</strong> e a <strong>inclusão
+                    social</strong> da população cabaceirense.</p>
+        </div>
+
+        <p style="text-align: center; font-size: 9.5pt; color: var(--gray-600); margin-top: 20px;">
+            <strong>Prefeitura Municipal de Cabaceiras</strong><br>
+            Secretaria de Desenvolvimento Econômico • Casa do Empreendedor<br>
+            <em>Documento gerado em Fevereiro de 2026</em>
+        </p>
+    </div>
+
+</body>
+
+</html>
