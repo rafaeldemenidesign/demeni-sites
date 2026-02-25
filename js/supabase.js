@@ -214,12 +214,13 @@ const SupabaseClient = (function () {
         }
 
         try {
-            // Use UPSERT: Insert if new, Update if exists (based on slug)
-            console.log('⏳ Calling Supabase upsert...');
+            // 🛡️ FIX: Update the EXISTING project row by ID (not upsert by slug)
+            // The old .upsert(onConflict:'slug') was creating NEW rows because the
+            // original project (from createProject) had slug=null, so no conflict was found.
+            console.log('⏳ Updating project by ID...');
             const { data, error } = await supabase
                 .from('projects')
-                .upsert({
-                    user_id: user.id,
+                .update({
                     name: projectName,
                     slug: slug,
                     data: projectData,
@@ -228,10 +229,8 @@ const SupabaseClient = (function () {
                     published_url: `https://${slug}.rafaeldemeni.com`,
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
-                }, {
-                    onConflict: 'slug',
-                    ignoreDuplicates: false
                 })
+                .eq('id', projectId)
                 .select()
                 .single();
 

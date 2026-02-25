@@ -2671,7 +2671,7 @@ async function initEditorD2() {
                     btn.classList.add('saved');
                     btnCheckpoint.disabled = false; // Enable restore
                     console.log('💾 Projeto salvo + checkpoint criado');
-                    showNotification('💾 Projeto salvo com sucesso!', 'success');
+                    showNotification('Projeto salvo com sucesso!', 'success');
                     setTimeout(() => {
                         btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
                         btn.classList.remove('saved');

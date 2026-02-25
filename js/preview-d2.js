@@ -743,7 +743,7 @@ function renderPreviewD2New(frame, state) {
                 margin-bottom: ${heroSubtitleSpacing}px;
                 opacity: 0.9;
             }
-            .d2-cta-btn {
+            .d2-preview-container .d2-cta-btn {
                 display: inline-block;
                 padding: ${heroBtnPaddingV}px ${heroBtnPaddingH}px;
                 background: ${heroBtnBackground};

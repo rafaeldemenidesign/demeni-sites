@@ -461,9 +461,48 @@ const UserData = (function () {
 
             const merged = Array.from(mergedMap.values());
 
+            // 🛡️ PHANTOM CLEANUP: Detect duplicate slugs (from old publishSite upsert bug)
+            // and delete the phantom rows from cloud
+            const slugMap = new Map();
+            const phantomIds = [];
+            merged.forEach(p => {
+                const key = p.slug || p.subdomain;
+                if (!key) return;
+                const existing = slugMap.get(key);
+                if (!existing) {
+                    slugMap.set(key, p);
+                } else {
+                    // Keep the one with newer updatedAt, mark the other as phantom
+                    const existingTime = new Date(existing.updatedAt || 0).getTime();
+                    const currentTime = new Date(p.updatedAt || 0).getTime();
+                    if (currentTime > existingTime) {
+                        phantomIds.push(existing.id);
+                        slugMap.set(key, p);
+                    } else {
+                        phantomIds.push(p.id);
+                    }
+                }
+            });
+
+            // Delete phantom rows from cloud and local
+            if (phantomIds.length > 0) {
+                console.warn(`🧹 Found ${phantomIds.length} phantom duplicate(s) — cleaning up...`);
+                for (const pid of phantomIds) {
+                    mergedMap.delete(pid);
+                    try {
+                        await SupabaseClient.deleteProject(pid);
+                        console.log(`🧹 Deleted phantom ${pid.substring(0, 8)} from cloud`);
+                    } catch (e) {
+                        console.warn(`⚠️ Failed to delete phantom ${pid.substring(0, 8)}:`, e.message);
+                    }
+                }
+            }
+
+            const cleanMerged = Array.from(mergedMap.values());
+
             // 🛡️ Proteção 1: Cloud sync inteligente — comparar qualidade dos dados
             const metadataOnly = [];
-            for (const p of merged) {
+            for (const p of cleanMerged) {
                 if (p.data && typeof p.data === 'object' && Object.keys(p.data).length > 0) {
                     const cloudSize = JSON.stringify(p.data).length;
                     const localData = await idbLoad(`proj-data-${p.id}`);
@@ -613,6 +652,52 @@ const UserData = (function () {
             projects = dedupedProjects;
         }
 
+        // Pass 2.5: Dedup by slug — catch phantom rows from old publishSite upsert
+        // (same slug, different IDs — the root cause of the duplication bug)
+        const seenBySlug = new Map();
+        let slugDupes = 0;
+        const slugDedupedProjects = [];
+        projects.forEach(p => {
+            if (p.slug) {
+                const existingIdx = seenBySlug.get(p.slug);
+                if (existingIdx === undefined) {
+                    seenBySlug.set(p.slug, slugDedupedProjects.length);
+                    slugDedupedProjects.push(p);
+                } else {
+                    // Keep the one with the newest updatedAt
+                    const existingProject = slugDedupedProjects[existingIdx];
+                    const existingTime = new Date(existingProject.updatedAt || 0).getTime();
+                    const currentTime = new Date(p.updatedAt || 0).getTime();
+                    if (currentTime > existingTime) {
+                        slugDedupedProjects[existingIdx] = p;
+                    }
+                    slugDupes++;
+                }
+            } else if (p.subdomain) {
+                // Also check subdomain field (set by publishProject)
+                const existingIdx = seenBySlug.get(p.subdomain);
+                if (existingIdx === undefined) {
+                    seenBySlug.set(p.subdomain, slugDedupedProjects.length);
+                    slugDedupedProjects.push(p);
+                } else {
+                    const existingProject = slugDedupedProjects[existingIdx];
+                    const existingTime = new Date(existingProject.updatedAt || 0).getTime();
+                    const currentTime = new Date(p.updatedAt || 0).getTime();
+                    if (currentTime > existingTime) {
+                        slugDedupedProjects[existingIdx] = p;
+                    }
+                    slugDupes++;
+                }
+            } else {
+                slugDedupedProjects.push(p);
+            }
+        });
+
+        if (slugDupes > 0) {
+            console.warn(`⚠️ Deduped ${slugDupes} duplicate slug(s)`);
+            projects = slugDedupedProjects;
+        }
+
         // Pass 3: Migrate embedded data to IndexedDB (one-time)
         let dataMigrated = false;
         projects.forEach(p => {
@@ -627,7 +712,7 @@ const UserData = (function () {
         }
 
         // Save if any deduplication or migration happened
-        if (seenById.size < (load(_scopedKey(KEYS.PROJECTS)) || []).length || urlDupes > 0 || dataMigrated) {
+        if (seenById.size < (load(_scopedKey(KEYS.PROJECTS)) || []).length || urlDupes > 0 || slugDupes > 0 || dataMigrated) {
             save(_scopedKey(KEYS.PROJECTS), projects);
         }
 
