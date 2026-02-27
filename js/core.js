@@ -2016,7 +2016,8 @@ const Core = (function () {
     function getFinancialSettings() {
         const salVendedor = getSetting('salary_vendedor', 1000);
         const salSuporte = getSetting('salary_suporte', 1500);
-        const salCriadora = getSetting('salary_criadora', 1400);
+        const salCriadora = getSetting('salary_criadora', 1000);
+        const salSocialMedia = getSetting('salary_social_media', 1500);
         const commRate = getSetting('commission_rate', 15) / 100;
         const commCap = getSetting('commission_cap', 10000);
         const bonusSite = getSetting('bonus_site', 3);
@@ -2024,8 +2025,8 @@ const Core = (function () {
         const salGestora = getSetting('salary_gestora', 1500);
         const gestoraPct = getSetting('gestora_pct', 8) / 100;
         const infraCosts = 3;
-        const fixedCosts = salVendedor + salSuporte + salCriadora + salGestora + infraCosts;
-        return { salVendedor, salSuporte, salCriadora, commRate, commCap, bonusSite, costKeychain, salGestora, gestoraPct, infraCosts, fixedCosts };
+        const fixedCosts = salVendedor + salSuporte + salCriadora + salSocialMedia + salGestora + infraCosts;
+        return { salVendedor, salSuporte, salCriadora, salSocialMedia, commRate, commCap, bonusSite, costKeychain, salGestora, gestoraPct, infraCosts, fixedCosts };
     }
 
     function saveFinancialSettings() {
@@ -2036,7 +2037,8 @@ const Core = (function () {
         const settings = {
             salary_vendedor: val('cfg-salary-vendedor', 1000),
             salary_suporte: val('cfg-salary-suporte', 1500),
-            salary_criadora: val('cfg-salary-criadora', 1400),
+            salary_criadora: val('cfg-salary-criadora', 1000),
+            salary_social_media: val('cfg-salary-social-media', 1500),
             commission_rate: val('cfg-commission-rate', 15),
             commission_cap: val('cfg-commission-cap', 10000),
             bonus_site: val('cfg-bonus-site', 3),
@@ -2057,7 +2059,8 @@ const Core = (function () {
         };
         el('cfg-salary-vendedor', 'salary_vendedor', 1000);
         el('cfg-salary-suporte', 'salary_suporte', 1500);
-        el('cfg-salary-criadora', 'salary_criadora', 1400);
+        el('cfg-salary-criadora', 'salary_criadora', 1000);
+        el('cfg-salary-social-media', 'salary_social_media', 1500);
         el('cfg-commission-rate', 'commission_rate', 15);
         el('cfg-commission-cap', 'commission_cap', 10000);
         el('cfg-bonus-site', 'bonus_site', 3);
@@ -2079,6 +2082,7 @@ const Core = (function () {
                 { name: 'Vendedor (fixo)', val: fin.salVendedor, obs: `Comissão ${Math.round(fin.commRate * 100)}% · Teto R$${fin.commCap.toLocaleString('pt-BR')}` },
                 { name: 'Suporte', val: fin.salSuporte, obs: 'Fixo' },
                 { name: 'Criadora (fixo)', val: fin.salCriadora, obs: `+ R$${fin.bonusSite}/site` },
+                { name: 'Social Media', val: fin.salSocialMedia, obs: 'Fixo' },
                 { name: 'Gestora (fixo)', val: fin.salGestora, obs: `+ ${Math.round(fin.gestoraPct * 100)}% do lucro` },
             ].filter(e => e.val > 0);
 
