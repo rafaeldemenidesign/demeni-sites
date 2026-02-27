@@ -123,7 +123,7 @@ const Core = (function () {
     const KANBAN_COLUMNS = [
         { id: 'lead', label: 'Lead', color: '#6b7280' },
         { id: 'contacted', label: 'Contatado', color: '#3b82f6' },
-        { id: 'meeting', label: 'Reunião', color: '#8b5cf6' },
+        { id: 'meeting', label: 'Reunião', color: '#d4a05a' },
         { id: 'converted', label: 'Convertido', color: '#10b981' },
         { id: 'briefing', label: 'Briefing', color: '#06b6d4' },
         { id: 'production', label: 'Produção', color: '#f97316' },
@@ -1205,7 +1205,7 @@ const Core = (function () {
         {
             id: 'approval',
             icon: 'fa-eye',
-            color: '#8b5cf6',
+            color: '#d4a05a',
             title: 'Envio para Aprovação',
             message: `Olá {nome}! 🎉\n\nSeu site está PRONTO para aprovação! 🚀\n\n🔗 Acesse o link abaixo para visualizar:\n[inserir link aqui]\n\nPor favor, avalie e nos diga:\n✅ Se está tudo certo, aprovamos e finalizamos!\n✏️ Se precisar de ajustes, nos diga o que mudar.\n\nEstamos ansiosos pelo seu feedback! 💜\n\n— Equipe Demeni`
         },
@@ -2196,8 +2196,8 @@ const Core = (function () {
         <style>
             * { margin:0; padding:0; box-sizing:border-box; }
             body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1a1a2e; padding: 40px; background: #fff; }
-            h1 { font-size: 24px; color: #7c3aed; margin-bottom: 4px; }
-            h2 { font-size: 16px; color: #7c3aed; margin: 24px 0 12px; border-bottom: 2px solid #7c3aed22; padding-bottom: 4px; }
+            h1 { font-size: 24px; color: #c47f3b; margin-bottom: 4px; }
+            h2 { font-size: 16px; color: #c47f3b; margin: 24px 0 12px; border-bottom: 2px solid #c47f3b22; padding-bottom: 4px; }
             .subtitle { font-size: 14px; color: #666; margin-bottom: 24px; }
             .kpis { display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
             .kpi { background: #f8f9fa; border-radius: 8px; padding: 16px; text-align: center; border: 1px solid #e9ecef; }
@@ -2354,7 +2354,7 @@ const Core = (function () {
             ads_meta: { label: 'Ads Meta', icon: 'fas fa-ad', color: '#0668e1' },
             ads_google: { label: 'Google Ads', icon: 'fab fa-google', color: '#4285f4' },
             site: { label: 'Site Orgânico', icon: 'fas fa-globe', color: '#10b981' },
-            indicacao: { label: 'Indicação', icon: 'fas fa-user-friends', color: '#8b5cf6' },
+            indicacao: { label: 'Indicação', icon: 'fas fa-user-friends', color: '#d4a05a' },
             whatsapp: { label: 'WhatsApp', icon: 'fab fa-whatsapp', color: '#25d366' },
             outro: { label: 'Outro', icon: 'fas fa-ellipsis-h', color: '#6b7280' },
         };
@@ -2457,8 +2457,8 @@ const Core = (function () {
     };
 
     function renderPostCard(p) {
-        return `<div style="background:${PLATFORM_COLORS[p.platform] || '#7c3aed'}22;
-            border-left:3px solid ${PLATFORM_COLORS[p.platform] || '#7c3aed'};
+        return `<div style="background:${PLATFORM_COLORS[p.platform] || '#c47f3b'}22;
+            border-left:3px solid ${PLATFORM_COLORS[p.platform] || '#c47f3b'};
             border-radius:6px;padding:6px 8px;margin-bottom:4px;cursor:pointer;"
             title="${p.caption || p.type}" onclick="event.stopPropagation();Core.openPostActions('${p.id}')">
             <div style="font-size:10px;display:flex;align-items:center;gap:4px;">
@@ -2658,11 +2658,11 @@ const Core = (function () {
             const dateStr = dateObj.toISOString().split('T')[0];
             const isToday = dateObj.toDateString() === today;
             const dayPosts = posts.filter(p => p.date === dateStr);
-            const dots = dayPosts.slice(0, 3).map(p => `<span style="width:6px;height:6px;border-radius:50%;background:${PLATFORM_COLORS[p.platform] || '#7c3aed'};display:inline-block;"></span>`).join('');
+            const dots = dayPosts.slice(0, 3).map(p => `<span style="width:6px;height:6px;border-radius:50%;background:${PLATFORM_COLORS[p.platform] || '#c47f3b'};display:inline-block;"></span>`).join('');
 
             html += `
-                <div style="background:${isToday ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.02)'};
-                    border:1px solid ${isToday ? 'rgba(124,58,237,0.3)' : 'var(--border-card)'};
+                <div style="background:${isToday ? 'rgba(196,127,59,0.12)' : 'rgba(255,255,255,0.02)'};
+                    border:1px solid ${isToday ? 'rgba(196,127,59,0.3)' : 'var(--border-card)'};
                     border-radius:8px;padding:6px;min-height:60px;cursor:pointer;"
                     onclick="Core.setCalendarView('day');Core.calendarGoToDate('${dateStr}')">
                     <div style="font-size:13px;font-weight:${isToday ? '700' : '500'};${isToday ? 'color:var(--brand-light);' : ''}">${d}</div>
