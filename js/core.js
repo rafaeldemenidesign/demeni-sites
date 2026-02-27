@@ -23,8 +23,12 @@ const Core = (function () {
             {
                 section: 'Produção', items: [
                     { id: 'queue', icon: 'fa-paint-brush', label: 'Fila de Produção' },
-                    { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
                     { id: 'criar-site', icon: 'fa-magic', label: 'Criar Site', href: 'app.html' },
+                ]
+            },
+            {
+                section: 'Suporte', items: [
+                    { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
                 ]
             },
             {
