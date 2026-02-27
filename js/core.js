@@ -477,6 +477,10 @@ const Core = (function () {
         // Show sort toggle only on pipeline
         const btnSort = document.getElementById('btn-kanban-sort');
         if (btnSort) btnSort.style.display = pageId === 'pipeline' ? 'flex' : 'none';
+
+        // Show PDF report button only on financial
+        const btnPdf = document.getElementById('btn-pdf-report');
+        if (btnPdf) btnPdf.style.display = pageId === 'financial' ? 'flex' : 'none';
     }
 
     function getDefaultPage() {

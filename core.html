@@ -83,6 +83,11 @@
                     <button class="btn-header" id="btn-new-order">
                         <i class="fas fa-plus"></i> Novo Pedido
                     </button>
+                    <button class="btn-header" id="btn-pdf-report"
+                        style="display:none;background:linear-gradient(135deg,#914531,#c47f3b);color:#fff;"
+                        onclick="Core.generateReport()">
+                        <i class="fas fa-file-pdf"></i> Relatório PDF
+                    </button>
                 </div>
             </header>
 
@@ -595,13 +600,6 @@
 
                 <!-- ========== FINANCEIRO (Admin/Gestora) ========== -->
                 <section class="page-section" id="page-financial">
-                    <!-- Report Button -->
-                    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-                        <button class="btn btn-sm btn-primary" onclick="Core.generateReport()"
-                            style="background:linear-gradient(135deg,#914531,#c47f3b);">
-                            <i class="fas fa-file-pdf"></i> Gerar Relatório PDF
-                        </button>
-                    </div>
                     <!-- KPIs -->
                     <div class="kpi-grid" style="margin-bottom:20px;">
                         <div class="kpi-card">
