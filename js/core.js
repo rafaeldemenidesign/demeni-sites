@@ -1705,7 +1705,7 @@ const Core = (function () {
         if (!order) return;
 
         const statuses = ['lead', 'contacted', 'meeting', 'converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed', 'lost'];
-        const products = [{ v: 'd1', l: 'D-1 — Card Digital' }, { v: 'd2', l: 'D-2 — Landing Page' }, { v: 'd3', l: 'D-3 — Cardápio/Loja' }, { v: 'prime', l: 'Prime-D — Página' }, { v: 'ecommerce', l: 'E-commerce' }, { v: 'saas', l: 'SaaS' }];
+        const products = [{ v: 'd1', l: 'D-1 — Card Digital' }, { v: 'd2', l: 'D-2 — Landing Page Mobile' }, { v: 'd3', l: 'D-3 — Cardápio/Loja' }, { v: 'prime', l: 'Prime-D — Página/Site' }, { v: 'ecommerce', l: 'E-commerce' }, { v: 'saas', l: 'SaaS' }];
         const sources = [{ v: '', l: 'Não informado' }, { v: 'instagram', l: '📱 Instagram' }, { v: 'facebook', l: '📘 Facebook' }, { v: 'ads_meta', l: '📢 Anúncio Meta' }, { v: 'ads_google', l: '🔍 Google Ads' }, { v: 'indicacao', l: '🤝 Indicação' }, { v: 'rua', l: '🚶 Rua' }, { v: 'whatsapp', l: '💬 WhatsApp' }, { v: 'influencer', l: '⭐ Influenciador' }, { v: 'site', l: '🌐 Site' }, { v: 'outro', l: '📎 Outro' }];
 
         const modal = document.createElement('div');
@@ -2020,13 +2020,17 @@ const Core = (function () {
     }
 
     function saveFinancialSettings() {
+        const val = (id, def) => {
+            const v = parseFloat(document.getElementById(id)?.value);
+            return isNaN(v) ? def : v;
+        };
         const settings = {
-            salary_vendedor: parseFloat(document.getElementById('cfg-salary-vendedor')?.value) || 1500,
-            salary_suporte: parseFloat(document.getElementById('cfg-salary-suporte')?.value) || 1500,
-            salary_criadora: parseFloat(document.getElementById('cfg-salary-criadora')?.value) || 1400,
-            commission_rate: parseFloat(document.getElementById('cfg-commission-rate')?.value) || 3,
-            bonus_site: parseFloat(document.getElementById('cfg-bonus-site')?.value) || 5,
-            sales_target: parseInt(document.getElementById('cfg-sales-target')?.value) || 50,
+            salary_vendedor: val('cfg-salary-vendedor', 1500),
+            salary_suporte: val('cfg-salary-suporte', 1500),
+            salary_criadora: val('cfg-salary-criadora', 1400),
+            commission_rate: val('cfg-commission-rate', 3),
+            bonus_site: val('cfg-bonus-site', 5),
+            sales_target: val('cfg-sales-target', 50),
         };
         localStorage.setItem('demeni-financial-settings', JSON.stringify(settings));
         renderAll();
