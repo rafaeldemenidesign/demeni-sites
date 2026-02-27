@@ -2053,6 +2053,58 @@ const Core = (function () {
     function updateFinancial() {
         if (!document.getElementById('fin-revenue')) return;
 
+        // Render dynamic costs table
+        const costsTbody = document.getElementById('fin-costs-tbody');
+        if (costsTbody) {
+            const fin = getFinancialSettings();
+            const fmt = v => `R$ ${v.toLocaleString('pt-BR')}`;
+            const equipe = [
+                { name: 'Vendedor', val: fin.salVendedor, obs: 'Fixo + comissão' },
+                { name: 'Suporte', val: fin.salSuporte, obs: 'Atendimento' },
+                { name: 'Criadora', val: fin.salCriadora, obs: 'Produção' },
+            ].filter(e => e.val > 0);
+
+            const infra = [
+                { name: 'Supabase', val: 0, obs: 'Free tier' },
+                { name: 'Domínio', val: 40, obs: 'Anual÷12' },
+                { name: 'Figma', val: 0, obs: 'Free tier' },
+            ];
+
+            const infraTotal = infra.reduce((s, i) => s + i.val, 0);
+            const equipeTotal = equipe.reduce((s, e) => s + e.val, 0);
+            const totalFixos = equipeTotal + infraTotal;
+
+            let rows = '';
+            if (equipe.length > 0) {
+                rows += equipe.map((e, i) => `
+                    <tr ${i === 0 ? 'style="border-top:2px solid rgba(196,127,59,0.2);"' : ''}>
+                        ${i === 0 ? `<td rowspan="${equipe.length}" style="font-weight:700;color:var(--brand-light);vertical-align:top;">👥 Equipe</td>` : ''}
+                        <td>${e.name}</td>
+                        <td>${fmt(e.val)}</td>
+                        <td style="font-size:11px;color:var(--text-muted);">${e.obs}</td>
+                    </tr>`).join('');
+            } else {
+                rows += `<tr style="border-top:2px solid rgba(196,127,59,0.2);">
+                    <td style="font-weight:700;color:var(--brand-light);">👥 Equipe</td>
+                    <td colspan="2" style="color:var(--text-muted);font-size:12px;">Nenhum salário configurado</td>
+                    <td></td>
+                </tr>`;
+            }
+
+            rows += infra.map((e, i) => `
+                <tr ${i === 0 ? 'style="border-top:2px solid rgba(6,182,212,0.2);"' : ''}>
+                    ${i === 0 ? `<td rowspan="${infra.length}" style="font-weight:700;color:#06b6d4;vertical-align:top;">🔧 Infra</td>` : ''}
+                    <td>${e.name}</td>
+                    <td>${e.val > 0 ? fmt(e.val) : 'R$ 0'}</td>
+                    <td style="font-size:11px;color:var(--text-muted);">${e.obs}</td>
+                </tr>`).join('');
+
+            costsTbody.innerHTML = rows;
+
+            const totalEl = document.getElementById('fin-total-costs');
+            if (totalEl) totalEl.textContent = fmt(totalFixos);
+        }
+
         const now = new Date();
         const monthOrders = orders.filter(o => {
             const d = new Date(o.created_at);
