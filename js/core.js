@@ -1211,7 +1211,7 @@ const Core = (function () {
             icon: 'fa-sync-alt',
             color: '#3b82f6',
             title: 'Atualização de Status',
-            message: `Olá {nome}! 😊\n\nPassando pra te dar uma atualização sobre o seu site:\n\n📌 Status atual: Em Produção\n🎨 Nossa equipe está trabalhando no design\n⏰ Previsão de conclusão: em breve\n\nFique tranquilo(a), estamos caprichando! Qualquer dúvida, é só chamar.\n\n— Equipe Demeni 🧡`
+            message: `Olá {nome}! 😊\n\nPassando pra te dar uma atualização sobre o seu site:\n\n📌 Status atual: Em Produção\n🎨 Nossa equipe está trabalhando no design\n⏰ Previsão de conclusão: em breve\n\n🔗 Acompanhe em tempo real:\n{link_status}\n\nFique tranquilo(a), estamos caprichando! Qualquer dúvida, é só chamar.\n\n— Equipe Demeni 🧡`
         },
         {
             id: 'approval',
@@ -1257,7 +1257,20 @@ const Core = (function () {
     function copyWaTemplate(templateId, clientName) {
         const t = WA_TEMPLATES.find(x => x.id === templateId);
         if (!t) return;
-        const msg = t.message.replace(/\{nome\}/g, clientName || '[Nome do Cliente]');
+        let msg = t.message.replace(/\{nome\}/g, clientName || '[Nome do Cliente]');
+
+        // Replace tracking link placeholder with actual tracking URL
+        if (msg.includes('{link_status}')) {
+            const orders = JSON.parse(localStorage.getItem('demeni_orders') || '[]');
+            const clientOrder = orders.find(o => o.client === clientName && o.tracking_token);
+            if (clientOrder) {
+                const trackingUrl = `https://core.rafaeldemeni.com/tracking.html?t=${clientOrder.tracking_token}`;
+                msg = msg.replace(/\{link_status\}/g, trackingUrl);
+            } else {
+                msg = msg.replace(/\{link_status\}/g, '[link de acompanhamento]');
+            }
+        }
+
         navigator.clipboard.writeText(msg).then(() => {
             toast('Mensagem copiada! Cole no WhatsApp.', 'success');
         }).catch(() => {
