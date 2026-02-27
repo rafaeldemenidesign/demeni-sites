@@ -2015,7 +2015,8 @@ const Core = (function () {
         const salCriadora = getSetting('salary_criadora', 1400);
         const commRate = getSetting('commission_rate', 5) / 100;
         const bonusSite = getSetting('bonus_site', 5);
-        const fixedCosts = salVendedor + salSuporte + salCriadora + 995; // salários + custos operacionais
+        const infraCosts = 40; // Domínio (Supabase e Figma são free)
+        const fixedCosts = salVendedor + salSuporte + salCriadora + infraCosts;
         return { salVendedor, salSuporte, salCriadora, commRate, bonusSite, fixedCosts };
     }
 
