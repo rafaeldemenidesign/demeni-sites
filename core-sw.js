@@ -3,7 +3,7 @@
 // PWA offline support + cache
 // ===========================
 
-const CACHE_NAME = 'demeni-core-v1';
+const CACHE_NAME = 'demeni-core-v2';
 const PRECACHE = [
     '/core.html',
     '/css/core.css',
