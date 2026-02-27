@@ -81,7 +81,7 @@
         const SUPABASE_URL = 'https://aeyxdqggngapczohqvbo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleXhkcWdnbmdhcGN6b2hxdmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTc3MTcsImV4cCI6MjA4NDU5MzcxN30.eq9Feo9dj6T1KUO-F4AN7j4x7HECb8f0B9WddFLD9C4';
 
-        const PLATFORM_SUBDOMAINS = ['www', 'sites', 'demeni-sites', 'localhost'];
+        const PLATFORM_SUBDOMAINS = ['www', 'sites', 'demeni-sites', 'localhost', 'core', 'app'];
 
         // Detectar subdomínio
         function getClientSubdomain() {
@@ -258,13 +258,20 @@
 
         // Iniciar roteamento
         (function () {
+            const hostname = window.location.hostname;
+            const subdomain = hostname.split('.')[0]?.toLowerCase();
+
+            // core.rafaeldemeni.com → redirecionar direto para o CRM
+            if (subdomain === 'core') {
+                window.location.replace('/core.html');
+                return;
+            }
+
             const slug = getClientSubdomain();
 
             if (slug) {
                 // É um site de cliente — remove favicon da plataforma IMEDIATAMENTE
-                // para que o browser não cache o ícone do Demeni Sites
                 document.querySelectorAll('link[rel="icon"],link[rel="apple-touch-icon"]').forEach(el => el.remove());
-                // Set transparent 1px favicon to prevent browser default
                 var tempIcon = document.createElement('link');
                 tempIcon.rel = 'icon';
                 tempIcon.href = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
@@ -275,11 +282,9 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const refCode = urlParams.get('ref');
                 if (refCode) {
-                    // Indicação direta → checkout da franquia
                     localStorage.setItem('demeni_referral_code', refCode);
                     window.location.href = '/franquia.html?ref=' + encodeURIComponent(refCode);
                 } else {
-                    // Sem indicação → dashboard normal
                     window.location.href = '/app.html';
                 }
             }
