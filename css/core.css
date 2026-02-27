@@ -5,32 +5,32 @@
 
 /* ========== CSS VARIABLES ========== */
 :root {
-    /* Brand */
-    --brand-primary: #7c3aed;
-    --brand-primary-light: #a78bfa;
-    --brand-primary-dark: #5b21b6;
-    --brand-gradient: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    /* Brand — Demeni Core (Amber/Gold) */
+    --brand-primary: #c47f3b;
+    --brand-primary-light: #d4a05a;
+    --brand-primary-dark: #914531;
+    --brand-gradient: linear-gradient(135deg, #914531 0%, #c47f3b 100%);
 
-    /* Background */
-    --bg-body: #0f0f1a;
-    --bg-sidebar: #141425;
-    --bg-content: #1a1a2e;
-    --bg-card: #1e1e35;
-    --bg-card-hover: #252545;
-    --bg-input: #1a1a30;
-    --bg-glass: rgba(30, 30, 53, 0.7);
+    /* Background — Dark Premium */
+    --bg-body: #0a0a0c;
+    --bg-sidebar: #0e0e12;
+    --bg-content: #131318;
+    --bg-card: #18181f;
+    --bg-card-hover: #1e1e28;
+    --bg-input: #141419;
+    --bg-glass: rgba(18, 18, 24, 0.85);
 
     /* Text */
     --text-primary: #f0f0f5;
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
-    --text-accent: #a78bfa;
+    --text-accent: #d4a05a;
 
     /* Borders */
-    --border-subtle: rgba(124, 58, 237, 0.15);
+    --border-subtle: rgba(196, 127, 59, 0.2);
     --border-card: rgba(255, 255, 255, 0.06);
     --border-input: rgba(255, 255, 255, 0.1);
-    --border-focus: #7c3aed;
+    --border-focus: #c47f3b;
 
     /* Status colors */
     --status-lead: #6b7280;
@@ -64,10 +64,10 @@
     --radius-xl: 20px;
 
     /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(196, 127, 59, 0.25);
 
     /* Transitions */
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -204,12 +204,12 @@ a:hover {
 
 .nav-item:hover {
     color: var(--text-primary);
-    background: rgba(124, 58, 237, 0.08);
+    background: rgba(196, 127, 59, 0.08);
 }
 
 .nav-item.active {
     color: var(--brand-primary-light);
-    background: rgba(124, 58, 237, 0.12);
+    background: rgba(196, 127, 59, 0.12);
     border-left-color: var(--brand-primary);
 }
 
@@ -385,7 +385,7 @@ a:hover {
 .btn-header:hover {
     border-color: var(--brand-primary);
     color: var(--text-primary);
-    background: rgba(124, 58, 237, 0.1);
+    background: rgba(196, 127, 59, 0.1);
 }
 
 /* Content Area */
@@ -478,8 +478,8 @@ a:hover {
 }
 
 .kpi-icon.purple {
-    background: rgba(124, 58, 237, 0.15);
-    color: #a78bfa;
+    background: rgba(196, 127, 59, 0.15);
+    color: #d4a05a;
 }
 
 .kpi-icon.blue {
@@ -539,12 +539,12 @@ a:hover {
 .btn-primary {
     background: var(--brand-gradient);
     color: white;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 4px 12px rgba(196, 127, 59, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 6px 20px rgba(196, 127, 59, 0.4);
 }
 
 .btn-secondary {
@@ -555,7 +555,7 @@ a:hover {
 
 .btn-secondary:hover {
     border-color: var(--brand-primary);
-    background: rgba(124, 58, 237, 0.08);
+    background: rgba(196, 127, 59, 0.08);
 }
 
 .btn-sm {
@@ -676,7 +676,7 @@ a:hover {
     padding: 2px 6px;
     border-radius: 4px;
     text-transform: uppercase;
-    background: rgba(124, 58, 237, 0.15);
+    background: rgba(196, 127, 59, 0.15);
     color: var(--brand-primary-light);
 }
 
@@ -705,7 +705,7 @@ a:hover {
 }
 
 .data-table tbody tr:hover {
-    background: rgba(124, 58, 237, 0.04);
+    background: rgba(196, 127, 59, 0.04);
 }
 
 /* ========== STATUS BADGES ========== */
@@ -733,7 +733,7 @@ a:hover {
 
 .status-badge.meeting {
     background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
+    color: #d4a05a;
 }
 
 .status-badge.proposal {
@@ -815,7 +815,7 @@ a:hover {
 .form-textarea:focus {
     outline: none;
     border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 0 0 3px rgba(196, 127, 59, 0.15);
 }
 
 .form-textarea {
