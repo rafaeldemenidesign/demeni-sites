@@ -1197,28 +1197,35 @@ const Core = (function () {
             icon: 'fa-hand-sparkles',
             color: '#10b981',
             title: 'Boas-vindas',
-            message: `Olá {nome}! 👋\n\nSeja bem-vindo(a) à Demeni! Estamos muito felizes em ter você como cliente. 🎉\n\nSeu site já está em nossa fila de produção. Em breve entraremos em contato para coletar as informações do seu negócio.\n\nQualquer dúvida, estou à disposição!\n\n— Equipe Demeni 💜`
+            message: `Olá {nome}! 👋\n\nSeja bem-vindo(a) à Demeni! Estamos muito felizes em ter você como cliente. 🎉\n\nSeu site já está em nossa fila de produção. Em breve entraremos em contato para coletar as informações do seu negócio.\n\nQualquer dúvida, estou à disposição!\n\n— Equipe Demeni 🧡`
+        },
+        {
+            id: 'briefing',
+            icon: 'fa-clipboard-list',
+            color: '#06b6d4',
+            title: 'Coleta de Briefing',
+            message: `Olá {nome}! 📋\n\nVamos montar o seu site! Preciso de algumas informações:\n\n1️⃣ *Nome do negócio*: como quer que apareça no site?\n2️⃣ *Logo*: tem logo? Se sim, envie em alta qualidade\n3️⃣ *Cores*: tem cores preferidas ou uma paleta?\n4️⃣ *Fotos*: envie fotos dos produtos/serviços\n5️⃣ *Textos*: descrição do negócio, sobre, diferenciais\n6️⃣ *Contatos*: WhatsApp, Instagram, endereço\n7️⃣ *Referências*: sites que você gosta e se inspira\n\nPode mandar tudo aqui mesmo no WhatsApp! 📱\n\n— Equipe Demeni 🧡`
         },
         {
             id: 'update',
             icon: 'fa-sync-alt',
             color: '#3b82f6',
             title: 'Atualização de Status',
-            message: `Olá {nome}! 😊\n\nPassando pra te dar uma atualização sobre o seu site:\n\n📌 Status atual: Em Produção\n🎨 Nossa equipe está trabalhando no design\n⏰ Previsão de conclusão: em breve\n\nFique tranquilo(a), estamos caprichando! Qualquer dúvida, é só chamar.\n\n— Equipe Demeni 💜`
+            message: `Olá {nome}! 😊\n\nPassando pra te dar uma atualização sobre o seu site:\n\n📌 Status atual: Em Produção\n🎨 Nossa equipe está trabalhando no design\n⏰ Previsão de conclusão: em breve\n\nFique tranquilo(a), estamos caprichando! Qualquer dúvida, é só chamar.\n\n— Equipe Demeni 🧡`
         },
         {
             id: 'approval',
             icon: 'fa-eye',
             color: '#d4a05a',
             title: 'Envio para Aprovação',
-            message: `Olá {nome}! 🎉\n\nSeu site está PRONTO para aprovação! 🚀\n\n🔗 Acesse o link abaixo para visualizar:\n[inserir link aqui]\n\nPor favor, avalie e nos diga:\n✅ Se está tudo certo, aprovamos e finalizamos!\n✏️ Se precisar de ajustes, nos diga o que mudar.\n\nEstamos ansiosos pelo seu feedback! 💜\n\n— Equipe Demeni`
+            message: `Olá {nome}! 🎉\n\nSeu site está PRONTO para aprovação! 🚀\n\n🔗 Acesse o link abaixo para visualizar:\n[inserir link aqui]\n\nPor favor, avalie e nos diga:\n✅ Se está tudo certo, aprovamos e finalizamos!\n✏️ Se precisar de ajustes, nos diga o que mudar.\n\nEstamos ansiosos pelo seu feedback! 🧡\n\n— Equipe Demeni`
         },
         {
             id: 'delivery',
             icon: 'fa-gift',
             color: '#f59e0b',
             title: 'Entrega Final',
-            message: `Olá {nome}! 🎊\n\nÉ com muito orgulho que entregamos o seu site FINALIZADO! ✨\n\n🌐 Seu site está no ar e pronto para receber clientes!\n\n📱 Compartilhe nas suas redes sociais\n⭐ Se puder, deixe um depoimento sobre nossa parceria\n💬 Indique a Demeni para seus amigos!\n\nFoi um prazer trabalhar com você. Conte sempre com a gente! 🚀\n\n— Equipe Demeni 💜`
+            message: `Olá {nome}! 🎊\n\nÉ com muito orgulho que entregamos o seu site FINALIZADO! ✨\n\n🌐 Seu site está no ar e pronto para receber clientes!\n\n📱 Compartilhe nas suas redes sociais\n⭐ Se puder, deixe um depoimento sobre nossa parceria\n💬 Indique a Demeni para seus amigos!\n\nFoi um prazer trabalhar com você. Conte sempre com a gente! 🚀\n\n— Equipe Demeni 🧡`
         }
     ];
 
