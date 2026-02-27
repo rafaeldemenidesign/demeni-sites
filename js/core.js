@@ -2010,14 +2010,15 @@ const Core = (function () {
     // ========== FINANCIAL ==========
     // Financial settings read from localStorage
     function getFinancialSettings() {
-        const salVendedor = getSetting('salary_vendedor', 1500);
+        const salVendedor = getSetting('salary_vendedor', 1000);
         const salSuporte = getSetting('salary_suporte', 1500);
         const salCriadora = getSetting('salary_criadora', 1400);
-        const commRate = getSetting('commission_rate', 5) / 100;
+        const commRate = getSetting('commission_rate', 15) / 100;
         const bonusSite = getSetting('bonus_site', 5);
+        const costKeychain = getSetting('cost_keychain', 12);
         const infraCosts = 3; // Domínio (~R$36/ano ÷ 12)
         const fixedCosts = salVendedor + salSuporte + salCriadora + infraCosts;
-        return { salVendedor, salSuporte, salCriadora, commRate, bonusSite, fixedCosts };
+        return { salVendedor, salSuporte, salCriadora, commRate, bonusSite, costKeychain, infraCosts, fixedCosts };
     }
 
     function saveFinancialSettings() {
@@ -2026,11 +2027,12 @@ const Core = (function () {
             return isNaN(v) ? def : v;
         };
         const settings = {
-            salary_vendedor: val('cfg-salary-vendedor', 1500),
+            salary_vendedor: val('cfg-salary-vendedor', 1000),
             salary_suporte: val('cfg-salary-suporte', 1500),
             salary_criadora: val('cfg-salary-criadora', 1400),
-            commission_rate: val('cfg-commission-rate', 3),
+            commission_rate: val('cfg-commission-rate', 15),
             bonus_site: val('cfg-bonus-site', 5),
+            cost_keychain: val('cfg-cost-keychain', 12),
             sales_target: val('cfg-sales-target', 50),
         };
         localStorage.setItem('demeni-financial-settings', JSON.stringify(settings));
@@ -2043,11 +2045,12 @@ const Core = (function () {
             const input = document.getElementById(id);
             if (input) input.value = getSetting(key, def);
         };
-        el('cfg-salary-vendedor', 'salary_vendedor', 1500);
+        el('cfg-salary-vendedor', 'salary_vendedor', 1000);
         el('cfg-salary-suporte', 'salary_suporte', 1500);
         el('cfg-salary-criadora', 'salary_criadora', 1400);
-        el('cfg-commission-rate', 'commission_rate', 5);
+        el('cfg-commission-rate', 'commission_rate', 15);
         el('cfg-bonus-site', 'bonus_site', 5);
+        el('cfg-cost-keychain', 'cost_keychain', 12);
         el('cfg-sales-target', 'sales_target', 50);
     }
 
@@ -2058,9 +2061,9 @@ const Core = (function () {
         const costsTbody = document.getElementById('fin-costs-tbody');
         if (costsTbody) {
             const fin = getFinancialSettings();
-            const fmt = v => `R$ ${v.toLocaleString('pt-BR')}`;
+            const fmtC = v => `R$ ${v.toLocaleString('pt-BR')}`;
             const equipe = [
-                { name: 'Vendedor', val: fin.salVendedor, obs: 'Fixo + comissão' },
+                { name: 'Vendedor (fixo mínimo)', val: fin.salVendedor, obs: 'Draw contra comissão' },
                 { name: 'Suporte', val: fin.salSuporte, obs: 'Atendimento' },
                 { name: 'Criadora', val: fin.salCriadora, obs: 'Produção' },
             ].filter(e => e.val > 0);
@@ -2081,7 +2084,7 @@ const Core = (function () {
                     <tr ${i === 0 ? 'style="border-top:2px solid rgba(196,127,59,0.2);"' : ''}>
                         ${i === 0 ? `<td rowspan="${equipe.length}" style="font-weight:700;color:var(--brand-light);vertical-align:top;">👥 Equipe</td>` : ''}
                         <td>${e.name}</td>
-                        <td>${fmt(e.val)}</td>
+                        <td>${fmtC(e.val)}</td>
                         <td style="font-size:11px;color:var(--text-muted);">${e.obs}</td>
                     </tr>`).join('');
             } else {
@@ -2096,14 +2099,14 @@ const Core = (function () {
                 <tr ${i === 0 ? 'style="border-top:2px solid rgba(6,182,212,0.2);"' : ''}>
                     ${i === 0 ? `<td rowspan="${infra.length}" style="font-weight:700;color:#06b6d4;vertical-align:top;">🔧 Infra</td>` : ''}
                     <td>${e.name}</td>
-                    <td>${e.val > 0 ? fmt(e.val) : 'R$ 0'}</td>
+                    <td>${e.val > 0 ? fmtC(e.val) : 'R$ 0'}</td>
                     <td style="font-size:11px;color:var(--text-muted);">${e.obs}</td>
                 </tr>`).join('');
 
             costsTbody.innerHTML = rows;
 
             const totalEl = document.getElementById('fin-total-costs');
-            if (totalEl) totalEl.textContent = fmt(totalFixos);
+            if (totalEl) totalEl.textContent = fmtC(totalFixos);
         }
 
         const now = new Date();
@@ -2123,11 +2126,14 @@ const Core = (function () {
                 .reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
         }, 0);
 
-        // Commissions
+        // Draw-against-commission model: vendedor gets max(fixo, comissão_bruta)
         const fin = getFinancialSettings();
-        const vendorCommission = Math.round(revenue * fin.commRate);
+        const vendorCommissionBruta = Math.round(revenue * fin.commRate);
+        const vendorPay = Math.max(fin.salVendedor, vendorCommissionBruta); // draw model
+        const vendorExtra = vendorPay - fin.salVendedor; // bônus above fixo
         const criadoraBonus = delivered.length * fin.bonusSite;
-        const totalCosts = fin.fixedCosts + vendorCommission + criadoraBonus;
+        const keychainCosts = delivered.length * fin.costKeychain; // 1 chaveiro NFC por site entregue
+        const totalCosts = fin.fixedCosts + vendorExtra + criadoraBonus + keychainCosts;
         const profit = revenue - totalCosts;
         const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 
