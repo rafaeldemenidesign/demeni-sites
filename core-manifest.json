@@ -7,7 +7,7 @@
     "id": "demeni-core",
     "display": "standalone",
     "background_color": "#0a0a0c",
-    "theme_color": "#c47f3b",
+    "theme_color": "#0a0a0c",
     "orientation": "any",
     "icons": [
         {
