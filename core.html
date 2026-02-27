@@ -1,0 +1,1489 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="CRM completo para gestão de vendas, equipe e produção — Demeni">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Demeni Core">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Demeni Core — Agência</title>
+    <link rel="manifest" href="core-manifest.json">
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <link rel="apple-touch-icon" href="img/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/core.css">
+</head>
+
+<body>
+    <!-- ========== LOGIN PAGE (hidden by default, shown by JS if no session) ========== -->
+    <div id="login-page" class="login-page" style="display:none;">
+        <div class="login-card">
+            <div class="brand-icon">D</div>
+            <h1>Demeni Core</h1>
+            <p class="login-subtitle">Acesse sua estação de trabalho</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="login-email" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                <p class="login-error" id="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MAIN APP (hidden until login) ========== -->
+    <div id="app-shell" class="core-layout" style="display: none;">
+
+        <!-- SIDEBAR -->
+        <aside class="core-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">D</div>
+                <div>
+                    <div class="brand-text">Demeni Core</div>
+                    <div class="brand-tag">Agência Digital</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <!-- Populated by JS based on role -->
+            </nav>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="core-main">
+            <!-- Header -->
+            <header class="core-header">
+                <div class="header-left">
+                    <button class="btn-menu-toggle" id="btn-menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="page-title" id="page-title">Dashboard</h2>
+                </div>
+                <div class="header-right" style="display:flex;gap:8px;align-items:center;">
+                    <button id="btn-kanban-sort" class="btn-header" onclick="Core.toggleKanbanSort()"
+                        style="font-size:12px;display:none;">
+                        <i class="fas fa-hand-pointer"></i> Manual
+                    </button>
+                    <button class="btn-header" id="btn-new-order">
+                        <i class="fas fa-plus"></i> Novo Pedido
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="core-content" id="core-content">
+
+                <!-- ========== DASHBOARD (Admin/Gestora) ========== -->
+                <section class="page-section active" id="page-dashboard">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon purple"><i class="fas fa-receipt"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-orders">0</div>
+                                <div class="kpi-label" id="kpi-orders-label">Pedidos (30 dias)</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon green"><i class="fas fa-check-circle"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-completed">0</div>
+                                <div class="kpi-label">Concluídos</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon orange"><i class="fas fa-spinner"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-production">0</div>
+                                <div class="kpi-label">Em Produção</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon blue"><i class="fas fa-dollar-sign"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-revenue">R$ 0</div>
+                                <div class="kpi-label">Faturamento</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts -->
+                    <div id="dashboard-alerts" style="margin-bottom:16px;display:none;"></div>
+
+                    <!-- Recent Orders -->
+                    <div class="card">
+                        <div class="card-header" style="flex-wrap:wrap;gap:8px;">
+                            <h3 class="card-title">Pedidos Recentes</h3>
+                            <div style="display:flex;gap:6px;align-items:center;">
+                                <button id="btn-dashboard-sort" class="btn btn-sm btn-secondary"
+                                    onclick="Core.cycleDashboardSort()" style="font-size:11px;">
+                                    <i class="fas fa-sort"></i> Original
+                                </button>
+                                <div style="display:flex;gap:4px;" id="period-pills">
+                                    <button class="btn btn-sm btn-secondary period-pill"
+                                        onclick="Core.setDashboardPeriod(7)"
+                                        style="font-size:11px;padding:4px 10px;">7d</button>
+                                    <button class="btn btn-sm btn-secondary period-pill"
+                                        onclick="Core.setDashboardPeriod(15)"
+                                        style="font-size:11px;padding:4px 10px;">15d</button>
+                                    <button class="btn btn-sm btn-primary period-pill active"
+                                        onclick="Core.setDashboardPeriod(30)"
+                                        style="font-size:11px;padding:4px 10px;">30d</button>
+                                    <button class="btn btn-sm btn-secondary period-pill"
+                                        onclick="Core.setDashboardPeriod(90)"
+                                        style="font-size:11px;padding:4px 10px;">90d</button>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Produto</th>
+                                    <th>Status</th>
+                                    <th>Responsável</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-orders-body">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; color:var(--text-muted); padding:40px;">
+                                        Nenhum pedido ainda. Clique em "Novo Pedido" para começar!
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div id="btn-ver-mais-wrap" style="text-align:center;padding:12px;display:none;">
+                            <button class="btn btn-sm btn-secondary" onclick="Core.toggleVerMais()" id="btn-ver-mais"
+                                style="font-size:12px;">
+                                <i class="fas fa-chevron-down"></i> Ver Mais
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== PIPELINE (Kanban) ========== -->
+                <section class="page-section" id="page-pipeline">
+                    <div style="position:relative;">
+                        <button id="kanban-scroll-left"
+                            onclick="document.getElementById('kanban-board').scrollBy({left:-240,behavior:'smooth'})"
+                            style="position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:10;width:36px;height:36px;border-radius:50%;background:var(--bg-sidebar);border:1px solid var(--border-card);color:var(--text-primary);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="kanban-board" id="kanban-board" style="overflow-x:auto !important;">
+                            <!-- Columns populated by JS -->
+                        </div>
+                        <button id="kanban-scroll-right"
+                            onclick="document.getElementById('kanban-board').scrollBy({left:240,behavior:'smooth'})"
+                            style="position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:10;width:36px;height:36px;border-radius:50%;background:var(--bg-sidebar);border:1px solid var(--border-card);color:var(--text-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ========== MEUS LEADS (Vendedor) ========== -->
+                <section class="page-section" id="page-leads">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Meus Leads</h3>
+                            <button class="btn btn-sm btn-primary" onclick="Core.openNewLead()">
+                                <i class="fas fa-plus"></i> Novo Lead
+                            </button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>Status</th>
+                                    <th>Produto</th>
+                                    <th>Valor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leads-body">
+                                <tr>
+                                    <td colspan="6" class="empty-state" style="padding:40px;">
+                                        <i class="fas fa-user-plus"></i><br>Nenhum lead ainda
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== PEDIDOS ========== -->
+                <section class="page-section" id="page-orders">
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-sm btn-primary" id="tab-orders-active"
+                                    onclick="Core.switchOrderTab('active')" style="font-size:12px;">Ativos</button>
+                                <button class="btn btn-sm btn-secondary" id="tab-orders-completed"
+                                    onclick="Core.switchOrderTab('completed')"
+                                    style="font-size:12px;">Concluídos</button>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="Core.openNewLead()">
+                                <i class="fas fa-plus"></i> Novo Pedido
+                            </button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Produto</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Origem</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body">
+                                <tr>
+                                    <td colspan="7" class="empty-state" style="padding:40px;"><i
+                                            class="fas fa-file-invoice"></i><br>Nenhum pedido</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== MINHA FILA (Criadora) ========== -->
+                <section class="page-section" id="page-queue">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Minha Fila de Produção</h3>
+                        </div>
+                        <div id="queue-list">
+                            <div class="empty-state">
+                                <i class="fas fa-paint-brush"></i>
+                                <h3>Fila vazia</h3>
+                                <p>Quando novos briefings chegarem, eles aparecerão aqui.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== CLIENTES ATIVOS (Suporte) ========== -->
+                <section class="page-section" id="page-clients">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Clientes Ativos</h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>WhatsApp</th>
+                                    <th>Status do Pedido</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clients-body">
+                                <tr>
+                                    <td colspan="4" class="empty-state" style="padding:40px;">
+                                        <i class="fas fa-headset"></i><br>Nenhum cliente ativo
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- WhatsApp Templates -->
+                    <div class="card" style="margin-top:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fab fa-whatsapp"
+                                    style="color:#25d366;margin-right:8px;"></i>Templates de Mensagem</h3>
+                        </div>
+                        <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"
+                            id="wa-templates">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== CALENDÁRIO (Social Media) ========== -->
+                <section class="page-section" id="page-calendar">
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header" style="flex-wrap:wrap;gap:8px;">
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="display:flex;gap:4px;" id="calendar-view-tabs">
+                                    <button class="btn btn-sm btn-secondary cal-view-tab"
+                                        onclick="Core.setCalendarView('month')"
+                                        style="font-size:11px;padding:4px 10px;">
+                                        <i class="fas fa-calendar-alt"></i> Mês
+                                    </button>
+                                    <button class="btn btn-sm btn-primary cal-view-tab active"
+                                        onclick="Core.setCalendarView('week')" style="font-size:11px;padding:4px 10px;">
+                                        <i class="fas fa-calendar-week"></i> Semana
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary cal-view-tab"
+                                        onclick="Core.setCalendarView('day')" style="font-size:11px;padding:4px 10px;">
+                                        <i class="fas fa-list"></i> Dia
+                                    </button>
+                                </div>
+                                <button class="btn btn-sm btn-secondary" onclick="Core.calendarPrev()"><i
+                                        class="fas fa-chevron-left"></i></button>
+                                <h3 class="card-title" id="calendar-week-label" style="white-space:nowrap;">Semana Atual
+                                </h3>
+                                <button class="btn btn-sm btn-secondary" onclick="Core.calendarNext()"><i
+                                        class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="Core.openModal('modal-new-post')">
+                                <i class="fas fa-plus"></i> Novo Post
+                            </button>
+                        </div>
+                        <div id="calendar-grid"
+                            style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;min-height:200px;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Upcoming posts list -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Próximos Posts</h3>
+                        </div>
+                        <div id="posts-list">
+                            <div class="empty-state">
+                                <i class="fas fa-image"></i>
+                                <h3>Nenhum post agendado</h3>
+                                <p>Clique em "Novo Post" para planejar conteúdo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== EQUIPE (Admin/Gestora) ========== -->
+                <section class="page-section" id="page-team">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Equipe</h3>
+                            <button class="btn btn-sm btn-primary" id="btn-add-member">
+                                <i class="fas fa-user-plus"></i> Adicionar
+                            </button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cargo</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="team-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Leaderboard -->
+                    <div class="card" style="margin-top:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-trophy"
+                                    style="margin-right:8px;color:#eab308;"></i>Ranking do Mês</h3>
+                        </div>
+                        <div id="leaderboard"></div>
+                    </div>
+
+                    <!-- Performance Monitor -->
+                    <div class="card" style="margin-top:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-chart-line"
+                                    style="margin-right:8px;color:#ef4444;"></i>Monitor de Performance</h3>
+                            <span style="font-size:11px;color:var(--text-muted);">Mínimo 60% · Recuperação 3
+                                meses</span>
+                        </div>
+                        <div id="performance-monitor"></div>
+                    </div>
+                </section>
+
+                <!-- ========== MÉTRICAS ========== -->
+                <section class="page-section" id="page-metrics">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon green"><i class="fas fa-globe"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-total-sites">0</div>
+                                <div class="kpi-label">Sites Entregues (Total)</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon pink"><i class="fas fa-percentage"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-conversion">0%</div>
+                                <div class="kpi-label">Taxa Conversão</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon blue"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-avg-time">-</div>
+                                <div class="kpi-label">Tempo Médio (dias)</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon purple"><i class="fas fa-dollar-sign"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-total-revenue">R$ 0</div>
+                                <div class="kpi-label">Faturamento Total</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon red"><i class="fas fa-user-times"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-lost-count">0</div>
+                                <div class="kpi-label">Leads Perdidos</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon orange"><i class="fas fa-tag"></i></div>
+                            <div>
+                                <div class="kpi-value" id="kpi-avg-ticket">R$ 0</div>
+                                <div class="kpi-label">Ticket Médio</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Desempenho por Produto</h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Pedidos</th>
+                                    <th>Entregues</th>
+                                    <th>Perdidos</th>
+                                    <th>Faturamento</th>
+                                    <th>Tempo Médio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="metrics-product-body">
+                                <tr>
+                                    <td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px;">
+                                        Dados aparecerão conforme pedidos forem concluídos
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Campaign Performance -->
+                    <div class="card" style="margin-top:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-bullhorn"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Desempenho por Fonte</h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fonte</th>
+                                    <th>Leads</th>
+                                    <th>Conversões</th>
+                                    <th>Taxa</th>
+                                    <th>Receita</th>
+                                    <th>Ticket Médio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="campaigns-body">
+                                <tr>
+                                    <td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px;">
+                                        Dados aparecerão conforme pedidos forem cadastrados
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== METAS (Vendedor) ========== -->
+                <section class="page-section" id="page-goals">
+                    <!-- KPIs -->
+                    <div class="kpi-grid" style="margin-bottom:20px;">
+                        <div class="kpi-card">
+                            <div class="kpi-icon purple"><i class="fas fa-bullseye"></i></div>
+                            <div>
+                                <div class="kpi-value" id="goals-target">0 / 0</div>
+                                <div class="kpi-label">Meta do Mês (vendas)</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon green"><i class="fas fa-dollar-sign"></i></div>
+                            <div>
+                                <div class="kpi-value" id="goals-commission">R$ 0</div>
+                                <div class="kpi-label">Comissão Acumulada (3%)</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon blue"><i class="fas fa-percentage"></i></div>
+                            <div>
+                                <div class="kpi-value" id="goals-conversion">0%</div>
+                                <div class="kpi-label">Taxa de Conversão</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-chart-line"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Progresso Mensal</h3>
+                            <span id="goals-progress-label" style="font-size:13px;color:var(--text-muted);">0%</span>
+                        </div>
+                        <div style="padding:16px;">
+                            <div
+                                style="background:rgba(255,255,255,0.06);border-radius:10px;height:28px;overflow:hidden;position:relative;">
+                                <div id="goals-progress-bar"
+                                    style="height:100%;border-radius:10px;background:linear-gradient(90deg,var(--brand-primary),var(--brand-light));transition:width 0.6s ease;width:0%;display:flex;align-items:center;justify-content:center;">
+                                    <span
+                                        style="font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.3);"
+                                        id="goals-bar-text"></span>
+                                </div>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text-muted);">
+                                <span>0 vendas</span>
+                                <span id="goals-target-label">Meta: 0 vendas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly History -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-calendar-week"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Vendas por Semana</h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Semana</th>
+                                    <th>Vendas</th>
+                                    <th>Valor Total</th>
+                                    <th>Comissão</th>
+                                </tr>
+                            </thead>
+                            <tbody id="goals-weekly-body">
+                                <tr>
+                                    <td colspan="4" class="empty-state" style="padding:30px;">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== FINANCEIRO (Admin/Gestora) ========== -->
+                <section class="page-section" id="page-financial">
+                    <!-- Report Button -->
+                    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+                        <button class="btn btn-sm btn-primary" onclick="Core.generateReport()"
+                            style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+                            <i class="fas fa-file-pdf"></i> Gerar Relatório PDF
+                        </button>
+                    </div>
+                    <!-- KPIs -->
+                    <div class="kpi-grid" style="margin-bottom:20px;">
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(16,185,129,0.1);color:#10b981;"><i
+                                    class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="kpi-value" id="fin-revenue">R$ 0</div>
+                            <div class="kpi-label">Receita Bruta</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(234,179,8,0.1);color:#eab308;"><i
+                                    class="fas fa-clock"></i></div>
+                            <div class="kpi-value" id="fin-receivable">R$ 0</div>
+                            <div class="kpi-label">À Receber</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(239,68,68,0.1);color:#ef4444;"><i
+                                    class="fas fa-arrow-down"></i></div>
+                            <div class="kpi-value" id="fin-costs">R$ 0</div>
+                            <div class="kpi-label">Custos Totais</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(124,58,237,0.1);color:#a78bfa;"><i
+                                    class="fas fa-coins"></i>
+                            </div>
+                            <div class="kpi-value" id="fin-profit">R$ 0</div>
+                            <div class="kpi-label">Lucro Bruto</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(234,179,8,0.1);color:#eab308;"><i
+                                    class="fas fa-percentage"></i></div>
+                            <div class="kpi-value" id="fin-margin">0%</div>
+                            <div class="kpi-label">Margem</div>
+                        </div>
+                    </div>
+
+                    <!-- BATTLE BAR -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-bolt"
+                                    style="margin-right:8px;color:#eab308;"></i>Receita vs Custos
+                            </h3>
+                            <span id="fin-battle-label"
+                                style="font-size:12px;font-weight:600;color:var(--text-muted);"></span>
+                        </div>
+                        <div style="padding:20px;">
+                            <div
+                                style="position:relative;height:40px;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,#dc2626,#ef4444);">
+                                <div id="fin-battle-green"
+                                    style="position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,#059669,#10b981);border-radius:12px;transition:width 0.8s ease;z-index:2;">
+                                </div>
+                                <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:#fff;z-index:3;"
+                                    id="fin-battle-revenue-label">R$ 0</div>
+                                <div style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:#fff;z-index:1;"
+                                    id="fin-battle-cost-label">R$ 0</div>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text-muted);">
+                                <span><i class="fas fa-circle" style="color:#10b981;font-size:8px;"></i> Receita</span>
+                                <span id="fin-battle-percent" style="font-weight:600;"></span>
+                                <span><i class="fas fa-circle" style="color:#ef4444;font-size:8px;"></i> Custos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PROFIT DISTRIBUTION -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-chart-pie"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Distribuição Estratégica do
+                                Lucro</h3>
+                            <span style="font-size:11px;color:var(--text-muted);">Disponível: <strong
+                                    id="fin-dist-total">R$
+                                    0</strong></span>
+                        </div>
+                        <div style="padding:16px;" id="fin-distribution">
+                            <div class="fin-slice" data-pct="15" style="margin-bottom:12px;">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span
+                                        style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><i
+                                            class="fas fa-bullhorn"
+                                            style="color:#f59e0b;width:16px;text-align:center;"></i> Verba
+                                        Marketing</span>
+                                    <span style="display:flex;align-items:center;gap:8px;"><span class="fin-slice-pct"
+                                            style="font-size:12px;font-weight:700;color:#f59e0b;">15%</span><span
+                                            class="fin-slice-val" style="font-size:12px;color:var(--text-muted);">R$
+                                            0</span></span>
+                                </div>
+                                <div
+                                    style="height:8px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;">
+                                    <div class="fin-slice-bar"
+                                        style="height:100%;width:0%;background:#f59e0b;border-radius:6px;transition:width 0.6s;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fin-slice" data-pct="10" style="margin-bottom:12px;">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span
+                                        style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><i
+                                            class="fas fa-ad" style="color:#3b82f6;width:16px;text-align:center;"></i>
+                                        Verba
+                                        Tráfego</span>
+                                    <span style="display:flex;align-items:center;gap:8px;"><span class="fin-slice-pct"
+                                            style="font-size:12px;font-weight:700;color:#3b82f6;">10%</span><span
+                                            class="fin-slice-val" style="font-size:12px;color:var(--text-muted);">R$
+                                            0</span></span>
+                                </div>
+                                <div
+                                    style="height:8px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;">
+                                    <div class="fin-slice-bar"
+                                        style="height:100%;width:0%;background:#3b82f6;border-radius:6px;transition:width 0.6s;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fin-slice" data-pct="20" style="margin-bottom:12px;">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span
+                                        style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><i
+                                            class="fas fa-wallet"
+                                            style="color:#10b981;width:16px;text-align:center;"></i> Caixa /
+                                        Fluxo</span>
+                                    <span style="display:flex;align-items:center;gap:8px;"><span class="fin-slice-pct"
+                                            style="font-size:12px;font-weight:700;color:#10b981;">20%</span><span
+                                            class="fin-slice-val" style="font-size:12px;color:var(--text-muted);">R$
+                                            0</span></span>
+                                </div>
+                                <div
+                                    style="height:8px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;">
+                                    <div class="fin-slice-bar"
+                                        style="height:100%;width:0%;background:#10b981;border-radius:6px;transition:width 0.6s;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fin-slice" data-pct="10" style="margin-bottom:12px;">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span
+                                        style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><i
+                                            class="fas fa-shield-alt"
+                                            style="color:#ef4444;width:16px;text-align:center;"></i> Caixa
+                                        Emergência</span>
+                                    <span style="display:flex;align-items:center;gap:8px;"><span class="fin-slice-pct"
+                                            style="font-size:12px;font-weight:700;color:#ef4444;">10%</span><span
+                                            class="fin-slice-val" style="font-size:12px;color:var(--text-muted);">R$
+                                            0</span></span>
+                                </div>
+                                <div
+                                    style="height:8px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;">
+                                    <div class="fin-slice-bar"
+                                        style="height:100%;width:0%;background:#ef4444;border-radius:6px;transition:width 0.6s;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fin-slice" data-pct="15" style="margin-bottom:12px;">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span
+                                        style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><i
+                                            class="fas fa-users-cog"
+                                            style="color:#8b5cf6;width:16px;text-align:center;"></i> UX
+                                        Interno</span>
+                                    <span style="display:flex;align-items:center;gap:8px;"><span class="fin-slice-pct"
+                                            style="font-size:12px;font-weight:700;color:#8b5cf6;">15%</span><span
+                                            class="fin-slice-val" style="font-size:12px;color:var(--text-muted);">R$
+                                            0</span></span>
+                                </div>
+                                <div
+                                    style="height:8px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;">
+                                    <div class="fin-slice-bar"
+                                        style="height:100%;width:0%;background:#8b5cf6;border-radius:6px;transition:width 0.6s;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fin-slice" data-pct="15" style="margin-bottom:12px;">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span
+                                        style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><i
+                                            class="fas fa-rocket"
+                                            style="color:#06b6d4;width:16px;text-align:center;"></i>
+                                        Crescimento</span>
+                                    <span style="display:flex;align-items:center;gap:8px;"><span class="fin-slice-pct"
+                                            style="font-size:12px;font-weight:700;color:#06b6d4;">15%</span><span
+                                            class="fin-slice-val" style="font-size:12px;color:var(--text-muted);">R$
+                                            0</span></span>
+                                </div>
+                                <div
+                                    style="height:8px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;">
+                                    <div class="fin-slice-bar"
+                                        style="height:100%;width:0%;background:#06b6d4;border-radius:6px;transition:width 0.6s;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fin-slice" data-pct="15" style="margin-bottom:0;">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span
+                                        style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><i
+                                            class="fas fa-crown"
+                                            style="color:#a78bfa;width:16px;text-align:center;"></i> Pagamento
+                                        CEO</span>
+                                    <span style="display:flex;align-items:center;gap:8px;"><span class="fin-slice-pct"
+                                            style="font-size:12px;font-weight:700;color:#a78bfa;">15%</span><span
+                                            class="fin-slice-val" style="font-size:12px;color:var(--text-muted);">R$
+                                            0</span></span>
+                                </div>
+                                <div
+                                    style="height:8px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;">
+                                    <div class="fin-slice-bar"
+                                        style="height:100%;width:0%;background:#a78bfa;border-radius:6px;transition:width 0.6s;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                style="margin-top:16px;padding:12px;background:rgba(124,58,237,0.04);border:1px dashed rgba(124,58,237,0.2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:12px;color:var(--text-muted);">Total alocado</span>
+                                <span id="fin-dist-pct-total"
+                                    style="font-size:14px;font-weight:700;color:var(--brand-light);">100%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROI -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-chart-line"
+                                    style="margin-right:8px;color:#10b981;"></i>ROI por Área
+                            </h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Investimento</th>
+                                    <th>Investido</th>
+                                    <th>Retorno</th>
+                                    <th>ROI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="fas fa-bullhorn" style="color:#f59e0b;margin-right:6px;"></i>Marketing
+                                    </td>
+                                    <td id="roi-mkt-invest">R$ 0</td>
+                                    <td id="roi-mkt-return">—</td>
+                                    <td id="roi-mkt-pct" style="font-weight:700;">—</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-ad" style="color:#3b82f6;margin-right:6px;"></i>Tráfego Pago
+                                    </td>
+                                    <td id="roi-ads-invest">R$ 0</td>
+                                    <td id="roi-ads-return">—</td>
+                                    <td id="roi-ads-pct" style="font-weight:700;">—</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-users-cog" style="color:#8b5cf6;margin-right:6px;"></i>UX
+                                        Interno</td>
+                                    <td id="roi-ux-invest">R$ 0</td>
+                                    <td id="roi-ux-return">—</td>
+                                    <td id="roi-ux-pct" style="font-weight:700;">—</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-rocket" style="color:#06b6d4;margin-right:6px;"></i>Crescimento
+                                    </td>
+                                    <td id="roi-grow-invest">R$ 0</td>
+                                    <td id="roi-grow-return">—</td>
+                                    <td id="roi-grow-pct" style="font-weight:700;">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Custos Fixos -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-receipt"
+                                    style="margin-right:8px;color:#ef4444;"></i>Custos Fixos
+                                Mensais</h3>
+                            <span style="font-size:11px;color:var(--text-muted);">Média baixa mercado BR</span>
+                        </div>
+                        <table class="data-table" id="costs-table">
+                            <thead>
+                                <tr>
+                                    <th>Categoria</th>
+                                    <th>Item</th>
+                                    <th>Valor</th>
+                                    <th>Obs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-top:2px solid rgba(124,58,237,0.2);">
+                                    <td rowspan="5"
+                                        style="font-weight:700;color:var(--brand-light);vertical-align:top;">👥 Equipe
+                                    </td>
+                                    <td>Criadora 1</td>
+                                    <td>R$ 800</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Freelancer</td>
+                                </tr>
+                                <tr>
+                                    <td>Criadora 2</td>
+                                    <td>R$ 800</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Freelancer</td>
+                                </tr>
+                                <tr>
+                                    <td>Suporte</td>
+                                    <td>R$ 600</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Meio período</td>
+                                </tr>
+                                <tr>
+                                    <td>Vendedor</td>
+                                    <td>R$ 1.200</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Fixo + comissão</td>
+                                </tr>
+                                <tr>
+                                    <td>Gestora</td>
+                                    <td>R$ 1.500</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Gestão operacional</td>
+                                </tr>
+                                <tr style="border-top:2px solid rgba(234,179,8,0.2);">
+                                    <td rowspan="3" style="font-weight:700;color:#eab308;vertical-align:top;">📱 Mkt
+                                    </td>
+                                    <td>Social Media</td>
+                                    <td>R$ 500</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Gestão de redes</td>
+                                </tr>
+                                <tr>
+                                    <td>Anúncios</td>
+                                    <td>R$ 300</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Meta/Google</td>
+                                </tr>
+                                <tr>
+                                    <td>Influencers</td>
+                                    <td>R$ 200</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">2-3/mês</td>
+                                </tr>
+                                <tr style="border-top:2px solid rgba(6,182,212,0.2);">
+                                    <td rowspan="3" style="font-weight:700;color:#06b6d4;vertical-align:top;">🔧 Infra
+                                    </td>
+                                    <td>Supabase</td>
+                                    <td>R$ 0</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Free tier</td>
+                                </tr>
+                                <tr>
+                                    <td>Domínio</td>
+                                    <td>R$ 40</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Anual÷12</td>
+                                </tr>
+                                <tr>
+                                    <td>Canva Pro</td>
+                                    <td>R$ 55</td>
+                                    <td style="font-size:11px;color:var(--text-muted);">Design</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top:2px solid var(--border-card);">
+                                    <td colspan="2" style="font-weight:700;">TOTAL FIXOS</td>
+                                    <td style="font-weight:700;color:#ef4444;" id="fin-total-costs">R$ 5.995</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Comissões -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-hand-holding-usd"
+                                    style="margin-right:8px;color:#eab308;"></i>Comissões Variáveis</h3>
+                        </div>
+                        <div
+                            style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+                            <div
+                                style="background:rgba(255,255,255,0.02);border:1px solid var(--border-card);border-radius:10px;padding:16px;">
+                                <div
+                                    style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">
+                                    Vendedor (3%)</div>
+                                <div style="font-size:20px;font-weight:700;" id="fin-commission-vendedor">R$ 0</div>
+                                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;"><span
+                                        id="fin-commission-base">0</span> vendas</div>
+                            </div>
+                            <div
+                                style="background:rgba(255,255,255,0.02);border:1px solid var(--border-card);border-radius:10px;padding:16px;">
+                                <div
+                                    style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">
+                                    Bônus
+                                    Criadora (R$5/site)</div>
+                                <div style="font-size:20px;font-weight:700;" id="fin-bonus-criadora">R$ 0</div>
+                                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;"><span
+                                        id="fin-bonus-sites">0</span>
+                                    sites</div>
+                            </div>
+                            <div
+                                style="background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.15);border-radius:10px;padding:16px;">
+                                <div
+                                    style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">
+                                    Custo
+                                    Total</div>
+                                <div style="font-size:20px;font-weight:700;color:#ef4444;" id="fin-total-all">R$ 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== CONFIGURAÇÕES (Admin) ========== -->
+                <section class="page-section" id="page-settings">
+                    <!-- Perfil do Usuário -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-user-circle"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Perfil</h3>
+                        </div>
+                        <div style="padding:20px;display:flex;align-items:center;gap:16px;">
+                            <div class="user-avatar" id="user-avatar" style="width:48px;height:48px;font-size:20px;">R
+                            </div>
+                            <div style="flex:1;">
+                                <div id="user-name" style="font-weight:700;font-size:16px;">Carregando...</div>
+                                <div id="user-role" data-role="admin"
+                                    style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                    Admin</div>
+                            </div>
+                            <button class="btn btn-sm btn-secondary" id="btn-logout" style="font-size:12px;">
+                                <i class="fas fa-sign-out-alt"></i> Sair
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Custos e Comissões -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-coins"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Custos e Comissões</h3>
+                            <button class="btn btn-sm btn-primary" onclick="Core.saveFinancialSettings()">
+                                <i class="fas fa-save"></i> Salvar
+                            </button>
+                        </div>
+                        <div style="padding:16px;">
+                            <div
+                                style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Salário Vendedor (R$)</label>
+                                    <input type="number" class="form-input" id="cfg-salary-vendedor" value="1800"
+                                        step="1">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Salário Suporte (R$)</label>
+                                    <input type="number" class="form-input" id="cfg-salary-suporte" value="1800"
+                                        step="1">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Salário Criadora (R$)</label>
+                                    <input type="number" class="form-input" id="cfg-salary-criadora" value="1400"
+                                        step="1">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Comissão Vendas (%)</label>
+                                    <input type="number" class="form-input" id="cfg-commission-rate" value="3"
+                                        step="0.5" min="0" max="100">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Bônus por Site (R$)</label>
+                                    <input type="number" class="form-input" id="cfg-bonus-site" value="5" step="1">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Meta Mensal (vendas)</label>
+                                    <input type="number" class="form-input" id="cfg-sales-target" value="50" step="1">
+                                </div>
+                            </div>
+                            <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">
+                                <i class="fas fa-info-circle"></i> Valores usados no Financeiro e Metas. Alterações são
+                                salvas localmente.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Produtos & Preços -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-box"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Catálogo de Produtos</h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Preço Sugerido</th>
+                                    <th>Custo Interno</th>
+                                    <th>Margem</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="kanban-card-product">D-1</span> Site Completo</td>
+                                    <td>R$ 497</td>
+                                    <td>R$ 50</td>
+                                    <td style="color:var(--status-completed);">90%</td>
+                                    <td><span class="status-badge converted">Ativo</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="kanban-card-product">D-2</span> Minisite Boutique</td>
+                                    <td>R$ 250</td>
+                                    <td>R$ 25</td>
+                                    <td style="color:var(--status-completed);">90%</td>
+                                    <td><span class="status-badge converted">Ativo</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="kanban-card-product">D-3</span> Landing Page</td>
+                                    <td>R$ 150</td>
+                                    <td>R$ 15</td>
+                                    <td style="color:var(--status-completed);">90%</td>
+                                    <td><span class="status-badge converted">Ativo</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="kanban-card-product">PRIME-D</span> Site Premium</td>
+                                    <td>R$ 997</td>
+                                    <td>R$ 100</td>
+                                    <td style="color:var(--status-completed);">90%</td>
+                                    <td><span class="status-badge converted">Ativo</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="kanban-card-product">E-COMM</span> E-commerce</td>
+                                    <td>A combinar</td>
+                                    <td>Terceirizado</td>
+                                    <td style="color:var(--text-muted);">—</td>
+                                    <td><span class="status-badge briefing">Em breve</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="kanban-card-product">SAAS</span> SaaS</td>
+                                    <td>A combinar</td>
+                                    <td>Terceirizado</td>
+                                    <td style="color:var(--text-muted);">—</td>
+                                    <td><span class="status-badge briefing">Em breve</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Conexão -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-plug"
+                                    style="margin-right:8px;color:var(--status-completed);"></i>Conexões</h3>
+                        </div>
+                        <div style="padding:16px;">
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:10px;margin-bottom:10px;">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <i class="fas fa-database"
+                                        style="color:var(--status-completed);font-size:18px;"></i>
+                                    <div>
+                                        <strong>Supabase</strong>
+                                        <div style="font-size:11px;color:var(--text-muted);">Banco de dados + Auth</div>
+                                    </div>
+                                </div>
+                                <span style="font-size:12px;font-weight:600;color:var(--status-completed);">●
+                                    Conectado</span>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(255,255,255,0.02);border:1px solid var(--border-card);border-radius:10px;">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <i class="fab fa-whatsapp" style="color:var(--text-muted);font-size:18px;"></i>
+                                    <div>
+                                        <strong style="color:var(--text-muted);">WhatsApp API</strong>
+                                        <div style="font-size:11px;color:var(--text-muted);">Notificações automáticas
+                                        </div>
+                                    </div>
+                                </div>
+                                <span style="font-size:12px;font-weight:600;color:var(--text-muted);">○ Não
+                                    configurado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dados -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-cog"
+                                    style="margin-right:8px;color:var(--text-muted);"></i>Dados & Sistema</h3>
+                        </div>
+                        <div style="padding:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                            <button class="btn btn-sm btn-secondary" onclick="Core.exportData()">
+                                <i class="fas fa-download"></i> Exportar Dados
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="Core.clearLocalData()"
+                                style="border-color:var(--status-lost);color:var(--status-lost);">
+                                <i class="fas fa-trash"></i> Limpar Cache Local
+                            </button>
+                        </div>
+                        <div style="padding:0 16px 16px;font-size:12px;color:var(--text-muted);">
+                            Demeni Core v1.0 · Supabase São Paulo · <span id="settings-orders-count">0</span> pedidos ·
+                            <span id="settings-posts-count">0</span> posts
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ========== NEW ORDER MODAL ========== -->
+    <div class="modal-overlay" id="modal-new-order">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Novo Pedido</h3>
+                <button class="modal-close" onclick="Core.closeModal('modal-new-order')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-new-order">
+                    <div class="form-group">
+                        <label class="form-label">Nome do Cliente</label>
+                        <input type="text" class="form-input" id="order-client-name" placeholder="Ex: João da Padaria"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">WhatsApp</label>
+                        <input type="tel" class="form-input" id="order-client-phone" placeholder="(83) 9 9999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Instagram</label>
+                        <input type="text" class="form-input" id="order-client-instagram" placeholder="@cliente">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Produto</label>
+                        <select class="form-select" id="order-product" required>
+                            <option value="">Selecione...</option>
+                            <option value="d1">D-1 — Card Digital (R$ 150)</option>
+                            <option value="d2">D-2 — Landing Page (R$ 250)</option>
+                            <option value="d3" disabled>D-3 — Cardápio/Loja (R$ 350) — em breve</option>
+                            <option value="prime" disabled>Prime-D — Página Responsiva (R$ 500) — em breve</option>
+                            <option value="ecommerce">E-commerce (terceirizado)</option>
+                            <option value="saas">SaaS (terceirizado)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Valor (R$)</label>
+                        <input type="number" class="form-input" id="order-price" placeholder="250" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Origem do Lead</label>
+                        <select class="form-select" id="order-source">
+                            <option value="">Não informado</option>
+                            <option value="instagram">📱 Instagram (orgânico)</option>
+                            <option value="facebook">📘 Facebook (orgânico)</option>
+                            <option value="ads_meta">📢 Anúncio Meta (pago)</option>
+                            <option value="ads_google">🔍 Anúncio Google (pago)</option>
+                            <option value="indicacao">🤝 Indicação</option>
+                            <option value="rua">🚶 Prospecção na Rua</option>
+                            <option value="whatsapp">💬 WhatsApp direto</option>
+                            <option value="influencer">⭐ Influenciador</option>
+                            <option value="site">🌐 Site próprio</option>
+                            <option value="outro">📎 Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Observações</label>
+                        <textarea class="form-textarea" id="order-notes"
+                            placeholder="Notas sobre o cliente ou pedido..."></textarea>
+                    </div>
+
+                    <!-- Briefing Section (collapsible) -->
+                    <details
+                        style="margin-top:12px;border:1px solid var(--border-card);border-radius:10px;padding:12px;">
+                        <summary
+                            style="cursor:pointer;font-weight:600;font-size:13px;color:var(--brand-light);user-select:none;">
+                            <i class="fas fa-paint-brush" style="margin-right:6px;"></i>Briefing do Site (opcional)
+                        </summary>
+                        <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px;">
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label">Tipo de Negócio</label>
+                                <input type="text" class="form-input" id="order-business-type"
+                                    placeholder="Ex: Barbearia, Restaurante, Clínica...">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label">Cores Principais</label>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <input type="color" id="order-color1" value="#7c3aed"
+                                        style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;">
+                                    <input type="color" id="order-color2" value="#1a1a2e"
+                                        style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;">
+                                    <input type="text" class="form-input" id="order-colors-text"
+                                        placeholder="ou descreva: preto e dourado" style="flex:1;">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label">Slogan / Frase de Destaque</label>
+                                <input type="text" class="form-input" id="order-slogan"
+                                    placeholder="Ex: O melhor corte da cidade">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label">Sobre o Negócio</label>
+                                <textarea class="form-textarea" id="order-about" rows="2"
+                                    placeholder="Breve descrição do negócio do cliente..."></textarea>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label">Serviços / Produtos</label>
+                                <textarea class="form-textarea" id="order-services" rows="2"
+                                    placeholder="Lista de serviços ou produtos que o cliente oferece..."></textarea>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label">Referências Visuais</label>
+                                <input type="text" class="form-input" id="order-references"
+                                    placeholder="Links de sites ou perfis de referência...">
+                            </div>
+                        </div>
+                    </details>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="Core.closeModal('modal-new-order')">Cancelar</button>
+                <button class="btn btn-primary" id="btn-save-order">
+                    <i class="fas fa-check"></i> Criar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ========== NEW POST MODAL ========== -->
+    <div class="modal-overlay" id="modal-new-post">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Novo Post</h3>
+                <button class="modal-close" onclick="Core.closeModal('modal-new-post')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-new-post">
+                    <div class="form-group">
+                        <label class="form-label">Data</label>
+                        <input type="date" class="form-input" id="post-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Plataformas</label>
+                        <div id="post-platforms" style="display:flex;flex-wrap:wrap;gap:8px;">
+                            <label
+                                style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;font-size:13px;">
+                                <input type="checkbox" value="instagram" checked style="accent-color:#E1306C;">
+                                <i class="fab fa-instagram" style="color:#E1306C;"></i> Instagram
+                            </label>
+                            <label
+                                style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;font-size:13px;">
+                                <input type="checkbox" value="facebook" style="accent-color:#1877F2;">
+                                <i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook
+                            </label>
+                            <label
+                                style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;font-size:13px;">
+                                <input type="checkbox" value="tiktok" style="accent-color:#00f2ea;">
+                                <i class="fab fa-tiktok" style="color:#00f2ea;"></i> TikTok
+                            </label>
+                            <label
+                                style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;font-size:13px;">
+                                <input type="checkbox" value="linkedin" style="accent-color:#0A66C2;">
+                                <i class="fab fa-linkedin" style="color:#0A66C2;"></i> LinkedIn
+                            </label>
+                            <label
+                                style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;font-size:13px;">
+                                <input type="checkbox" value="stories" style="accent-color:#FF6B35;">
+                                <i class="fas fa-mobile-alt" style="color:#FF6B35;"></i> Stories
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" id="post-type">
+                            <option value="feed">Feed</option>
+                            <option value="reels">Reels</option>
+                            <option value="stories">Stories</option>
+                            <option value="carousel">Carrossel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Legenda / Descrição</label>
+                        <textarea class="form-textarea" id="post-caption"
+                            placeholder="Ideia do post, texto, hashtags..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="Core.closeModal('modal-new-post')">Cancelar</button>
+                <button class="btn btn-primary" onclick="Core.savePost()">
+                    <i class="fas fa-check"></i> Agendar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/core.js"></script>
+
+    <!-- PWA: Install Banner -->
+    <div id="pwa-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;
+        background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:14px 20px;
+        display:none;align-items:center;justify-content:space-between;
+        box-shadow:0 -4px 20px rgba(0,0,0,0.3);font-family:'Inter',sans-serif;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <i class="fas fa-mobile-alt" style="font-size:20px;"></i>
+            <div>
+                <div style="font-weight:700;font-size:14px;">Instalar Demeni Core</div>
+                <div style="font-size:11px;opacity:0.85;">Acesse direto da tela inicial</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button onclick="dismissInstall()"
+                style="background:transparent;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;">Depois</button>
+            <button onclick="installApp()"
+                style="background:#fff;color:#7c3aed;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px;">Instalar</button>
+        </div>
+    </div>
+
+    <!-- PWA: Service Worker Registration + Install Logic -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/core-sw.js', { scope: '/' })
+                    .then(reg => console.log('✅ Core SW registered:', reg.scope))
+                    .catch(err => console.warn('⚠️ Core SW failed:', err));
+            });
+
+            // Listen for sync messages from SW
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data?.type === 'SYNC_READY' && window.SupabaseClient?.isConfigured()) {
+                    console.log('🔄 Sync triggered by SW');
+                    window.SupabaseClient.syncFromLocal();
+                }
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Don't show if user dismissed recently
+            const dismissed = localStorage.getItem('pwa-install-dismissed');
+            if (dismissed && Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
+            document.getElementById('pwa-install-banner').style.display = 'flex';
+        });
+
+        function installApp() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(choice => {
+                if (choice.outcome === 'accepted') {
+                    console.log('✅ PWA installed');
+                }
+                deferredPrompt = null;
+                document.getElementById('pwa-install-banner').style.display = 'none';
+            });
+        }
+
+        function dismissInstall() {
+            document.getElementById('pwa-install-banner').style.display = 'none';
+            localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+        }
+
+        // Detect if already installed
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('pwa-install-banner').style.display = 'none';
+            deferredPrompt = null;
+            console.log('✅ Demeni Core installed as PWA');
+        });
+
+        // Online/Offline indicator
+        window.addEventListener('online', () => {
+            if (window.Core?.toast) Core.toast('Conexão restaurada! 🟢', 'success');
+            if (window.SupabaseClient?.isConfigured()) {
+                window.SupabaseClient.syncFromLocal();
+            }
+        });
+        window.addEventListener('offline', () => {
+            if (window.Core?.toast) Core.toast('Sem conexão. Modo offline ativo. 🔴', 'warning');
+        });
+    </script>
+</body>
+
+</html>

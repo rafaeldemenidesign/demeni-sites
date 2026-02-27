@@ -300,6 +300,219 @@ const SupabaseClient = (function () {
         }
     }
 
+    // ========== CRM: ORDERS ==========
+    async function getOrders() {
+        if (!supabase) return { data: [], error: null };
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+        return { data: data || [], error };
+    }
+
+    async function createOrder(orderData) {
+        if (!supabase) return { data: null, error: { message: 'Not configured' } };
+        const { data, error } = await supabase
+            .from('orders')
+            .insert(orderData)
+            .select()
+            .single();
+        return { data, error };
+    }
+
+    async function updateOrder(orderId, updates) {
+        if (!supabase) return { data: null, error: { message: 'Not configured' } };
+        const { data, error } = await supabase
+            .from('orders')
+            .update({ ...updates, updated_at: new Date().toISOString() })
+            .eq('id', orderId)
+            .select()
+            .single();
+        return { data, error };
+    }
+
+    async function deleteOrder(orderId) {
+        if (!supabase) return { error: { message: 'Not configured' } };
+        const { error } = await supabase.from('orders').delete().eq('id', orderId);
+        return { error };
+    }
+
+    // ========== CRM: PAYMENTS ==========
+    async function addPayment(orderIdVal, payment) {
+        if (!supabase) return { data: null, error: { message: 'Not configured' } };
+        const { data, error } = await supabase
+            .from('payments')
+            .insert({ order_id: orderIdVal, ...payment })
+            .select()
+            .single();
+        return { data, error };
+    }
+
+    async function getPayments(orderIdVal) {
+        if (!supabase) return { data: [], error: null };
+        const { data, error } = await supabase
+            .from('payments')
+            .select('*')
+            .eq('order_id', orderIdVal)
+            .order('created_at', { ascending: true });
+        return { data: data || [], error };
+    }
+
+    // ========== CRM: ACTIVITY LOG ==========
+    async function addActivity(orderIdVal, activity) {
+        if (!supabase) return { data: null, error: null };
+        const { data, error } = await supabase
+            .from('activity_log')
+            .insert({ order_id: orderIdVal, ...activity });
+        return { data, error };
+    }
+
+    async function getActivities(orderIdVal) {
+        if (!supabase) return { data: [], error: null };
+        const { data, error } = await supabase
+            .from('activity_log')
+            .select('*')
+            .eq('order_id', orderIdVal)
+            .order('created_at', { ascending: false })
+            .limit(20);
+        return { data: data || [], error };
+    }
+
+    // ========== CRM: PERFORMANCE ==========
+    async function upsertPerformance(userId, monthKey, stats) {
+        if (!supabase) return { data: null, error: null };
+        const { data, error } = await supabase
+            .from('performance_history')
+            .upsert({
+                user_id: userId,
+                month_key: monthKey,
+                ...stats,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id,month_key' });
+        return { data, error };
+    }
+
+    async function getPerformanceHistory(userId) {
+        if (!supabase) return { data: [], error: null };
+        const { data, error } = await supabase
+            .from('performance_history')
+            .select('*')
+            .eq('user_id', userId)
+            .order('month_key', { ascending: false })
+            .limit(6);
+        return { data: data || [], error };
+    }
+
+    // ========== CRM: SETTINGS ==========
+    async function getUserSettings(userId) {
+        if (!supabase) return { data: null, error: null };
+        const { data, error } = await supabase
+            .from('user_settings')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+        return { data, error };
+    }
+
+    async function saveUserSettings(userId, settings) {
+        if (!supabase) return { data: null, error: null };
+        const { data, error } = await supabase
+            .from('user_settings')
+            .upsert({
+                user_id: userId,
+                ...settings,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+        return { data, error };
+    }
+
+    // ========== CRM: TEAM ==========
+    async function getTeamMembers() {
+        if (!supabase) return { data: [], error: null };
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, name, email, role, is_admin, created_at')
+            .order('created_at', { ascending: true });
+        return { data: data || [], error };
+    }
+
+    // ========== SYNC: localStorage → Supabase ==========
+    async function syncFromLocal() {
+        if (!supabase) return { success: false, message: 'Supabase not configured' };
+
+        try {
+            const user = await getUser();
+            if (!user) return { success: false, message: 'Not authenticated' };
+
+            // 1. Sync orders
+            const localOrders = JSON.parse(localStorage.getItem('demeni-orders') || '[]');
+            if (localOrders.length > 0) {
+                for (const order of localOrders) {
+                    const { payments: localPayments, activity_log: localLog, ...orderData } = order;
+                    // Upsert order
+                    const { data: savedOrder, error } = await supabase
+                        .from('orders')
+                        .upsert(orderData, { onConflict: 'id' })
+                        .select()
+                        .single();
+
+                    if (!error && savedOrder) {
+                        // Sync payments
+                        if (localPayments && localPayments.length > 0) {
+                            for (const p of localPayments) {
+                                await supabase.from('payments').upsert({
+                                    order_id: savedOrder.id,
+                                    amount: p.amount,
+                                    method: p.method,
+                                    notes: p.notes,
+                                    created_at: p.date
+                                });
+                            }
+                        }
+                        // Sync activity log
+                        if (localLog && localLog.length > 0) {
+                            for (const a of localLog) {
+                                await supabase.from('activity_log').insert({
+                                    order_id: savedOrder.id,
+                                    action: a.action,
+                                    from_status: a.from,
+                                    to_status: a.to,
+                                    performed_by: a.by,
+                                    created_at: a.at
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 2. Sync settings
+            const settingsKeys = ['salary_vendedor', 'salary_suporte', 'salary_criadora', 'commission_rate', 'bonus_site', 'sales_target'];
+            const settings = {};
+            settingsKeys.forEach(k => {
+                const v = localStorage.getItem(`demeni-${k}`);
+                if (v) settings[k] = parseFloat(v);
+            });
+            if (Object.keys(settings).length > 0) {
+                await saveUserSettings(user.id, settings);
+            }
+
+            // 3. Sync performance
+            const perfData = JSON.parse(localStorage.getItem('demeni-performance') || '{}');
+            for (const [uid, data] of Object.entries(perfData)) {
+                for (const [monthKey, stats] of Object.entries(data.months || {})) {
+                    await upsertPerformance(uid, monthKey, stats);
+                }
+            }
+
+            console.log('✅ Sync from localStorage complete');
+            return { success: true, message: `${localOrders.length} pedidos sincronizados` };
+        } catch (e) {
+            console.error('❌ Sync error:', e);
+            return { success: false, message: e.message };
+        }
+    }
+
     // ========== UTILITY ==========
     function isConfigured() {
         return SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_URL';
@@ -335,7 +548,23 @@ const SupabaseClient = (function () {
         // Publish
         publishSite,
         getPublishedSite,
-        uploadOgImage
+        uploadOgImage,
+
+        // CRM
+        getOrders,
+        createOrder,
+        updateOrder,
+        deleteOrder,
+        addPayment,
+        getPayments,
+        addActivity,
+        getActivities,
+        upsertPerformance,
+        getPerformanceHistory,
+        getUserSettings,
+        saveUserSettings,
+        getTeamMembers,
+        syncFromLocal
     };
 })();
 

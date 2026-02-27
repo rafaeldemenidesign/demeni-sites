@@ -1,0 +1,54 @@
+{
+    "name": "Demeni Core — Gestão de Agência",
+    "short_name": "Demeni Core",
+    "description": "CRM completo para gestão de vendas, equipe e produção da agência Demeni.",
+    "start_url": "https://core.rafaeldemeni.com/core.html",
+    "scope": "https://core.rafaeldemeni.com/",
+    "id": "demeni-core",
+    "display": "standalone",
+    "background_color": "#0f0f23",
+    "theme_color": "#7c3aed",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "img/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "img/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ],
+    "screenshots": [],
+    "categories": [
+        "business",
+        "productivity"
+    ],
+    "lang": "pt-BR",
+    "dir": "ltr",
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "url": "https://core.rafaeldemeni.com/core.html#dashboard",
+            "icons": [
+                {
+                    "src": "img/favicon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Novo Pedido",
+            "url": "https://core.rafaeldemeni.com/core.html#pipeline",
+            "icons": [
+                {
+                    "src": "img/favicon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}

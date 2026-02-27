@@ -12,6 +12,10 @@
             "destination": "/app.html"
         },
         {
+            "source": "/core",
+            "destination": "/core.html"
+        },
+        {
             "source": "/editor",
             "destination": "/editor.html"
         },
