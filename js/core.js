@@ -2015,7 +2015,7 @@ const Core = (function () {
         const salCriadora = getSetting('salary_criadora', 1400);
         const commRate = getSetting('commission_rate', 5) / 100;
         const bonusSite = getSetting('bonus_site', 5);
-        const infraCosts = 40; // Domínio (Supabase e Figma são free)
+        const infraCosts = 3; // Domínio (~R$36/ano ÷ 12)
         const fixedCosts = salVendedor + salSuporte + salCriadora + infraCosts;
         return { salVendedor, salSuporte, salCriadora, commRate, bonusSite, fixedCosts };
     }
@@ -2067,7 +2067,7 @@ const Core = (function () {
 
             const infra = [
                 { name: 'Supabase', val: 0, obs: 'Free tier' },
-                { name: 'Domínio', val: 40, obs: 'Anual÷12' },
+                { name: 'Domínio', val: 3, obs: '~R$36/ano' },
                 { name: 'Figma', val: 0, obs: 'Free tier' },
             ];
 
