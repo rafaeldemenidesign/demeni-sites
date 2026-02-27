@@ -2018,11 +2018,14 @@ const Core = (function () {
         const salSuporte = getSetting('salary_suporte', 1500);
         const salCriadora = getSetting('salary_criadora', 1400);
         const commRate = getSetting('commission_rate', 15) / 100;
-        const bonusSite = getSetting('bonus_site', 5);
+        const commCap = getSetting('commission_cap', 10000);
+        const bonusSite = getSetting('bonus_site', 3);
         const costKeychain = getSetting('cost_keychain', 12);
-        const infraCosts = 3; // Domínio (~R$36/ano ÷ 12)
-        const fixedCosts = salVendedor + salSuporte + salCriadora + infraCosts;
-        return { salVendedor, salSuporte, salCriadora, commRate, bonusSite, costKeychain, infraCosts, fixedCosts };
+        const salGestora = getSetting('salary_gestora', 1500);
+        const gestoraPct = getSetting('gestora_pct', 8) / 100;
+        const infraCosts = 3;
+        const fixedCosts = salVendedor + salSuporte + salCriadora + salGestora + infraCosts;
+        return { salVendedor, salSuporte, salCriadora, commRate, commCap, bonusSite, costKeychain, salGestora, gestoraPct, infraCosts, fixedCosts };
     }
 
     function saveFinancialSettings() {
@@ -2035,8 +2038,11 @@ const Core = (function () {
             salary_suporte: val('cfg-salary-suporte', 1500),
             salary_criadora: val('cfg-salary-criadora', 1400),
             commission_rate: val('cfg-commission-rate', 15),
-            bonus_site: val('cfg-bonus-site', 5),
+            commission_cap: val('cfg-commission-cap', 10000),
+            bonus_site: val('cfg-bonus-site', 3),
             cost_keychain: val('cfg-cost-keychain', 12),
+            salary_gestora: val('cfg-salary-gestora', 1500),
+            gestora_pct: val('cfg-gestora-pct', 8),
             sales_target: val('cfg-sales-target', 50),
         };
         localStorage.setItem('demeni-financial-settings', JSON.stringify(settings));
@@ -2053,8 +2059,11 @@ const Core = (function () {
         el('cfg-salary-suporte', 'salary_suporte', 1500);
         el('cfg-salary-criadora', 'salary_criadora', 1400);
         el('cfg-commission-rate', 'commission_rate', 15);
-        el('cfg-bonus-site', 'bonus_site', 5);
+        el('cfg-commission-cap', 'commission_cap', 10000);
+        el('cfg-bonus-site', 'bonus_site', 3);
         el('cfg-cost-keychain', 'cost_keychain', 12);
+        el('cfg-salary-gestora', 'salary_gestora', 1500);
+        el('cfg-gestora-pct', 'gestora_pct', 8);
         el('cfg-sales-target', 'sales_target', 50);
     }
 
@@ -2067,9 +2076,10 @@ const Core = (function () {
             const fin = getFinancialSettings();
             const fmtC = v => `R$ ${v.toLocaleString('pt-BR')}`;
             const equipe = [
-                { name: 'Vendedor (fixo mínimo)', val: fin.salVendedor, obs: 'Draw contra comissão' },
-                { name: 'Suporte', val: fin.salSuporte, obs: 'Atendimento' },
-                { name: 'Criadora', val: fin.salCriadora, obs: 'Produção' },
+                { name: 'Vendedor (fixo)', val: fin.salVendedor, obs: `Comissão ${Math.round(fin.commRate * 100)}% · Teto R$${fin.commCap.toLocaleString('pt-BR')}` },
+                { name: 'Suporte', val: fin.salSuporte, obs: 'Fixo' },
+                { name: 'Criadora (fixo)', val: fin.salCriadora, obs: `+ R$${fin.bonusSite}/site` },
+                { name: 'Gestora (fixo)', val: fin.salGestora, obs: `+ ${Math.round(fin.gestoraPct * 100)}% do lucro` },
             ].filter(e => e.val > 0);
 
             const infra = [
@@ -2130,14 +2140,19 @@ const Core = (function () {
                 .reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
         }, 0);
 
-        // Draw-against-commission model: vendedor gets max(fixo, comissão_bruta)
+        // Draw-against-commission with cap: vendedor gets max(fixo, min(comissão, teto))
         const fin = getFinancialSettings();
         const vendorCommissionBruta = Math.round(revenue * fin.commRate);
-        const vendorPay = Math.max(fin.salVendedor, vendorCommissionBruta); // draw model
-        const vendorExtra = vendorPay - fin.salVendedor; // bônus above fixo
+        const vendorCommissionCapped = Math.min(vendorCommissionBruta, fin.commCap);
+        const vendorPay = Math.max(fin.salVendedor, vendorCommissionCapped);
+        const vendorExtra = vendorPay - fin.salVendedor;
         const criadoraBonus = delivered.length * fin.bonusSite;
-        const keychainCosts = delivered.length * fin.costKeychain; // 1 chaveiro NFC por site entregue
-        const totalCosts = fin.fixedCosts + vendorExtra + criadoraBonus + keychainCosts;
+        const keychainCosts = delivered.length * fin.costKeychain;
+        const baseCosts = fin.fixedCosts + vendorExtra + criadoraBonus + keychainCosts;
+        // Gestora: fixo já incluído em fixedCosts, + % do lucro antes da gestora
+        const profitBeforeGestora = revenue - baseCosts;
+        const gestoraBonus = Math.max(0, Math.round(profitBeforeGestora * fin.gestoraPct));
+        const totalCosts = baseCosts + gestoraBonus;
         const profit = revenue - totalCosts;
         const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 
