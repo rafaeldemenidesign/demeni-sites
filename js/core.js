@@ -584,7 +584,7 @@ const Core = (function () {
             const imgs = (order.attachments || []).filter(a => a.type === 'image');
             const links = (order.attachments || []).filter(a => a.type === 'link');
             const attachCount = (order.attachments || []).length;
-            const thumbHTML = imgs.length > 0 ? `<img class="kanban-card-thumb" src="${imgs[0].url}" alt="">` : '';
+            const thumbHTML = imgs.length > 0 ? `<img class="kanban-card-thumb" src="${imgs[0].url}" alt="" draggable="false" style="pointer-events:none;">` : '';
             const checkPct = getChecklistProgress(order);
 
             card.innerHTML = `
