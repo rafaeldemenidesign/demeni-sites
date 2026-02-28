@@ -701,6 +701,7 @@ const Core = (function () {
             if (newStatus === 'completed') order.completed_at = new Date().toISOString();
         }
         saveOrdersLocal();
+        if (order) saveToSheet(order, 'status_' + newStatus);
 
         // Update Supabase
         try {
@@ -758,7 +759,9 @@ const Core = (function () {
     async function handleNewOrder() {
         const clientName = document.getElementById('order-client-name').value.trim();
         const clientPhone = document.getElementById('order-client-phone').value.trim();
+        const clientEmail = document.getElementById('order-client-email')?.value.trim() || '';
         const clientInstagram = document.getElementById('order-client-instagram').value.trim();
+        const clientCity = document.getElementById('order-client-city')?.value.trim() || '';
         const productType = document.getElementById('order-product').value;
         const price = parseFloat(document.getElementById('order-price').value) || 0;
         const source = document.getElementById('order-source').value;
@@ -772,8 +775,9 @@ const Core = (function () {
             tracking_token: crypto.randomUUID().replace(/-/g, '').substring(0, 16),
             client_name: clientName,
             client_phone: clientPhone,
-            client_email: '',
+            client_email: clientEmail,
             client_instagram: clientInstagram,
+            client_city: clientCity,
             product_type: productType,
             price: price,
             source: source,
@@ -822,6 +826,9 @@ const Core = (function () {
 
         renderAll();
         toast(`Pedido criado! Código: ${order.tracking_token}`, 'success');
+
+        // Backup to Google Sheets
+        saveToSheet(order, 'novo_pedido');
     }
 
     let dashboardSort = 'original';
@@ -1007,6 +1014,7 @@ const Core = (function () {
             saveOrdersLocal();
             renderAll();
             toast(`${order.client_name} → ${getStatusLabel(order.status)}`, 'success');
+            saveToSheet(order, 'status_' + order.status);
         }
     }
 
@@ -1018,6 +1026,7 @@ const Core = (function () {
         saveOrdersLocal();
         renderAll();
         toast(`${order.client_name} — Perdido`, 'error');
+        saveToSheet(order, 'perdido');
     }
 
     // ========== QUEUE PANEL (Criadora) ==========
@@ -1757,6 +1766,50 @@ const Core = (function () {
         localStorage.setItem('demeni-orders', JSON.stringify(orders));
     }
 
+    // ========== GOOGLE SHEETS BACKUP ==========
+    function saveToSheet(order, action) {
+        const sheetsUrl = localStorage.getItem('demeni-sheets-url');
+        if (!sheetsUrl) return;
+
+        const payload = {
+            action: action || 'update',
+            client_name: order.client_name || '',
+            client_phone: order.client_phone || '',
+            client_email: order.client_email || '',
+            client_instagram: order.client_instagram || '',
+            client_city: order.client_city || '',
+            product_type: order.product_type || '',
+            price: order.price || '',
+            source: order.source || '',
+            status: order.status || '',
+            referral_code: order.referral_code || '',
+            site_url: order.site_url || '',
+            tracking_token: order.tracking_token || '',
+            notes: order.notes || '',
+            loss_reason: order.loss_reason || '',
+        };
+
+        fetch(sheetsUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload),
+        }).catch(err => console.warn('[Sheets] Backup failed:', err.message));
+    }
+
+    function saveIntegrationSettings() {
+        const url = document.getElementById('cfg-sheets-url')?.value.trim() || '';
+        if (url) localStorage.setItem('demeni-sheets-url', url);
+        else localStorage.removeItem('demeni-sheets-url');
+        toast('Integrações salvas!', 'success');
+    }
+
+    function loadIntegrationSettings() {
+        const url = localStorage.getItem('demeni-sheets-url') || '';
+        const el = document.getElementById('cfg-sheets-url');
+        if (el) el.value = url;
+    }
+
     // ========== ORDERS PAGE ==========
     let ordersTab = 'active';
 
@@ -1918,6 +1971,7 @@ const Core = (function () {
         if (pc) pc.textContent = posts.length;
         // Financial
         updateFinancial();
+        loadIntegrationSettings();
         renderGoals();
         renderAlerts();
         loadFinancialSettings();
@@ -3336,6 +3390,7 @@ const Core = (function () {
         updateWaSendPreview: () => { },
         // Financial Settings
         saveFinancialSettings,
+        saveIntegrationSettings,
         generateReport,
         sendPaymentLink,
         // Settings

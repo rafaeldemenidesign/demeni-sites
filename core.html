@@ -967,6 +967,27 @@
                         </div>
                     </div>
 
+                    <!-- Integrações -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-plug"
+                                    style="margin-right:8px;color:var(--brand-light);"></i>Integrações</h3>
+                            <button class="btn btn-sm btn-primary" onclick="Core.saveIntegrationSettings()">
+                                <i class="fas fa-save"></i> Salvar
+                            </button>
+                        </div>
+                        <div style="padding:16px;">
+                            <div class="form-group" style="margin:0;">
+                                <label class="form-label">URL do Google Sheets (Apps Script)</label>
+                                <input type="url" class="form-input" id="cfg-sheets-url"
+                                    placeholder="https://script.google.com/macros/s/...">
+                                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;">Cole
+                                    aqui a URL da implantação do Apps Script. Cada pedido será registrado na planilha
+                                    automaticamente.</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Custos e Comissões -->
                     <div class="card" style="margin-bottom:20px;">
                         <div class="card-header">
@@ -1187,8 +1208,16 @@
                         <input type="tel" class="form-input" id="order-client-phone" placeholder="(83) 9 9999-9999">
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="order-client-email" placeholder="cliente@email.com">
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Instagram</label>
                         <input type="text" class="form-input" id="order-client-instagram" placeholder="@cliente">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cidade</label>
+                        <input type="text" class="form-input" id="order-client-city" placeholder="Ex: João Pessoa - PB">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Produto</label>
