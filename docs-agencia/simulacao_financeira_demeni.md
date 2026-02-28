@@ -2,15 +2,25 @@
 
 ---
 
+## Custos fixos de ferramentas
+
+| Ferramenta | Custo/mês |
+|---|---|
+| ManyChat Pro | R$ 149 |
+| Infraestrutura (Vercel, domínio) | R$ 3 |
+| **Total ferramentas** | **R$ 152** |
+
+---
+
 ## Cenário 1: Solo (Rafael faz tudo)
 
 | Ritmo | Sites/mês | Receita | Custos | **Lucro** |
 |---|:-:|:-:|:-:|:-:|
-| 1/dia | 22 | R$ 5.500 | R$ 267 | **R$ 5.233** |
-| 2/dia | 44 | R$ 11.000 | R$ 531 | **R$ 10.469** |
-| 3/dia (limite) | 66 | R$ 16.500 | R$ 795 | **R$ 15.705** |
+| 1/dia | 22 | R$ 5.500 | R$ 416 | **R$ 5.084** |
+| 2/dia | 44 | R$ 11.000 | R$ 680 | **R$ 10.320** |
+| 3/dia (limite) | 66 | R$ 16.500 | R$ 944 | **R$ 15.556** |
 
-*Custos = chaveiro R$12/site + R$3 infra. Sem equipe.*
+*Custos = chaveiro R$12/site + R$152 ferramentas. Sem equipe.*
 
 **Ponto de contratação**: quando atinge 3/dia consistente → contratar Criadora.
 
@@ -24,7 +34,7 @@
 
 ### Custos
 
-| Quem | Recebe |
+| Quem / O quê | Recebe |
 |---|---|
 | Líder de Vendas | R$ 6.290 |
 | Sub-vendedor ×3 | R$ 4.950 |
@@ -33,22 +43,23 @@
 | Social Media | R$ 1.500 |
 | Gestora | R$ 4.417 |
 | Chaveiro NFC | R$ 2.640 |
+| ManyChat Pro | R$ 149 |
 | Infra | R$ 3 |
-| **Total custos** | **R$ 22.960** |
+| **Total custos** | **R$ 23.109** |
 
-### Lucro: R$ 32.040
+### Lucro: R$ 31.891
 
 ### Distribuição do lucro
 
 | Destino | % | Valor |
 |---|:-:|---|
-| 💰 Caixa/Fluxo | 20% | R$ 6.408 |
-| 🚀 Crescimento | 20% | R$ 6.408 |
-| 🎨 UX Interno | 15% | R$ 4.806 |
-| 👑 CEO (Rafael) | 15% | R$ 4.806 |
-| 📣 Marketing | 10% | R$ 3.204 |
-| 🎯 Tráfego Pago | 10% | R$ 3.204 |
-| 🛡️ Emergência | 10% | R$ 3.204 |
+| 💰 Caixa/Fluxo | 20% | R$ 6.378 |
+| 🚀 Crescimento | 20% | R$ 6.378 |
+| 🎨 UX Interno | 15% | R$ 4.784 |
+| 👑 CEO (Rafael) | 15% | R$ 4.784 |
+| 📣 Marketing | 10% | R$ 3.189 |
+| 🎯 Tráfego Pago | 10% | R$ 3.189 |
+| 🛡️ Emergência | 10% | R$ 3.189 |
 
 ---
 
@@ -56,10 +67,10 @@
 
 | Receita | R$ 110.000 |
 |---|---|
-| Equipe + custos | ~R$ 35.000 |
-| **Lucro** | **~R$ 75.000** |
-| CEO (15%) | **~R$ 11.250** |
-| Crescimento (20%) | ~R$ 15.000 |
+| Equipe + custos | ~R$ 35.150 |
+| **Lucro** | **~R$ 74.850** |
+| CEO (15%) | **~R$ 11.228** |
+| Crescimento (20%) | ~R$ 14.970 |
 
 ---
 

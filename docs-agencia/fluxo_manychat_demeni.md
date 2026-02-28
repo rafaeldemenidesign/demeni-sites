@@ -1,6 +1,6 @@
 # DEMENI — Fluxo ManyChat FINAL (v8)
 
-> ManyChat Pro (US$ 15/mês) + Google Sheets nativo. Sem IA, sem Make.  
+> ManyChat Pro (R$ 149/mês) + Google Sheets nativo. Sem IA, sem Make.  
 > 🔗 Cadastro: https://manychat.com
 
 ---
