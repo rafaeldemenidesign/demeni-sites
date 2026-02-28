@@ -1973,9 +1973,32 @@ const Core = (function () {
 
         order.attachments.splice(index, 1);
         saveOrdersLocal();
+        toast('Anexo removido', 'success');
         const modal = document.getElementById('modal-order-detail');
         if (modal) { modal.remove(); openOrderDetail(orderId); }
         renderKanbanCards();
+    }
+
+    function downloadAttachment(orderId, index) {
+        const order = orders.find(o => o.id === orderId);
+        if (!order || !order.attachments || !order.attachments[index]) return;
+        const att = order.attachments[index];
+        // Works for both base64 data URIs and Supabase URLs
+        fetch(att.url)
+            .then(res => res.blob())
+            .then(blob => {
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = att.name || 'download';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+            })
+            .catch(() => {
+                window.open(att.url, '_blank');
+            });
     }
 
     function openLightbox(src) {
@@ -3456,9 +3479,9 @@ const Core = (function () {
                                             </div>
                                         </div>
                                         <div style="display:flex;gap:4px;flex-shrink:0;">
-                                            ${isImage ? `<a href="${att.url}" target="_blank" download="${att.name || 'image'}" onclick="event.stopPropagation();" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(16,185,129,0.1);color:#10b981;cursor:pointer;text-decoration:none;" title="Download">
+                                            ${isImage ? `<span onclick="event.stopPropagation();Core.downloadAttachment('${order.id}',${idx})" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(16,185,129,0.1);color:#10b981;cursor:pointer;" title="Download">
                                                 <i class="fas fa-download" style="font-size:12px;"></i>
-                                            </a>` : `<a href="${att.url}" target="_blank" onclick="event.stopPropagation();" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(99,102,241,0.1);color:#6366f1;cursor:pointer;text-decoration:none;" title="Abrir link">
+                                            </span>` : `<a href="${att.url}" target="_blank" onclick="event.stopPropagation();" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(99,102,241,0.1);color:#6366f1;cursor:pointer;text-decoration:none;" title="Abrir link">
                                                 <i class="fas fa-external-link-alt" style="font-size:12px;"></i>
                                             </a>`}
                                             <span onclick="event.stopPropagation();Core.removeAttachment('${order.id}',${idx})" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(239,68,68,0.1);color:#ef4444;cursor:pointer;" title="Remover">
@@ -3638,6 +3661,7 @@ const Core = (function () {
         addAttachment,
         addLinkAttachment,
         removeAttachment,
+        downloadAttachment,
         toggleChecklistItem,
         openLightbox,
         editOrder,
