@@ -29,7 +29,6 @@ const Core = (function () {
             {
                 section: 'Suporte', items: [
                     { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
-                    { id: 'messages', icon: 'fa-comment-dots', label: 'Mensagens' },
                 ]
             },
             {
@@ -88,7 +87,6 @@ const Core = (function () {
             {
                 section: 'Atendimento', items: [
                     { id: 'clients', icon: 'fa-headset', label: 'Clientes Ativos' },
-                    { id: 'messages', icon: 'fa-comment-dots', label: 'Mensagens' },
                     { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
                     { id: 'leads', icon: 'fa-user-plus', label: 'Leads' },
                     { id: 'goals', icon: 'fa-bullseye', label: 'Minhas Metas' },
@@ -117,7 +115,6 @@ const Core = (function () {
         orders: 'Pedidos',
         queue: 'Fila de Produção',
         clients: 'Clientes Ativos',
-        messages: 'Mensagens Padrão',
         calendar: 'Calendário de Conteúdo',
         team: 'Equipe',
         metrics: 'Métricas',
@@ -1200,39 +1197,124 @@ const Core = (function () {
     // ========== WHATSAPP TEMPLATES ==========
     const WA_TEMPLATES = [
         {
-            id: 'welcome',
-            icon: 'fa-hand-sparkles',
-            color: '#10b981',
+            id: 'first_contact', section: '🟢 Primeiro Contato',
+            icon: 'fa-comment-dots', color: '#10b981',
             title: 'Boas-vindas',
-            message: `Olá {nome}! 👋\n\nSeja bem-vindo(a) à Demeni! Estamos muito felizes em ter você como cliente. 🎉\n\nSeu site já está em nossa fila de produção. Em breve entraremos em contato para coletar as informações do seu negócio.\n\nQualquer dúvida, estou à disposição!\n\n— Equipe Demeni 🧡`
+            message: `Oi {nome}! 🧡 Tudo bem?\n\nA Demeni cria sites profissionais pra pequenos negócios. R$ 250, sem mensalidade, pronto em 24h.\n\nComo posso te ajudar?\n1️⃣ Quero meu site! 🚀\n2️⃣ Quero indicar pessoas 🎁\n3️⃣ Vim por indicação 🎟️\n4️⃣ Como funciona? 🤔`
         },
         {
-            id: 'briefing',
-            icon: 'fa-clipboard-list',
-            color: '#06b6d4',
+            id: 'briefing', section: '📋 Briefing',
+            icon: 'fa-clipboard-list', color: '#06b6d4',
             title: 'Coleta de Briefing',
-            message: `Olá {nome}! 📋\n\nVamos montar o seu site! Preciso de algumas informações:\n\n1️⃣ *Nome do negócio*: como quer que apareça no site?\n2️⃣ *Logo*: tem logo? Se sim, envie em alta qualidade\n3️⃣ *Cores*: tem cores preferidas ou uma paleta?\n4️⃣ *Fotos*: envie fotos dos produtos/serviços\n5️⃣ *Textos*: descrição do negócio, sobre, diferenciais\n6️⃣ *Contatos*: WhatsApp, Instagram, endereço\n7️⃣ *Referências*: sites que você gosta e se inspira\n\nPode mandar tudo aqui mesmo no WhatsApp! 📱\n\n— Equipe Demeni 🧡`
+            message: `Bora montar seu site, {nome}! 🚀\n\nMe responde essas perguntas rápidas:\n1. Qual o nome do seu negócio?\n2. O que você faz?\n3. Serviços/produtos com preço?\n4. Tem ponto físico? Qual endereço?\n5. Instagram?\n6. Cor preferida pro site?\n7. Botão principal: WhatsApp, Instagram, Ligar ou Mapa?\n\nDepois manda a logo e fotos do negócio! 📸\n\n— Equipe Demeni 🧡`
         },
         {
-            id: 'update',
-            icon: 'fa-sync-alt',
-            color: '#3b82f6',
-            title: 'Atualização de Status',
-            message: `Olá {nome}! 😊\n\nPassando pra te dar uma atualização sobre o seu site:\n\n📌 Status atual: Em Produção\n🎨 Nossa equipe está trabalhando no design\n⏰ Previsão de conclusão: em breve\n\n🔗 Acompanhe em tempo real:\n{link_status}\n\nFique tranquilo(a), estamos caprichando! Qualquer dúvida, é só chamar.\n\n— Equipe Demeni 🧡`
+            id: 'briefing_done', section: '📋 Briefing',
+            icon: 'fa-check-circle', color: '#22c55e',
+            title: 'Briefing Completo',
+            message: `Briefing completo, {nome}! 🎉 Tudo certo?\n\nSe sim, vamos pro pagamento! 😊\nSe quiser corrigir algo, me avisa.`
         },
         {
-            id: 'approval',
-            icon: 'fa-eye',
-            color: '#d4a05a',
-            title: 'Envio para Aprovação',
-            message: `Olá {nome}! 🎉\n\nSeu site está PRONTO para aprovação! 🚀\n\n🔗 Acesse o link abaixo para visualizar:\n[inserir link aqui]\n\nPor favor, avalie e nos diga:\n✅ Se está tudo certo, aprovamos e finalizamos!\n✏️ Se precisar de ajustes, nos diga o que mudar.\n\nEstamos ansiosos pelo seu feedback! 🧡\n\n— Equipe Demeni`
+            id: 'payment', section: '💰 Pagamento',
+            icon: 'fa-credit-card', color: '#8b5cf6',
+            title: 'Pedir Pagamento',
+            message: `{nome}, vamos fechar! 💰\n\nR$ 250 — PIX ou cartão\n📌 Sem mensalidade\n🔑 Chaveiro NFC incluso\n\nTem código de indicação? Se sim, manda que aplico o desconto! 😊`
         },
         {
-            id: 'delivery',
-            icon: 'fa-gift',
-            color: '#f59e0b',
-            title: 'Entrega Final',
-            message: `Olá {nome}! 🎊\n\nÉ com muito orgulho que entregamos o seu site FINALIZADO! ✨\n\n🌐 Seu site está no ar e pronto para receber clientes!\n\n📱 Compartilhe nas suas redes sociais\n⭐ Se puder, deixe um depoimento sobre nossa parceria\n💬 Indique a Demeni para seus amigos!\n\nFoi um prazer trabalhar com você. Conte sempre com a gente! 🚀\n\n— Equipe Demeni 🧡`
+            id: 'payment_confirmed', section: '💰 Pagamento',
+            icon: 'fa-check-double', color: '#10b981',
+            title: 'Pagamento Confirmado',
+            message: `Confirmado, {nome}! 🎉\n\nBem-vindo(a) à Demeni! Seu site já entrou em produção 🎨\n⏰ Em até 24h envio o preview pra você aprovar!\n\n🔗 Acompanhe:\n{link_status}\n\n— Equipe Demeni 🧡`
+        },
+        {
+            id: 'followup', section: '💰 Pagamento',
+            icon: 'fa-clock', color: '#06b6d4',
+            title: 'Follow-up (não pagou)',
+            message: `{nome}, ficou alguma dúvida? 😊\nSeu briefing tá salvo! Quando quiser finalizar, só pagar e em 24h tá pronto!`
+        },
+        {
+            id: 'update', section: '🎨 Produção',
+            icon: 'fa-sync-alt', color: '#3b82f6',
+            title: 'Atualização',
+            message: `Olá {nome}! 😊\n\nAtualização do seu site:\n📌 Status: Em Produção\n🎨 Estamos caprichando!\n\n🔗 Acompanhe:\n{link_status}\n\nQualquer dúvida, é só chamar.\n\n— Equipe Demeni 🧡`
+        },
+        {
+            id: 'approval', section: '🎨 Produção',
+            icon: 'fa-eye', color: '#d4a05a',
+            title: 'Preview/Aprovação',
+            message: `{nome}, olha o seu site! 🚀\n\n👁️ [LINK DO PREVIEW]\n\nTá do jeito que você queria?\n✅ Perfeito — publica!\n✏️ Quero mudar algo\n\n— Equipe Demeni 🧡`
+        },
+        {
+            id: 'alt_1', section: '🎨 Produção',
+            icon: 'fa-pen', color: '#f97316',
+            title: 'Alteração 1 (de 3)',
+            message: `Sem problema, {nome}! 😊\n\n💡 Dica: peça TUDO que quer mudar de uma vez, assim aproveita melhor suas 3 alterações!\n\nMe conta tudo 👇`
+        },
+        {
+            id: 'alt_2', section: '🎨 Produção',
+            icon: 'fa-pen', color: '#f97316',
+            title: 'Alteração 2 (de 3)',
+            message: `Anotado, {nome}! ✅\n\nDepois dessa tem mais UMA alteração. Aproveita e pede tudo que falta!`
+        },
+        {
+            id: 'alt_3', section: '🎨 Produção',
+            icon: 'fa-pen', color: '#ef4444',
+            title: 'Alteração 3 (última)',
+            message: `{nome}, essa é a ÚLTIMA alteração inclusa! Capricha no pedido 👇`
+        },
+        {
+            id: 'alt_ended', section: '🎨 Produção',
+            icon: 'fa-lock', color: '#6b7280',
+            title: 'Alterações Esgotadas',
+            message: `{nome}, suas alterações inclusas acabaram! 😊\nMas você não fica na mão.\n\n💰 Por R$ 100 você ganha mais 3 alterações.\nOu se quiser repaginar o site todo, R$ 100 também!\n\nInteressou?`
+        },
+        {
+            id: 'delivery', section: '🎉 Entrega',
+            icon: 'fa-gift', color: '#f59e0b',
+            title: 'Site no Ar',
+            message: `{nome}, SEU SITE TÁ NO AR! 🎉🚀\n\n🔗 [LINK DO SITE]\n🔑 Chaveiro NFC a caminho!\n📌 Sem mensalidade — pra sempre! 💪\n\nFoi um prazer! Conte sempre com a gente.\n\n— Equipe Demeni 🧡`
+        },
+        {
+            id: 'rating', section: '🎉 Entrega',
+            icon: 'fa-star', color: '#eab308',
+            title: 'Avaliação',
+            message: `{nome}, de 1 a 5, como foi sua experiência com a Demeni? 🧡`
+        },
+        {
+            id: 'referral', section: '🎁 Indicação',
+            icon: 'fa-gift', color: '#7c3aed',
+            title: 'Código de Indicação',
+            message: `🧡 Que bom que gostou, {nome}!\n\nSeu código de indicação:\n🎟️ [CÓDIGO]\n\nCada pessoa que usar ganha 10% de desconto!\nE pra cada venda, você acumula 15% de desconto!\n7 indicações = site GRÁTIS! 🆓\n\n📊 Acompanhe: indicacoes.demeni.com`
+        },
+        {
+            id: 'indicacao_explicar', section: '🎁 Indicação',
+            icon: 'fa-bullhorn', color: '#7c3aed',
+            title: 'Explicar Programa',
+            message: `{nome}, programa de indicação Demeni! 🎁\n\nCada pessoa que comprar com seu código te dá 15% de desconto!\n7 indicações = site GRÁTIS! 🆓\nSeu indicado ganha 10% de desconto!\n\n⚠️ Quem indica não pode usar código de outra pessoa.\n\nQuer participar?`
+        },
+        {
+            id: 'indicacao_converteu', section: '🎁 Indicação',
+            icon: 'fa-bell', color: '#10b981',
+            title: 'Indicação Converteu',
+            message: `🎉 {nome}, alguém comprou com seu código!\nSeu desconto aumentou! 📊 Confira: indicacoes.demeni.com`
+        },
+        {
+            id: 'postsale_30d', section: '🔄 Pós-venda',
+            icon: 'fa-heart', color: '#ec4899',
+            title: '30 dias',
+            message: `{nome}! 1 mês de site no ar! Tudo bem? 🧡\nPrecisa de alguma coisa?`
+        },
+        {
+            id: 'postsale_repaginar', section: '🔄 Pós-venda',
+            icon: 'fa-palette', color: '#8b5cf6',
+            title: 'Repaginar (60d)',
+            message: `{nome}, que tal renovar o visual do site? 🎨\nR$ 100 com 3 alterações! E se tiver indicações, desconto extra!`
+        },
+        {
+            id: 'lead_frio', section: '🔄 Pós-venda',
+            icon: 'fa-snowflake', color: '#6b7280',
+            title: 'Lead Frio',
+            message: `{nome}, lembra do site profissional? R$ 250, sem mensalidade, pronto em 24h 😊\nAinda tô aqui se precisar!`
         }
     ];
 
@@ -1240,22 +1322,36 @@ const Core = (function () {
         const container = document.getElementById('wa-templates');
         if (!container) return;
 
-        container.innerHTML = WA_TEMPLATES.map(t => `
-            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border-card);border-radius:12px;padding:14px;">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                    <div style="width:32px;height:32px;border-radius:8px;background:${t.color}22;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas ${t.icon}" style="color:${t.color};font-size:14px;"></i>
-                    </div>
-                    <span style="font-weight:700;font-size:14px;">${t.title}</span>
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);white-space:pre-line;line-height:1.5;max-height:80px;overflow:hidden;margin-bottom:10px;">${t.message.substring(0, 120)}...</div>
-                <div style="display:flex;gap:6px;">
-                    <button class="btn btn-sm btn-secondary" onclick="Core.copyWaTemplate('${t.id}')" style="flex:1;justify-content:center;">
-                        <i class="fas fa-copy"></i> Copiar
-                    </button>
-                    <button class="btn btn-sm btn-secondary" onclick="Core.previewWaTemplate('${t.id}')" style="flex:1;justify-content:center;">
-                        <i class="fas fa-eye"></i> Ver
-                    </button>
+        // Group templates by section
+        const sections = [];
+        const sectionMap = {};
+        WA_TEMPLATES.forEach(t => {
+            const sec = t.section || 'Outros';
+            if (!sectionMap[sec]) {
+                sectionMap[sec] = [];
+                sections.push(sec);
+            }
+            sectionMap[sec].push(t);
+        });
+
+        container.innerHTML = sections.map(sec => `
+            <div style="margin-bottom:12px;">
+                <div style="font-size:12px;font-weight:700;color:var(--text-muted);padding:8px 0;border-bottom:1px solid var(--border-card);margin-bottom:8px;">${sec}</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    ${sectionMap[sec].map(t => `
+                        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border-card);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;" onmouseenter="this.style.borderColor='${t.color}44'" onmouseleave="this.style.borderColor='var(--border-card)'">
+                            <div style="width:28px;height:28px;border-radius:6px;background:${t.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas ${t.icon}" style="color:${t.color};font-size:12px;"></i>
+                            </div>
+                            <span style="font-size:13px;font-weight:600;flex:1;">${t.title}</span>
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();Core.copyWaTemplate('${t.id}')" style="padding:4px 8px;font-size:11px;">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();Core.previewWaTemplate('${t.id}')" style="padding:4px 8px;font-size:11px;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         `).join('');
@@ -3220,17 +3316,6 @@ const Core = (function () {
                 toast(`Código copiado: ${token}`, 'success');
             }).catch(() => {
                 prompt('Copie o código:', token);
-            });
-        },
-        // Messages
-        copyMsg: (el) => {
-            const text = el.querySelector('.msg-text').textContent.trim();
-            navigator.clipboard.writeText(text).then(() => {
-                const copied = el.querySelector('.msg-copied');
-                copied.style.display = 'block';
-                setTimeout(() => { copied.style.display = 'none'; }, 1500);
-            }).catch(() => {
-                prompt('Copie a mensagem:', text);
             });
         },
         // Calendar
