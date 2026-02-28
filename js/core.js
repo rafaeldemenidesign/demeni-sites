@@ -702,12 +702,22 @@ const Core = (function () {
         // Update order
         const order = orders.find(o => o.id === movedId);
         if (order) {
+            const prevStatus = order.status;
             order.status = newStatus;
             order.updated_at = new Date().toISOString();
 
-            if (newStatus === 'converted') order.converted_at = new Date().toISOString();
-            if (newStatus === 'delivered') order.delivered_at = new Date().toISOString();
             if (newStatus === 'completed') order.completed_at = new Date().toISOString();
+
+            // Log activity
+            if (prevStatus !== newStatus) {
+                if (!order.activity_log) order.activity_log = [];
+                order.activity_log.push({
+                    from: prevStatus,
+                    to: newStatus,
+                    at: new Date().toISOString(),
+                    by: currentUser?.name || 'Sistema'
+                });
+            }
         }
         saveOrdersLocal();
         if (order) saveToSheet(order, 'status_' + newStatus);
@@ -720,8 +730,6 @@ const Core = (function () {
                     .update({
                         status: newStatus,
                         updated_at: new Date().toISOString(),
-                        converted_at: order?.converted_at,
-                        delivered_at: order?.delivered_at,
                         completed_at: order?.completed_at,
                     })
                     .eq('id', movedId);
@@ -733,8 +741,8 @@ const Core = (function () {
         renderAll();
         toast('Pedido movido!', 'success');
 
-        // Auto-prompt payment for Convertido (1st 50%) and Entregue (2nd 50%)
-        if (order && (newStatus === 'converted' || newStatus === 'delivered')) {
+        // Auto-prompt payment when entering Briefing (1st payment)
+        if (order && newStatus === 'briefing') {
             setTimeout(() => openPaymentModal(movedId), 400);
         }
     }
@@ -923,8 +931,8 @@ const Core = (function () {
     function updateKPIs() {
         const periodOrders = getFilteredOrders();
 
-        const completed = periodOrders.filter(o => o.status === 'completed' || o.status === 'delivered');
-        const inProd = orders.filter(o => ['production', 'approval', 'adjustments', 'briefing'].includes(o.status));
+        const completed = periodOrders.filter(o => o.status === 'completed');
+        const inProd = orders.filter(o => ['production', 'review', 'briefing'].includes(o.status));
         const revenue = completed.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
 
         setKPI('kpi-orders', periodOrders.length);
@@ -972,7 +980,7 @@ const Core = (function () {
         const tbody = document.getElementById('leads-body');
         if (!tbody) return;
 
-        const salesStatuses = ['lead', 'contacted', 'meeting', 'proposal', 'converted', 'lost'];
+        const salesStatuses = ['lead', 'negotiation', 'lost'];
         const myLeads = orders.filter(o => salesStatuses.includes(o.status));
 
         if (myLeads.length === 0) {
@@ -992,7 +1000,7 @@ const Core = (function () {
                 <td style="font-size:13px;">R$ ${parseFloat(o.price || 0).toFixed(0)}</td>
                 <td>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                        ${o.status !== 'converted' && o.status !== 'lost' ? `
+                        ${o.status !== 'completed' && o.status !== 'lost' ? `
                             <button class="btn btn-sm btn-primary" onclick="Core.advanceLead('${o.id}')" title="Avançar">
                                 <i class="fas fa-arrow-right"></i>
                             </button>` : ''}
@@ -1059,7 +1067,7 @@ const Core = (function () {
 
         if (queueTimerInterval) { clearInterval(queueTimerInterval); queueTimerInterval = null; }
 
-        const queueStatuses = ['briefing', 'production', 'adjustments'];
+        const queueStatuses = ['briefing', 'production', 'review'];
         const myQueue = orders.filter(o => queueStatuses.includes(o.status));
 
         if (myQueue.length === 0) {
@@ -1116,7 +1124,7 @@ const Core = (function () {
                             <button class="btn btn-sm btn-primary" onclick="Core.sendForApproval('${o.id}')">
                                 <i class="fas fa-paper-plane"></i> Enviar p/ Aprovação
                             </button>` : ''}
-                        ${o.status === 'adjustments' ? `
+                        ${o.status === 'review' ? `
                             <button class="btn btn-sm btn-primary" onclick="Core.sendForApproval('${o.id}')">
                                 <i class="fas fa-redo"></i> Reenviar
                             </button>` : ''}
@@ -1157,7 +1165,7 @@ const Core = (function () {
             order.production_time_ms = (order.production_time_ms || 0) + elapsed;
             order.timer_started_at = null;
         }
-        updateOrderStatus(orderId, 'approval');
+        updateOrderStatus(orderId, 'review');
         toast('Enviado para aprovação!', 'info');
     }
 
@@ -1166,7 +1174,7 @@ const Core = (function () {
         const tbody = document.getElementById('clients-body');
         if (!tbody) return;
 
-        const activeStatuses = ['converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered'];
+        const activeStatuses = ['briefing', 'production', 'review'];
         const activeClients = orders.filter(o => activeStatuses.includes(o.status));
 
         if (activeClients.length === 0) {
@@ -1192,18 +1200,18 @@ const Core = (function () {
                             <button class="btn btn-sm btn-secondary" onclick="Core.sendWaToClient('${o.id}')" style="color:#25d366;border-color:#25d36644;" title="Enviar mensagem via WhatsApp">
                                 <i class="fab fa-whatsapp"></i> Enviar
                             </button>` : ''}
-                        ${o.status === 'converted' ? `
+                        ${o.status === 'briefing' ? `
                             <button class="btn btn-sm btn-primary" onclick="Core.moveToBriefing('${o.id}')">
                                 <i class="fas fa-clipboard-list"></i> Briefing
                             </button>` : ''}
-                        ${o.status === 'approval' ? `
+                        ${o.status === 'review' ? `
                             <button class="btn btn-sm btn-primary" onclick="Core.approveOrder('${o.id}')" style="background:linear-gradient(135deg,#10b981,#34d399);">
                                 <i class="fas fa-check"></i> Aprovar
                             </button>
                             <button class="btn btn-sm btn-secondary" onclick="Core.requestAdjustments('${o.id}')">
                                 <i class="fas fa-edit"></i> Ajustes
                             </button>` : ''}
-                        ${o.status === 'delivered' ? `
+                        ${o.status === 'completed' ? `
                             <button class="btn btn-sm btn-primary" onclick="Core.completeOrder('${o.id}')" style="background:linear-gradient(135deg,#10b981,#059669);">
                                 <i class="fas fa-flag-checkered"></i> Concluir
                             </button>` : ''}
@@ -1260,7 +1268,7 @@ const Core = (function () {
             message: `Olá {nome}! 😊\n\nAtualização do seu site:\n📌 Status: Em Produção\n🎨 Estamos caprichando!\n\n🔗 Acompanhe:\n{link_status}\n\nQualquer dúvida, é só chamar.\n\n— Equipe Demeni 🧡`
         },
         {
-            id: 'approval', section: '🎨 Produção',
+            id: 'review', section: '🎨 Produção',
             icon: 'fa-eye', color: '#d4a05a',
             title: 'Preview/Aprovação',
             message: `{nome}, olha o seu site! 🚀\n\n👁️ [LINK DO PREVIEW]\n\nTá do jeito que você queria?\n✅ Perfeito — publica!\n✏️ Quero mudar algo\n\n— Equipe Demeni 🧡`
@@ -1447,7 +1455,7 @@ const Core = (function () {
         const statusTemplateMap = {
             converted: 'welcome', briefing: 'welcome',
             production: 'update', adjustments: 'update',
-            approval: 'approval',
+            approval: 'review',
             delivered: 'delivery', completed: 'delivery',
         };
         const defaultTemplateId = statusTemplateMap[order.status] || 'update';
@@ -1515,12 +1523,12 @@ const Core = (function () {
         if (order) {
             order.delivered_at = new Date().toISOString();
         }
-        updateOrderStatus(orderId, 'delivered');
+        updateOrderStatus(orderId, 'completed');
         toast('Site aprovado e entregue!', 'success');
     }
 
     function requestAdjustments(orderId) {
-        updateOrderStatus(orderId, 'adjustments');
+        updateOrderStatus(orderId, 'review');
         toast('Ajustes solicitados', 'info');
     }
 
@@ -1588,7 +1596,7 @@ const Core = (function () {
         });
 
         // Calculate this month's performance for each member
-        const convertedStatuses = ['converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed'];
+        const convertedStatuses = ['briefing', 'production', 'review', 'completed'];
         const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
         Object.values(members).forEach(m => {
@@ -1697,7 +1705,7 @@ const Core = (function () {
         if (!container) return;
 
         const now = new Date();
-        const convertedStatuses = ['converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed'];
+        const convertedStatuses = ['briefing', 'production', 'review', 'completed'];
         const monthOrders = orders.filter(o => {
             const d = new Date(o.created_at);
             return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
@@ -2145,7 +2153,7 @@ const Core = (function () {
         const now = new Date();
 
         // 1. Overdue orders (active orders past deadline)
-        const activeStatuses = ['briefing', 'production', 'approval', 'adjustments'];
+        const activeStatuses = ['briefing', 'production', 'review'];
         const activeOrders = orders.filter(o => activeStatuses.includes(o.status));
         activeOrders.forEach(o => {
             let dl;
@@ -2188,7 +2196,7 @@ const Core = (function () {
         });
 
         // 3. Follow-up suggestions (leads/contacted not updated in 3+ days)
-        const followupStatuses = ['lead', 'contacted', 'meeting'];
+        const followupStatuses = ['lead', 'negotiation'];
         orders.filter(o => followupStatuses.includes(o.status)).forEach(o => {
             const lastUpdate = new Date(o.updated_at || o.created_at);
             const daysSince = Math.floor((now - lastUpdate) / (1000 * 60 * 60 * 24));
@@ -2241,7 +2249,7 @@ const Core = (function () {
         });
 
         // Sales = orders past lead stage (converted+)
-        const convertedStatuses = ['converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed'];
+        const convertedStatuses = ['briefing', 'production', 'review', 'completed'];
         const allSales = thisMonth.filter(o => convertedStatuses.includes(o.status));
 
         // Role-based attribution
@@ -2445,8 +2453,8 @@ const Core = (function () {
             return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
         });
 
-        const delivered = monthOrders.filter(o => o.status === 'completed' || o.status === 'delivered');
-        const converted = monthOrders.filter(o => o.status !== 'lead' && o.status !== 'contacted' && o.status !== 'meeting' && o.status !== 'lost');
+        const delivered = monthOrders.filter(o => o.status === 'completed');
+        const converted = monthOrders.filter(o => o.status !== 'lead' && o.status !== 'negotiation' && o.status !== 'lost');
 
         // Revenue = sum of actual payments received this month
         const revenue = orders.reduce((sum, o) => {
@@ -2558,9 +2566,9 @@ const Core = (function () {
             return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
         });
 
-        const convertedStatuses = ['converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed'];
+        const convertedStatuses = ['briefing', 'production', 'review', 'completed'];
         const converted = monthOrders.filter(o => convertedStatuses.includes(o.status));
-        const delivered = monthOrders.filter(o => o.status === 'completed' || o.status === 'delivered');
+        const delivered = monthOrders.filter(o => o.status === 'completed');
         const lost = monthOrders.filter(o => o.status === 'lost');
 
         const revenue = orders.reduce((sum, o) => {
@@ -2687,7 +2695,7 @@ const Core = (function () {
 
     // ========== METRICS ==========
     function updateMetrics() {
-        const delivered = orders.filter(o => o.status === 'completed' || o.status === 'delivered');
+        const delivered = orders.filter(o => o.status === 'completed');
         const lost = orders.filter(o => o.status === 'lost');
         const totalOrders = orders.filter(o => o.status !== 'lost');
         const allWithPrice = delivered.filter(o => parseFloat(o.price) > 0);
@@ -2736,7 +2744,7 @@ const Core = (function () {
             const pOrders = orders.filter(o => o.product_type === p);
             if (pOrders.length === 0) return null;
 
-            const pDelivered = pOrders.filter(o => o.status === 'completed' || o.status === 'delivered');
+            const pDelivered = pOrders.filter(o => o.status === 'completed');
             const pLost = pOrders.filter(o => o.status === 'lost');
             const pRevenue = pDelivered.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
 
@@ -2781,7 +2789,7 @@ const Core = (function () {
             outro: { label: 'Outro', icon: 'fas fa-ellipsis-h', color: '#6b7280' },
         };
 
-        const convertedStatuses = ['converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed'];
+        const convertedStatuses = ['briefing', 'production', 'review', 'completed'];
         const sources = {};
 
         orders.forEach(o => {
@@ -3652,7 +3660,7 @@ const Core = (function () {
             const fNames = ['João', 'Maria', 'Carlos', 'Ana', 'Pedro', 'Lucas', 'Juliana', 'Bruno', 'Fernanda', 'Rafael', 'Larissa', 'Thiago', 'Camila', 'Diego', 'Patrícia', 'Anderson', 'Gabriela', 'Marcos', 'Beatriz', 'Leandro', 'Silvana', 'Roberto', 'Letícia', 'Gustavo', 'Adriana', 'Felipe', 'Renata', 'Matheus', 'Cristiane', 'Leonardo', 'Sandra', 'Daniel', 'Mariana', 'Paulo', 'Vanessa', 'Eduardo', 'Aline', 'Alexandre', 'Tatiana', 'Ricardo', 'Claudia', 'Fabrício', 'Priscila', 'Hugo', 'Michele', 'Vicente', 'Carla', 'Ronaldo', 'Luciana', 'Renan', 'Simone', 'Igor', 'Elisa', 'Maurício', 'Natália', 'Jonas', 'Débora', 'Otávio', 'Helena', 'Willian'];
             const lNames = ['Silva', 'Santos', 'Oliveira', 'Costa', 'Souza', 'Pereira', 'Lima', 'Ferreira', 'Rodrigues', 'Almeida', 'Nascimento', 'Araújo', 'Melo', 'Barbosa', 'Ribeiro', 'Cardoso', 'Gomes', 'Lopes', 'Moreira', 'Martins'];
             const srcs = ['instagram', 'facebook', 'ads_meta', 'indicacao', 'rua', 'whatsapp', 'influencer', 'site', 'ads_google', 'outro'];
-            const sts = ['lead', 'contacted', 'meeting', 'converted', 'briefing', 'production', 'approval', 'delivered', 'completed', 'completed', 'completed', 'completed'];
+            const sts = ['lead', 'negotiation', 'briefing', 'production', 'review', 'completed', 'completed', 'completed', 'completed', 'completed', 'completed', 'completed'];
             const methods = ['pix', 'pix', 'pix', 'cartao', 'dinheiro'];
             for (let i = 0; i < count; i++) {
                 const isD1 = Math.random() < 0.4;
@@ -3664,8 +3672,8 @@ const Core = (function () {
 
                 // Generate payments based on status
                 let payments = [];
-                const paidStatuses = ['converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed'];
-                const fullPaidStatuses = ['delivered', 'completed'];
+                const paidStatuses = ['briefing', 'production', 'review', 'completed'];
+                const fullPaidStatuses = ['completed'];
                 if (paidStatuses.includes(status)) {
                     payments.push({ amount: half, method, notes: 'Entrada 50%', date: d.toISOString() });
                     if (fullPaidStatuses.includes(status)) {
