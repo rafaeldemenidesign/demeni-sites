@@ -676,27 +676,29 @@ const Core = (function () {
 
         // Calculate sort position from mouse Y
         const container = e.target.closest('.kanban-cards');
-        let newSortOrder = 0;
         if (container) {
-            const cards = [...container.querySelectorAll('.kanban-card')];
-            const cardIds = cards.map(c => c.dataset.orderId).filter(id => id !== movedId);
-            let insertIdx = cardIds.length; // default: end
-            for (let i = 0; i < cards.length; i++) {
-                if (cards[i].dataset.orderId === movedId) continue;
-                const rect = cards[i].getBoundingClientRect();
+            // Get only non-dragged visible cards for position calculation
+            const visibleCards = [...container.querySelectorAll('.kanban-card:not(.dragging)')]
+                .filter(c => c.dataset.orderId !== movedId);
+
+            // Find where to insert based on mouse Y vs card midpoints
+            let insertIdx = visibleCards.length; // default: end
+            for (let i = 0; i < visibleCards.length; i++) {
+                const rect = visibleCards[i].getBoundingClientRect();
                 if (e.clientY < rect.top + rect.height / 2) {
-                    insertIdx = cardIds.indexOf(cards[i].dataset.orderId);
+                    insertIdx = i;
                     break;
                 }
             }
-            // Reassign sort_order for all cards in the target column
-            const columnOrders = orders.filter(o => o.status === newStatus && o.id !== movedId)
-                .sort((a, b) => (a.sort_order || 9999) - (b.sort_order || 9999));
-            columnOrders.splice(insertIdx, 0, { id: movedId }); // placeholder
-            columnOrders.forEach((o, i) => {
-                const real = orders.find(r => r.id === o.id);
-                if (real) real.sort_order = i;
-            });
+
+            // Build ordered list: all column orders except moved, then splice moved in
+            const columnOrders = orders
+                .filter(o => (o.status === newStatus || o.id === movedId) && o.id !== movedId)
+                .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
+            columnOrders.splice(insertIdx, 0, orders.find(o => o.id === movedId));
+
+            // Reassign sort_order for all
+            columnOrders.forEach((o, i) => { if (o) o.sort_order = i; });
         }
 
         // Update order
