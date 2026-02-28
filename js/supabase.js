@@ -361,6 +361,75 @@ const SupabaseClient = (function () {
         }
     }
 
+    // ========== CHAT ==========
+    async function sendMessage(channel, content) {
+        if (!supabase) return null;
+        const user = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user : null;
+        if (!user) return null;
+        const { data, error } = await supabase
+            .from('chat_messages')
+            .insert({ channel, content, sender_id: user.id })
+            .select()
+            .single();
+        if (error) console.warn('⚠️ Send message failed:', error.message);
+        return data;
+    }
+
+    async function getMessages(channel, limit = 50) {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('chat_messages')
+            .select('*, profiles:sender_id(name, avatar_url, role_label)')
+            .eq('channel', channel)
+            .order('created_at', { ascending: true })
+            .limit(limit);
+        if (error) {
+            console.warn('⚠️ Get messages failed:', error.message);
+            return [];
+        }
+        return data || [];
+    }
+
+    function subscribeToChannel(channel, callback) {
+        if (!supabase) return null;
+        return supabase
+            .channel(`chat-${channel}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'chat_messages',
+                filter: `channel=eq.${channel}`
+            }, (payload) => {
+                callback(payload.new);
+            })
+            .subscribe();
+    }
+
+    function unsubscribeChannel(subscription) {
+        if (subscription && supabase) {
+            supabase.removeChannel(subscription);
+        }
+    }
+
+    async function getProfiles() {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, name, email, role, avatar_url, role_label')
+            .order('name');
+        if (error) {
+            console.warn('⚠️ Get profiles failed:', error.message);
+            return [];
+        }
+        return data || [];
+    }
+
+    async function getCurrentUserId() {
+        if (!supabase) return null;
+        const { data } = await supabase.auth.getUser();
+        return data?.user?.id || null;
+    }
+
     // ========== CRM: ORDERS ==========
     async function getOrders() {
         if (!supabase) return { data: [], error: null };
@@ -612,6 +681,14 @@ const SupabaseClient = (function () {
         uploadOgImage,
         uploadAttachment,
         deleteAttachment,
+
+        // Chat
+        sendMessage,
+        getMessages,
+        subscribeToChannel,
+        unsubscribeChannel,
+        getProfiles,
+        getCurrentUserId,
 
         // CRM
         getOrders,

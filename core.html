@@ -918,6 +918,71 @@
                     </div>
                 </section>
 
+                <!-- ========== CHAT (WhatsApp Web) ========== -->
+                <section class="page-section" id="page-chat">
+                    <div class="chat-layout">
+                        <!-- Chat Area -->
+                        <div class="chat-area">
+                            <!-- Chat Header -->
+                            <div class="chat-header" id="chat-header">
+                                <div class="chat-header-info">
+                                    <div class="chat-header-avatar" id="chat-header-avatar">🌐</div>
+                                    <div>
+                                        <div class="chat-header-name" id="chat-header-name">Equipe Demeni</div>
+                                        <div class="chat-header-status" id="chat-header-status">Chat geral da equipe
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chat-header-actions">
+                                    <button class="chat-btn" onclick="Core.toggleChatContacts()" title="Contatos">
+                                        <i class="fas fa-users"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Messages -->
+                            <div class="chat-messages" id="chat-messages">
+                                <div class="chat-empty">
+                                    <i class="fas fa-comments"
+                                        style="font-size:48px;color:rgba(255,255,255,0.1);margin-bottom:12px;"></i>
+                                    <p>Envie uma mensagem para começar a conversa</p>
+                                </div>
+                            </div>
+
+                            <!-- Input -->
+                            <div class="chat-input-bar">
+                                <input type="text" class="chat-input" id="chat-input"
+                                    placeholder="Digite uma mensagem..." autocomplete="off">
+                                <button class="chat-send-btn" onclick="Core.sendChatMessage()" id="chat-send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Contacts Sidebar (RIGHT) -->
+                        <div class="chat-contacts expanded" id="chat-contacts">
+                            <div class="chat-contacts-header">
+                                <span class="chat-contacts-title">Conversas</span>
+                                <button class="chat-btn" onclick="Core.toggleChatContacts()" title="Recolher">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="chat-contacts-list" id="chat-contacts-list">
+                                <!-- General channel -->
+                                <div class="chat-contact active" onclick="Core.switchChannel('general')"
+                                    data-channel="general">
+                                    <div class="chat-contact-avatar general">🌐</div>
+                                    <div class="chat-contact-info">
+                                        <div class="chat-contact-name">Equipe Demeni</div>
+                                        <div class="chat-contact-last">Chat geral</div>
+                                    </div>
+                                </div>
+                                <!-- Team members populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- ========== CONFIGURAÇÕES (Admin) ========== -->
                 <section class="page-section" id="page-settings">
                     <!-- Perfil do Usuário -->

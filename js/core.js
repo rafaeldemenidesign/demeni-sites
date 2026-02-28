@@ -40,6 +40,7 @@ const Core = (function () {
                 section: 'Gestão', items: [
                     { id: 'team', icon: 'fa-users', label: 'Equipe' },
                     { id: 'financial', icon: 'fa-wallet', label: 'Financeiro' },
+                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
                     { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
                 ]
             },
@@ -57,6 +58,7 @@ const Core = (function () {
                     { id: 'financial', icon: 'fa-wallet', label: 'Financeiro' },
                     { id: 'metrics', icon: 'fa-chart-line', label: 'Métricas' },
                     { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
+                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
                 ]
             },
         ],
@@ -67,6 +69,7 @@ const Core = (function () {
                     { id: 'orders', icon: 'fa-file-invoice', label: 'Pedidos' },
                     { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
                     { id: 'goals', icon: 'fa-bullseye', label: 'Minhas Metas' },
+                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
                     { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
                 ]
             },
@@ -78,6 +81,7 @@ const Core = (function () {
                     { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
                     { id: 'metrics', icon: 'fa-chart-line', label: 'Meu Histórico' },
                     { id: 'criar-site', icon: 'fa-magic', label: 'Criar Site', href: 'app.html' },
+                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
                     { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
                 ]
             },
@@ -90,6 +94,7 @@ const Core = (function () {
                     { id: 'leads', icon: 'fa-user-plus', label: 'Leads' },
                     { id: 'goals', icon: 'fa-bullseye', label: 'Minhas Metas' },
                     { id: 'dashboard', icon: 'fa-chart-pie', label: 'Visão Geral' },
+                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
                     { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
                 ]
             },
@@ -100,6 +105,7 @@ const Core = (function () {
                     { id: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário' },
                     { id: 'metrics', icon: 'fa-chart-line', label: 'Métricas' },
                     { id: 'dashboard', icon: 'fa-chart-pie', label: 'Visão Geral' },
+                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
                     { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
                 ]
             },
@@ -119,6 +125,7 @@ const Core = (function () {
         metrics: 'Métricas',
         goals: 'Metas',
         financial: 'Financeiro',
+        chat: 'Chat da Equipe',
         settings: 'Configurações',
     };
 
@@ -476,6 +483,22 @@ const Core = (function () {
         // Show PDF report button only on financial
         const btnPdf = document.getElementById('btn-pdf-report');
         if (btnPdf) btnPdf.style.display = pageId === 'financial' ? 'flex' : 'none';
+
+        // Init chat when navigating to chat page
+        if (pageId === 'chat') {
+            initChat();
+            // Enter to send
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput && !chatInput._chatListener) {
+                chatInput._chatListener = true;
+                chatInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendChatMessage();
+                    }
+                });
+            }
+        }
     }
 
     function getDefaultPage() {
@@ -3652,6 +3675,170 @@ const Core = (function () {
         toast(`Pagamento de R$ ${amount} registrado!`, 'success');
     }
 
+
+    // ========== CHAT ==========
+    let chatChannel = 'general';
+    let chatSubscription = null;
+    let chatCurrentUserId = null;
+    let chatProfiles = [];
+
+    async function initChat() {
+        if (typeof SupabaseClient === 'undefined' || !SupabaseClient.getClient()) {
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="chat-empty">
+                    <i class="fas fa-exclamation-triangle" style="font-size:48px;color:rgba(255,255,255,0.1);margin-bottom:12px;"></i>
+                    <p>Conecte ao Supabase para usar o chat</p>
+                </div>`;
+            return;
+        }
+        chatCurrentUserId = await SupabaseClient.getCurrentUserId();
+        chatProfiles = await SupabaseClient.getProfiles();
+        renderChatContacts();
+        await switchChannel('general');
+    }
+
+    function renderChatContacts() {
+        const list = document.getElementById('chat-contacts-list');
+        if (!list) return;
+        let html = `
+            <div class="chat-contact active" onclick="Core.switchChannel('general')" data-channel="general">
+                <div class="chat-contact-avatar general">🌐</div>
+                <div class="chat-contact-info">
+                    <div class="chat-contact-name">Equipe Demeni</div>
+                    <div class="chat-contact-last">Chat geral</div>
+                </div>
+            </div>`;
+        chatProfiles.forEach(p => {
+            if (p.id === chatCurrentUserId) return;
+            const initial = (p.name || 'U').charAt(0).toUpperCase();
+            const avatarContent = p.avatar_url
+                ? `<img src="${p.avatar_url}" alt="${p.name}">`
+                : initial;
+            const channelId = [chatCurrentUserId, p.id].sort().join('_');
+            html += `
+                <div class="chat-contact" onclick="Core.switchChannel('${channelId}')" data-channel="${channelId}">
+                    <div class="chat-contact-avatar">${avatarContent}</div>
+                    <div class="chat-contact-info">
+                        <div class="chat-contact-name">${p.name || p.email || 'Membro'}</div>
+                        <div class="chat-contact-last">${p.role_label || p.role || 'Equipe'}</div>
+                    </div>
+                </div>`;
+        });
+        list.innerHTML = html;
+    }
+
+    async function switchChannel(channel) {
+        chatChannel = channel;
+        document.querySelectorAll('.chat-contact').forEach(c => {
+            c.classList.toggle('active', c.dataset.channel === channel);
+        });
+        const headerName = document.getElementById('chat-header-name');
+        const headerStatus = document.getElementById('chat-header-status');
+        const headerAvatar = document.getElementById('chat-header-avatar');
+        if (channel === 'general') {
+            if (headerName) headerName.textContent = 'Equipe Demeni';
+            if (headerStatus) headerStatus.textContent = 'Chat geral da equipe';
+            if (headerAvatar) headerAvatar.innerHTML = '🌐';
+        } else {
+            const otherId = channel.split('_').find(id => id !== chatCurrentUserId);
+            const profile = chatProfiles.find(p => p.id === otherId);
+            if (headerName) headerName.textContent = profile?.name || 'Conversa';
+            if (headerStatus) headerStatus.textContent = profile?.role_label || profile?.role || 'Equipe';
+            if (headerAvatar) {
+                headerAvatar.innerHTML = profile?.avatar_url
+                    ? `<img src="${profile.avatar_url}" alt="">`
+                    : (profile?.name || 'U').charAt(0).toUpperCase();
+            }
+        }
+        if (chatSubscription && typeof SupabaseClient !== 'undefined') {
+            SupabaseClient.unsubscribeChannel(chatSubscription);
+        }
+        await loadAndRenderMessages();
+        chatSubscription = SupabaseClient.subscribeToChannel(channel, async (newMsg) => {
+            const msgs = await SupabaseClient.getMessages(channel, 100);
+            const fullMsg = msgs.find(m => m.id === newMsg.id);
+            if (fullMsg) {
+                appendChatMessage(fullMsg);
+                scrollChatToBottom();
+            }
+        });
+    }
+
+    async function loadAndRenderMessages() {
+        const container = document.getElementById('chat-messages');
+        if (!container) return;
+        container.innerHTML = '<div class="chat-empty"><i class="fas fa-spinner fa-spin" style="font-size:24px;color:rgba(255,255,255,0.2);"></i></div>';
+        const messages = await SupabaseClient.getMessages(chatChannel, 100);
+        if (messages.length === 0) {
+            container.innerHTML = `
+                <div class="chat-empty">
+                    <i class="fas fa-comments" style="font-size:48px;color:rgba(255,255,255,0.1);margin-bottom:12px;"></i>
+                    <p>Envie uma mensagem para começar</p>
+                </div>`;
+            return;
+        }
+        container.innerHTML = '';
+        let lastDate = '';
+        messages.forEach(msg => {
+            const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
+            if (msgDate !== lastDate) {
+                lastDate = msgDate;
+                const divider = document.createElement('div');
+                divider.className = 'chat-date-divider';
+                divider.innerHTML = `<span>${msgDate}</span>`;
+                container.appendChild(divider);
+            }
+            appendChatMessage(msg);
+        });
+        scrollChatToBottom();
+    }
+
+    function appendChatMessage(msg) {
+        const container = document.getElementById('chat-messages');
+        if (!container) return;
+        const empty = container.querySelector('.chat-empty');
+        if (empty) empty.remove();
+        // Avoid duplicate
+        if (container.querySelector(`[data-msg-id="${msg.id}"]`)) return;
+        const isMine = msg.sender_id === chatCurrentUserId;
+        const profile = msg.profiles || {};
+        const senderName = profile.name || 'Membro';
+        const time = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const bubble = document.createElement('div');
+        bubble.className = `chat-msg ${isMine ? 'sent' : 'received'}`;
+        bubble.dataset.msgId = msg.id;
+        bubble.innerHTML = `
+            ${!isMine && chatChannel === 'general' ? `<div class="chat-msg-sender">${senderName}</div>` : ''}
+            <div>${msg.content}</div>
+            <div class="chat-msg-time">${time}</div>`;
+        container.appendChild(bubble);
+    }
+
+    function scrollChatToBottom() {
+        const container = document.getElementById('chat-messages');
+        if (container) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        if (!input) return;
+        const content = input.value.trim();
+        if (!content) return;
+        input.value = '';
+        const result = await SupabaseClient.sendMessage(chatChannel, content);
+        if (!result) {
+            toast('Erro ao enviar mensagem', 'error');
+            input.value = content;
+        }
+    }
+
+    function toggleChatContacts() {
+        const sidebar = document.getElementById('chat-contacts');
+        if (!sidebar) return;
+        sidebar.classList.toggle('collapsed');
+        sidebar.classList.toggle('expanded');
+    }
+
     // ========== PUBLIC API ==========
     return {
         navigate,
@@ -3714,6 +3901,11 @@ const Core = (function () {
         saveIntegrationSettings,
         generateReport,
         sendPaymentLink,
+        // Chat
+        sendChatMessage,
+        switchChannel,
+        toggleChatContacts,
+        initChat,
         // Settings
         exportData: () => {
             const data = {
