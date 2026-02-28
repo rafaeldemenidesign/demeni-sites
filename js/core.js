@@ -29,6 +29,7 @@ const Core = (function () {
             {
                 section: 'Suporte', items: [
                     { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
+                    { id: 'messages', icon: 'fa-comment-dots', label: 'Mensagens' },
                 ]
             },
             {
@@ -87,6 +88,7 @@ const Core = (function () {
             {
                 section: 'Atendimento', items: [
                     { id: 'clients', icon: 'fa-headset', label: 'Clientes Ativos' },
+                    { id: 'messages', icon: 'fa-comment-dots', label: 'Mensagens' },
                     { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
                     { id: 'leads', icon: 'fa-user-plus', label: 'Leads' },
                     { id: 'goals', icon: 'fa-bullseye', label: 'Minhas Metas' },
@@ -3217,6 +3219,17 @@ const Core = (function () {
                 toast(`Código copiado: ${token}`, 'success');
             }).catch(() => {
                 prompt('Copie o código:', token);
+            });
+        },
+        // Messages
+        copyMsg: (el) => {
+            const text = el.querySelector('.msg-text').textContent.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                const copied = el.querySelector('.msg-copied');
+                copied.style.display = 'block';
+                setTimeout(() => { copied.style.display = 'none'; }, 1500);
+            }).catch(() => {
+                prompt('Copie a mensagem:', text);
             });
         },
         // Calendar

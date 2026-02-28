@@ -1089,3 +1089,69 @@ a:hover {
     margin-top: 12px;
     display: none;
 }
+
+/* ========== MESSAGES PAGE ========== */
+.msg-group {
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.msg-group-title {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px 16px;
+    background: rgba(196, 127, 59, 0.06);
+    border-bottom: 1px solid var(--border-card);
+    letter-spacing: 0.3px;
+}
+
+.msg-card {
+    padding: 14px 16px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid var(--border-card);
+}
+
+.msg-card:last-child {
+    border-bottom: none;
+}
+
+.msg-card:hover {
+    background: rgba(196, 127, 59, 0.06);
+}
+
+.msg-card:active {
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.msg-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.msg-text {
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    color: var(--text-secondary);
+}
+
+.msg-copied {
+    display: none;
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 3px 10px;
+    border-radius: 6px;
+    animation: fadeIn 0.2s ease;
+}
