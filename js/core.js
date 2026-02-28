@@ -125,14 +125,10 @@ const Core = (function () {
     // ========== KANBAN COLUMNS ==========
     const KANBAN_COLUMNS = [
         { id: 'lead', label: 'Lead', color: '#6b7280' },
-        { id: 'contacted', label: 'Contatado', color: '#3b82f6' },
-        { id: 'meeting', label: 'Reunião', color: '#d4a05a' },
-        { id: 'converted', label: 'Convertido', color: '#10b981' },
+        { id: 'negotiation', label: 'Negociação', color: '#3b82f6' },
         { id: 'briefing', label: 'Briefing', color: '#06b6d4' },
         { id: 'production', label: 'Produção', color: '#f97316' },
-        { id: 'approval', label: 'Aprovação', color: '#eab308' },
-        { id: 'adjustments', label: 'Ajustes', color: '#ef4444' },
-        { id: 'delivered', label: 'Entregue', color: '#22c55e' },
+        { id: 'review', label: 'Revisão', color: '#eab308' },
         { id: 'completed', label: 'Concluído', color: '#10b981' },
     ];
 
@@ -1018,12 +1014,15 @@ const Core = (function () {
         const order = orders.find(o => o.id === orderId);
         if (!order) return;
 
-        const flow = ['lead', 'contacted', 'meeting', 'proposal', 'converted'];
+        const flow = ['lead', 'negotiation', 'briefing', 'production', 'review', 'completed'];
         const idx = flow.indexOf(order.status);
         if (idx < flow.length - 1) {
+            const prev = order.status;
             order.status = flow[idx + 1];
             order.updated_at = new Date().toISOString();
-            if (order.status === 'converted') order.converted_at = new Date().toISOString();
+            if (order.status === 'completed') order.converted_at = new Date().toISOString();
+            if (!order.activity_log) order.activity_log = [];
+            order.activity_log.push({ from: prev, to: order.status, at: new Date().toISOString(), by: currentUser?.name || 'Sistema' });
             saveOrdersLocal();
             renderAll();
             toast(`${order.client_name} → ${getStatusLabel(order.status)}`, 'success');
@@ -1972,9 +1971,9 @@ const Core = (function () {
         const body = document.getElementById('orders-table-body');
         if (!body) return;
         const sourceLabels = { instagram: '📱 Insta', facebook: '📘 FB', ads_meta: '📢 Meta', ads_google: '🔍 Google', indicacao: '🤝 Indicação', rua: '🚶 Rua', whatsapp: '💬 WhatsApp', influencer: '⭐ Influencer', site: '🌐 Site', outro: '📎 Outro' };
-        const presaleStatuses = ['lead', 'contacted', 'meeting', 'proposal', 'converted'];
-        const completedStatuses = ['completed', 'delivered', 'lost'];
-        const productionStatuses = ['briefing', 'production', 'approval', 'adjustments'];
+        const presaleStatuses = ['lead', 'negotiation'];
+        const completedStatuses = ['completed', 'lost'];
+        const productionStatuses = ['briefing', 'production', 'review'];
         let filtered;
         if (ordersTab === 'presale') {
             filtered = orders.filter(o => presaleStatuses.includes(o.status));
@@ -2015,7 +2014,7 @@ const Core = (function () {
         const order = orders.find(o => o.id === orderId);
         if (!order) return;
 
-        const statuses = ['lead', 'contacted', 'meeting', 'converted', 'briefing', 'production', 'approval', 'adjustments', 'delivered', 'completed', 'lost'];
+        const statuses = ['lead', 'negotiation', 'briefing', 'production', 'review', 'completed', 'lost'];
         const products = [{ v: 'd1', l: 'D-1 — Card Digital' }, { v: 'd2', l: 'D-2 — Landing Page Mobile' }, { v: 'd3', l: 'D-3 — Cardápio/Loja' }, { v: 'prime', l: 'Prime-D — Página/Site' }, { v: 'ecommerce', l: 'E-commerce' }, { v: 'saas', l: 'SaaS' }];
         const sources = [{ v: '', l: 'Não informado' }, { v: 'instagram', l: '📱 Instagram' }, { v: 'facebook', l: '📘 Facebook' }, { v: 'ads_meta', l: '📢 Anúncio Meta' }, { v: 'ads_google', l: '🔍 Google Ads' }, { v: 'indicacao', l: '🤝 Indicação' }, { v: 'rua', l: '🚶 Rua' }, { v: 'whatsapp', l: '💬 WhatsApp' }, { v: 'influencer', l: '⭐ Influenciador' }, { v: 'site', l: '🌐 Site' }, { v: 'outro', l: '📎 Outro' }];
 
@@ -2109,6 +2108,12 @@ const Core = (function () {
     }
 
     function renderAll() {
+        // Migrate old statuses to new 6-column flow
+        const statusMap = { contacted: 'negotiation', meeting: 'negotiation', proposal: 'negotiation', converted: 'briefing', approval: 'review', adjustments: 'review', delivered: 'completed' };
+        let migrated = false;
+        orders.forEach(o => { if (statusMap[o.status]) { o.status = statusMap[o.status]; migrated = true; } });
+        if (migrated) saveOrdersLocal();
+
         renderKanbanCards();
         renderRecentOrders();
         renderOrders();
@@ -2818,10 +2823,13 @@ const Core = (function () {
 
     function getStatusLabel(status) {
         const labels = {
-            lead: 'Lead', contacted: 'Contatado', meeting: 'Reunião',
-            proposal: 'Proposta', converted: 'Convertido', briefing: 'Briefing',
-            production: 'Produção', approval: 'Aprovação', adjustments: 'Ajustes',
-            delivered: 'Entregue', completed: 'Concluído', lost: 'Perdido'
+            lead: 'Lead', negotiation: 'Negociação', briefing: 'Briefing',
+            production: 'Produção', review: 'Revisão',
+            completed: 'Concluído', lost: 'Perdido',
+            // Legacy (pedidos antigos)
+            contacted: 'Contatado', meeting: 'Reunião', proposal: 'Proposta',
+            converted: 'Convertido', approval: 'Aprovação', adjustments: 'Ajustes',
+            delivered: 'Entregue'
         };
         return labels[status] || status;
     }
