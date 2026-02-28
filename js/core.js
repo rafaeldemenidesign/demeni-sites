@@ -3754,13 +3754,9 @@ const Core = (function () {
             SupabaseClient.unsubscribeChannel(chatSubscription);
         }
         await loadAndRenderMessages();
-        chatSubscription = SupabaseClient.subscribeToChannel(channel, async (newMsg) => {
-            const msgs = await SupabaseClient.getMessages(channel, 100);
-            const fullMsg = msgs.find(m => m.id === newMsg.id);
-            if (fullMsg) {
-                appendChatMessage(fullMsg);
-                scrollChatToBottom();
-            }
+        chatSubscription = SupabaseClient.subscribeToChannel(channel, (newMsg) => {
+            appendChatMessage(newMsg);
+            scrollChatToBottom();
         });
     }
 
@@ -3801,7 +3797,7 @@ const Core = (function () {
         // Avoid duplicate
         if (container.querySelector(`[data-msg-id="${msg.id}"]`)) return;
         const isMine = msg.sender_id === chatCurrentUserId;
-        const profile = msg.profiles || {};
+        const profile = chatProfiles.find(p => p.id === msg.sender_id) || {};
         const senderName = profile.name || 'Membro';
         const time = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         const bubble = document.createElement('div');

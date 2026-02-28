@@ -379,7 +379,7 @@ const SupabaseClient = (function () {
         if (!supabase) return [];
         const { data, error } = await supabase
             .from('chat_messages')
-            .select('*, profiles:sender_id(name, avatar_url, role_label)')
+            .select('*')
             .eq('channel', channel)
             .order('created_at', { ascending: true })
             .limit(limit);
