@@ -117,6 +117,7 @@ const Core = (function () {
         orders: 'Pedidos',
         queue: 'Fila de Produção',
         clients: 'Clientes Ativos',
+        messages: 'Mensagens Padrão',
         calendar: 'Calendário de Conteúdo',
         team: 'Equipe',
         metrics: 'Métricas',
