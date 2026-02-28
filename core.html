@@ -202,43 +202,17 @@
                 </section>
 
                 <!-- ========== MEUS LEADS (Vendedor) ========== -->
-                <section class="page-section" id="page-leads">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Meus Leads</h3>
-                            <button class="btn btn-sm btn-primary" onclick="Core.openNewLead()">
-                                <i class="fas fa-plus"></i> Novo Lead
-                            </button>
-                        </div>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Telefone</th>
-                                    <th>Status</th>
-                                    <th>Produto</th>
-                                    <th>Valor</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leads-body">
-                                <tr>
-                                    <td colspan="6" class="empty-state" style="padding:40px;">
-                                        <i class="fas fa-user-plus"></i><br>Nenhum lead ainda
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- ========== PEDIDOS ========== -->
+                <!-- ========== PEDIDOS (unificado) ========== -->
                 <section class="page-section" id="page-orders">
                     <div class="card" style="margin-bottom:20px;">
                         <div class="card-header">
-                            <div style="display:flex;gap:8px;">
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <button class="btn btn-sm btn-secondary" id="tab-orders-all"
+                                    onclick="Core.switchOrderTab('all')" style="font-size:12px;">Todos</button>
+                                <button class="btn btn-sm btn-secondary" id="tab-orders-presale"
+                                    onclick="Core.switchOrderTab('presale')" style="font-size:12px;">Pré-venda</button>
                                 <button class="btn btn-sm btn-primary" id="tab-orders-active"
-                                    onclick="Core.switchOrderTab('active')" style="font-size:12px;">Ativos</button>
+                                    onclick="Core.switchOrderTab('active')" style="font-size:12px;">Produção</button>
                                 <button class="btn btn-sm btn-secondary" id="tab-orders-completed"
                                     onclick="Core.switchOrderTab('completed')"
                                     style="font-size:12px;">Concluídos</button>

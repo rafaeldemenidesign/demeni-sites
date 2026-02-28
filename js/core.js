@@ -15,7 +15,6 @@ const Core = (function () {
             },
             {
                 section: 'Vendas', items: [
-                    { id: 'leads', icon: 'fa-user-plus', label: 'Leads' },
                     { id: 'orders', icon: 'fa-file-invoice', label: 'Pedidos' },
                     { id: 'goals', icon: 'fa-bullseye', label: 'Metas' },
                 ]
@@ -65,7 +64,7 @@ const Core = (function () {
             {
                 section: 'Principal', items: [
                     { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
-                    { id: 'leads', icon: 'fa-user-plus', label: 'Meus Leads' },
+                    { id: 'orders', icon: 'fa-file-invoice', label: 'Pedidos' },
                     { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
                     { id: 'goals', icon: 'fa-bullseye', label: 'Minhas Metas' },
                     { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
@@ -111,7 +110,7 @@ const Core = (function () {
     const PAGE_TITLES = {
         dashboard: 'Dashboard',
         pipeline: 'Pipeline de Pedidos',
-        leads: 'Meus Leads',
+        leads: 'Pedidos',
         orders: 'Pedidos',
         queue: 'Fila de Produção',
         clients: 'Clientes Ativos',
@@ -1815,10 +1814,11 @@ const Core = (function () {
 
     function switchOrderTab(tab) {
         ordersTab = tab;
-        const btnActive = document.getElementById('tab-orders-active');
-        const btnDone = document.getElementById('tab-orders-completed');
-        if (btnActive) { btnActive.className = tab === 'active' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary'; }
-        if (btnDone) { btnDone.className = tab === 'completed' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary'; }
+        const tabs = ['all', 'presale', 'active', 'completed'];
+        tabs.forEach(t => {
+            const btn = document.getElementById('tab-orders-' + t);
+            if (btn) btn.className = t === tab ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+        });
         renderOrders();
     }
 
@@ -1826,13 +1826,22 @@ const Core = (function () {
         const body = document.getElementById('orders-table-body');
         if (!body) return;
         const sourceLabels = { instagram: '📱 Insta', facebook: '📘 FB', ads_meta: '📢 Meta', ads_google: '🔍 Google', indicacao: '🤝 Indicação', rua: '🚶 Rua', whatsapp: '💬 WhatsApp', influencer: '⭐ Influencer', site: '🌐 Site', outro: '📎 Outro' };
+        const presaleStatuses = ['lead', 'contacted', 'meeting', 'proposal', 'converted'];
         const completedStatuses = ['completed', 'delivered', 'lost'];
-        const filtered = ordersTab === 'completed'
-            ? orders.filter(o => completedStatuses.includes(o.status))
-            : orders.filter(o => !completedStatuses.includes(o.status));
+        const productionStatuses = ['briefing', 'production', 'approval', 'adjustments'];
+        let filtered;
+        if (ordersTab === 'presale') {
+            filtered = orders.filter(o => presaleStatuses.includes(o.status));
+        } else if (ordersTab === 'active') {
+            filtered = orders.filter(o => productionStatuses.includes(o.status));
+        } else if (ordersTab === 'completed') {
+            filtered = orders.filter(o => completedStatuses.includes(o.status));
+        } else {
+            filtered = orders;
+        }
 
         if (filtered.length === 0) {
-            body.innerHTML = `<tr><td colspan="7" class="empty-state" style="padding:40px;"><i class="fas fa-file-invoice"></i><br>${ordersTab === 'completed' ? 'Nenhum pedido concluído' : 'Nenhum pedido ativo'}</td></tr>`;
+            body.innerHTML = `<tr><td colspan="7" class="empty-state" style="padding:40px;"><i class="fas fa-file-invoice"></i><br>Nenhum pedido nesta categoria</td></tr>`;
             return;
         }
         body.innerHTML = filtered.map(o => `
@@ -1956,7 +1965,6 @@ const Core = (function () {
     function renderAll() {
         renderKanbanCards();
         renderRecentOrders();
-        renderLeads();
         renderOrders();
         renderQueue();
         renderClients();
