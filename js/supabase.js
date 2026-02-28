@@ -300,6 +300,67 @@ const SupabaseClient = (function () {
         }
     }
 
+    // ========== ORDER ATTACHMENTS ==========
+    /**
+     * Upload a file to Supabase Storage (original quality, no compression).
+     * Bucket 'order-attachments' must exist with public access.
+     * Returns { url, filePath } or null on failure.
+     */
+    async function uploadAttachment(orderId, file) {
+        if (!supabase) return null;
+
+        try {
+            const timestamp = Date.now();
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const filePath = `${orderId}/${timestamp}_${safeName}`;
+
+            const { data, error } = await supabase.storage
+                .from('order-attachments')
+                .upload(filePath, file, {
+                    contentType: file.type,
+                    upsert: false
+                });
+
+            if (error) {
+                console.warn('⚠️ Attachment upload failed:', error.message);
+                return null;
+            }
+
+            const { data: urlData } = supabase.storage
+                .from('order-attachments')
+                .getPublicUrl(filePath);
+
+            console.log('✅ Attachment uploaded:', urlData.publicUrl);
+            return { url: urlData.publicUrl, filePath };
+        } catch (e) {
+            console.warn('⚠️ Attachment upload error:', e.message);
+            return null;
+        }
+    }
+
+    /**
+     * Delete a file from Supabase Storage.
+     */
+    async function deleteAttachment(filePath) {
+        if (!supabase || !filePath) return false;
+
+        try {
+            const { error } = await supabase.storage
+                .from('order-attachments')
+                .remove([filePath]);
+
+            if (error) {
+                console.warn('⚠️ Attachment delete failed:', error.message);
+                return false;
+            }
+            console.log('✅ Attachment deleted:', filePath);
+            return true;
+        } catch (e) {
+            console.warn('⚠️ Attachment delete error:', e.message);
+            return false;
+        }
+    }
+
     // ========== CRM: ORDERS ==========
     async function getOrders() {
         if (!supabase) return { data: [], error: null };
@@ -549,6 +610,8 @@ const SupabaseClient = (function () {
         publishSite,
         getPublishedSite,
         uploadOgImage,
+        uploadAttachment,
+        deleteAttachment,
 
         // CRM
         getOrders,

@@ -1891,14 +1891,44 @@ const Core = (function () {
             if (!order) return;
             if (!order.attachments) order.attachments = [];
 
+            const useSupabase = typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient();
+            if (useSupabase) toast('Enviando...', 'info');
+
             for (const file of input.files) {
-                const base64 = await compressImage(file);
-                order.attachments.push({
-                    type: 'image',
-                    url: base64,
-                    name: file.name,
-                    added_at: new Date().toISOString(),
-                });
+                if (useSupabase) {
+                    // Upload original (full quality) to Supabase Storage
+                    const result = await SupabaseClient.uploadAttachment(orderId, file);
+                    if (result) {
+                        order.attachments.push({
+                            type: 'image',
+                            url: result.url,
+                            filePath: result.filePath,
+                            name: file.name,
+                            size: file.size,
+                            added_at: new Date().toISOString(),
+                        });
+                    } else {
+                        // Fallback to base64 if Supabase upload fails
+                        const base64 = await compressImage(file);
+                        order.attachments.push({
+                            type: 'image',
+                            url: base64,
+                            name: file.name,
+                            size: file.size,
+                            added_at: new Date().toISOString(),
+                        });
+                    }
+                } else {
+                    // No Supabase: compress and store as base64
+                    const base64 = await compressImage(file);
+                    order.attachments.push({
+                        type: 'image',
+                        url: base64,
+                        name: file.name,
+                        size: file.size,
+                        added_at: new Date().toISOString(),
+                    });
+                }
             }
             saveOrdersLocal();
             toast(`${input.files.length} imagem(ns) anexada(s)`, 'success');
@@ -1929,10 +1959,18 @@ const Core = (function () {
         if (modal) { modal.remove(); openOrderDetail(orderId); }
     }
 
-    function removeAttachment(orderId, index) {
+    async function removeAttachment(orderId, index) {
         const order = orders.find(o => o.id === orderId);
         if (!order || !order.attachments) return;
         if (!confirm('Remover este anexo?')) return;
+
+        const attachment = order.attachments[index];
+
+        // Delete from Supabase Storage if it has a filePath
+        if (attachment.filePath && typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient()) {
+            await SupabaseClient.deleteAttachment(attachment.filePath);
+        }
+
         order.attachments.splice(index, 1);
         saveOrdersLocal();
         const modal = document.getElementById('modal-order-detail');
@@ -3372,13 +3410,22 @@ const Core = (function () {
                         ${order.briefing.references ? `<div><strong>Referências:</strong> ${order.briefing.references}</div>` : ''}
                     </div>` : ''}
                     ${(() => {
-                // ATTACHMENTS SECTION
+                // ATTACHMENTS SECTION (Trello-style)
                 const attachments = order.attachments || [];
-                const images = attachments.filter(a => a.type === 'image');
-                const links = attachments.filter(a => a.type === 'link');
+                const formatSize = (bytes) => {
+                    if (!bytes) return '';
+                    if (bytes < 1024) return bytes + ' B';
+                    if (bytes < 1048576) return (bytes / 1024).toFixed(0) + ' KB';
+                    return (bytes / 1048576).toFixed(1) + ' MB';
+                };
+                const formatAttDate = (iso) => {
+                    if (!iso) return '';
+                    const d = new Date(iso);
+                    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) + ' · ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                };
                 return `
                         <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border-card);border-radius:10px;padding:14px;margin-bottom:12px;margin-top:12px;">
-                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                                 <span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;">📎 Anexos (${attachments.length})</span>
                                 <div style="display:flex;gap:4px;">
                                     <button class="btn btn-sm" onclick="event.stopPropagation();Core.addAttachment('${order.id}')" style="font-size:11px;padding:4px 8px;">
@@ -3389,27 +3436,38 @@ const Core = (function () {
                                     </button>
                                 </div>
                             </div>
-                            ${images.length > 0 ? `<div class="attach-grid">
-                                ${images.map((img, i) => {
-                    const idx = attachments.indexOf(img);
-                    return `<div style="position:relative;">
-                                        <img class="attach-thumb" src="${img.url}" onclick="event.stopPropagation();Core.openLightbox('${img.url.replace(/'/g, "\\'")}')" title="${img.name}">
-                                        <span onclick="event.stopPropagation();Core.removeAttachment('${order.id}',${idx})" style="position:absolute;top:2px;right:4px;cursor:pointer;font-size:14px;color:#ef4444;opacity:0.7;background:rgba(0,0,0,0.6);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;" title="Remover">&times;</span>
+                            ${attachments.length > 0 ? `<div style="display:flex;flex-direction:column;gap:6px;">
+                                ${attachments.map((att, idx) => {
+                    const isImage = att.type === 'image';
+                    const isLink = att.type === 'link';
+                    const thumbSrc = isImage ? att.url : '';
+                    const icon = isLink ? 'fa-external-link-alt' : 'fa-image';
+                    const iconColor = isLink ? '#6366f1' : '#10b981';
+                    return `<div style="display:flex;align-items:center;gap:10px;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);transition:background 0.15s;" onmouseenter="this.style.background='rgba(255,255,255,0.06)'" onmouseleave="this.style.background='rgba(255,255,255,0.03)'">
+                                        ${isImage ? `<img src="${thumbSrc}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;cursor:pointer;flex-shrink:0;" onclick="event.stopPropagation();Core.openLightbox('${att.url.replace(/'/g, "\\\\'")}')" title="Ampliar">` :
+                            `<div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:rgba(99,102,241,0.1);border-radius:6px;flex-shrink:0;">
+                                            <i class="fas ${icon}" style="font-size:18px;color:${iconColor};"></i>
+                                        </div>`}
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;" title="${att.name || 'Sem nome'}">${att.name || 'Sem nome'}</div>
+                                            <div style="font-size:11px;color:var(--text-muted);display:flex;gap:8px;">
+                                                <span>${formatAttDate(att.added_at)}</span>
+                                                ${att.size ? `<span>${formatSize(att.size)}</span>` : ''}
+                                            </div>
+                                        </div>
+                                        <div style="display:flex;gap:4px;flex-shrink:0;">
+                                            ${isImage ? `<a href="${att.url}" target="_blank" download="${att.name || 'image'}" onclick="event.stopPropagation();" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(16,185,129,0.1);color:#10b981;cursor:pointer;text-decoration:none;" title="Download">
+                                                <i class="fas fa-download" style="font-size:12px;"></i>
+                                            </a>` : `<a href="${att.url}" target="_blank" onclick="event.stopPropagation();" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(99,102,241,0.1);color:#6366f1;cursor:pointer;text-decoration:none;" title="Abrir link">
+                                                <i class="fas fa-external-link-alt" style="font-size:12px;"></i>
+                                            </a>`}
+                                            <span onclick="event.stopPropagation();Core.removeAttachment('${order.id}',${idx})" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(239,68,68,0.1);color:#ef4444;cursor:pointer;" title="Remover">
+                                                <i class="fas fa-trash-alt" style="font-size:12px;"></i>
+                                            </span>
+                                        </div>
                                     </div>`;
                 }).join('')}
-                            </div>` : ''}
-                            ${links.length > 0 ? `<div style="display:flex;flex-direction:column;gap:4px;${images.length > 0 ? 'margin-top:8px;' : ''}">
-                                ${links.map((lnk, i) => {
-                    const idx = attachments.indexOf(lnk);
-                    return `<div style="display:flex;align-items:center;gap:6px;">
-                                        <a href="${lnk.url}" target="_blank" class="attach-link" style="flex:1;" onclick="event.stopPropagation();">
-                                            <i class="fas fa-external-link-alt"></i> ${lnk.name}
-                                        </a>
-                                        <span onclick="event.stopPropagation();Core.removeAttachment('${order.id}',${idx})" style="cursor:pointer;color:#ef4444;opacity:0.6;font-size:14px;" title="Remover">&times;</span>
-                                    </div>`;
-                }).join('')}
-                            </div>` : ''}
-                            ${attachments.length === 0 ? '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px;">Nenhum anexo</div>' : ''}
+                            </div>` : '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Nenhum anexo</div>'}
                         </div>`;
             })()}
                     ${(() => {
