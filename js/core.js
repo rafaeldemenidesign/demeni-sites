@@ -1788,12 +1788,35 @@ const Core = (function () {
             loss_reason: order.loss_reason || '',
         };
 
-        fetch(sheetsUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload),
-        }).catch(err => console.warn('[Sheets] Backup failed:', err.message));
+        // Use iframe + form to bypass CORS/redirect issues with Apps Script
+        try {
+            const iframe = document.createElement('iframe');
+            iframe.name = 'sheets-submit-' + Date.now();
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = sheetsUrl;
+            form.target = iframe.name;
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'payload';
+            input.value = JSON.stringify(payload);
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+
+            // Clean up after 10s
+            setTimeout(() => {
+                iframe.remove();
+                form.remove();
+            }, 10000);
+        } catch (err) {
+            console.warn('[Sheets] Backup failed:', err.message);
+        }
     }
 
     function saveIntegrationSettings() {
