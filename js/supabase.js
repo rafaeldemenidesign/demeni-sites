@@ -652,6 +652,48 @@ const SupabaseClient = (function () {
         return supabase;
     }
 
+    // ========== USER MANAGEMENT ==========
+    async function createUser(email, password, name, role, roleLabel) {
+        if (!supabase) return { data: null, error: { message: 'Supabase not configured' } };
+        // Sign up the user (this creates auth.users entry)
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { name, role } }
+        });
+        if (authError) return { data: null, error: authError };
+        // Insert profile
+        const userId = authData.user?.id;
+        if (userId) {
+            await supabase.from('profiles').upsert({
+                id: userId,
+                email,
+                name,
+                role,
+                role_label: roleLabel || role
+            });
+        }
+        return { data: authData, error: null };
+    }
+
+    async function updateUserRole(userId, role, roleLabel) {
+        if (!supabase) return { error: { message: 'Not configured' } };
+        const { error } = await supabase
+            .from('profiles')
+            .update({ role, role_label: roleLabel })
+            .eq('id', userId);
+        return { error };
+    }
+
+    async function deleteProfile(userId) {
+        if (!supabase) return { error: { message: 'Not configured' } };
+        const { error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', userId);
+        return { error };
+    }
+
     // ========== PUBLIC API ==========
     return {
         init,
@@ -668,6 +710,11 @@ const SupabaseClient = (function () {
         // Profile
         getUserProfile,
         updateUserProfile,
+
+        // User Management
+        createUser,
+        updateUserRole,
+        deleteProfile,
 
         // Projects
         getProjects,

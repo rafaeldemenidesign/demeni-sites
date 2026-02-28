@@ -5,111 +5,55 @@
 
 const Core = (function () {
     // ========== ROLE MENU CONFIG ==========
-    const ROLE_MENUS = {
-        admin: [
-            {
-                section: 'Principal', items: [
-                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
-                    { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
-                ]
-            },
-            {
-                section: 'Vendas', items: [
-                    { id: 'orders', icon: 'fa-file-invoice', label: 'Pedidos' },
-                    { id: 'goals', icon: 'fa-bullseye', label: 'Metas' },
-                ]
-            },
-            {
-                section: 'Produção', items: [
-                    { id: 'queue', icon: 'fa-paint-brush', label: 'Fila de Produção' },
-                    { id: 'criar-site', icon: 'fa-magic', label: 'Criar Site', href: 'app.html' },
-                ]
-            },
-            {
-                section: 'Suporte', items: [
-                    { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
-                ]
-            },
-            {
-                section: 'Marketing', items: [
-                    { id: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário' },
-                    { id: 'metrics', icon: 'fa-chart-line', label: 'Métricas' },
-                ]
-            },
-            {
-                section: 'Gestão', items: [
-                    { id: 'team', icon: 'fa-users', label: 'Equipe' },
-                    { id: 'financial', icon: 'fa-wallet', label: 'Financeiro' },
-                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
-                    { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
-                ]
-            },
-        ],
-        gestora: [
-            {
-                section: 'Principal', items: [
-                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
-                    { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
-                ]
-            },
-            {
-                section: 'Gestão', items: [
-                    { id: 'team', icon: 'fa-users', label: 'Equipe' },
-                    { id: 'financial', icon: 'fa-wallet', label: 'Financeiro' },
-                    { id: 'metrics', icon: 'fa-chart-line', label: 'Métricas' },
-                    { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
-                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
-                ]
-            },
-        ],
-        vendedor: [
-            {
-                section: 'Principal', items: [
-                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
-                    { id: 'orders', icon: 'fa-file-invoice', label: 'Pedidos' },
-                    { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
-                    { id: 'goals', icon: 'fa-bullseye', label: 'Minhas Metas' },
-                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
-                    { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
-                ]
-            },
-        ],
-        criadora: [
-            {
-                section: 'Produção', items: [
-                    { id: 'queue', icon: 'fa-paint-brush', label: 'Minha Fila' },
-                    { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
-                    { id: 'metrics', icon: 'fa-chart-line', label: 'Meu Histórico' },
-                    { id: 'criar-site', icon: 'fa-magic', label: 'Criar Site', href: 'app.html' },
-                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
-                    { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
-                ]
-            },
-        ],
-        suporte: [
-            {
-                section: 'Atendimento', items: [
-                    { id: 'clients', icon: 'fa-headset', label: 'Clientes Ativos' },
-                    { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
-                    { id: 'leads', icon: 'fa-user-plus', label: 'Leads' },
-                    { id: 'goals', icon: 'fa-bullseye', label: 'Minhas Metas' },
-                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Visão Geral' },
-                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
-                    { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
-                ]
-            },
-        ],
-        social_media: [
-            {
-                section: 'Marketing', items: [
-                    { id: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário' },
-                    { id: 'metrics', icon: 'fa-chart-line', label: 'Métricas' },
-                    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Visão Geral' },
-                    { id: 'chat', icon: 'fa-comments', label: 'Chat' },
-                    { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
-                ]
-            },
-        ],
+    // ========== SIDEBAR UNIFICADA ==========
+    const SIDEBAR_ITEMS = [
+        {
+            section: 'Principal', items: [
+                { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
+                { id: 'pipeline', icon: 'fa-columns', label: 'Pipeline' },
+            ]
+        },
+        {
+            section: 'Vendas', items: [
+                { id: 'orders', icon: 'fa-file-invoice', label: 'Pedidos' },
+                { id: 'goals', icon: 'fa-bullseye', label: 'Metas' },
+            ]
+        },
+        {
+            section: 'Produção', items: [
+                { id: 'queue', icon: 'fa-paint-brush', label: 'Fila de Produção' },
+                { id: 'criar-site', icon: 'fa-magic', label: 'Criar Site', href: 'app.html' },
+            ]
+        },
+        {
+            section: 'Suporte', items: [
+                { id: 'clients', icon: 'fa-headset', label: 'Clientes' },
+            ]
+        },
+        {
+            section: 'Marketing', items: [
+                { id: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário' },
+                { id: 'metrics', icon: 'fa-chart-line', label: 'Métricas' },
+            ]
+        },
+        {
+            section: 'Gestão', items: [
+                { id: 'team', icon: 'fa-users', label: 'Equipe' },
+                { id: 'financial', icon: 'fa-wallet', label: 'Financeiro' },
+                { id: 'chat', icon: 'fa-comments', label: 'Chat' },
+                { id: 'settings', icon: 'fa-cog', label: 'Configurações' },
+            ]
+        },
+    ];
+
+    // Páginas acessíveis por cada role (admin acessa tudo)
+    const ROLE_PERMISSIONS = {
+        admin: ['dashboard', 'pipeline', 'orders', 'goals', 'queue', 'criar-site', 'clients', 'calendar', 'metrics', 'team', 'financial', 'chat', 'settings'],
+        gestora: ['dashboard', 'pipeline', 'clients', 'metrics', 'team', 'financial', 'chat', 'settings'],
+        vendedor: ['dashboard', 'pipeline', 'orders', 'goals', 'chat', 'settings'],
+        criadora: ['pipeline', 'queue', 'criar-site', 'metrics', 'chat', 'settings'],
+        suporte: ['dashboard', 'pipeline', 'clients', 'goals', 'chat', 'settings'],
+        social_media: ['dashboard', 'calendar', 'metrics', 'chat', 'settings'],
     };
 
     // ========== PAGE TITLES ==========
@@ -312,22 +256,38 @@ const Core = (function () {
     // ========== SIDEBAR ==========
     function buildSidebar() {
         const nav = document.getElementById('sidebar-nav');
-        const menus = ROLE_MENUS[currentRole] || ROLE_MENUS.criadora;
+        const allowed = ROLE_PERMISSIONS[currentRole] || ROLE_PERMISSIONS.admin;
 
-        nav.innerHTML = menus.map(section => `
+        nav.innerHTML = SIDEBAR_ITEMS.map(section => `
             <div class="nav-section">
                 <div class="nav-section-title">${section.section}</div>
-                ${section.items.map(item => item.href
-            ? `<a class="nav-item" href="${item.href}" target="_blank" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;">
-                        <i class="fas ${item.icon}"></i>
-                        <span>${item.label}</span>
-                        <i class="fas fa-external-link-alt" style="margin-left:auto;font-size:9px;opacity:0.4;"></i>
-                    </a>`
-            : `<button class="nav-item" data-page="${item.id}" onclick="Core.navigate('${item.id}')">
-                        <i class="fas ${item.icon}"></i>
-                        <span>${item.label}</span>
-                    </button>`
-        ).join('')}
+                ${section.items.map(item => {
+            const hasAccess = allowed.includes(item.id);
+            const disabledClass = hasAccess ? '' : ' disabled';
+            if (item.href) {
+                return hasAccess
+                    ? `<a class="nav-item" href="${item.href}" target="_blank" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;">
+                                <i class="fas ${item.icon}"></i>
+                                <span>${item.label}</span>
+                                <i class="fas fa-external-link-alt" style="margin-left:auto;font-size:9px;opacity:0.4;"></i>
+                            </a>`
+                    : `<div class="nav-item disabled" title="Sem acesso">
+                                <i class="fas ${item.icon}"></i>
+                                <span>${item.label}</span>
+                                <i class="fas fa-lock" style="margin-left:auto;font-size:9px;"></i>
+                            </div>`;
+            }
+            return hasAccess
+                ? `<button class="nav-item" data-page="${item.id}" onclick="Core.navigate('${item.id}')">
+                            <i class="fas ${item.icon}"></i>
+                            <span>${item.label}</span>
+                        </button>`
+                : `<div class="nav-item disabled" data-page="${item.id}" title="Sem acesso">
+                            <i class="fas ${item.icon}"></i>
+                            <span>${item.label}</span>
+                            <i class="fas fa-lock" style="margin-left:auto;font-size:9px;"></i>
+                        </div>`;
+        }).join('')}
             </div>
         `).join('');
 
@@ -1567,34 +1527,168 @@ const Core = (function () {
     }
 
     // ========== TEAM PANEL (Admin/Gestora) ==========
-    function renderTeam() {
+    async function renderTeam() {
         const tbody = document.getElementById('team-body');
         if (!tbody) return;
 
-        // Mock team for now (will come from Supabase profiles later)
-        const team = [
-            { name: 'Rafael', role: 'admin', email: 'rafael@demeni.com', online: true },
+        // Fetch real profiles from Supabase
+        const profiles = await SupabaseClient.getProfiles();
+        const team = profiles.length ? profiles : [
+            { name: 'Rafael', role: 'admin', email: 'rafael@demeni.com' },
         ];
+
+        const isAdmin = currentRole === 'admin';
 
         tbody.innerHTML = team.map(m => `
             <tr>
                 <td>
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div style="width:32px;height:32px;border-radius:50%;background:var(--brand-gradient);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:white;">
-                            ${m.name.charAt(0)}
+                            ${(m.name || m.email || '?').charAt(0).toUpperCase()}
                         </div>
-                        <strong>${m.name}</strong>
+                        <strong>${m.name || m.email?.split('@')[0] || 'Sem nome'}</strong>
                     </div>
                 </td>
-                <td><span class="user-role" data-role="${m.role}" style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${ROLE_LABELS[m.role] || m.role}</span></td>
-                <td style="font-size:13px;color:var(--text-muted);">${m.email}</td>
-                <td><span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:${m.online ? 'var(--status-completed)' : 'var(--text-muted)'};"><span style="width:6px;height:6px;border-radius:50%;background:${m.online ? 'var(--status-completed)' : 'var(--text-muted)'}"></span> ${m.online ? 'Online' : 'Offline'}</span></td>
-                <td><button class="btn btn-sm btn-secondary"><i class="fas fa-ellipsis-h"></i></button></td>
+                <td>
+                    ${isAdmin
+                ? `<select class="team-role-select" data-uid="${m.id}" style="background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-card);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;">
+                            ${Object.entries(ROLE_LABELS).map(([k, v]) => `<option value="${k}" ${m.role === k ? 'selected' : ''}>${v}</option>`).join('')}
+                        </select>`
+                : `<span class="user-role" data-role="${m.role}" style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${ROLE_LABELS[m.role] || m.role_label || m.role}</span>`
+            }
+                </td>
+                <td style="font-size:13px;color:var(--text-muted);">${m.email || '—'}</td>
+                <td><span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--status-completed);"><span style="width:6px;height:6px;border-radius:50%;background:var(--status-completed)"></span> Ativo</span></td>
+                <td>
+                    ${isAdmin
+                ? `<button class="btn btn-sm btn-secondary team-delete-btn" data-uid="${m.id}" data-name="${m.name || m.email}" title="Excluir membro" style="color:#ef4444;">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>`
+                : `<button class="btn btn-sm btn-secondary"><i class="fas fa-ellipsis-h"></i></button>`
+            }
+                </td>
             </tr>
         `).join('');
 
+        // Wire admin events
+        if (isAdmin) {
+            tbody.querySelectorAll('.team-role-select').forEach(sel => {
+                sel.addEventListener('change', async (e) => {
+                    const uid = e.target.dataset.uid;
+                    const newRole = e.target.value;
+                    const label = ROLE_LABELS[newRole] || newRole;
+                    const { error } = await SupabaseClient.updateUserRole(uid, newRole, label);
+                    if (error) { toast('Erro ao alterar cargo: ' + error.message, 'error'); return; }
+                    toast(`Cargo alterado para ${label}`, 'success');
+                });
+            });
+            tbody.querySelectorAll('.team-delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteTeamMember(btn.dataset.uid, btn.dataset.name));
+            });
+        }
+
+        // Wire add member button (admin only)
+        const addBtn = document.getElementById('btn-add-member');
+        if (addBtn) {
+            addBtn.style.display = isAdmin ? '' : 'none';
+            addBtn.onclick = () => openCreateMemberModal();
+        }
+
         renderLeaderboard();
         renderPerformance();
+    }
+
+    async function deleteTeamMember(uid, name) {
+        if (!confirm(`Tem certeza que deseja excluir "${name}"?`)) return;
+        const { error } = await SupabaseClient.deleteProfile(uid);
+        if (error) { toast('Erro ao excluir: ' + error.message, 'error'); return; }
+        toast(`${name} removido da equipe`, 'success');
+        renderTeam();
+    }
+
+    function openCreateMemberModal() {
+        // Create modal if not exists
+        let modal = document.getElementById('modal-create-member');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modal-create-member';
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:440px;">
+                    <div class="modal-header">
+                        <h3 style="margin:0;font-size:18px;"><i class="fas fa-user-plus" style="margin-right:8px;color:var(--brand-primary);"></i>Criar Membro</h3>
+                        <button class="modal-close" onclick="document.getElementById('modal-create-member').classList.remove('active')">&times;</button>
+                    </div>
+                    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block;">Nome</label>
+                            <input type="text" id="new-member-name" class="input-field" placeholder="Nome completo" />
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block;">Email</label>
+                            <input type="email" id="new-member-email" class="input-field" placeholder="email@demeni.com" />
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block;">Senha</label>
+                            <input type="password" id="new-member-password" class="input-field" placeholder="Mínimo 6 caracteres" />
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block;">Cargo</label>
+                            <select id="new-member-role" class="input-field" style="cursor:pointer;">
+                                ${Object.entries(ROLE_LABELS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;">
+                        <button class="btn btn-secondary" onclick="document.getElementById('modal-create-member').classList.remove('active')">Cancelar</button>
+                        <button class="btn btn-primary" id="btn-confirm-create-member"><i class="fas fa-check" style="margin-right:6px;"></i>Criar Membro</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Close on overlay click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+        }
+
+        // Clear and show
+        modal.querySelector('#new-member-name').value = '';
+        modal.querySelector('#new-member-email').value = '';
+        modal.querySelector('#new-member-password').value = '';
+        modal.querySelector('#new-member-role').value = 'vendedor';
+        modal.classList.add('active');
+
+        // Wire confirm button
+        const confirmBtn = modal.querySelector('#btn-confirm-create-member');
+        confirmBtn.onclick = async () => {
+            const name = modal.querySelector('#new-member-name').value.trim();
+            const email = modal.querySelector('#new-member-email').value.trim();
+            const password = modal.querySelector('#new-member-password').value;
+            const role = modal.querySelector('#new-member-role').value;
+            const roleLabel = ROLE_LABELS[role] || role;
+
+            if (!name || !email || !password) { toast('Preencha todos os campos', 'error'); return; }
+            if (password.length < 6) { toast('Senha precisa ter no mínimo 6 caracteres', 'error'); return; }
+
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+
+            const { data, error } = await SupabaseClient.createUser(email, password, name, role, roleLabel);
+            if (error) {
+                toast('Erro ao criar: ' + error.message, 'error');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check" style="margin-right:6px;"></i>Criar Membro';
+                return;
+            }
+
+            toast(`${name} adicionado como ${roleLabel}!`, 'success');
+            modal.classList.remove('active');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-check" style="margin-right:6px;"></i>Criar Membro';
+            renderTeam();
+        };
     }
 
     // ========== PERFORMANCE MONITOR ==========

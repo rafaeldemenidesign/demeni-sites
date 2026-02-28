@@ -213,6 +213,18 @@ a:hover {
     border-left-color: var(--brand-primary);
 }
 
+.nav-item.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+    user-select: none;
+}
+
+.nav-item.disabled:hover {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
 .nav-item i {
     width: 20px;
     text-align: center;
@@ -1051,6 +1063,24 @@ a:hover {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 2px rgba(196, 127, 59, 0.15);
 }
 
 /* ========== EMPTY STATE ========== */
