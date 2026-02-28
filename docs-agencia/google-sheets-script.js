@@ -2,15 +2,40 @@
 // DEMENI CORE — Google Apps Script
 // Cole este código no editor do Apps Script
 // ================================
-// Como configurar:
-// 1. Abra a planilha no Google Sheets
-// 2. Menu: Extensões → Apps Script
-// 3. Cole este código
-// 4. Implantar → Gerenciar implantações → Editar
-// 5. Executar como: Eu → Quem tem acesso: Qualquer pessoa
-// 6. Copie a URL gerada e cole nas configurações do Core
+// IMPORTANTE: Após colar, vá em:
+// Implantar → Gerenciar implantações → Editar (lápis)
+// Versão: Nova versão → Implantar
+
+function doGet(e) {
+    // Se tem parâmetro 'data', é um backup do Core
+    if (e && e.parameter && e.parameter.data) {
+        return processData(e.parameter.data);
+    }
+    return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Demeni Sheets API ativa' }))
+        .setMimeType(ContentService.MimeType.JSON);
+}
 
 function doPost(e) {
+    try {
+        if (e.postData && e.postData.contents) {
+            return processData(e.postData.contents);
+        } else if (e.parameter && e.parameter.payload) {
+            return processData(e.parameter.payload);
+        } else if (e.parameter && e.parameter.data) {
+            return processData(e.parameter.data);
+        }
+        return ContentService
+            .createTextOutput(JSON.stringify({ success: false, error: 'No data received' }))
+            .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+        return ContentService
+            .createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
+            .setMimeType(ContentService.MimeType.JSON);
+    }
+}
+
+function processData(jsonString) {
     try {
         var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Base');
         if (!sheet) {
@@ -24,15 +49,7 @@ function doPost(e) {
             sheet.setFrozenRows(1);
         }
 
-        // Handle both JSON body and form submissions
-        var data;
-        if (e.postData && e.postData.contents) {
-            data = JSON.parse(e.postData.contents);
-        } else if (e.parameter && e.parameter.payload) {
-            data = JSON.parse(e.parameter.payload);
-        } else {
-            data = e.parameter || {};
-        }
+        var data = JSON.parse(jsonString);
 
         sheet.appendRow([
             new Date().toLocaleString('pt-BR'),
@@ -62,10 +79,4 @@ function doPost(e) {
             .createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
             .setMimeType(ContentService.MimeType.JSON);
     }
-}
-
-function doGet(e) {
-    return ContentService
-        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Demeni Sheets API ativa' }))
-        .setMimeType(ContentService.MimeType.JSON);
 }

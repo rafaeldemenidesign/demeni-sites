@@ -1788,32 +1788,13 @@ const Core = (function () {
             loss_reason: order.loss_reason || '',
         };
 
-        // Use iframe + form to bypass CORS/redirect issues with Apps Script
+        // Use GET with URL params (most reliable for Apps Script cross-origin)
         try {
-            const iframe = document.createElement('iframe');
-            iframe.name = 'sheets-submit-' + Date.now();
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = sheetsUrl;
-            form.target = iframe.name;
-
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'payload';
-            input.value = JSON.stringify(payload);
-            form.appendChild(input);
-
-            document.body.appendChild(form);
-            form.submit();
-
-            // Clean up after 10s
-            setTimeout(() => {
-                iframe.remove();
-                form.remove();
-            }, 10000);
+            const params = new URLSearchParams();
+            params.set('data', JSON.stringify(payload));
+            const img = new Image();
+            img.src = sheetsUrl + '?' + params.toString();
+            // Image request follows redirects automatically, no CORS issues
         } catch (err) {
             console.warn('[Sheets] Backup failed:', err.message);
         }
