@@ -584,13 +584,27 @@ const Core = (function () {
             const dlIcon = diffDays < 0 ? 'fa-exclamation-triangle' : 'fa-calendar-check';
             const dateHTML = `<div class="kanban-card-meta" style="color:${dlColor};"><i class="fas ${dlIcon}"></i> ${formatDate(deadlineDate.toISOString())}</div>`;
 
+            // Thumbnail + badges
+            const imgs = (order.attachments || []).filter(a => a.type === 'image');
+            const links = (order.attachments || []).filter(a => a.type === 'link');
+            const attachCount = (order.attachments || []).length;
+            const thumbHTML = imgs.length > 0 ? `<img class="kanban-card-thumb" src="${imgs[0].url}" alt="">` : '';
+            const checkPct = getChecklistProgress(order);
+
             card.innerHTML = `
+                ${thumbHTML}
                 <div class="kanban-card-title">${order.client_name}</div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                     <span class="kanban-card-product">${order.product_type?.toUpperCase() || 'D-2'}</span>
                     ${order.price ? `<span style="font-size:12px;color:var(--text-muted);">R$ ${parseFloat(order.price).toFixed(0)}</span>` : ''}
                 </div>
                 ${dateHTML}
+                <div class="kanban-card-badges">
+                    ${attachCount > 0 ? `<span><i class="fas fa-paperclip"></i>${attachCount}</span>` : ''}
+                    ${links.length > 0 ? `<span><i class="fas fa-link"></i>${links.length}</span>` : ''}
+                    ${checkPct > 0 ? `<span class="badge-check"><i class="fas fa-check-circle"></i>${checkPct}%</span>` : ''}
+                </div>
+                ${checkPct > 0 ? `<div class="checklist-progress"><div class="checklist-progress-bar" style="width:${checkPct}%"></div></div>` : ''}
             `;
 
             container.appendChild(card);
@@ -1798,6 +1812,134 @@ const Core = (function () {
         } catch (err) {
             console.warn('[Sheets] Backup failed:', err.message);
         }
+    }
+
+    // ========== ATTACHMENTS & CHECKLIST ==========
+    const DEFAULT_CHECKLIST = [
+        { key: 'logo', label: '📷 Logo / imagem recebida' },
+        { key: 'colors', label: '🎨 Cores definidas' },
+        { key: 'texts', label: '📝 Textos e conteúdos prontos' },
+        { key: 'refs', label: '🔗 Referências visuais OK' },
+        { key: 'approval', label: '✅ Aprovação do cliente' },
+    ];
+
+    function getChecklist(order) {
+        if (!order.checklist) order.checklist = {};
+        return DEFAULT_CHECKLIST.map(item => ({
+            ...item,
+            done: !!order.checklist[item.key],
+        }));
+    }
+
+    function getChecklistProgress(order) {
+        if (!order.checklist) return 0;
+        const done = DEFAULT_CHECKLIST.filter(i => order.checklist[i.key]).length;
+        return Math.round((done / DEFAULT_CHECKLIST.length) * 100);
+    }
+
+    function toggleChecklistItem(orderId, key) {
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+        if (!order.checklist) order.checklist = {};
+        order.checklist[key] = !order.checklist[key];
+        saveOrdersLocal();
+        // Re-render the detail modal
+        const modal = document.getElementById('modal-order-detail');
+        if (modal) { modal.remove(); openOrderDetail(orderId); }
+        renderKanbanCards();
+    }
+
+    function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 600;
+                    let w = img.width, h = img.height;
+                    if (w > MAX) { h = h * (MAX / w); w = MAX; }
+                    if (h > MAX) { w = w * (MAX / h); h = MAX; }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/webp', 0.6));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function addAttachment(orderId) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.multiple = true;
+        input.onchange = async () => {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            if (!order.attachments) order.attachments = [];
+
+            for (const file of input.files) {
+                const base64 = await compressImage(file);
+                order.attachments.push({
+                    type: 'image',
+                    url: base64,
+                    name: file.name,
+                    added_at: new Date().toISOString(),
+                });
+            }
+            saveOrdersLocal();
+            toast(`${input.files.length} imagem(ns) anexada(s)`, 'success');
+            // Re-render
+            const modal = document.getElementById('modal-order-detail');
+            if (modal) { modal.remove(); openOrderDetail(orderId); }
+            renderKanbanCards();
+        };
+        input.click();
+    }
+
+    function addLinkAttachment(orderId) {
+        const url = prompt('Cole o link (Google Drive, referência, etc.):');
+        if (!url || !url.trim()) return;
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+        if (!order.attachments) order.attachments = [];
+        const name = prompt('Nome do link (opcional):', '') || url.substring(0, 40);
+        order.attachments.push({
+            type: 'link',
+            url: url.trim(),
+            name: name,
+            added_at: new Date().toISOString(),
+        });
+        saveOrdersLocal();
+        toast('Link adicionado!', 'success');
+        const modal = document.getElementById('modal-order-detail');
+        if (modal) { modal.remove(); openOrderDetail(orderId); }
+    }
+
+    function removeAttachment(orderId, index) {
+        const order = orders.find(o => o.id === orderId);
+        if (!order || !order.attachments) return;
+        if (!confirm('Remover este anexo?')) return;
+        order.attachments.splice(index, 1);
+        saveOrdersLocal();
+        const modal = document.getElementById('modal-order-detail');
+        if (modal) { modal.remove(); openOrderDetail(orderId); }
+        renderKanbanCards();
+    }
+
+    function openLightbox(src) {
+        const overlay = document.createElement('div');
+        overlay.className = 'lightbox-overlay';
+        overlay.innerHTML = `
+            <span class="lightbox-close">&times;</span>
+            <img src="${src}" alt="Anexo">
+        `;
+        overlay.addEventListener('click', () => overlay.remove());
+        document.body.appendChild(overlay);
     }
 
     function saveIntegrationSettings() {
@@ -3211,6 +3353,68 @@ const Core = (function () {
                         ${order.briefing.services ? `<div style="margin-bottom:6px;"><strong>Serviços:</strong> ${order.briefing.services}</div>` : ''}
                         ${order.briefing.references ? `<div><strong>Referências:</strong> ${order.briefing.references}</div>` : ''}
                     </div>` : ''}
+                    ${(() => {
+                // ATTACHMENTS SECTION
+                const attachments = order.attachments || [];
+                const images = attachments.filter(a => a.type === 'image');
+                const links = attachments.filter(a => a.type === 'link');
+                return `
+                        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border-card);border-radius:10px;padding:14px;margin-bottom:12px;margin-top:12px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;">📎 Anexos (${attachments.length})</span>
+                                <div style="display:flex;gap:4px;">
+                                    <button class="btn btn-sm" onclick="event.stopPropagation();Core.addAttachment('${order.id}')" style="font-size:11px;padding:4px 8px;">
+                                        <i class="fas fa-image"></i> Imagem
+                                    </button>
+                                    <button class="btn btn-sm" onclick="event.stopPropagation();Core.addLinkAttachment('${order.id}')" style="font-size:11px;padding:4px 8px;">
+                                        <i class="fas fa-link"></i> Link
+                                    </button>
+                                </div>
+                            </div>
+                            ${images.length > 0 ? `<div class="attach-grid">
+                                ${images.map((img, i) => {
+                    const idx = attachments.indexOf(img);
+                    return `<div style="position:relative;">
+                                        <img class="attach-thumb" src="${img.url}" onclick="event.stopPropagation();Core.openLightbox('${img.url.replace(/'/g, "\\'")}')" title="${img.name}">
+                                        <span onclick="event.stopPropagation();Core.removeAttachment('${order.id}',${idx})" style="position:absolute;top:2px;right:4px;cursor:pointer;font-size:14px;color:#ef4444;opacity:0.7;background:rgba(0,0,0,0.6);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;" title="Remover">&times;</span>
+                                    </div>`;
+                }).join('')}
+                            </div>` : ''}
+                            ${links.length > 0 ? `<div style="display:flex;flex-direction:column;gap:4px;${images.length > 0 ? 'margin-top:8px;' : ''}">
+                                ${links.map((lnk, i) => {
+                    const idx = attachments.indexOf(lnk);
+                    return `<div style="display:flex;align-items:center;gap:6px;">
+                                        <a href="${lnk.url}" target="_blank" class="attach-link" style="flex:1;" onclick="event.stopPropagation();">
+                                            <i class="fas fa-external-link-alt"></i> ${lnk.name}
+                                        </a>
+                                        <span onclick="event.stopPropagation();Core.removeAttachment('${order.id}',${idx})" style="cursor:pointer;color:#ef4444;opacity:0.6;font-size:14px;" title="Remover">&times;</span>
+                                    </div>`;
+                }).join('')}
+                            </div>` : ''}
+                            ${attachments.length === 0 ? '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px;">Nenhum anexo</div>' : ''}
+                        </div>`;
+            })()}
+                    ${(() => {
+                // CHECKLIST SECTION
+                const items = getChecklist(order);
+                const pct = getChecklistProgress(order);
+                return `
+                        <div style="background:rgba(16,185,129,0.03);border:1px solid rgba(16,185,129,0.15);border-radius:10px;padding:14px;margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                <span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;">✅ Checklist do Briefing</span>
+                                <span style="font-size:12px;font-weight:700;color:#10b981;">${pct}%</span>
+                            </div>
+                            <div class="checklist-progress" style="margin-bottom:10px;">
+                                <div class="checklist-progress-bar" style="width:${pct}%"></div>
+                            </div>
+                            ${items.map(item => `
+                                <div class="checklist-item ${item.done ? 'done' : ''}" onclick="event.stopPropagation();Core.toggleChecklistItem('${order.id}','${item.key}')">
+                                    <i class="fas ${item.done ? 'fa-check-square' : 'fa-square'}"></i>
+                                    <span>${item.label}</span>
+                                </div>
+                            `).join('')}
+                        </div>`;
+            })()}
                     ${order.activity_log && order.activity_log.length > 0 ? `
                     <div style="margin-top:12px;">
                         <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:8px;">📜 Histórico</div>
@@ -3230,13 +3434,13 @@ const Core = (function () {
                             `).join('')}
                         </div>
                     </div>` : ''}
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('modal-order-detail').remove()">Fechar</button>
-                    <button class="btn btn-primary btn-sm" onclick="Core.editOrder('${order.id}')"><i class="fas fa-pen"></i> Editar</button>
-                </div>
-            </div>
-        `;
+                </div >
+    <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('modal-order-detail').remove()">Fechar</button>
+        <button class="btn btn-primary btn-sm" onclick="Core.editOrder('${order.id}')"><i class="fas fa-pen"></i> Editar</button>
+    </div>
+            </div >
+    `;
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
         document.body.appendChild(modal);
     }
@@ -3255,7 +3459,7 @@ const Core = (function () {
         modal.id = 'modal-payment';
         modal.style.zIndex = '1001';
         modal.innerHTML = `
-            <div class="modal" style="max-width:400px;">
+    < div class="modal" style = "max-width:400px;" >
                 <div class="modal-header">
                     <h3 class="modal-title">Registrar Pagamento</h3>
                     <button class="modal-close" onclick="document.getElementById('modal-payment').remove()">&times;</button>
@@ -3301,8 +3505,8 @@ const Core = (function () {
                     <button class="btn btn-secondary btn-sm" onclick="document.getElementById('modal-payment').remove()">Cancelar</button>
                     <button class="btn btn-primary btn-sm" onclick="Core.savePayment('${order.id}')" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-check"></i> Confirmar</button>
                 </div>
-            </div>
-        `;
+            </div >
+    `;
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
         document.body.appendChild(modal);
     }
@@ -3323,7 +3527,7 @@ const Core = (function () {
             saveOrdersLocal();
         }
 
-        const msg = `Olá ${order.client_name}! 😊\n\nSeguem os dados para pagamento:\n\n💰 Valor: R$ ${amount}\n${link ? `\n🔗 Link de pagamento:\n${link}\n` : ''}\nQualquer dúvida, estou à disposição!\n\n— Equipe Demeni 💜`;
+        const msg = `Olá ${order.client_name} ! 😊\n\nSeguem os dados para pagamento: \n\n💰 Valor: R$ ${amount} \n${link ? `\n🔗 Link de pagamento:\n${link}\n` : ''} \nQualquer dúvida, estou à disposição!\n\n— Equipe Demeni 💜`;
 
         window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         toast('WhatsApp aberto com link de pagamento!', 'success');
@@ -3355,6 +3559,11 @@ const Core = (function () {
         openModal,
         closeModal,
         openOrderDetail,
+        addAttachment,
+        addLinkAttachment,
+        removeAttachment,
+        toggleChecklistItem,
+        openLightbox,
         editOrder,
         saveEditOrder,
         switchOrderTab,
