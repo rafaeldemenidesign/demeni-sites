@@ -7,9 +7,9 @@
 // Versão: Nova versão → Implantar
 
 function doGet(e) {
-    // Se tem parâmetro 'data', é um backup do Core
-    if (e && e.parameter && e.parameter.data) {
-        return processData(e.parameter.data);
+    // Se tem parâmetro 'action', é um backup do Core
+    if (e && e.parameter && e.parameter.action) {
+        return gravar(e.parameter);
     }
     return ContentService
         .createTextOutput(JSON.stringify({ status: 'ok', message: 'Demeni Sheets API ativa' }))
@@ -18,15 +18,17 @@ function doGet(e) {
 
 function doPost(e) {
     try {
+        // Tenta ler JSON do body
         if (e.postData && e.postData.contents) {
-            return processData(e.postData.contents);
-        } else if (e.parameter && e.parameter.payload) {
-            return processData(e.parameter.payload);
-        } else if (e.parameter && e.parameter.data) {
-            return processData(e.parameter.data);
+            var data = JSON.parse(e.postData.contents);
+            return gravar(data);
+        }
+        // Fallback: parâmetros do form/URL
+        if (e.parameter && e.parameter.action) {
+            return gravar(e.parameter);
         }
         return ContentService
-            .createTextOutput(JSON.stringify({ success: false, error: 'No data received' }))
+            .createTextOutput(JSON.stringify({ success: false, error: 'Sem dados' }))
             .setMimeType(ContentService.MimeType.JSON);
     } catch (err) {
         return ContentService
@@ -35,7 +37,7 @@ function doPost(e) {
     }
 }
 
-function processData(jsonString) {
+function gravar(d) {
     try {
         var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Base');
         if (!sheet) {
@@ -49,25 +51,23 @@ function processData(jsonString) {
             sheet.setFrozenRows(1);
         }
 
-        var data = JSON.parse(jsonString);
-
         sheet.appendRow([
             new Date().toLocaleString('pt-BR'),
-            data.action || 'update',
-            data.client_name || '',
-            data.client_phone || '',
-            data.client_email || '',
-            data.client_instagram || '',
-            data.client_city || '',
-            data.product_type || '',
-            data.price || '',
-            data.source || '',
-            data.status || '',
-            data.referral_code || '',
-            data.site_url || '',
-            data.tracking_token || '',
-            data.notes || '',
-            data.loss_reason || ''
+            d.action || '',
+            d.client_name || '',
+            d.client_phone || '',
+            d.client_email || '',
+            d.client_instagram || '',
+            d.client_city || '',
+            d.product_type || '',
+            d.price || '',
+            d.source || '',
+            d.status || '',
+            d.referral_code || '',
+            d.site_url || '',
+            d.tracking_token || '',
+            d.notes || '',
+            d.loss_reason || ''
         ]);
 
         return ContentService

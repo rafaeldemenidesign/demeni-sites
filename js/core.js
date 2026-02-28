@@ -1770,7 +1770,8 @@ const Core = (function () {
         const sheetsUrl = localStorage.getItem('demeni-sheets-url');
         if (!sheetsUrl) return;
 
-        const payload = {
+        // Send each field as individual URL param (avoids JSON encoding issues)
+        const fields = {
             action: action || 'update',
             client_name: order.client_name || '',
             client_phone: order.client_phone || '',
@@ -1784,17 +1785,16 @@ const Core = (function () {
             referral_code: order.referral_code || '',
             site_url: order.site_url || '',
             tracking_token: order.tracking_token || '',
-            notes: order.notes || '',
+            notes: (order.notes || '').substring(0, 200),
             loss_reason: order.loss_reason || '',
         };
 
-        // Use GET with URL params (most reliable for Apps Script cross-origin)
         try {
-            const params = new URLSearchParams();
-            params.set('data', JSON.stringify(payload));
+            const params = Object.entries(fields)
+                .map(([k, v]) => k + '=' + encodeURIComponent(v))
+                .join('&');
             const img = new Image();
-            img.src = sheetsUrl + '?' + params.toString();
-            // Image request follows redirects automatically, no CORS issues
+            img.src = sheetsUrl + '?' + params;
         } catch (err) {
             console.warn('[Sheets] Backup failed:', err.message);
         }
