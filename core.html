@@ -23,6 +23,28 @@
 </head>
 
 <body>
+    <!-- Emergency SW reset: forces fresh code on version change -->
+    <script>
+        (function () {
+            var V = '2026-03-01-v5';
+            if (localStorage.getItem('core-sw-ver') !== V) {
+                localStorage.setItem('core-sw-ver', V);
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function (regs) {
+                        var p = regs.map(function (r) { return r.unregister(); });
+                        return Promise.all(p);
+                    }).then(function () {
+                        return caches.keys();
+                    }).then(function (keys) {
+                        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+                    }).then(function () {
+                        console.log('🔄 Cache limpo, recarregando...');
+                        location.reload(true);
+                    });
+                }
+            }
+        })();
+    </script>
     <!-- ========== LOGIN PAGE (hidden by default, shown by JS if no session) ========== -->
     <div id="login-page" class="login-page" style="display:none;">
         <div class="login-card">
