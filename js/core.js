@@ -752,15 +752,18 @@ const Core = (function () {
                     .select('*')
                     .order('created_at', { ascending: false });
 
-                if (!error && data) {
+                if (error) {
+                    console.error('[Core] loadOrders ERROR:', error);
+                } else if (data) {
                     orders = data;
+                    console.log('[Core] Orders loaded:', data.length);
                 }
+            } else {
+                console.warn('[Core] loadOrders: Supabase client not available');
             }
         } catch (e) {
-            console.warn('[Core] Could not load orders:', e.message);
+            console.error('[Core] loadOrders EXCEPTION:', e);
         }
-
-        // Supabase-only: no localStorage fallback
 
         renderAll();
     }
