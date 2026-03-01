@@ -665,6 +665,7 @@ a:hover {
 .kanban-card:hover {
     border-color: var(--brand-primary);
     box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
 }
 
 .kanban-card.dragging {
@@ -1658,6 +1659,148 @@ a:hover {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
+}
+
+/* ========== TABLE ZEBRA STRIPING ========== */
+.data-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.data-table tbody tr {
+    transition: background var(--duration) var(--ease);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(196, 127, 59, 0.06);
+}
+
+/* ========== BUTTON GLOBAL TRANSITIONS ========== */
+.btn,
+.btn-header,
+.btn-primary,
+.btn-secondary,
+.chat-send-btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover,
+.btn-header:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active,
+.btn-header:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* ========== BELL SHAKE ANIMATION ========== */
+@keyframes bellShake {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    10% {
+        transform: rotate(14deg);
+    }
+
+    20% {
+        transform: rotate(-14deg);
+    }
+
+    30% {
+        transform: rotate(10deg);
+    }
+
+    40% {
+        transform: rotate(-8deg);
+    }
+
+    50% {
+        transform: rotate(4deg);
+    }
+
+    60% {
+        transform: rotate(-2deg);
+    }
+
+    70% {
+        transform: rotate(0deg);
+    }
+}
+
+#btn-notifications.has-unread i {
+    animation: bellShake 0.8s ease-in-out;
+    animation-iteration-count: 1;
+    color: #f59e0b;
+}
+
+/* ========== SKELETON LOADING ========== */
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-card) 0px, rgba(255, 255, 255, 0.04) 40px, var(--bg-card) 80px);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+    width: 60%;
+}
+
+.skeleton-kpi {
+    height: 72px;
+    border-radius: var(--radius-md);
+}
+
+/* ========== KPI VALUE ANIMATION ========== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kpi-card {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.kpi-card:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.kpi-card:nth-child(2) {
+    animation-delay: 0.08s;
+}
+
+.kpi-card:nth-child(3) {
+    animation-delay: 0.16s;
+}
+
+.kpi-card:nth-child(4) {
+    animation-delay: 0.24s;
+}
+
+/* ========== PAGE SECTION TRANSITION ========== */
+.page-section.active {
+    animation: fadeInUp 0.3s ease-out;
 }
 
 /* ========== LOGIN PAGE ========== */

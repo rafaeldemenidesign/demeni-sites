@@ -1117,6 +1117,10 @@ const Core = (function () {
             renderAll();
             toast(`${order.client_name} → ${getStatusLabel(order.status)}`, 'success');
             saveToSheet(order, 'status_' + order.status);
+            // Notify assigned vendedor about status change
+            if (order.vendedor_id && order.vendedor_id !== currentUser?.id) {
+                createNotification(order.vendedor_id, 'order', `Pedido ${order.client_name} avançou: ${getStatusLabel(prev)} → ${getStatusLabel(order.status)}`);
+            }
         }
     }
 
@@ -1129,6 +1133,10 @@ const Core = (function () {
         renderAll();
         toast(`${order.client_name} — Perdido`, 'error');
         saveToSheet(order, 'perdido');
+        // Notify assigned vendedor
+        if (order.vendedor_id && order.vendedor_id !== currentUser?.id) {
+            createNotification(order.vendedor_id, 'order', `Pedido ${order.client_name} marcado como Perdido`);
+        }
     }
 
     // ========== QUEUE PANEL (Criadora) ==========
@@ -4315,6 +4323,17 @@ const Core = (function () {
         chatProfiles = await SupabaseClient.getProfiles();
         renderChatContacts();
         await switchChannel('general');
+
+        // Enter key sends message
+        const chatInput = document.getElementById('chat-input');
+        if (chatInput) {
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendChatMessage();
+                }
+            });
+        }
     }
 
     function renderChatContacts() {
@@ -4522,13 +4541,16 @@ const Core = (function () {
 
     function updateNotifBadge() {
         const badge = document.getElementById('notif-badge');
+        const bell = document.getElementById('btn-notifications');
         if (!badge) return;
         const unread = notifications.filter(n => !n.read).length;
         if (unread > 0) {
             badge.style.display = '';
             badge.textContent = unread > 9 ? '9+' : unread;
+            if (bell) bell.classList.add('has-unread');
         } else {
             badge.style.display = 'none';
+            if (bell) bell.classList.remove('has-unread');
         }
     }
 
