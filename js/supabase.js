@@ -694,6 +694,73 @@ const SupabaseClient = (function () {
         return { error };
     }
 
+    // ========== CALENDAR POSTS ==========
+    async function getPosts() {
+        if (!supabase) return { data: [], error: null };
+        const { data, error } = await supabase
+            .from('calendar_posts')
+            .select('*')
+            .order('date', { ascending: true });
+        return { data: data || [], error };
+    }
+
+    async function createPostDB(post) {
+        if (!supabase) return { data: null, error: { message: 'Not configured' } };
+        const { data, error } = await supabase
+            .from('calendar_posts')
+            .insert(post)
+            .select()
+            .single();
+        return { data, error };
+    }
+
+    async function updatePostDB(postId, updates) {
+        if (!supabase) return { error: { message: 'Not configured' } };
+        updates.updated_at = new Date().toISOString();
+        const { data, error } = await supabase
+            .from('calendar_posts')
+            .update(updates)
+            .eq('id', postId)
+            .select()
+            .single();
+        return { data, error };
+    }
+
+    async function deletePostDB(postId) {
+        if (!supabase) return { error: { message: 'Not configured' } };
+        const { error } = await supabase
+            .from('calendar_posts')
+            .delete()
+            .eq('id', postId);
+        return { error };
+    }
+
+    // ========== APP SETTINGS (key-value) ==========
+    async function getAppSetting(key) {
+        if (!supabase) return { data: null, error: null };
+        const { data, error } = await supabase
+            .from('app_settings')
+            .select('value')
+            .eq('key', key)
+            .single();
+        if (error && error.code === 'PGRST116') return { data: null, error: null }; // not found
+        return { data: data?.value || null, error };
+    }
+
+    async function saveAppSetting(key, value) {
+        if (!supabase) return { error: { message: 'Not configured' } };
+        const userId = (await supabase.auth.getUser())?.data?.user?.id;
+        const { error } = await supabase
+            .from('app_settings')
+            .upsert({
+                key,
+                value,
+                updated_at: new Date().toISOString(),
+                updated_by: userId || null
+            });
+        return { error };
+    }
+
     // ========== PUBLIC API ==========
     return {
         init,
@@ -736,6 +803,16 @@ const SupabaseClient = (function () {
         unsubscribeChannel,
         getProfiles,
         getCurrentUserId,
+
+        // Calendar
+        getPosts,
+        createPostDB,
+        updatePostDB,
+        deletePostDB,
+
+        // App Settings
+        getAppSetting,
+        saveAppSetting,
 
         // CRM
         getOrders,

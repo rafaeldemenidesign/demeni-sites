@@ -220,6 +220,16 @@ const Core = (function () {
         navigate(getDefaultPage());
         initKanban();
         loadOrders();
+
+        // Load shared data from Supabase (parallel)
+        Promise.all([
+            SupabaseClient.getPosts().then(({ data }) => { posts = data || []; }),
+            SupabaseClient.getAppSetting('financial_settings').then(({ data }) => { window._cachedFinancialSettings = data || {}; }),
+            SupabaseClient.getAppSetting('sheets_url').then(({ data }) => { window._cachedSheetsUrl = data?.url || ''; }),
+        ]).then(() => {
+            renderAll();
+            console.log('[Core] Supabase data loaded: posts=' + posts.length);
+        }).catch(e => console.warn('[Core] Error loading shared data:', e));
     }
 
     async function fetchUserRole() {
@@ -750,10 +760,7 @@ const Core = (function () {
             console.warn('[Core] Could not load orders:', e.message);
         }
 
-        // Also check localStorage fallback
-        if (orders.length === 0) {
-            orders = JSON.parse(localStorage.getItem('demeni-orders') || '[]');
-        }
+        // Supabase-only: no localStorage fallback
 
         renderAll();
     }
@@ -820,7 +827,7 @@ const Core = (function () {
 
         // Save locally as fallback
         orders.unshift(order);
-        localStorage.setItem('demeni-orders', JSON.stringify(orders));
+        // Orders saved via Supabase (no localStorage)
 
         // Reset form and close
         document.getElementById('form-new-order').reset();
@@ -1378,7 +1385,7 @@ const Core = (function () {
 
         // Replace tracking link placeholder with actual tracking URL
         if (msg.includes('{link_status}')) {
-            const orders = JSON.parse(localStorage.getItem('demeni_orders') || '[]');
+            // Use in-memory orders array (already loaded from Supabase)
             const clientOrder = orders.find(o => o.client === clientName && o.tracking_token);
             if (clientOrder) {
                 const trackingUrl = `https://core.rafaeldemeni.com/tracking.html?t=${clientOrder.tracking_token}`;
@@ -1702,7 +1709,7 @@ const Core = (function () {
         const RECOVERY_MONTHS = 3;
 
         // Get saved performance history
-        let history = JSON.parse(localStorage.getItem('demeni-performance') || '{}');
+        let history = {}; // Loaded from Supabase
 
         // Build members from orders data (unique vendedor_ids)
         const members = {};
@@ -1732,7 +1739,7 @@ const Core = (function () {
             history[m.id].months[monthKey] = { sales, target: TARGET_SALES, pct };
         });
 
-        localStorage.setItem('demeni-performance', JSON.stringify(history));
+        // Performance saved via Supabase (no localStorage)
 
         // Render
         const entries = Object.entries(history);
@@ -1902,12 +1909,12 @@ const Core = (function () {
     }
 
     function saveOrdersLocal() {
-        localStorage.setItem('demeni-orders', JSON.stringify(orders));
+        // Orders persisted via Supabase (no localStorage)
     }
 
     // ========== GOOGLE SHEETS BACKUP ==========
     function saveToSheet(order, action) {
-        const sheetsUrl = localStorage.getItem('demeni-sheets-url');
+        const sheetsUrl = window._cachedSheetsUrl || '';
         if (!sheetsUrl) return;
 
         // Send each field as individual URL param (avoids JSON encoding issues)
@@ -2131,13 +2138,13 @@ const Core = (function () {
 
     function saveIntegrationSettings() {
         const url = document.getElementById('cfg-sheets-url')?.value.trim() || '';
-        if (url) localStorage.setItem('demeni-sheets-url', url);
-        else localStorage.removeItem('demeni-sheets-url');
+        window._cachedSheetsUrl = url;
+        SupabaseClient.saveAppSetting('sheets_url', { url: url || '' });
         toast('Integrações salvas!', 'success');
     }
 
     function loadIntegrationSettings() {
-        const url = localStorage.getItem('demeni-sheets-url') || '';
+        const url = window._cachedSheetsUrl || '';
         const el = document.getElementById('cfg-sheets-url');
         if (el) el.value = url;
     }
@@ -2414,7 +2421,7 @@ const Core = (function () {
 
     // ========== METAS DO VENDEDOR ==========
     function getSetting(key, defaultVal) {
-        const s = JSON.parse(localStorage.getItem('demeni-financial-settings') || '{}');
+        const s = window._cachedFinancialSettings || {};
         return s[key] !== undefined ? s[key] : defaultVal;
     }
 
@@ -2512,7 +2519,7 @@ const Core = (function () {
     }
 
     // ========== FINANCIAL ==========
-    // Financial settings read from localStorage
+    // Financial settings from Supabase (cached in window._cachedFinancialSettings)
     function getFinancialSettings() {
         const salVendedor = getSetting('salary_vendedor', 1000);
         const salSuporte = getSetting('salary_suporte', 1500);
@@ -2547,7 +2554,8 @@ const Core = (function () {
             gestora_pct: val('cfg-gestora-pct', 8),
             sales_target: val('cfg-sales-target', 50),
         };
-        localStorage.setItem('demeni-financial-settings', JSON.stringify(settings));
+        window._cachedFinancialSettings = settings;
+        SupabaseClient.saveAppSetting('financial_settings', settings);
         renderAll();
         toast('Configurações financeiras salvas!', 'success');
     }
@@ -3028,7 +3036,7 @@ const Core = (function () {
         return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
     }
     // ========== SOCIAL MEDIA CALENDAR ==========
-    let posts = JSON.parse(localStorage.getItem('demeni-posts') || '[]');
+    let posts = []; // Loaded from Supabase via loadPosts()
     let calendarWeekOffset = 0;
     let calendarMonthOffset = 0;
     let calendarDayOffset = 0;
@@ -3170,31 +3178,38 @@ const Core = (function () {
         document.body.appendChild(modal);
     }
 
-    function saveEditPost(postId) {
+    async function saveEditPost(postId) {
+        const updates = {
+            date: document.getElementById('edit-post-date').value,
+            platform: document.getElementById('edit-post-platform').value,
+            type: document.getElementById('edit-post-type').value,
+            caption: document.getElementById('edit-post-caption').value.trim()
+        };
+        const { error } = await SupabaseClient.updatePostDB(postId, updates);
+        if (error) { toast('Erro ao salvar: ' + error.message, 'error'); return; }
+        // Update local array
         const p = posts.find(x => x.id === postId);
-        if (!p) return;
-        p.date = document.getElementById('edit-post-date').value;
-        p.platform = document.getElementById('edit-post-platform').value;
-        p.type = document.getElementById('edit-post-type').value;
-        p.caption = document.getElementById('edit-post-caption').value.trim();
-        localStorage.setItem('demeni-posts', JSON.stringify(posts));
-        document.getElementById('modal-edit-post').remove();
+        if (p) Object.assign(p, updates);
+        document.getElementById('modal-edit-post')?.remove();
         renderCalendar();
         toast('Post atualizado!', 'success');
     }
 
-    function duplicatePost(postId) {
+    async function duplicatePost(postId) {
         const p = posts.find(x => x.id === postId);
         if (!p) return;
         const newDate = new Date(p.date + 'T12:00');
         newDate.setDate(newDate.getDate() + 1);
-        posts.push({
-            ...p,
-            id: crypto.randomUUID(),
+        const newPost = {
+            title: p.title || p.type || 'Post',
+            platform: p.platform,
             date: newDate.toISOString().split('T')[0],
-            created_at: new Date().toISOString()
-        });
-        localStorage.setItem('demeni-posts', JSON.stringify(posts));
+            caption: p.caption,
+            status: 'scheduled'
+        };
+        const { data, error } = await SupabaseClient.createPostDB(newPost);
+        if (error) { toast('Erro ao duplicar: ' + error.message, 'error'); return; }
+        if (data) posts.push(data);
         document.getElementById('modal-post-actions')?.remove();
         renderCalendar();
         toast('Post duplicado para o dia seguinte!', 'success');
@@ -3395,7 +3410,7 @@ const Core = (function () {
         `).join('');
     }
 
-    function savePost() {
+    async function savePost() {
         const date = document.getElementById('post-date').value;
         const checkboxes = document.querySelectorAll('#post-platforms input[type="checkbox"]:checked');
         const platforms = Array.from(checkboxes).map(cb => cb.value);
@@ -3405,29 +3420,30 @@ const Core = (function () {
         if (!date) return toast('Selecione a data', 'error');
         if (platforms.length === 0) return toast('Selecione pelo menos uma plataforma', 'error');
 
-        // Create one post per selected platform
-        platforms.forEach(platform => {
-            posts.push({
-                id: crypto.randomUUID(),
-                date,
+        // Create one post per selected platform (via Supabase)
+        for (const platform of platforms) {
+            const { data, error } = await SupabaseClient.createPostDB({
+                title: type || 'Post',
                 platform,
-                type,
+                date,
                 caption,
-                created_at: new Date().toISOString()
+                status: 'scheduled'
             });
-        });
+            if (error) { toast('Erro: ' + error.message, 'error'); return; }
+            if (data) posts.push(data);
+        }
 
-        localStorage.setItem('demeni-posts', JSON.stringify(posts));
         document.getElementById('form-new-post').reset();
         closeModal('modal-new-post');
         renderCalendar();
         toast(`Post agendado em ${platforms.length} plataforma${platforms.length > 1 ? 's' : ''}!`, 'success');
     }
 
-    function deletePost(postId) {
+    async function deletePost(postId) {
         if (!confirm('Remover este post?')) return;
+        const { error } = await SupabaseClient.deletePostDB(postId);
+        if (error) { toast('Erro: ' + error.message, 'error'); return; }
         posts = posts.filter(p => p.id !== postId);
-        localStorage.setItem('demeni-posts', JSON.stringify(posts));
         renderCalendar();
         toast('Post removido', 'info');
     }
@@ -4014,9 +4030,7 @@ const Core = (function () {
             toast('Dados exportados!', 'success');
         },
         clearLocalData: () => {
-            if (!confirm('Limpar todos os dados locais? (Dados no Supabase permanecem)')) return;
-            localStorage.removeItem('demeni-orders');
-            localStorage.removeItem('demeni-posts');
+            if (!confirm('Limpar dados em memória? (Dados no Supabase permanecem)')) return;
             orders = [];
             posts = [];
             renderAll();
