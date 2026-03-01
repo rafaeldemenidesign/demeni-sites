@@ -630,6 +630,37 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Team Ranking (Admin/Gestora) -->
+                    <div class="card" id="goals-team-card" style="margin-top:20px;display:none;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-trophy"
+                                    style="margin-right:8px;color:#f59e0b;"></i>Ranking da Equipe</h3>
+                            <button class="btn btn-primary btn-sm" onclick="Core.openSetGoals()" id="btn-set-goals">
+                                <i class="fas fa-cog"></i> Definir Metas
+                            </button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Vendedor</th>
+                                        <th>Meta</th>
+                                        <th>Vendas</th>
+                                        <th>Progresso</th>
+                                        <th>Valor</th>
+                                        <th>Comissão</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="goals-team-body">
+                                    <tr>
+                                        <td colspan="7" class="empty-state" style="padding:30px;">Carregando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- ========== FINANCEIRO (Admin/Gestora) ========== -->

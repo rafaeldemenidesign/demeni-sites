@@ -221,6 +221,7 @@ const Core = (function () {
         initKanban();
         loadOrders();
         loadClients();
+        loadGoals();
 
         // Load shared data from Supabase (parallel)
         Promise.all([
@@ -2675,6 +2676,34 @@ const Core = (function () {
     }
 
 
+    let goalsData = [];
+
+    async function loadGoals() {
+        try {
+            if (typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient()) {
+                const now = new Date();
+                const { data, error } = await SupabaseClient.getClient()
+                    .from('goals')
+                    .select('*')
+                    .eq('month', now.getMonth() + 1)
+                    .eq('year', now.getFullYear());
+                if (!error && data) {
+                    goalsData = data;
+                    console.log('[Core] Goals loaded:', data.length);
+                } else if (error) {
+                    console.error('[Core] loadGoals ERROR:', error);
+                }
+            }
+        } catch (e) {
+            console.error('[Core] loadGoals EXCEPTION:', e);
+        }
+    }
+
+    function getGoalForUser(userId) {
+        const goal = goalsData.find(g => g.user_id === userId);
+        return goal ? goal.sales_target : getSetting('sales_target', 50);
+    }
+
     function renderGoals() {
         if (!document.getElementById('goals-target')) return;
 
@@ -2712,9 +2741,9 @@ const Core = (function () {
         const totalLeads = thisMonth.length;
         const convRate = totalLeads > 0 ? Math.round((salesCount / totalLeads) * 100) : 0;
 
-        // Progress
-        const SALES_TARGET = getSetting('sales_target', 50);
-        const pct = Math.min(Math.round((salesCount / SALES_TARGET) * 100), 100);
+        // Progress (use Supabase goal if available)
+        const SALES_TARGET = getGoalForUser(currentUser?.id);
+        const pct = SALES_TARGET > 0 ? Math.min(Math.round((salesCount / SALES_TARGET) * 100), 100) : 0;
 
         // Update KPIs
         document.getElementById('goals-target').textContent = `${salesCount} / ${SALES_TARGET}`;
@@ -2752,19 +2781,174 @@ const Core = (function () {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:30px;">
                 Nenhuma venda neste mês ainda.
             </td></tr>`;
+        } else {
+            tbody.innerHTML = weekKeys.map(w => {
+                const wk = weeks[w];
+                const wkComm = Math.round(wk.paid * (getSetting('commission_rate', 5) / 100));
+                return `<tr>
+                    <td><strong>${w}</strong></td>
+                    <td>${wk.count}</td>
+                    <td style="color:var(--text-secondary);">R$ ${wk.value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</td>
+                    <td style="color:#10b981;font-weight:600;">R$ ${wkComm.toLocaleString('pt-BR')}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Team Ranking (admin/gestora only)
+        renderTeamRanking(allSales, convertedStatuses);
+    }
+
+    async function renderTeamRanking(allSales) {
+        const teamCard = document.getElementById('goals-team-card');
+        const teamBody = document.getElementById('goals-team-body');
+        if (!teamCard || !teamBody) return;
+
+        // Show only for admin/gestora
+        if (!['admin', 'gestora'].includes(currentRole)) {
+            teamCard.style.display = 'none';
+            return;
+        }
+        teamCard.style.display = '';
+
+        // Get team profiles
+        let profiles = [];
+        try {
+            profiles = await SupabaseClient.getProfiles();
+        } catch (e) {
+            profiles = [];
+        }
+
+        // Filter to sales roles
+        const salesRoles = ['vendedor', 'admin', 'suporte'];
+        const salesTeam = profiles.filter(p => salesRoles.includes(p.role));
+
+        if (salesTeam.length === 0) {
+            teamBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px;">Nenhum vendedor na equipe.</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = weekKeys.map(w => {
-            const wk = weeks[w];
-            const wkComm = Math.round(wk.paid * (getSetting('commission_rate', 5) / 100));
+        // Compute per-vendedor stats
+        const commRate = getSetting('commission_rate', 5) / 100;
+        const ranking = salesTeam.map(member => {
+            const memberSales = allSales.filter(o => o.vendedor_id === member.id);
+            const salesCount = memberSales.length;
+            const totalValue = memberSales.reduce((s, o) => s + (parseFloat(o.price) || 0), 0);
+            const totalPaid = memberSales.reduce((s, o) => s + getOrderPaid(o), 0);
+            const commission = Math.round(totalPaid * commRate);
+            const target = getGoalForUser(member.id);
+            const pct = target > 0 ? Math.min(Math.round((salesCount / target) * 100), 100) : 0;
+
+            return { ...member, salesCount, totalValue, totalPaid, commission, target, pct };
+        }).sort((a, b) => b.salesCount - a.salesCount);
+
+        const medals = ['🥇', '🥈', '🥉'];
+        teamBody.innerHTML = ranking.map((r, i) => {
+            const barColor = r.pct >= 100 ? '#10b981' : r.pct >= 50 ? '#f59e0b' : '#ef4444';
+
             return `<tr>
-                <td><strong>${w}</strong></td>
-                <td>${wk.count}</td>
-                <td style="color:var(--text-secondary);">R$ ${wk.value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</td>
-                <td style="color:#10b981;font-weight:600;">R$ ${wkComm.toLocaleString('pt-BR')}</td>
+                <td style="font-size:18px;text-align:center;">${medals[i] || (i + 1)}</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="width:28px;height:28px;border-radius:50%;background:var(--brand-gradient);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:white;">
+                            ${(r.name || r.email || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <strong style="font-size:13px;">${r.name || r.email?.split('@')[0] || 'Sem nome'}</strong>
+                            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">${ROLE_LABELS[r.role] || r.role}</div>
+                        </div>
+                    </div>
+                </td>
+                <td style="font-weight:600;">${r.target}</td>
+                <td style="font-weight:600;">${r.salesCount}</td>
+                <td style="min-width:120px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <div style="flex:1;background:rgba(255,255,255,0.06);border-radius:6px;height:8px;overflow:hidden;">
+                            <div style="width:${r.pct}%;height:100%;background:${barColor};border-radius:6px;transition:width 0.4s ease;"></div>
+                        </div>
+                        <span style="font-size:11px;font-weight:600;color:${barColor};min-width:32px;">${r.pct}%</span>
+                    </div>
+                </td>
+                <td style="color:var(--text-secondary);">R$ ${r.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</td>
+                <td style="color:#10b981;font-weight:600;">R$ ${r.commission.toLocaleString('pt-BR')}</td>
             </tr>`;
         }).join('');
+    }
+
+    async function openSetGoals() {
+        let profiles = [];
+        try { profiles = await SupabaseClient.getProfiles(); } catch (e) { /* */ }
+        const salesRoles = ['vendedor', 'admin', 'suporte'];
+        const salesTeam = profiles.filter(p => salesRoles.includes(p.role));
+        const now = new Date();
+        const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+        const rows = salesTeam.map(m => {
+            const currentGoal = getGoalForUser(m.id);
+            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-card);">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--brand-gradient);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:white;">
+                    ${(m.name || '?').charAt(0).toUpperCase()}
+                </div>
+                <div style="flex:1;">
+                    <strong style="font-size:13px;">${m.name || m.email?.split('@')[0]}</strong>
+                    <span style="font-size:10px;color:var(--text-muted);margin-left:6px;">${ROLE_LABELS[m.role] || m.role}</span>
+                </div>
+                <input type="number" class="goal-input" data-uid="${m.id}" value="${currentGoal}" min="1"
+                    style="width:70px;padding:6px 8px;border-radius:6px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;font-weight:600;text-align:center;">
+                <span style="font-size:12px;color:var(--text-muted);">vendas</span>
+            </div>`;
+        }).join('');
+
+        const html = `<div style="display:grid;gap:12px;min-width:350px;">
+            <h3 style="color:var(--text-primary);margin:0;">
+                <i class="fas fa-bullseye" style="margin-right:8px;color:var(--brand-primary);"></i>
+                Metas — ${monthNames[now.getMonth()]} ${now.getFullYear()}
+            </h3>
+            <div style="max-height:400px;overflow-y:auto;">${rows || '<p style="color:var(--text-muted);">Nenhum vendedor encontrado.</p>'}</div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="Core.saveAllGoals()">
+                    <i class="fas fa-save"></i> Salvar Metas
+                </button>
+            </div>
+        </div>`;
+
+        openModal('', html);
+    }
+
+    async function saveAllGoals() {
+        const inputs = document.querySelectorAll('.goal-input');
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+        let saved = 0;
+
+        for (const input of inputs) {
+            const userId = input.dataset.uid;
+            const target = parseInt(input.value) || 50;
+
+            try {
+                const { error } = await SupabaseClient.getClient()
+                    .from('goals')
+                    .upsert({
+                        user_id: userId,
+                        month,
+                        year,
+                        sales_target: target,
+                        created_by: currentUser?.id,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'user_id,month,year' });
+
+                if (!error) saved++;
+                else console.error('[Core] saveGoal error:', error);
+            } catch (e) {
+                console.error('[Core] saveGoal exception:', e);
+            }
+        }
+
+        toast(`${saved} metas salvas!`, 'success');
+        closeModal();
+        await loadGoals();
+        renderGoals();
     }
 
     // ========== FINANCIAL ==========
@@ -4256,6 +4440,9 @@ const Core = (function () {
         openAddClient,
         editClient,
         saveClient,
+        // Goals
+        openSetGoals,
+        saveAllGoals,
         // Financial Settings
         saveFinancialSettings,
         saveIntegrationSettings,
