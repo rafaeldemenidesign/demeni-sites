@@ -2735,7 +2735,7 @@ const Core = (function () {
         });
 
         // Commissions
-        setKPI('fin-commission-vendedor', fmt(vendorCommission));
+        setKPI('fin-commission-vendedor', fmt(vendorCommissionCapped));
         setKPI('fin-commission-base', converted.length);
         setKPI('fin-bonus-criadora', fmt(criadoraBonus));
         setKPI('fin-bonus-sites', delivered.length);

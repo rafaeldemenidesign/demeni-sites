@@ -742,9 +742,9 @@ const SupabaseClient = (function () {
             .from('app_settings')
             .select('value')
             .eq('key', key)
-            .single();
-        if (error && error.code === 'PGRST116') return { data: null, error: null }; // not found
-        return { data: data?.value || null, error };
+            .maybeSingle();
+        if (error) return { data: null, error };
+        return { data: data?.value || null, error: null };
     }
 
     async function saveAppSetting(key, value) {
