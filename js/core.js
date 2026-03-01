@@ -714,7 +714,7 @@ const Core = (function () {
                 });
             }
         }
-        saveOrdersLocal();
+        saveOrdersLocal(movedId);
         if (order) saveToSheet(order, 'status_' + newStatus);
 
         // Update Supabase
@@ -1023,7 +1023,7 @@ const Core = (function () {
             if (order.status === 'completed') order.converted_at = new Date().toISOString();
             if (!order.activity_log) order.activity_log = [];
             order.activity_log.push({ from: prev, to: order.status, at: new Date().toISOString(), by: currentUser?.name || 'Sistema' });
-            saveOrdersLocal();
+            saveOrdersLocal(orderId);
             renderAll();
             toast(`${order.client_name} → ${getStatusLabel(order.status)}`, 'success');
             saveToSheet(order, 'status_' + order.status);
@@ -1035,7 +1035,7 @@ const Core = (function () {
         if (!order) return;
         order.status = 'lost';
         order.updated_at = new Date().toISOString();
-        saveOrdersLocal();
+        saveOrdersLocal(orderId);
         renderAll();
         toast(`${order.client_name} — Perdido`, 'error');
         saveToSheet(order, 'perdido');
@@ -1904,12 +1904,27 @@ const Core = (function () {
                 at: new Date().toISOString()
             });
         }
-        saveOrdersLocal();
+        saveOrdersLocal(orderId);
         renderAll();
     }
 
-    function saveOrdersLocal() {
-        // Orders persisted via Supabase (no localStorage)
+    function saveOrdersLocal(orderId) {
+        // Persist specific order to Supabase (or all recently changed)
+        if (!orderId) return; // no-op if no orderId specified
+
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+
+        // Fire-and-forget upsert to Supabase
+        if (typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient()) {
+            SupabaseClient.getClient()
+                .from('orders')
+                .upsert(order, { onConflict: 'id' })
+                .then(({ error }) => {
+                    if (error) console.warn('[Core] Order sync error:', error.message);
+                })
+                .catch(e => console.warn('[Core] Order sync failed:', e.message));
+        }
     }
 
     // ========== GOOGLE SHEETS BACKUP ==========
@@ -1975,7 +1990,7 @@ const Core = (function () {
         if (!order) return;
         if (!order.checklist) order.checklist = {};
         order.checklist[key] = !order.checklist[key];
-        saveOrdersLocal();
+        saveOrdersLocal(orderId);
         // Re-render the detail modal
         const modal = document.getElementById('modal-order-detail');
         if (modal) { modal.remove(); openOrderDetail(orderId); }
@@ -2054,7 +2069,7 @@ const Core = (function () {
                     });
                 }
             }
-            saveOrdersLocal();
+            saveOrdersLocal(orderId);
             toast(`${input.files.length} imagem(ns) anexada(s)`, 'success');
             // Re-render
             const modal = document.getElementById('modal-order-detail');
@@ -2077,7 +2092,7 @@ const Core = (function () {
             name: name,
             added_at: new Date().toISOString(),
         });
-        saveOrdersLocal();
+        saveOrdersLocal(orderId);
         toast('Link adicionado!', 'success');
         const modal = document.getElementById('modal-order-detail');
         if (modal) { modal.remove(); openOrderDetail(orderId); }
@@ -2096,7 +2111,7 @@ const Core = (function () {
         }
 
         order.attachments.splice(index, 1);
-        saveOrdersLocal();
+        saveOrdersLocal(orderId);
         toast('Anexo removido', 'success');
         const modal = document.getElementById('modal-order-detail');
         if (modal) { modal.remove(); openOrderDetail(orderId); }
@@ -2296,7 +2311,7 @@ const Core = (function () {
         const deadlineVal = document.getElementById('edit-deadline').value;
         order.deadline = deadlineVal ? new Date(deadlineVal + 'T23:59:59').toISOString() : '';
         order.updated_at = new Date().toISOString();
-        saveOrdersLocal();
+        saveOrdersLocal(orderId);
         renderAll();
         document.getElementById('modal-edit-order').remove();
         toast('Pedido atualizado!', 'success');
@@ -2307,7 +2322,7 @@ const Core = (function () {
         const statusMap = { contacted: 'negotiation', meeting: 'negotiation', proposal: 'negotiation', converted: 'briefing', approval: 'review', adjustments: 'review', delivered: 'completed' };
         let migrated = false;
         orders.forEach(o => { if (statusMap[o.status]) { o.status = statusMap[o.status]; migrated = true; } });
-        if (migrated) saveOrdersLocal();
+        if (migrated) { orders.forEach(o => saveOrdersLocal(o.id)); }
 
         renderKanbanCards();
         renderRecentOrders();
@@ -3756,7 +3771,7 @@ const Core = (function () {
 
         if (link) {
             order.payment_link = link;
-            saveOrdersLocal();
+            saveOrdersLocal(orderId);
         }
 
         const msg = `Olá ${order.client_name} ! 😊\n\nSeguem os dados para pagamento: \n\n💰 Valor: R$ ${amount} \n${link ? `\n🔗 Link de pagamento:\n${link}\n` : ''} \nQualquer dúvida, estou à disposição!\n\n— Equipe Demeni 💜`;
@@ -3777,7 +3792,7 @@ const Core = (function () {
         if (link) order.payment_link = link;
         order.payments.push({ amount, method, notes, date: new Date().toISOString() });
         order.updated_at = new Date().toISOString();
-        saveOrdersLocal();
+        saveOrdersLocal(orderId);
         document.getElementById('modal-payment').remove();
         document.getElementById('modal-order-detail')?.remove();
         openOrderDetail(orderId); // reopen with updated payments
@@ -4080,7 +4095,7 @@ const Core = (function () {
                     updated_at: d.toISOString(),
                 });
             }
-            saveOrdersLocal();
+            orders.forEach(o => saveOrdersLocal(o.id));
             renderAll();
             toast(`${count} pedidos gerados com pagamentos!`, 'success');
         },
