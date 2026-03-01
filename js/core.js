@@ -950,14 +950,35 @@ const Core = (function () {
     }
 
     // ========== MODALS ==========
-    function openModal(id) {
-        const modal = document.getElementById(id);
+    function openModal(idOrTitle, html) {
+        if (html !== undefined) {
+            // Dynamic modal with HTML content
+            const overlay = document.getElementById('dynamic-modal-overlay');
+            const content = document.getElementById('dynamic-modal-content');
+            if (overlay && content) {
+                content.innerHTML = html;
+                overlay.style.display = 'flex';
+            }
+            return;
+        }
+        const modal = document.getElementById(idOrTitle);
         if (modal) modal.classList.add('active');
     }
 
     function closeModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) modal.classList.remove('active');
+        // Close dynamic modal
+        const overlay = document.getElementById('dynamic-modal-overlay');
+        if (overlay) overlay.style.display = 'none';
+        // Close ID-based modal
+        if (id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.remove('active');
+        }
+    }
+
+    function closeDynamicModal() {
+        const overlay = document.getElementById('dynamic-modal-overlay');
+        if (overlay) overlay.style.display = 'none';
     }
 
     // ========== TOAST ==========
@@ -2819,8 +2840,7 @@ const Core = (function () {
         }
 
         // Filter to sales roles
-        const salesRoles = ['vendedor', 'admin', 'suporte'];
-        const salesTeam = profiles.filter(p => salesRoles.includes(p.role));
+        const salesTeam = profiles;
 
         if (salesTeam.length === 0) {
             teamBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px;">Nenhum vendedor na equipe.</td></tr>`;
@@ -2877,8 +2897,7 @@ const Core = (function () {
     async function openSetGoals() {
         let profiles = [];
         try { profiles = await SupabaseClient.getProfiles(); } catch (e) { /* */ }
-        const salesRoles = ['vendedor', 'admin', 'suporte'];
-        const salesTeam = profiles.filter(p => salesRoles.includes(p.role));
+        const salesTeam = profiles;
         const now = new Date();
         const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
@@ -4443,6 +4462,7 @@ const Core = (function () {
         // Goals
         openSetGoals,
         saveAllGoals,
+        closeDynamicModal,
         // Financial Settings
         saveFinancialSettings,
         saveIntegrationSettings,
