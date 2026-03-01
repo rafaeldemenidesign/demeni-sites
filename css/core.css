@@ -1487,10 +1487,25 @@ a:hover {
 @media (max-width: 768px) {
     .core-sidebar {
         transform: translateX(-100%);
+        position: fixed;
+        z-index: 1000;
+        width: 260px;
     }
 
     .core-sidebar.open {
         transform: translateX(0);
+    }
+
+    /* Overlay when sidebar is open */
+    .core-sidebar.open::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 260px;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
     }
 
     .core-main {
@@ -1502,13 +1517,85 @@ a:hover {
     }
 
     .core-content {
-        padding: 16px;
+        padding: 12px;
+    }
+
+    /* Header responsive */
+    .core-header {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .core-header h2 {
+        font-size: 18px;
+        width: 100%;
     }
 
     .kpi-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
+    .kpi-card {
+        padding: 12px;
+    }
+
+    .kpi-value {
+        font-size: 20px;
+    }
+
+    .kpi-label {
+        font-size: 10px;
+    }
+
+    .kpi-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    /* Tables horizontal scroll */
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    /* Cards compact */
+    .card {
+        border-radius: 12px;
+    }
+
+    .card-header {
+        padding: 12px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .card-title {
+        font-size: 14px;
+    }
+
+    /* Buttons touch-friendly */
+    .btn {
+        min-height: 36px;
+        font-size: 12px;
+    }
+
+    .btn-sm {
+        min-height: 32px;
+        padding: 4px 10px;
+    }
+
+    /* Kanban stack */
     .kanban-board {
         flex-direction: column;
     }
@@ -1517,11 +1604,40 @@ a:hover {
         min-width: 100%;
         max-width: 100%;
     }
+
+    /* Stats cards for clients page */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    /* Dynamic modal responsive */
+    #dynamic-modal-content {
+        max-width: 95% !important;
+        padding: 16px !important;
+    }
+
+    /* Chart containers */
+    .chart-container {
+        height: 220px !important;
+    }
 }
 
 @media (max-width: 480px) {
     .kpi-grid {
         grid-template-columns: 1fr;
+    }
+
+    .core-content {
+        padding: 8px;
+    }
+
+    .core-header h2 {
+        font-size: 16px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr !important;
     }
 }
 
