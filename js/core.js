@@ -220,6 +220,7 @@ const Core = (function () {
         navigate(getDefaultPage());
         initKanban();
         loadOrders();
+        loadClients();
 
         // Load shared data from Supabase (parallel)
         Promise.all([
@@ -1171,57 +1172,276 @@ const Core = (function () {
     }
 
     // ========== CLIENTS PANEL (Suporte) ==========
+    let clientsList = [];
+    let clientsFilter = '';
+
+    async function loadClients() {
+        try {
+            if (typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient()) {
+                const { data, error } = await SupabaseClient.getClient()
+                    .from('clients')
+                    .select('*')
+                    .order('name');
+                if (!error && data) {
+                    clientsList = data;
+                    console.log('[Core] Clients loaded:', data.length);
+                } else if (error) {
+                    console.error('[Core] loadClients ERROR:', error);
+                }
+            }
+        } catch (e) {
+            console.error('[Core] loadClients EXCEPTION:', e);
+        }
+    }
+
+    function buildClientAggregates() {
+        // Build client data from orders + standalone clients table
+        const map = new Map();
+
+        // First, add all clients from orders
+        orders.forEach(o => {
+            const key = (o.client_phone || o.client_name || '').toLowerCase().trim();
+            if (!key) return;
+
+            if (!map.has(key)) {
+                map.set(key, {
+                    name: o.client_name || '',
+                    phone: o.client_phone || '',
+                    instagram: o.client_instagram || '',
+                    city: o.client_city || '',
+                    email: '',
+                    notes: '',
+                    totalOrders: 0,
+                    totalSpent: 0,
+                    lastOrderAt: null,
+                    firstOrderAt: null,
+                    lastStatus: '',
+                    source: 'orders'
+                });
+            }
+
+            const c = map.get(key);
+            c.totalOrders++;
+            const price = parseFloat(o.price) || 0;
+            c.totalSpent += price;
+
+            const orderDate = o.created_at ? new Date(o.created_at) : null;
+            if (orderDate) {
+                if (!c.lastOrderAt || orderDate > c.lastOrderAt) {
+                    c.lastOrderAt = orderDate;
+                    c.lastStatus = o.status;
+                }
+                if (!c.firstOrderAt || orderDate < c.firstOrderAt) {
+                    c.firstOrderAt = orderDate;
+                }
+            }
+
+            // Fill missing fields
+            if (o.client_instagram && !c.instagram) c.instagram = o.client_instagram;
+            if (o.client_city && !c.city) c.city = o.client_city;
+            if (o.client_name && c.name.length < o.client_name.length) c.name = o.client_name;
+        });
+
+        // Merge with Supabase clients table
+        clientsList.forEach(cl => {
+            const key = (cl.phone || cl.name || '').toLowerCase().trim();
+            if (!key) return;
+
+            if (map.has(key)) {
+                // Enrich existing
+                const c = map.get(key);
+                if (cl.email) c.email = cl.email;
+                if (cl.notes) c.notes = cl.notes;
+                if (cl.instagram && !c.instagram) c.instagram = cl.instagram;
+                if (cl.city && !c.city) c.city = cl.city;
+                c.supabaseId = cl.id;
+            } else {
+                map.set(key, {
+                    name: cl.name,
+                    phone: cl.phone || '',
+                    instagram: cl.instagram || '',
+                    city: cl.city || '',
+                    email: cl.email || '',
+                    notes: cl.notes || '',
+                    totalOrders: cl.total_orders || 0,
+                    totalSpent: cl.total_spent || 0,
+                    lastOrderAt: cl.last_order_at ? new Date(cl.last_order_at) : null,
+                    firstOrderAt: cl.first_order_at ? new Date(cl.first_order_at) : null,
+                    lastStatus: '',
+                    source: 'database',
+                    supabaseId: cl.id
+                });
+            }
+        });
+
+        return Array.from(map.values()).sort((a, b) => {
+            // Sort by last order date (most recent first), then by name
+            if (a.lastOrderAt && b.lastOrderAt) return b.lastOrderAt - a.lastOrderAt;
+            if (a.lastOrderAt) return -1;
+            if (b.lastOrderAt) return 1;
+            return a.name.localeCompare(b.name);
+        });
+    }
+
     function renderClients() {
         const tbody = document.getElementById('clients-body');
         if (!tbody) return;
 
-        const activeStatuses = ['briefing', 'production', 'review'];
-        const activeClients = orders.filter(o => activeStatuses.includes(o.status));
+        const allClients = buildClientAggregates();
 
-        if (activeClients.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">
-                <i class="fas fa-headset" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>
-                Nenhum cliente ativo
+        // Apply search filter
+        const q = clientsFilter.toLowerCase();
+        const filtered = q ? allClients.filter(c =>
+            c.name.toLowerCase().includes(q) ||
+            c.phone.includes(q) ||
+            c.instagram.toLowerCase().includes(q) ||
+            c.city.toLowerCase().includes(q) ||
+            (c.email && c.email.toLowerCase().includes(q))
+        ) : allClients;
+
+        // Update stats
+        const totalEl = document.getElementById('stat-total-clients');
+        const ordersEl = document.getElementById('stat-clients-orders');
+        const revenueEl = document.getElementById('stat-clients-revenue');
+        if (totalEl) totalEl.textContent = allClients.length;
+        if (ordersEl) ordersEl.textContent = allClients.filter(c => c.totalOrders > 0).length;
+        if (revenueEl) {
+            const total = allClients.reduce((sum, c) => sum + c.totalSpent, 0);
+            revenueEl.textContent = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+        }
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px;">
+                <i class="fas fa-users" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>
+                ${q ? 'Nenhum cliente encontrado para "' + q + '"' : 'Nenhum cliente cadastrado'}
             </td></tr>`;
             return;
         }
 
-        tbody.innerHTML = activeClients.map(o => `
-            <tr>
-                <td><strong>${o.client_name}</strong></td>
+        tbody.innerHTML = filtered.map(c => {
+            const phoneClean = c.phone ? c.phone.replace(/\D/g, '') : '';
+            const whatsLink = phoneClean ? `https://wa.me/55${phoneClean}` : '';
+            const instaLink = c.instagram ? `https://instagram.com/${c.instagram.replace('@', '')}` : '';
+            const lastDate = c.lastOrderAt ? c.lastOrderAt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '-';
+            const statusBadge = c.lastStatus ? `<span class="status-badge ${c.lastStatus}" style="font-size:10px;padding:2px 6px;margin-left:4px;">${getStatusLabel(c.lastStatus)}</span>` : '';
+
+            return `<tr>
+                <td><strong>${c.name}</strong></td>
+                <td>${c.phone ? `<a href="${whatsLink}" target="_blank" style="color:#25d366;text-decoration:none;">
+                    <i class="fab fa-whatsapp"></i> ${c.phone}</a>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+                <td>${c.instagram ? `<a href="${instaLink}" target="_blank" style="color:#E1306C;text-decoration:none;">
+                    <i class="fab fa-instagram"></i> ${c.instagram}</a>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+                <td style="color:var(--text-secondary);">${c.city || '-'}</td>
+                <td><span style="font-weight:600;color:var(--text-primary);">${c.totalOrders}</span>${statusBadge}</td>
+                <td style="color:var(--brand-primary);font-weight:600;">R$ ${c.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</td>
+                <td style="color:var(--text-secondary);font-size:12px;">${lastDate}</td>
                 <td>
-                    ${o.client_phone ? `<a href="https://wa.me/55${o.client_phone.replace(/\D/g, '')}" target="_blank" style="color:var(--status-completed);">
-                        <i class="fab fa-whatsapp"></i> ${o.client_phone}
-                    </a>` : '-'}
-                </td>
-                <td><span class="status-badge ${o.status}">${getStatusLabel(o.status)}</span></td>
-                <td>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                        ${o.client_phone ? `
-                            <button class="btn btn-sm btn-secondary" onclick="Core.sendWaToClient('${o.id}')" style="color:#25d366;border-color:#25d36644;" title="Enviar mensagem via WhatsApp">
-                                <i class="fab fa-whatsapp"></i> Enviar
-                            </button>` : ''}
-                        ${o.status === 'briefing' ? `
-                            <button class="btn btn-sm btn-primary" onclick="Core.moveToBriefing('${o.id}')">
-                                <i class="fas fa-clipboard-list"></i> Briefing
-                            </button>` : ''}
-                        ${o.status === 'review' ? `
-                            <button class="btn btn-sm btn-primary" onclick="Core.approveOrder('${o.id}')" style="background:linear-gradient(135deg,#10b981,#34d399);">
-                                <i class="fas fa-check"></i> Aprovar
-                            </button>
-                            <button class="btn btn-sm btn-secondary" onclick="Core.requestAdjustments('${o.id}')">
-                                <i class="fas fa-edit"></i> Ajustes
-                            </button>` : ''}
-                        ${o.status === 'completed' ? `
-                            <button class="btn btn-sm btn-primary" onclick="Core.completeOrder('${o.id}')" style="background:linear-gradient(135deg,#10b981,#059669);">
-                                <i class="fas fa-flag-checkered"></i> Concluir
-                            </button>` : ''}
+                    <div style="display:flex;gap:4px;">
+                        ${whatsLink ? `<button class="btn btn-sm btn-secondary" onclick="window.open('${whatsLink}','_blank')" title="WhatsApp" style="color:#25d366;border-color:#25d36633;padding:4px 8px;">
+                            <i class="fab fa-whatsapp"></i></button>` : ''}
+                        <button class="btn btn-sm btn-secondary" onclick="Core.editClient('${encodeURIComponent(JSON.stringify({ name: c.name, phone: c.phone, instagram: c.instagram, city: c.city, email: c.email, notes: c.notes, id: c.supabaseId || '' }))}')" title="Editar" style="padding:4px 8px;">
+                            <i class="fas fa-pen"></i></button>
                     </div>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
 
         renderWaTemplates();
+    }
+
+    function filterClients() {
+        const input = document.getElementById('clients-search');
+        clientsFilter = input ? input.value.trim() : '';
+        renderClients();
+    }
+
+    function openAddClient() {
+        openEditClientModal({});
+    }
+
+    function editClient(encodedData) {
+        try {
+            const data = JSON.parse(decodeURIComponent(encodedData));
+            openEditClientModal(data);
+        } catch (e) {
+            console.error('editClient parse error:', e);
+        }
+    }
+
+    function openEditClientModal(data) {
+        const isEdit = !!data.name;
+        const html = `
+            <div style="display:grid;gap:12px;">
+                <h3 style="color:var(--text-primary);margin:0;">${isEdit ? 'Editar' : 'Novo'} Cliente</h3>
+                <input type="text" id="client-name" placeholder="Nome completo *" value="${data.name || ''}"
+                    style="padding:10px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <input type="text" id="client-phone" placeholder="Telefone (DDD)"  value="${data.phone || ''}"
+                        style="padding:10px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+                    <input type="text" id="client-email" placeholder="Email" value="${data.email || ''}"
+                        style="padding:10px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <input type="text" id="client-instagram" placeholder="@instagram" value="${data.instagram || ''}"
+                        style="padding:10px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+                    <input type="text" id="client-city" placeholder="Cidade" value="${data.city || ''}"
+                        style="padding:10px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+                </div>
+                <textarea id="client-notes" placeholder="Observações" rows="3"
+                    style="padding:10px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;resize:vertical;">${data.notes || ''}</textarea>
+                <input type="hidden" id="client-supabase-id" value="${data.id || ''}">
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="Core.saveClient()">
+                        <i class="fas fa-save"></i> ${isEdit ? 'Salvar' : 'Criar'}
+                    </button>
+                </div>
+            </div>`;
+
+        openModal('', html);
+    }
+
+    async function saveClient() {
+        const name = document.getElementById('client-name')?.value.trim();
+        if (!name) { toast('Nome é obrigatório', 'error'); return; }
+
+        const clientData = {
+            name,
+            phone: document.getElementById('client-phone')?.value.trim() || null,
+            email: document.getElementById('client-email')?.value.trim() || null,
+            instagram: document.getElementById('client-instagram')?.value.trim() || null,
+            city: document.getElementById('client-city')?.value.trim() || null,
+            notes: document.getElementById('client-notes')?.value.trim() || null,
+            updated_at: new Date().toISOString()
+        };
+
+        const existingId = document.getElementById('client-supabase-id')?.value;
+
+        try {
+            if (typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient()) {
+                const supabase = SupabaseClient.getClient();
+                let result;
+                if (existingId) {
+                    result = await supabase.from('clients').update(clientData).eq('id', existingId);
+                } else {
+                    result = await supabase.from('clients').insert(clientData);
+                }
+                if (result.error) {
+                    console.error('[Core] saveClient error:', result.error);
+                    toast('Erro ao salvar: ' + result.error.message, 'error');
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('[Core] saveClient exception:', e);
+            toast('Erro ao salvar cliente', 'error');
+            return;
+        }
+
+        toast(existingId ? 'Cliente atualizado!' : 'Cliente criado!', 'success');
+        closeModal();
+        await loadClients();
+        renderClients();
     }
 
     // ========== WHATSAPP TEMPLATES ==========
@@ -4031,6 +4251,11 @@ const Core = (function () {
         previewWaTemplate,
         sendWaToClient,
         updateWaSendPreview: () => { },
+        // Clients
+        filterClients,
+        openAddClient,
+        editClient,
+        saveClient,
         // Financial Settings
         saveFinancialSettings,
         saveIntegrationSettings,

@@ -26,7 +26,7 @@
     <!-- Emergency SW reset: forces fresh code on version change -->
     <script>
         (function () {
-            var V = '2026-03-01-v5';
+            var V = '2026-03-01-v6';
             if (localStorage.getItem('core-sw-ver') !== V) {
                 localStorage.setItem('core-sw-ver', V);
                 if ('serviceWorker' in navigator) {
@@ -283,27 +283,65 @@
 
                 <!-- ========== CLIENTES ATIVOS (Suporte) ========== -->
                 <section class="page-section" id="page-clients">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Clientes Ativos</h3>
+                    <!-- Stats Cards -->
+                    <div class="kpi-grid" id="clients-stats" style="margin-bottom:20px;">
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:var(--status-briefing);"><i
+                                    class="fas fa-users"></i></div>
+                            <div><span class="kpi-number" id="stat-total-clients">0</span><span class="kpi-label">TOTAL
+                                    CLIENTES</span></div>
                         </div>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th>WhatsApp</th>
-                                    <th>Status do Pedido</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="clients-body">
-                                <tr>
-                                    <td colspan="4" class="empty-state" style="padding:40px;">
-                                        <i class="fas fa-headset"></i><br>Nenhum cliente ativo
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:var(--status-converted);"><i
+                                    class="fas fa-shopping-bag"></i></div>
+                            <div><span class="kpi-number" id="stat-clients-orders">0</span><span class="kpi-label">COM
+                                    PEDIDOS</span></div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:var(--brand-primary);"><i
+                                    class="fas fa-dollar-sign"></i></div>
+                            <div><span class="kpi-number" id="stat-clients-revenue">R$ 0</span><span
+                                    class="kpi-label">TOTAL GASTO</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header" style="flex-wrap:wrap;gap:8px;">
+                            <h3 class="card-title"><i class="fas fa-address-book" style="margin-right:8px;"></i>Base de
+                                Clientes</h3>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input type="text" id="clients-search"
+                                    placeholder="Buscar por nome, telefone, Instagram..."
+                                    style="padding:8px 12px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:13px;width:260px;"
+                                    oninput="Core.filterClients()">
+                                <button class="btn btn-primary btn-sm" onclick="Core.openAddClient()">
+                                    <i class="fas fa-plus"></i> Novo Cliente
+                                </button>
+                            </div>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Telefone</th>
+                                        <th>Instagram</th>
+                                        <th>Cidade</th>
+                                        <th>Pedidos</th>
+                                        <th>Total Gasto</th>
+                                        <th>Último Pedido</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clients-body">
+                                    <tr>
+                                        <td colspan="8" class="empty-state" style="padding:40px;">
+                                            <i class="fas fa-users"></i><br>Carregando clientes...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- WhatsApp Templates -->
