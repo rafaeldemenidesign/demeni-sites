@@ -325,6 +325,63 @@ const Core = (function () {
         const roleEl = document.getElementById('user-role');
         roleEl.textContent = ROLE_LABELS[currentRole] || currentRole;
         roleEl.dataset.role = currentRole;
+
+        const emailEl = document.getElementById('user-email');
+        if (emailEl) emailEl.textContent = currentUser.email || '';
+    }
+
+    function openEditProfile() {
+        const name = currentUser?.name || currentUser?.email?.split('@')[0] || '';
+        const email = currentUser?.email || '';
+
+        const html = `<div style="display:grid;gap:14px;">
+            <h3 style="color:var(--text-primary);margin:0;">
+                <i class="fas fa-user-circle" style="margin-right:8px;color:var(--brand-primary);"></i>Editar Perfil
+            </h3>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <div class="user-avatar" style="width:56px;height:56px;font-size:24px;">${name.charAt(0).toUpperCase()}</div>
+                <div style="flex:1;">
+                    <div style="font-size:13px;color:var(--text-muted);">${email}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${ROLE_LABELS[currentRole] || currentRole}</div>
+                </div>
+            </div>
+            <input type="text" id="profile-name" placeholder="Seu nome" value="${name}"
+                style="padding:10px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="Core.saveProfile()">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>`;
+
+        openModal('', html);
+    }
+
+    async function saveProfile() {
+        const name = document.getElementById('profile-name')?.value.trim();
+        if (!name) { toast('Nome é obrigatório', 'error'); return; }
+
+        try {
+            if (typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient()) {
+                const { error } = await SupabaseClient.getClient()
+                    .from('profiles')
+                    .update({ name })
+                    .eq('id', currentUser.id);
+                if (error) {
+                    toast('Erro ao salvar: ' + error.message, 'error');
+                    return;
+                }
+            }
+        } catch (e) {
+            toast('Erro ao salvar perfil', 'error');
+            return;
+        }
+
+        currentUser.name = name;
+        updateUserInfo();
+        closeModal();
+        toast('Perfil atualizado!', 'success');
     }
 
     // ========== GLOBAL SEARCH (Ctrl+K) ==========
@@ -2839,8 +2896,8 @@ const Core = (function () {
             profiles = [];
         }
 
-        // Filter to sales roles
-        const salesTeam = profiles;
+        // Ranking: only roles that sell (vendedor, admin)
+        const salesTeam = profiles.filter(p => ['vendedor', 'admin'].includes(p.role));
 
         if (salesTeam.length === 0) {
             teamBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px;">Nenhum vendedor na equipe.</td></tr>`;
@@ -4463,6 +4520,9 @@ const Core = (function () {
         openSetGoals,
         saveAllGoals,
         closeDynamicModal,
+        // Profile
+        openEditProfile,
+        saveProfile,
         // Financial Settings
         saveFinancialSettings,
         saveIntegrationSettings,

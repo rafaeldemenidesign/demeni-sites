@@ -1083,17 +1083,27 @@
                                     style="margin-right:8px;color:var(--brand-light);"></i>Perfil</h3>
                         </div>
                         <div style="padding:20px;display:flex;align-items:center;gap:16px;">
-                            <div class="user-avatar" id="user-avatar" style="width:48px;height:48px;font-size:20px;">R
+                            <div class="user-avatar" id="user-avatar"
+                                style="width:48px;height:48px;font-size:20px;cursor:pointer;"
+                                onclick="Core.openEditProfile()" title="Editar perfil">R
                             </div>
                             <div style="flex:1;">
                                 <div id="user-name" style="font-weight:700;font-size:16px;">Carregando...</div>
                                 <div id="user-role" data-role="admin"
                                     style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
                                     Admin</div>
+                                <div id="user-email" style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+                                </div>
                             </div>
-                            <button class="btn btn-sm btn-secondary" id="btn-logout" style="font-size:12px;">
-                                <i class="fas fa-sign-out-alt"></i> Sair
-                            </button>
+                            <div style="display:flex;gap:6px;">
+                                <button class="btn btn-sm btn-secondary" onclick="Core.openEditProfile()"
+                                    title="Editar perfil" style="font-size:12px;">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" id="btn-logout" style="font-size:12px;">
+                                    <i class="fas fa-sign-out-alt"></i> Sair
+                                </button>
+                            </div>
                         </div>
                     </div>
 
