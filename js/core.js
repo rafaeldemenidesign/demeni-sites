@@ -222,6 +222,7 @@ const Core = (function () {
         loadOrders();
         loadClients();
         loadGoals();
+        loadNotifications();
 
         // Load shared data from Supabase (parallel)
         Promise.all([
@@ -4444,6 +4445,25 @@ const Core = (function () {
         if (!result) {
             toast('Erro ao enviar mensagem', 'error');
             input.value = content;
+        } else {
+            // Create notification for other users in the channel
+            try {
+                const senderName = currentUser?.name || currentUser?.email?.split('@')[0] || 'Alguém';
+                if (chatChannel === 'general') {
+                    // Notify all team except sender
+                    chatProfiles.forEach(p => {
+                        if (p.id !== chatCurrentUserId) {
+                            createNotification(p.id, 'chat', `${senderName}: ${content.substring(0, 80)}`);
+                        }
+                    });
+                } else {
+                    // DM: notify the other person
+                    const otherId = chatChannel.split('_').find(id => id !== chatCurrentUserId);
+                    if (otherId) {
+                        createNotification(otherId, 'chat', `${senderName}: ${content.substring(0, 80)}`);
+                    }
+                }
+            } catch (e) { /* silent */ }
         }
     }
 
@@ -4453,6 +4473,191 @@ const Core = (function () {
         sidebar.classList.toggle('collapsed');
         sidebar.classList.toggle('expanded');
     }
+
+    // ========== NOTIFICATIONS ==========
+    let notifications = [];
+    let notifSubscription = null;
+
+    async function loadNotifications() {
+        try {
+            if (typeof SupabaseClient === 'undefined' || !SupabaseClient.getClient()) return;
+            const userId = await SupabaseClient.getCurrentUserId();
+            if (!userId) return;
+
+            const { data, error } = await SupabaseClient.getClient()
+                .from('notifications')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (!error && data) {
+                notifications = data;
+                updateNotifBadge();
+                console.log('[Core] Notifications loaded:', data.length);
+            }
+
+            // Subscribe to new notifications via realtime
+            if (notifSubscription) {
+                SupabaseClient.getClient().removeChannel(notifSubscription);
+            }
+            notifSubscription = SupabaseClient.getClient()
+                .channel('notif-' + userId)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'notifications',
+                    filter: `user_id=eq.${userId}`
+                }, (payload) => {
+                    notifications.unshift(payload.new);
+                    updateNotifBadge();
+                    // Show toast for new notification
+                    toast(payload.new.message, 'info');
+                })
+                .subscribe();
+        } catch (e) {
+            console.error('[Core] loadNotifications error:', e);
+        }
+    }
+
+    function updateNotifBadge() {
+        const badge = document.getElementById('notif-badge');
+        if (!badge) return;
+        const unread = notifications.filter(n => !n.read).length;
+        if (unread > 0) {
+            badge.style.display = '';
+            badge.textContent = unread > 9 ? '9+' : unread;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notif-dropdown');
+        if (!dropdown) return;
+        const isVisible = dropdown.style.display !== 'none';
+        dropdown.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) renderNotifications();
+    }
+
+    function renderNotifications() {
+        const list = document.getElementById('notif-list');
+        if (!list) return;
+
+        if (notifications.length === 0) {
+            list.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);">
+                <i class="fas fa-bell-slash" style="font-size:28px;opacity:0.3;margin-bottom:8px;display:block;"></i>
+                <p style="font-size:13px;">Nenhuma notificação</p>
+            </div>`;
+            return;
+        }
+
+        const icons = {
+            chat: 'fa-comment',
+            order: 'fa-shopping-bag',
+            goal: 'fa-bullseye',
+            team: 'fa-users',
+            system: 'fa-cog'
+        };
+
+        const colors = {
+            chat: '#3b82f6',
+            order: '#f59e0b',
+            goal: '#10b981',
+            team: '#8b5cf6',
+            system: '#6b7280'
+        };
+
+        list.innerHTML = notifications.slice(0, 30).map(n => {
+            const icon = icons[n.type] || 'fa-bell';
+            const color = colors[n.type] || '#6b7280';
+            const time = timeAgo(n.created_at);
+            const unreadStyle = !n.read ? 'border-left:3px solid var(--brand-primary);background:rgba(255,255,255,0.02);' : '';
+
+            return `<div onclick="Core.markNotifRead('${n.id}')" style="padding:10px 12px;cursor:pointer;border-radius:8px;margin:2px;transition:background 0.2s;${unreadStyle}" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='${!n.read ? 'rgba(255,255,255,0.02)' : ''}'">
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <div style="width:32px;height:32px;border-radius:8px;background:${color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas ${icon}" style="color:${color};font-size:13px;"></i>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;color:var(--text-primary);line-height:1.4;${!n.read ? 'font-weight:600;' : ''}">${n.message}</div>
+                        <div style="font-size:10px;color:var(--text-muted);margin-top:3px;">${time}</div>
+                    </div>
+                    ${!n.read ? '<div style="width:6px;height:6px;border-radius:50%;background:var(--brand-primary);flex-shrink:0;margin-top:6px;"></div>' : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function timeAgo(dateStr) {
+        const now = new Date();
+        const date = new Date(dateStr);
+        const diff = Math.floor((now - date) / 1000);
+
+        if (diff < 60) return 'agora';
+        if (diff < 3600) return `${Math.floor(diff / 60)}min atrás`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d atrás`;
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    async function markNotifRead(notifId) {
+        const n = notifications.find(x => x.id === notifId);
+        if (n) n.read = true;
+        updateNotifBadge();
+        renderNotifications();
+
+        try {
+            if (SupabaseClient.getClient()) {
+                await SupabaseClient.getClient()
+                    .from('notifications')
+                    .update({ read: true })
+                    .eq('id', notifId);
+            }
+        } catch (e) { /* silent */ }
+    }
+
+    async function markAllRead() {
+        notifications.forEach(n => n.read = true);
+        updateNotifBadge();
+        renderNotifications();
+
+        try {
+            const userId = await SupabaseClient.getCurrentUserId();
+            if (SupabaseClient.getClient() && userId) {
+                await SupabaseClient.getClient()
+                    .from('notifications')
+                    .update({ read: true })
+                    .eq('user_id', userId)
+                    .eq('read', false);
+            }
+        } catch (e) { /* silent */ }
+    }
+
+    async function createNotification(userId, type, message) {
+        try {
+            if (!SupabaseClient.getClient()) return;
+            await SupabaseClient.getClient()
+                .from('notifications')
+                .insert({
+                    user_id: userId,
+                    type,
+                    message,
+                    read: false
+                });
+        } catch (e) {
+            console.error('[Core] createNotification error:', e);
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        const wrapper = document.getElementById('notif-wrapper');
+        const dropdown = document.getElementById('notif-dropdown');
+        if (wrapper && dropdown && !wrapper.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
 
     // ========== PUBLIC API ==========
     return {
@@ -4523,6 +4728,10 @@ const Core = (function () {
         // Profile
         openEditProfile,
         saveProfile,
+        // Notifications
+        toggleNotifications,
+        markNotifRead,
+        markAllRead,
         // Financial Settings
         saveFinancialSettings,
         saveIntegrationSettings,
