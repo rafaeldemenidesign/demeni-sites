@@ -808,6 +808,7 @@ const Core = (function () {
         };
 
         // Save to Supabase
+        let insertOk = false;
         try {
             if (typeof SupabaseClient !== 'undefined' && SupabaseClient.getClient()) {
                 const { data, error } = await SupabaseClient.getClient()
@@ -816,13 +817,18 @@ const Core = (function () {
                     .select()
                     .single();
 
-                if (!error && data) {
+                if (error) {
+                    console.error('[Core] Supabase insert error:', error);
+                    toast('⚠️ Erro ao salvar no servidor: ' + error.message, 'error');
+                } else if (data) {
                     order.id = data.id;
                     order.tracking_token = data.tracking_token;
+                    insertOk = true;
                 }
             }
         } catch (e) {
-            console.warn('[Core] Supabase insert failed, saving locally:', e.message);
+            console.error('[Core] Supabase insert failed:', e);
+            toast('⚠️ Erro ao salvar: ' + e.message, 'error');
         }
 
         // Save locally as fallback
@@ -1909,8 +1915,8 @@ const Core = (function () {
     }
 
     function saveOrdersLocal(orderId) {
-        // Persist specific order to Supabase (or all recently changed)
-        if (!orderId) return; // no-op if no orderId specified
+        // Persist specific order to Supabase
+        if (!orderId) return;
 
         const order = orders.find(o => o.id === orderId);
         if (!order) return;
@@ -1921,9 +1927,14 @@ const Core = (function () {
                 .from('orders')
                 .upsert(order, { onConflict: 'id' })
                 .then(({ error }) => {
-                    if (error) console.warn('[Core] Order sync error:', error.message);
+                    if (error) {
+                        console.error('[Core] Order sync error:', error);
+                        if (typeof toast === 'function') toast('⚠️ Erro ao sincronizar pedido', 'error');
+                    }
                 })
-                .catch(e => console.warn('[Core] Order sync failed:', e.message));
+                .catch(e => {
+                    console.error('[Core] Order sync failed:', e);
+                });
         }
     }
 
