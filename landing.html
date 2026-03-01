@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Demeni Agency | Seu Negócio Profissional Online</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#c47f3b",
+                        "primary-dark": "#914531",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#0a0a0c",
+                        "card-dark": "#18181f",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        .golden-gradient {
+            background: linear-gradient(135deg, #914531 0%, #c47f3b 100%);
+        }
+
+        .golden-text-gradient {
+            background: linear-gradient(135deg, #914531 0%, #c47f3b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(24, 24, 31, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+
+<body class="font-sans bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+    <header
+        class="fixed top-0 w-full z-50 border-b border-slate-200/10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 golden-gradient rounded-lg flex items-center justify-center">
+                    <span class="text-white font-black text-xl italic">D</span>
+                </div>
+                <span class="text-2xl font-extrabold tracking-tight dark:text-white">Demeni</span>
+            </div>
+            <nav class="hidden md:flex items-center gap-8">
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#portfolio">Portfólio</a>
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#precos">Planos</a>
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#faq">Dúvidas</a>
+            </nav>
+            <a class="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
+                href="https://wa.me/5583996353619">
+                Quero Meu Site
+            </a>
+        </div>
+    </header>
+    <section class="pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden relative">
+        <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent -z-10">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div
+                class="inline-flex items-center gap-2 bg-slate-100 dark:bg-card-dark px-4 py-2 rounded-full mb-8 border border-slate-200 dark:border-white/5">
+                <span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-xs font-bold uppercase tracking-widest opacity-80">Vagas abertas para esta
+                    semana</span>
+            </div>
+            <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]">
+                Seu Negócio Merece Um <br class="hidden lg:block" /> <span class="golden-text-gradient">Site
+                    Profissional</span>
+            </h1>
+            <p class="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Criamos seu site em até 48 horas. Bonito, rápido e feito pra vender no celular. Sem mensalidades
+                abusivas e com suporte total.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                <a class="w-full sm:w-auto golden-gradient text-white px-8 py-4 rounded-xl font-extrabold text-lg shadow-2xl shadow-primary/30 hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                    href="https://wa.me/5583996353619">
+                    <span class="material-icons-outlined">rocket_launch</span>
+                    Quero Meu Site
+                </a>
+                <button
+                    class="w-full sm:w-auto bg-slate-200 dark:bg-card-dark hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-xl font-bold text-lg border border-slate-300 dark:border-white/5 transition-all flex items-center justify-center gap-2">
+                    <span class="material-icons-outlined">play_circle</span>
+                    Assistir Apresentação
+                </button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-3 justify-center">
+                    <span class="material-icons-outlined text-primary">timer</span>
+                    <span class="text-sm font-semibold">Pronto em 48h</span>
+                </div>
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-3 justify-center">
+                    <span class="material-icons-outlined text-primary">smartphone</span>
+                    <span class="text-sm font-semibold">100% Mobile</span>
+                </div>
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-3 justify-center">
+                    <span class="material-icons-outlined text-primary">credit_card_off</span>
+                    <span class="text-sm font-semibold">Sem Mensalidade</span>
+                </div>
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-3 justify-center">
+                    <span class="material-icons-outlined text-primary">support_agent</span>
+                    <span class="text-sm font-semibold">Suporte Incluso</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-slate-50 dark:bg-[#0e0e12]">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div
+                class="relative rounded-[2rem] overflow-hidden border-4 border-primary/20 shadow-[0_0_50px_rgba(196,127,59,0.15)] group">
+                <img alt="Background de tecnologia" class="w-full aspect-video object-cover brightness-[0.3]"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZtn90iHsyeINcr2mnrlvF3zWElqJ2FACHqgOx-kGNGk3g2NGkFipDKA-qphLb7enUrrrH7QtFEsreVs7LEVJlCgob8o2ksRPi9GNtT05s1TL7Y1DsHwBThyltmoQUPR29gHKqRRGNqx3i_L9aRYqXIjJRLOqAM8LOGRQKjyGseCCbg2jNmynrNNQavtwOmPSvzGC9LBSnNu8YueekBM5bzrklLtGq7B5v2kVyQthlSnuUJq_wWilm93Yuzj3GcWo0zIt-VcgiWFc" />
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <button
+                        class="w-24 h-24 bg-primary/90 hover:bg-primary rounded-full flex items-center justify-center text-white shadow-2xl transition-all hover:scale-110 group-hover:shadow-primary/40">
+                        <span class="material-icons-outlined text-5xl translate-x-1">play_arrow</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-24 bg-white dark:bg-background-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">O Site Ideal Para Você Que...</h2>
+                <div class="h-1.5 w-24 golden-gradient mx-auto rounded-full"></div>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
+                    <div
+                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-icons-outlined text-primary text-3xl">chat</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Vende pelo WhatsApp</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Botões estratégicos que levam seu cliente direto para
+                        o seu atendimento em um clique.</p>
+                </div>
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
+                    <div
+                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-icons-outlined text-primary text-3xl">devices</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Foca no Celular</h3>
+                    <p class="text-slate-600 dark:text-slate-400">90% dos seus clientes estão no celular. Criamos sites
+                        ultrarrápidos e leves para mobile.</p>
+                </div>
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
+                    <div
+                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-icons-outlined text-primary text-3xl">star</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Quer Autoridade</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Pare de parecer amador. Tenha uma presença digital
+                        robusta que transmite confiança.</p>
+                </div>
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
+                    <div
+                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-icons-outlined text-primary text-3xl">restaurant</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">É do Ramo de Serviços</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Seja você um Personal Trainer, Advogado ou Dono de
+                        Restaurante, nós temos o modelo certo.</p>
+                </div>
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
+                    <div
+                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-icons-outlined text-primary text-3xl">google</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Quer ser Achado</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Estrutura otimizada para aparecer nas buscas locais do
+                        Google quando alguém procurar seu serviço.</p>
+                </div>
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
+                    <div
+                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-icons-outlined text-primary text-3xl">bolt</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Tem Pressa</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Sem burocracia ou esperas de meses. Seu site no ar em
+                        tempo recorde para você começar a lucrar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-24 bg-slate-50 dark:bg-[#0e0e12]" id="portfolio">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">Veja Alguns Sites Que Já Criamos</h2>
+                <p class="text-slate-600 dark:text-slate-400">Resultados reais para clientes reais em diversos nichos.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="relative group">
+                    <div
+                        class="bg-slate-900 rounded-[3rem] p-3 border-[8px] border-slate-800 shadow-2xl overflow-hidden aspect-[9/19] relative">
+                        <img alt="Site de Restaurante" class="w-full h-full object-cover"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHI0mOpkqcXrogQsN4clv-2FJS9kn16L28fl2eEOF9w15C2aPu4LIQX8uBX0LbUtpdPWivBzMblQTrJERzBI89qh9h7NJIwMEeCfsFBU0HaYh6FinqGeo_a_dkmABDq3p_faw6qltbBJ3H5encaNI8zniNuiEiYkTgrxbmj08d5Kh0Sth_BGtWHr6YKeNoec0rfEINgJvahfHu2izM7Iqn_sTTT9ExhoWO0zqq6OsjhwYb7muPQPaKLA4wsevIbAvMyTU9o4rDOtI" />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <p class="text-sm font-bold text-primary uppercase tracking-widest">Gastronomia</p>
+                        <h4 class="text-lg font-bold">The Burger House</h4>
+                    </div>
+                </div>
+                <div class="relative group mt-8 md:mt-0">
+                    <div
+                        class="bg-slate-900 rounded-[3rem] p-3 border-[8px] border-slate-800 shadow-2xl overflow-hidden aspect-[9/19] relative">
+                        <img alt="Site de Salão" class="w-full h-full object-cover"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIwVF-Luj5sTKyfkIrH6fGlmvpg7eJmBJcprSnuerRE9m3iGMfusFckpaYomp96ZiZpS3kn7xOfsYyrdq4fKsZ9mL_9SUbwByySIv6HdmukLgn3LcJF7eTlnpGtG_V3eySNVzn2xpJyhgrnCv0qYGloBjzAP5_U59iwlsyY7LH6DyqYXjKNPM8vfMn433mlbXsVuuMPj4aHPuU2goD4HZVUxNG5CNChb7_6KFA0-VNfV5XE_r6B7EWlyeLIV1LKYYK24QsVlmTTuk" />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <p class="text-sm font-bold text-primary uppercase tracking-widest">Beleza</p>
+                        <h4 class="text-lg font-bold">Studio VIP Beauty</h4>
+                    </div>
+                </div>
+                <div class="relative group mt-8 md:mt-0">
+                    <div
+                        class="bg-slate-900 rounded-[3rem] p-3 border-[8px] border-slate-800 shadow-2xl overflow-hidden aspect-[9/19] relative">
+                        <img alt="Site de Personal Trainer" class="w-full h-full object-cover"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPpMDLmVz20dY1efIw-ulYGv8lhXzAqTbPLaCb8R6z5cQH-CGoyD1PpWXG7mboQl6QnKj2D_6BiDxnb6fwz62apYYAVtxrLMWmXwHPIGTG4-6fYiigQJiyan7xex3fF-Z3YvUVhjDkUYzLlE5Rh5aY3-aqzWnyDbfFJtxV1vS6GUyDqXxwowldAGmNZsjrBjmjpZbQQYdLAxoMfNNjcDWBGRSqqFokdBKQgQicIYzvUuINpOO9wIWGfig1uax9Nnxg0Dwhm-IoQRc" />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <p class="text-sm font-bold text-primary uppercase tracking-widest">Saúde &amp; Fitness</p>
+                        <h4 class="text-lg font-bold">Elite Performance</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-24 bg-white dark:bg-background-dark" id="precos">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">Escolha Seu Plano</h2>
+                <p class="text-slate-600 dark:text-slate-400">Investimento único. Sem taxas mensais escondidas.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-10 rounded-3xl border border-slate-200 dark:border-white/5 relative overflow-hidden flex flex-col h-full">
+                    <h3 class="text-2xl font-bold mb-2">Cartão Digital</h3>
+                    <p class="text-slate-600 dark:text-slate-400 mb-8">Ideal para freelancers e autônomos.</p>
+                    <div class="mb-8">
+                        <span class="text-slate-400 line-through text-sm">R$ 199,90</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-2xl font-bold">R$</span>
+                            <span class="text-5xl font-extrabold">149</span>
+                            <span class="text-2xl font-bold">,90</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-6 flex-grow">
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> 1 Página (Link
+                            Bio)</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Links Redes
+                            Sociais</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Botão WhatsApp
+                        </li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Hospedagem
+                            Inclusa</li>
+                    </ul>
+                    <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+                        <p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">🎁 Você ganha:</p>
+                        <p class="text-sm font-semibold">Chaveiro Inteligente NFC</p>
+                        <p class="text-xs text-slate-400">Seu cliente aponta o celular → abre seu site</p>
+                    </div>
+                    <a class="w-full text-center border-2 border-primary text-primary hover:bg-primary hover:text-white py-4 rounded-xl font-bold transition-all"
+                        href="https://wa.me/5583996353619">Contratar Plano</a>
+                </div>
+                <div
+                    class="bg-slate-50 dark:bg-card-dark p-10 rounded-3xl border-2 border-primary relative overflow-hidden flex flex-col h-full shadow-[0_0_40px_rgba(196,127,59,0.1)]">
+                    <div
+                        class="absolute top-6 right-[-35px] bg-primary text-white text-[10px] font-black uppercase tracking-widest py-1 px-10 rotate-45 shadow-lg">
+                        MAIS VENDIDO</div>
+                    <h3 class="text-2xl font-bold mb-2">Minisite Profissional</h3>
+                    <p class="text-slate-600 dark:text-slate-400 mb-8 text-sm">A solução completa para o seu negócio.
+                    </p>
+                    <div class="mb-8">
+                        <span class="text-slate-400 line-through text-sm">R$ 399,90</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-2xl font-bold">R$</span>
+                            <span class="text-5xl font-extrabold">249</span>
+                            <span class="text-2xl font-bold">,90</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-6 flex-grow text-sm">
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Site Completo
+                            com Múltiplas Seções</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Catálogo de
+                            Serviços/Produtos</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Seção Sobre,
+                            FAQ e
+                            Depoimentos</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Botão Flutuante
+                            WhatsApp</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Até 2 Páginas
+                            Internas Extras</li>
+                    </ul>
+                    <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+                        <p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">🎁 Você ganha:</p>
+                        <p class="text-sm font-semibold">Chaveiro Inteligente NFC</p>
+                        <p class="text-xs text-slate-400">Artesanal em couro — seu cliente encosta o celular e o site
+                            abre</p>
+                    </div>
+                    <a class="w-full text-center golden-gradient text-white py-4 rounded-xl font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                        href="https://wa.me/5583996353619">Garantir Meu Site</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-24 bg-slate-50 dark:bg-[#0e0e12]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">Simples Assim</h2>
+                <p class="text-slate-600 dark:text-slate-400">Do primeiro contato ao seu site no ar.</p>
+            </div>
+            <div class="relative">
+                <div
+                    class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 dark:bg-white/10 -translate-y-1/2">
+                </div>
+                <div class="grid md:grid-cols-4 gap-8 relative">
+                    <div
+                        class="bg-white dark:bg-card-dark p-6 rounded-2xl border border-slate-200 dark:border-white/5 text-center relative z-10">
+                        <div
+                            class="w-12 h-12 golden-gradient rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4">
+                            1</div>
+                        <h4 class="font-bold mb-2">Bate-papo</h4>
+                        <p class="text-xs text-slate-500">Alinhamos suas ideias e necessidades via WhatsApp.</p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-card-dark p-6 rounded-2xl border border-slate-200 dark:border-white/5 text-center relative z-10">
+                        <div
+                            class="w-12 h-12 golden-gradient rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4">
+                            2</div>
+                        <h4 class="font-bold mb-2">Criação</h4>
+                        <p class="text-xs text-slate-500">Nossa equipe desenvolve seu design exclusivo.</p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-card-dark p-6 rounded-2xl border border-slate-200 dark:border-white/5 text-center relative z-10">
+                        <div
+                            class="w-12 h-12 golden-gradient rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4">
+                            3</div>
+                        <h4 class="font-bold mb-2">Aprovação</h4>
+                        <p class="text-xs text-slate-500">Você revisa tudo e solicita ajustes se precisar.</p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-card-dark p-6 rounded-2xl border border-slate-200 dark:border-white/5 text-center relative z-10">
+                        <div
+                            class="w-12 h-12 golden-gradient rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4">
+                            4</div>
+                        <h4 class="font-bold mb-2">Lançamento</h4>
+                        <p class="text-xs text-slate-500">Site publicado e pronto para receber clientes!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-24 bg-white dark:bg-background-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold mb-8 leading-tight">Por que escolher a <span
+                            class="golden-text-gradient">Demeni?</span></h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="flex flex-col gap-2">
+                            <span class="material-icons-outlined text-primary text-3xl">money_off</span>
+                            <h4 class="font-bold">Zero Mensalidade</h4>
+                            <p class="text-sm text-slate-500">Pague uma única vez e o site é seu para sempre.</p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="material-icons-outlined text-primary text-3xl">speed</span>
+                            <h4 class="font-bold">Entrega 48h</h4>
+                            <p class="text-sm text-slate-500">Velocidade real. Sem enrolação no cronograma.</p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="material-icons-outlined text-primary text-3xl">touch_app</span>
+                            <h4 class="font-bold">Mobile First</h4>
+                            <p class="text-sm text-slate-500">Pensado para quem navega com o polegar.</p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="material-icons-outlined text-primary text-3xl">volunteer_activism</span>
+                            <h4 class="font-bold">Suporte Humano</h4>
+                            <p class="text-sm text-slate-500">Não falamos com robôs. Atendimento direto.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img alt="Web Design Workspace" class="rounded-[2.5rem] shadow-2xl"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnbwqgXgcEaXeNP9B-fbUrF7oUyRkFoJV6AMnbyPokV8ZkwNo1R_mw78659skOVm6qjvkdv9Nqp3gtVbkN5sxpziZV_CGQKyzDxeI1fm5QLWvFYzJwFiuBSEs6meY0D79ap9TYf0TUXDdv_Dv8N7Dprpx4TrL3RAb_N5oOVD60VEu8pl-wYHidon4Z_iQv4YQWUZBDC6gxSreFl-RmUxWgf-f68QhLzv6GFPlnuDl14U5_3ozTztW5rXE-Q37MWxepXTtWSv0murY" />
+                    <div
+                        class="absolute -bottom-6 -left-6 bg-primary p-8 rounded-3xl text-white shadow-xl hidden lg:block">
+                        <p class="text-3xl font-black">+100</p>
+                        <p class="text-sm opacity-90">Sites Entregues</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-24 bg-slate-50 dark:bg-[#0e0e12]" id="faq">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-extrabold mb-4">Dúvidas Frequentes</h2>
+            </div>
+            <div class="space-y-4">
+                <details
+                    class="group bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-white/5 p-6 cursor-pointer overflow-hidden">
+                    <summary class="flex items-center justify-between font-bold text-lg list-none">
+                        O site tem custo mensal?
+                        <span
+                            class="material-icons-outlined transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <p class="mt-4 text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Não! Nós cobramos apenas pela criação do site. O único custo recorrente que você terá é a
+                        hospedagem e domínio (que são pagos anualmente para as empresas de registro, custando cerca de
+                        R$ 80/ano).
+                    </p>
+                </details>
+                <details
+                    class="group bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-white/5 p-6 cursor-pointer overflow-hidden">
+                    <summary class="flex items-center justify-between font-bold text-lg list-none">
+                        Preciso passar algum conteúdo?
+                        <span
+                            class="material-icons-outlined transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <p class="mt-4 text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Sim, solicitaremos as informações básicas do seu negócio, sua logo e as principais fotos dos
+                        seus serviços. Se não tiver fotos profissionais, podemos usar bancos de imagens de alta
+                        qualidade.
+                    </p>
+                </details>
+                <details
+                    class="group bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-white/5 p-6 cursor-pointer overflow-hidden">
+                    <summary class="flex items-center justify-between font-bold text-lg list-none">
+                        E se eu quiser alterar algo depois?
+                        <span
+                            class="material-icons-outlined transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <p class="mt-4 text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Entregamos o site pronto e ensinamos você a fazer alterações básicas. Se preferir, também
+                        oferecemos pacotes de manutenção pontual.
+                    </p>
+                </details>
+            </div>
+        </div>
+    </section>
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="golden-gradient rounded-[3rem] p-12 lg:p-20 text-center relative overflow-hidden group">
+                <div
+                    class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20">
+                </div>
+                <div class="relative z-10">
+                    <h2 class="text-4xl lg:text-6xl font-black text-white mb-6">Coloque Seu Negócio <br /> Online Hoje
+                    </h2>
+                    <p class="text-white/80 text-lg lg:text-xl max-w-2xl mx-auto mb-12">
+                        Não perca mais tempo sendo invisível no Google. Garanta sua vaga na agenda desta semana agora
+                        mesmo.
+                    </p>
+                    <a class="inline-flex items-center justify-center gap-3 bg-white text-primary px-10 py-5 rounded-2xl font-black text-xl shadow-2xl hover:scale-105 transition-transform"
+                        href="https://wa.me/5583996353619">
+                        <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                            <path
+                                d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217s.231.001.332.005c.101.004.256-.037.401.307.145.344.491 1.2.534 1.288.043.087.072.188.014.303-.058.116-.087.188-.173.289l-.26.303c-.087.101-.177.211-.077.382.1.172.443.731.95 1.182.653.581 1.201.762 1.373.848.173.087.274.072.376-.043.101-.116.434-.506.549-.68.116-.173.231-.144.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.176L2 22l4.957-1.3c1.479.821 3.184 1.3 5.043 1.3 5.523 0 10-4.477 10-10S17.523 2 12 2z">
+                            </path>
+                        </svg>
+                        Chamar no WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="py-12 border-t border-slate-200 dark:border-white/5">
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 golden-gradient rounded flex items-center justify-center">
+                    <span class="text-white font-black text-sm italic">D</span>
+                </div>
+                <span class="text-xl font-bold dark:text-white">Demeni</span>
+            </div>
+            <p class="text-sm text-slate-500">© 2026 Demeni Agency. Todos os direitos reservados.</p>
+            <div class="flex items-center gap-2 text-slate-500">
+                <span class="material-icons-outlined text-sm">schedule</span>
+                <span class="text-sm font-medium">Atendimento de segunda a sábado</span>
+            </div>
+        </div>
+    </footer>
+    <a class="md:hidden fixed bottom-6 right-6 w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl z-[60] animate-bounce"
+        href="https://wa.me/5583996353619">
+        <svg class="w-10 h-10 fill-current" viewBox="0 0 24 24">
+            <path
+                d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217s.231.001.332.005c.101.004.256-.037.401.307.145.344.491 1.2.534 1.288.043.087.072.188.014.303-.058.116-.087.188-.173.289l-.26.303c-.087.101-.177.211-.077.382.1.172.443.731.95 1.182.653.581 1.201.762 1.373.848.173.087.274.072.376-.043.101-.116.434-.506.549-.68.116-.173.231-.144.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.176L2 22l4.957-1.3c1.479.821 3.184 1.3 5.043 1.3 5.523 0 10-4.477 10-10S17.523 2 12 2z">
+            </path>
+        </svg>
+    </a>
+
+</body>
+
+</html>
