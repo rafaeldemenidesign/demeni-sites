@@ -1450,13 +1450,42 @@
         </div>
     </div>
 
-    <!-- PWA: Service Worker Registration + Install Logic -->
+    <!-- PWA: Service Worker Registration + Auto-Update -->
     <script>
-        // Register Service Worker
+        // Register Service Worker with aggressive auto-update
         if ('serviceWorker' in navigator) {
+            let refreshing = false;
+
+            // Auto-reload when new SW takes control
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('🔄 Novo código detectado, recarregando...');
+                    window.location.reload();
+                }
+            });
+
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/core-sw.js', { scope: '/' })
-                    .then(reg => console.log('✅ Core SW registered:', reg.scope))
+                    .then(reg => {
+                        console.log('✅ Core SW registered:', reg.scope);
+
+                        // Force check for updates on every page load
+                        reg.update();
+
+                        // When a new SW is found, tell it to activate immediately
+                        reg.addEventListener('updatefound', () => {
+                            const newSW = reg.installing;
+                            if (newSW) {
+                                newSW.addEventListener('statechange', () => {
+                                    if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('🆕 Nova versão disponível, ativando...');
+                                        newSW.postMessage({ type: 'SKIP_WAITING' });
+                                    }
+                                });
+                            }
+                        });
+                    })
                     .catch(err => console.warn('⚠️ Core SW failed:', err));
             });
 

@@ -3,7 +3,7 @@
 // PWA offline support + cache
 // ===========================
 
-const CACHE_NAME = 'demeni-core-v4';
+const CACHE_NAME = 'demeni-core-v5';
 const PRECACHE = [
     '/core.html',
     '/css/core.css',
@@ -78,6 +78,13 @@ self.addEventListener('fetch', (event) => {
                 });
             })
     );
+});
+
+// Listen for SKIP_WAITING from the page to activate immediately
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 // Background Sync: queue data changes when offline
