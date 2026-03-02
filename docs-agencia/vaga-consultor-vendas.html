@@ -359,12 +359,29 @@
 
             <!-- 0. VÍDEO -->
             <div class="section" style="text-align: center;">
-                <div
-                    style="position: relative; width: 100%; aspect-ratio: 16/9; background: #0a0a0c url('/docs-agencia/video-thumb.jpg') center/cover no-repeat; border: 3px solid #4361EE; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                    <!-- Substitua pelo embed do YouTube quando gravar -->
+                <div id="videoThumb" onclick="document.getElementById('videoLightbox').style.display='flex'"
+                    style="position: relative; max-width: 400px; margin: 0 auto; aspect-ratio: 16/9; background: #0a0a0c url('/docs-agencia/video-thumb.jpg') center/cover no-repeat; border: 3px solid #4361EE; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
+                    onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 8px 32px rgba(67,97,238,0.3)'"
+                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                     <div
-                        style="width: 80px; height: 80px; background: rgba(67, 97, 238, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                        <div style="font-size: 32px; color: white; margin-left: 4px;">▶</div>
+                        style="width: 60px; height: 60px; background: rgba(67, 97, 238, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+                        <div style="font-size: 24px; color: white; margin-left: 3px;">▶</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIGHTBOX -->
+            <div id="videoLightbox" onclick="this.style.display='none'"
+                style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.95); z-index:9999; align-items:center; justify-content:center; cursor:pointer;">
+                <div
+                    style="position:absolute; top:20px; right:24px; color:white; font-size:32px; font-weight:300; cursor:pointer;">
+                    ✕</div>
+                <div onclick="event.stopPropagation()"
+                    style="width:90%; max-width:860px; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:default;">
+                    <!-- Substitua pelo iframe do YouTube quando gravar -->
+                    <div style="text-align:center; color:#4361EE;">
+                        <div style="font-size:64px; margin-bottom:12px;">▶</div>
+                        <p style="font-size:16px; font-weight:600; color:#888;">Vídeo em breve</p>
                     </div>
                 </div>
             </div>
