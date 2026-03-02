@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demeni Agency — Vaga Consultor de Vendas</title>
+    <title>Demeni Agency — Ganhe até R$ 5.000/mês</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <style>
@@ -28,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* HEADER */
         .header {
             background: linear-gradient(135deg, #3A0CA3 0%, #4361EE 50%, #7B2FF7 100%);
             padding: 60px 48px;
@@ -59,11 +58,10 @@
         .header p {
             font-size: 16px;
             opacity: 0.85;
-            max-width: 480px;
+            max-width: 520px;
             margin: 0 auto;
         }
 
-        /* CONTENT */
         .content {
             padding: 48px;
         }
@@ -73,12 +71,6 @@
             font-weight: 800;
             margin-bottom: 16px;
             color: #3A0CA3;
-        }
-
-        h3 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 8px;
         }
 
         .section {
@@ -113,7 +105,6 @@
             margin-top: 8px;
         }
 
-        /* TABLE */
         .meta-table {
             width: 100%;
             border-collapse: collapse;
@@ -154,7 +145,6 @@
             font-size: 15px;
         }
 
-        /* CHECKLIST */
         .checklist {
             list-style: none;
             padding: 0;
@@ -181,7 +171,12 @@
             font-size: 16px;
         }
 
-        /* QUOTE */
+        .checklist.soft li::before {
+            content: '→';
+            color: #888;
+            font-weight: 600;
+        }
+
         .quote {
             background: #fafafe;
             border-left: 4px solid #4361EE;
@@ -193,7 +188,6 @@
             font-size: 15px;
         }
 
-        /* STEPS */
         .steps {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -225,7 +219,57 @@
             color: #888;
         }
 
-        /* CTA */
+        .advantage-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .advantage {
+            background: linear-gradient(135deg, #f8f6ff, #eef0ff);
+            border: 1px solid #e0d8ff;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .advantage .emoji {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .advantage h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #3A0CA3;
+        }
+
+        .advantage p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .profile-section {
+            background: #fafafe;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            padding: 32px;
+            margin: 32px 0;
+        }
+
+        .profile-section h2 {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .profile-section p.intro {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+
         .cta-section {
             background: linear-gradient(135deg, #3A0CA3 0%, #4361EE 50%, #7B2FF7 100%);
             color: white;
@@ -290,6 +334,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .advantage-grid {
+                grid-template-columns: 1fr;
+            }
+
             .highlight-box .big-number {
                 font-size: 44px;
             }
@@ -301,47 +349,86 @@
     <div class="page">
 
         <div class="header">
-            <div class="badge">🚀 Vaga Aberta</div>
-            <h1>Consultor de Vendas Externo</h1>
-            <p>Ganhe até R$ 5.000/mês vendendo sites profissionais para pequenos negócios. Sem experiência necessária.
-            </p>
+            <div class="badge">🚀 Oportunidade Aberta</div>
+            <h1>Ganhe até R$ 5.000/mês vendendo sites profissionais</h1>
+            <p>Uma oportunidade real de renda para quem quer trabalhar por conta própria, com um produto que
+                praticamente se vende sozinho.</p>
         </div>
 
         <div class="content">
 
+            <!-- 1. VANTAGENS PRIMEIRO - ATRAIR -->
             <div class="section">
-                <h2>O que você vai vender?</h2>
-                <p>O <strong>Minisite Profissional (R$ 249,90)</strong> — um site completo com múltiplas seções,
-                    catálogo de serviços, depoimentos e botão WhatsApp. Ideal para restaurantes, salões, personal
-                    trainers, lojas e clínicas.</p>
-                <p style="margin-top: 12px;">Se o cliente achar que não precisa de tudo isso, você oferece o
-                    <strong>Cartão Digital (R$ 149,90)</strong> — um link na bio turbinado. Ninguém sai sem comprar.</p>
-                <p style="margin-top: 12px;">E o melhor: cada cliente recebe um <strong>Chaveiro Inteligente
-                        NFC</strong> — quando alguém encosta o celular, o site abre automaticamente. Essa demonstração
-                    ao vivo é o que fecha a venda.</p>
-
-                <div class="quote">
-                    "Você chega no comerciante, mostra o chaveiro no celular dele, o site abre na hora. Apresenta o
-                    Minisite por R$ 249. Se ele hesitar, oferece o Cartão Digital por R$ 149. Ninguém sai sem fechar."
+                <h2>Por que essa oportunidade é diferente de tudo?</h2>
+                <div class="advantage-grid">
+                    <div class="advantage">
+                        <div class="emoji">🎯</div>
+                        <h4>O produto se vende sozinho</h4>
+                        <p>Você mostra um chaveiro inteligente no celular do cliente. O site abre na hora. O impacto é
+                            imediato.</p>
+                    </div>
+                    <div class="advantage">
+                        <div class="emoji">💰</div>
+                        <h4>Preço que qualquer um paga</h4>
+                        <p>A partir de R$ 149,90. É menos que uma cesta básica. O cliente não precisa "pensar" — ele
+                            fecha na hora.</p>
+                    </div>
+                    <div class="advantage">
+                        <div class="emoji">🏠</div>
+                        <h4>Você é seu próprio chefe</h4>
+                        <p>Sem horário fixo, sem escritório, sem patrão chato. Você faz seu horário e define quanto quer
+                            ganhar.</p>
+                    </div>
+                    <div class="advantage">
+                        <div class="emoji">📈</div>
+                        <h4>Sem teto de ganho</h4>
+                        <p>Quanto mais você vende, mais ganha. Simples assim. Não existe limite.</p>
+                    </div>
+                    <div class="advantage">
+                        <div class="emoji">🎓</div>
+                        <h4>Não precisa de experiência</h4>
+                        <p>Você recebe treinamento, material pronto e suporte direto do fundador. A gente te ensina
+                            tudo.</p>
+                    </div>
+                    <div class="advantage">
+                        <div class="emoji">⚡</div>
+                        <h4>Você só vende. A gente produz.</h4>
+                        <p>Não precisa saber nada de tecnologia. Você fecha a venda e a equipe cuida de criar o site do
+                            cliente em 48h.</p>
+                    </div>
+                    <div class="advantage">
+                        <div class="emoji">🌍</div>
+                        <h4>Mercado gigante e inexplorado</h4>
+                        <p>90% dos pequenos negócios ainda não têm site. Cada rua tem dezenas de clientes em potencial.
+                        </p>
+                    </div>
+                    <div class="advantage">
+                        <div class="emoji">🤝</div>
+                        <h4>Todo mundo precisa</h4>
+                        <p>Restaurante, salão, loja, clínica, personal — qualquer comerciante é um potencial cliente.
+                        </p>
+                    </div>
                 </div>
             </div>
 
+            <!-- 2. GANHO - MOSTRAR O DINHEIRO -->
             <div class="highlight-box">
                 <div class="big-number">R$ 5.000</div>
-                <div class="label">Sua meta — e seu potencial de ganho mensal</div>
-                <div class="sub">100% baseado no seu desempenho. Quanto mais vende, mais ganha.</div>
+                <div class="label">Potencial de ganho mensal com 5 vendas por dia</div>
+                <div class="sub">Seu ganho cresce junto com seu esforço. Sem limite, sem teto.</div>
             </div>
 
             <div class="section">
                 <h2>Tabela de Ganhos</h2>
-                <p>Sua remuneração é proporcional à sua média diária de vendas ao longo do mês (22 dias úteis).</p>
+                <p>Sua remuneração é proporcional à sua média de vendas diária ao longo do mês (22 dias úteis). Veja
+                    quanto você pode ganhar:</p>
 
                 <table class="meta-table">
                     <thead>
                         <tr>
-                            <th>Média/Dia</th>
-                            <th>Vendas/Mês</th>
-                            <th>Seu Ganho</th>
+                            <th>Sua Média/Dia</th>
+                            <th>Vendas no Mês</th>
+                            <th>Você Ganha</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -374,83 +461,94 @@
                 </table>
 
                 <div class="quote">
-                    "Se a meta é 5, não é possível que eu não faça pelo menos 3 na média. Se eu me esforço tanto e nunca
-                    ganhei R$ 5.000, aqui eu tenho essa chance."
+                    "Se a meta é 5 por dia, não é possível que eu não faça 3 na média. Se eu me esforço tanto em outros
+                    trabalhos e nunca ganhei R$ 5.000, aqui eu tenho essa chance real."
                 </div>
             </div>
 
+            <!-- 3. COMO FUNCIONA - SIMPLICIDADE -->
             <div class="section">
-                <h2>Como funciona o dia a dia?</h2>
+                <h2>Como funciona na prática?</h2>
+                <p>É simples. Você vai até os comércios da sua cidade e mostra o produto. Não precisa convencer — o
+                    produto convence sozinho.</p>
                 <div class="steps">
                     <div class="step">
                         <div class="emoji">🚶</div>
-                        <h4>Visita Presencial</h4>
-                        <p>Você visita comércios locais e demonstra o produto pessoalmente</p>
+                        <h4>Visite os comércios</h4>
+                        <p>Restaurantes, salões, lojas, clínicas — toda rua tem clientes</p>
                     </div>
                     <div class="step">
                         <div class="emoji">📱</div>
-                        <h4>Demonstração NFC</h4>
-                        <p>Mostra o chaveiro inteligente funcionando no celular do cliente</p>
+                        <h4>Faça a demonstração</h4>
+                        <p>Encoste o chaveiro NFC no celular do cliente. O site abre na hora. É mágico.</p>
                     </div>
                     <div class="step">
                         <div class="emoji">💳</div>
-                        <h4>Fechamento na Hora</h4>
-                        <p>Pix ou cartão. Sem burocracia, sem espera de aprovação</p>
+                        <h4>Feche a venda</h4>
+                        <p>Pix ou cartão, na hora. Sem burocracia, sem espera.</p>
                     </div>
                     <div class="step">
                         <div class="emoji">✅</div>
-                        <h4>Site Entregue em 48h</h4>
-                        <p>A equipe cuida da produção. Você foca 100% em vender</p>
+                        <h4>A gente cuida do resto</h4>
+                        <p>O site do cliente fica pronto em 48h. Você não faz nada técnico.</p>
                     </div>
                 </div>
             </div>
 
+            <!-- 4. O QUE VOCÊ VAI VENDER -->
+            <div class="section">
+                <h2>O que você vai vender?</h2>
+                <p>O produto principal é o <strong>Minisite Profissional (R$ 249,90)</strong> — um site completo com
+                    catálogo, depoimentos, botão WhatsApp e tudo que um pequeno negócio precisa para ser encontrado na
+                    internet.</p>
+                <p style="margin-top: 12px;">Se o cliente achar que não precisa de tudo isso, você oferece o
+                    <strong>Cartão Digital (R$ 149,90)</strong> — um link na bio turbinado. É o plano B que garante que
+                    ninguém saia sem comprar.</p>
+                <p style="margin-top: 12px;">E o diferencial matador: cada cliente leva um <strong>Chaveiro Inteligente
+                        NFC artesanal</strong>. Quando alguém encosta o celular, o site abre automaticamente. Essa
+                    demonstração ao vivo é o que torna a venda tão fácil.</p>
+            </div>
+
+            <!-- 5. O QUE VOCÊ RECEBE -->
             <div class="section">
                 <h2>O que você recebe para trabalhar</h2>
                 <ul class="checklist">
-                    <li>Chaveiros NFC de demonstração</li>
-                    <li>Portfólio de sites prontos no celular</li>
-                    <li>Link de pagamento configurado (Pix e Cartão)</li>
-                    <li>Script de abordagem e argumentação</li>
-                    <li>Treinamento sobre o produto e objeções comuns</li>
-                    <li>Suporte direto com o fundador via WhatsApp</li>
+                    <li>Chaveiros NFC de demonstração prontos para usar</li>
+                    <li>Portfólio de sites reais no seu celular para mostrar aos clientes</li>
+                    <li>Link de pagamento configurado (aceita Pix e Cartão)</li>
+                    <li>Script de abordagem — você sabe exatamente o que falar</li>
+                    <li>Treinamento completo sobre o produto e como lidar com objeções</li>
+                    <li>Suporte direto e rápido com o fundador via WhatsApp</li>
                 </ul>
             </div>
 
-            <div class="section">
-                <h2>Perfil que buscamos</h2>
-                <ul class="checklist">
-                    <li>Comunicativo e não tem vergonha de abordar comerciantes</li>
-                    <li>Disciplinado — cumpre horário e metas diárias</li>
-                    <li>Tem celular com internet para demonstrações</li>
-                    <li>Disponibilidade para trabalho externo (rua)</li>
-                    <li>Experiência com vendas é um diferencial, mas não é obrigatória</li>
+            <!-- 6. PERFIL - NO FINAL, SUAVE -->
+            <div class="profile-section">
+                <h2>Esse trabalho é pra você se...</h2>
+                <p class="intro">Não exigimos experiência anterior. Mas para ter sucesso, é importante que você se
+                    identifique com o seguinte:</p>
+                <ul class="checklist soft">
+                    <li>Gosta de conversar com pessoas e não tem vergonha de chegar em um comércio</li>
+                    <li>Tem disciplina para sair todo dia, mesmo sem ninguém cobrando</li>
+                    <li>Tem um celular com internet (para fazer as demonstrações)</li>
+                    <li>Tem disponibilidade para trabalhar na rua, visitando comércios</li>
+                    <li>Quer ganhar bem e está disposto a se esforçar para isso</li>
+                    <li>Sabe que o resultado depende 100% de você — e isso te motiva, não te assusta</li>
                 </ul>
             </div>
 
-            <div class="section">
-                <h2>Por que essa vaga é diferente?</h2>
-                <ul class="checklist">
-                    <li><strong>Produto que se vende sozinho</strong> — a demonstração do NFC causa impacto imediato
-                    </li>
-                    <li><strong>Ticket acessível</strong> — R$ 149 a R$ 249 é decisão rápida para qualquer comerciante
-                    </li>
-                    <li><strong>Sem teto de ganho</strong> — sua remuneração cresce com seu esforço</li>
-                    <li><strong>Mercado gigante</strong> — 90% dos pequenos negócios não têm site profissional</li>
-                    <li><strong>Sem burocracia</strong> — você vende, a gente produz</li>
-                </ul>
-            </div>
-
+            <!-- 7. CTA -->
             <div class="cta-section">
-                <h2>Interessado?</h2>
-                <p>Fale diretamente com o fundador da Demeni Agency.</p>
+                <h2>Quer essa oportunidade?</h2>
+                <p>Fale diretamente com o fundador da Demeni Agency. Sem processo seletivo complicado — é uma conversa.
+                </p>
                 <a class="cta-btn"
-                    href="https://wa.me/5583996353619?text=Olá! Vi a vaga de Consultor de Vendas e tenho interesse.">
+                    href="https://wa.me/5583996353619?text=Olá! Vi a oportunidade de vendedor de sites e tenho interesse.">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path
                             d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217s.231.001.332.005c.101.004.256-.037.401.307.145.344.491 1.2.534 1.288.043.087.072.188.014.303-.058.116-.087.188-.173.289l-.26.303c-.087.101-.177.211-.077.382.1.172.443.731.95 1.182.653.581 1.201.762 1.373.848.173.087.274.072.376-.043.101-.116.434-.506.549-.68.116-.173.231-.144.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.176L2 22l4.957-1.3c1.479.821 3.184 1.3 5.043 1.3 5.523 0 10-4.477 10-10S17.523 2 12 2z" />
                     </svg>
-                    Quero me candidatar
+                    Quero participar
                 </a>
             </div>
 
