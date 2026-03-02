@@ -18,6 +18,16 @@
             "destination": "/sites.html"
         },
         {
+            "source": "/vendedor-5k",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "sites.rafaeldemeni.com"
+                }
+            ],
+            "destination": "/docs-agencia/vaga-consultor-vendas.html"
+        },
+        {
             "source": "/admin",
             "destination": "/admin.html"
         },
