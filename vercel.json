@@ -4,6 +4,20 @@
     "public": true,
     "rewrites": [
         {
+            "source": "/",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "sites.rafaeldemeni.com"
+                }
+            ],
+            "destination": "/sites.html"
+        },
+        {
+            "source": "/sites",
+            "destination": "/sites.html"
+        },
+        {
             "source": "/admin",
             "destination": "/admin.html"
         },
