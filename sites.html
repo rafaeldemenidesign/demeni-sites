@@ -360,13 +360,10 @@
                 </p>
             </div>
             <div class="relative">
-                <!-- Hover zones for auto-scroll -->
-                <div id="hoverLeft" class="absolute left-0 top-0 bottom-0 w-24 md:w-40 z-20 cursor-w-resize"></div>
-                <div id="hoverRight" class="absolute right-0 top-0 bottom-0 w-24 md:w-40 z-20 cursor-e-resize"></div>
-                <!-- Fade edges -->
-                <div class="absolute left-0 top-0 bottom-0 w-20 md:w-32 z-10 pointer-events-none"
+                <!-- Hover zones for auto-scroll (fade edges also scroll) -->
+                <div id="hoverLeft" class="absolute left-0 top-0 bottom-0 w-24 md:w-40 z-20 cursor-w-resize"
                     style="background:linear-gradient(to right,var(--fade-bg,#0e0e12),transparent);"></div>
-                <div class="absolute right-0 top-0 bottom-0 w-20 md:w-32 z-10 pointer-events-none"
+                <div id="hoverRight" class="absolute right-0 top-0 bottom-0 w-24 md:w-40 z-20 cursor-e-resize"
                     style="background:linear-gradient(to left,var(--fade-bg,#0e0e12),transparent);"></div>
                 <style>
                     .dark #portfolio {
@@ -377,22 +374,13 @@
                         --fade-bg: #f8fafc
                     }
 
-                    @keyframes cardPulse {
-
-                        0%,
-                        100% {
-                            box-shadow: 0 0 0 0 rgba(123, 47, 247, 0);
-                            border-color: rgba(100, 116, 139, 0.5);
-                        }
-
-                        50% {
-                            box-shadow: 0 0 18px 4px rgba(123, 47, 247, 0.3);
-                            border-color: rgba(123, 47, 247, 0.6);
-                        }
+                    .carousel-card .card-frame {
+                        transition: box-shadow 0.4s ease, border-color 0.4s ease;
                     }
 
-                    .carousel-card .card-frame {
-                        animation: cardPulse 3s ease-in-out infinite;
+                    .carousel-card:hover .card-frame {
+                        box-shadow: 0 0 20px 6px rgba(123, 47, 247, 0.35);
+                        border-color: rgba(123, 47, 247, 0.6);
                     }
 
                     .card-cat,
@@ -401,7 +389,7 @@
                     }
                 </style>
                 <!-- Track -->
-                <div class="overflow-hidden">
+                <div style="overflow:visible;clip-path:inset(-20px 0);padding:20px 0;margin:-20px 0">
                     <div id="carouselTrack" class="flex gap-5 transition-transform duration-500 ease-out"
                         style="will-change:transform;">
                     </div>
