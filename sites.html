@@ -86,8 +86,8 @@
             top: 0;
             bottom: 0;
             left: 0;
-            width: 30%;
-            background: linear-gradient(to right, rgba(123, 47, 247, 0.15), transparent);
+            width: 35%;
+            background: linear-gradient(to right, rgba(90, 29, 184, 0.35), transparent);
             z-index: 1;
             pointer-events: none;
         }
@@ -98,8 +98,8 @@
             top: 0;
             bottom: 0;
             right: 0;
-            width: 30%;
-            background: linear-gradient(to left, rgba(123, 47, 247, 0.15), transparent);
+            width: 35%;
+            background: linear-gradient(to left, rgba(90, 29, 184, 0.35), transparent);
             z-index: 1;
             pointer-events: none;
         }
@@ -183,16 +183,16 @@
         </div>
     </section>
     <!-- Seta animada -->
-    <div class="flex justify-center -mt-6 mb-0 relative z-10">
+    <div class="flex justify-center -mt-4 mb-0 relative z-10">
         <a href="#video-section" class="animate-bounce">
-            <span class="material-icons-outlined text-primary text-2xl opacity-70">expand_more</span>
+            <span class="material-icons-outlined text-primary text-4xl opacity-80">expand_more</span>
         </a>
     </div>
     <!-- Vídeo compacto com lightbox -->
     <section class="py-12 bg-slate-50 dark:bg-[#0e0e12]" id="video-section">
-        <div class="max-w-2xl mx-auto px-4">
+        <div class="flex justify-center px-4">
             <div id="videoThumb" onclick="document.getElementById('videoLightbox').classList.remove('hidden')"
-                class="relative rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg cursor-pointer group aspect-video max-h-[200px]">
+                class="relative rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg cursor-pointer group w-full max-w-xl aspect-video">
                 <img alt="Apresentação Demeni Sites" class="w-full h-full object-cover brightness-[0.4]"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZtn90iHsyeINcr2mnrlvF3zWElqJ2FACHqgOx-kGNGk3g2NGkFipDKA-qphLb7enUrrrH7QtFEsreVs7LEVJlCgob8o2ksRPi9GNtT05s1TL7Y1DsHwBThyltmoQUPR29gHKqRRGNqx3i_L9aRYqXIjJRLOqAM8LOGRQKjyGseCCbg2jNmynrNNQavtwOmPSvzGC9LBSnNu8YueekBM5bzrklLtGq7B5v2kVyQthlSnuUJq_wWilm93Yuzj3GcWo0zIt-VcgiWFc" />
                 <div class="absolute inset-0 flex items-center justify-center">
@@ -217,114 +217,135 @@
             <p class="text-white/40 text-center mt-8 text-sm">Vídeo de apresentação será adicionado em breve.</p>
         </div>
     </div>
-    <!-- O Site Ideal - Scroll Reveal -->
-    <section class="py-24 bg-white dark:bg-background-dark">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">O Site Ideal Para Você Que...</h2>
-                <div class="h-1.5 w-24 brand-gradient mx-auto rounded-full"></div>
-            </div>
-            <!-- Timeline vertical -->
-            <div class="relative">
-                <div class="absolute left-6 top-0 bottom-0 w-px bg-slate-200 dark:bg-white/10"></div>
-                <div id="timelineProgress" class="absolute left-6 top-0 w-px bg-primary transition-all duration-300"
-                    style="height:0"></div>
+    <!-- O Site Ideal - Fullscreen Sparo Style -->
+    <section class="bg-white dark:bg-background-dark" id="site-ideal">
+        <div class="text-center pt-24 pb-8 px-4">
+            <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">O Site Ideal Para Você Que...</h2>
+            <div class="h-1.5 w-24 brand-gradient mx-auto rounded-full"></div>
+        </div>
+        <div class="relative max-w-4xl mx-auto px-4 sm:px-8 pb-24">
+            <!-- Timeline line left -->
+            <div class="absolute left-8 sm:left-12 top-0 bottom-0 w-[3px] bg-white/5 rounded-full"></div>
+            <div id="idealProgress"
+                class="absolute left-8 sm:left-12 top-0 w-[3px] bg-primary rounded-full transition-all duration-300"
+                style="height:0"></div>
 
-                <div class="space-y-12">
-                    <div
-                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
-                        <div
-                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
-                            <span class="material-icons-outlined text-primary text-xl">chat</span>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-1">Vende pelo WhatsApp</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">Botões estratégicos que levam seu
-                                cliente direto para o seu atendimento em um clique.</p>
-                        </div>
+            <!-- Card 1 -->
+            <div class="ideal-card relative flex min-h-[70vh] items-center pl-16 sm:pl-24 py-12 opacity-20 transition-all duration-700"
+                style="transform:translateY(40px)">
+                <div
+                    class="absolute left-[26px] sm:left-[40px] w-5 h-5 rounded-full bg-background-dark border-[3px] border-white/10 ideal-dot transition-all duration-500">
+                </div>
+                <div class="glass-card w-full rounded-3xl p-10 sm:p-14 text-center border border-white/5">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="material-icons-outlined text-primary text-3xl">chat</span>
                     </div>
-                    <div
-                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
-                        <div
-                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
-                            <span class="material-icons-outlined text-primary text-xl">devices</span>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-1">Foca no Celular</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">90% dos seus clientes estão no
-                                celular. Sites ultrarrápidos e leves para mobile.</p>
-                        </div>
+                    <h3 class="text-2xl font-extrabold mb-3">Vende pelo WhatsApp</h3>
+                    <p class="text-slate-400 text-base leading-relaxed">Botões estratégicos que levam seu cliente direto
+                        para o seu atendimento em um clique.</p>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="ideal-card relative flex min-h-[70vh] items-center pl-16 sm:pl-24 py-12 opacity-20 transition-all duration-700"
+                style="transform:translateY(40px)">
+                <div
+                    class="absolute left-[26px] sm:left-[40px] w-5 h-5 rounded-full bg-background-dark border-[3px] border-white/10 ideal-dot transition-all duration-500">
+                </div>
+                <div class="glass-card w-full rounded-3xl p-10 sm:p-14 text-center border border-white/5">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="material-icons-outlined text-primary text-3xl">devices</span>
                     </div>
-                    <div
-                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
-                        <div
-                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
-                            <span class="material-icons-outlined text-primary text-xl">star</span>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-1">Quer Autoridade</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">Pare de parecer amador. Presença
-                                digital robusta que transmite confiança.</p>
-                        </div>
+                    <h3 class="text-2xl font-extrabold mb-3">Foca no Celular</h3>
+                    <p class="text-slate-400 text-base leading-relaxed">90% dos seus clientes estão no celular. Criamos
+                        sites ultrarrápidos e leves para mobile.</p>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="ideal-card relative flex min-h-[70vh] items-center pl-16 sm:pl-24 py-12 opacity-20 transition-all duration-700"
+                style="transform:translateY(40px)">
+                <div
+                    class="absolute left-[26px] sm:left-[40px] w-5 h-5 rounded-full bg-background-dark border-[3px] border-white/10 ideal-dot transition-all duration-500">
+                </div>
+                <div class="glass-card w-full rounded-3xl p-10 sm:p-14 text-center border border-white/5">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="material-icons-outlined text-primary text-3xl">star</span>
                     </div>
-                    <div
-                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
-                        <div
-                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
-                            <span class="material-icons-outlined text-primary text-xl">restaurant</span>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-1">É do Ramo de Serviços</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">Personal Trainer, Advogado ou Dono de
-                                Restaurante — temos o modelo certo.</p>
-                        </div>
+                    <h3 class="text-2xl font-extrabold mb-3">Quer Autoridade</h3>
+                    <p class="text-slate-400 text-base leading-relaxed">Pare de parecer amador. Tenha uma presença
+                        digital robusta que transmite confiança.</p>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="ideal-card relative flex min-h-[70vh] items-center pl-16 sm:pl-24 py-12 opacity-20 transition-all duration-700"
+                style="transform:translateY(40px)">
+                <div
+                    class="absolute left-[26px] sm:left-[40px] w-5 h-5 rounded-full bg-background-dark border-[3px] border-white/10 ideal-dot transition-all duration-500">
+                </div>
+                <div class="glass-card w-full rounded-3xl p-10 sm:p-14 text-center border border-white/5">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="material-icons-outlined text-primary text-3xl">restaurant</span>
                     </div>
-                    <div
-                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
-                        <div
-                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
-                            <span class="material-icons-outlined text-primary text-xl">search</span>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-1">Quer ser Achado</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">Estrutura otimizada para aparecer nas
-                                buscas locais do Google.</p>
-                        </div>
+                    <h3 class="text-2xl font-extrabold mb-3">É do Ramo de Serviços</h3>
+                    <p class="text-slate-400 text-base leading-relaxed">Personal Trainer, Advogado ou Dono de
+                        Restaurante — nós temos o modelo certo.</p>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="ideal-card relative flex min-h-[70vh] items-center pl-16 sm:pl-24 py-12 opacity-20 transition-all duration-700"
+                style="transform:translateY(40px)">
+                <div
+                    class="absolute left-[26px] sm:left-[40px] w-5 h-5 rounded-full bg-background-dark border-[3px] border-white/10 ideal-dot transition-all duration-500">
+                </div>
+                <div class="glass-card w-full rounded-3xl p-10 sm:p-14 text-center border border-white/5">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="material-icons-outlined text-primary text-3xl">search</span>
                     </div>
-                    <div
-                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
-                        <div
-                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
-                            <span class="material-icons-outlined text-primary text-xl">bolt</span>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-1">Tem Pressa</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">Sem burocracia. Seu site no ar em
-                                tempo recorde para você começar a lucrar.</p>
-                        </div>
+                    <h3 class="text-2xl font-extrabold mb-3">Quer ser Achado</h3>
+                    <p class="text-slate-400 text-base leading-relaxed">Estrutura otimizada para aparecer nas buscas
+                        locais do Google quando alguém procurar seu serviço.</p>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="ideal-card relative flex min-h-[70vh] items-center pl-16 sm:pl-24 py-12 opacity-20 transition-all duration-700"
+                style="transform:translateY(40px)">
+                <div
+                    class="absolute left-[26px] sm:left-[40px] w-5 h-5 rounded-full bg-background-dark border-[3px] border-white/10 ideal-dot transition-all duration-500">
+                </div>
+                <div class="glass-card w-full rounded-3xl p-10 sm:p-14 text-center border border-white/5">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="material-icons-outlined text-primary text-3xl">bolt</span>
                     </div>
+                    <h3 class="text-2xl font-extrabold mb-3">Tem Pressa</h3>
+                    <p class="text-slate-400 text-base leading-relaxed">Sem burocracia ou esperas de meses. Seu site no
+                        ar em tempo recorde para você começar a lucrar.</p>
                 </div>
             </div>
         </div>
         <script>
             (function () {
-                const cards = document.querySelectorAll('.reveal-card');
-                const progress = document.getElementById('timelineProgress');
-                const section = progress.parentElement;
+                const cards = document.querySelectorAll('.ideal-card');
+                const progress = document.getElementById('idealProgress');
+                const container = progress.parentElement;
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(e => {
                         if (e.isIntersecting) {
                             e.target.style.opacity = '1';
                             e.target.style.transform = 'translateY(0)';
-                            e.target.querySelector('.shrink-0').classList.add('border-primary/40');
+                            e.target.querySelector('.ideal-dot').style.borderColor = '#7B2FF7';
+                            e.target.querySelector('.ideal-dot').style.backgroundColor = '#7B2FF7';
+                            e.target.querySelector('.ideal-dot').style.boxShadow = '0 0 12px rgba(123,47,247,0.6)';
                         }
                     });
-                }, { threshold: 0.3, rootMargin: '-10% 0px -10% 0px' });
+                }, { threshold: 0.3, rootMargin: '-20% 0px -20% 0px' });
                 cards.forEach(c => observer.observe(c));
-                // Progress bar
                 window.addEventListener('scroll', () => {
-                    const rect = section.getBoundingClientRect();
-                    const sH = section.offsetHeight;
+                    const rect = container.getBoundingClientRect();
+                    const sH = container.offsetHeight;
                     const scrolled = Math.max(0, Math.min(1, (-rect.top + window.innerHeight * 0.5) / sH));
                     progress.style.height = (scrolled * 100) + '%';
                 });
