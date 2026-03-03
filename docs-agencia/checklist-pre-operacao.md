@@ -32,11 +32,11 @@
 **Por que é bloqueante:** O chaveiro NFC é o diferencial que fecha a venda. Sem demo físico = venda genérica de site = muito mais difícil.
 
 ### 3. Vídeo de Vendas
-- [ ] Gravar vídeo para a **Landing Page** (sites.rafaeldemeni.com)
-- [ ] Gravar vídeo para a **Página do Vendedor** (sites.rafaeldemeni.com/vendedor-5k)
-- [ ] Subir vídeos no YouTube (não listado)
-- [ ] Substituir placeholders pelos embeds nas páginas
-- [ ] Thumbnail já está pronta ✅
+- [x] Gravar vídeo para a **Landing Page** (sites.rafaeldemeni.com) ✅
+- [x] Gravar vídeo para a **Página do Vendedor** (sites.rafaeldemeni.com/vendedor-5k) ✅
+- [x] Subir vídeos no YouTube (não listado) ✅
+- [x] Substituir placeholders pelos embeds nas páginas ✅
+- [x] Thumbnail já está pronta ✅
 
 **Por que é bloqueante:** A landing page e a página de recrutamento dependem do vídeo para converter. Placeholder = amadorismo.
 
