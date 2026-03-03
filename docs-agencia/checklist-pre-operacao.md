@@ -1,7 +1,7 @@
 # Checklist Pré-Operação — Demeni Sites
 
 > Tudo que precisa estar pronto antes de começar a vender com vendedor externo.
-> Última atualização: 02/03/2026
+> Última atualização: 03/03/2026
 
 ---
 
@@ -41,11 +41,13 @@
 **Por que é bloqueante:** A landing page e a página de recrutamento dependem do vídeo para converter. Placeholder = amadorismo.
 
 ### 4. Portfólio de Sites Demo
-- [ ] Criar **3-5 sites D-2** com negócios fictícios mas realistas (ex: restaurante, salão, personal trainer, loja, clínica)
-- [ ] Publicar cada um com URL acessível (ex: s/restaurante-demo)
+- [x] Criar sites demo reais (Rafael, Ame+, Roberta) ✅
+- [x] Publicar com URLs acessíveis ✅
+- [x] Carrossel infinito com 9 cards na landing page ✅
+- [ ] Adicionar 6 sites faltantes: TechCell, Dra Caroline, Jailson Yharley, Mini Box Mari, Corrupião, Casa do Empreendedor
 - [ ] Montar galeria no celular do vendedor para demonstração rápida
 
-**Por que é bloqueante:** O vendedor precisa mostrar exemplos reais. "Confia, vai ficar bonito" não vende.
+**Status:** Portfólio base no ar com 3 sites reais + carrossel premium. Faltam 6 sites adicionais.
 
 ---
 
