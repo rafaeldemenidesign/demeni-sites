@@ -360,6 +360,31 @@
                     #portfolio {
                         --fade-bg: #f8fafc
                     }
+
+                    .carousel-card {
+                        transition: transform 0.4s ease, z-index 0s;
+                    }
+
+                    .carousel-card:hover {
+                        transform: scale(1.15);
+                        z-index: 30;
+                    }
+
+                    .carousel-card:hover .card-cat {
+                        font-size: 0.9rem;
+                        text-shadow: 0 0 12px rgba(123, 47, 247, 0.8), 0 0 30px rgba(123, 47, 247, 0.4);
+                        color: #A855F7;
+                    }
+
+                    .carousel-card:hover .card-name {
+                        font-size: 1rem;
+                        color: #fff;
+                    }
+
+                    .card-cat,
+                    .card-name {
+                        transition: all 0.4s ease;
+                    }
                 </style>
                 <!-- Track -->
                 <div class="overflow-hidden">
@@ -389,9 +414,9 @@
                 allItems.forEach(s => {
                     const a = document.createElement('a');
                     a.href = s.href; a.target = '_blank';
-                    a.className = 'group shrink-0';
+                    a.className = 'carousel-card group shrink-0 relative';
                     a.style.width = cardW + 'px';
-                    a.innerHTML = `<div class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative"><img alt="${s.alt}" class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500" src="${s.img}"/><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div></div><div class="mt-4 text-center"><p class="text-xs font-bold text-primary uppercase tracking-widest">${s.cat}</p><h4 class="text-sm font-bold">${s.name}</h4></div>`;
+                    a.innerHTML = `<div class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative"><img alt="${s.alt}" class="w-full h-full object-cover object-top rounded-xl transition-transform duration-500" src="${s.img}"/><div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div></div><div class="mt-4 text-center"><p class="card-cat text-xs font-bold text-primary uppercase tracking-widest">${s.cat}</p><h4 class="card-name text-sm font-bold text-slate-300">${s.name}</h4></div>`;
                     track.appendChild(a);
                 });
                 let idx = total; // start at middle set
