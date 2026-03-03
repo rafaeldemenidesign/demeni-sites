@@ -487,7 +487,8 @@
                 <div
                     class="bg-slate-50 dark:bg-card-dark p-10 rounded-3xl border border-slate-200 dark:border-white/5 relative overflow-hidden flex flex-col h-full">
                     <h3 class="text-2xl font-bold mb-2">Site Modelo D-1</h3>
-                    <p class="text-slate-600 dark:text-slate-400 mb-8">Ideal para freelancers e autônomos.</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-8">Perfil digital com seus links úteis em um site
+                        simples.</p>
                     <div class="mb-8">
                         <span class="text-slate-400 line-through text-sm">R$ 199,90</span>
                         <div class="flex items-baseline gap-1">
@@ -498,14 +499,17 @@
                     </div>
                     <ul class="space-y-4 mb-6 flex-grow">
                         <li class="flex items-center gap-3"><span
-                                class="material-icons-outlined text-primary text-sm">check_circle</span> 1 Página (Link
-                            Bio)</li>
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Página Única
+                            Responsiva</li>
                         <li class="flex items-center gap-3"><span
-                                class="material-icons-outlined text-primary text-sm">check_circle</span> Links Redes
-                            Sociais</li>
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Links para
+                            Redes Sociais</li>
                         <li class="flex items-center gap-3"><span
                                 class="material-icons-outlined text-primary text-sm">check_circle</span> Botão WhatsApp
-                        </li>
+                            Integrado</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Seção de
+                            Serviços / Bio</li>
                         <li class="flex items-center gap-3"><span
                                 class="material-icons-outlined text-primary text-sm">check_circle</span> Hospedagem
                             Inclusa</li>
@@ -525,8 +529,8 @@
                         class="absolute top-6 right-[-35px] bg-primary text-white text-[10px] font-black uppercase tracking-widest py-1 px-10 rotate-45 shadow-lg">
                         MAIS VENDIDO</div>
                     <h3 class="text-2xl font-bold mb-2">Site Modelo D-2 PRO</h3>
-                    <p class="text-slate-600 dark:text-slate-400 mb-8 text-sm">A solução completa para o seu negócio.
-                    </p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-8 text-sm">Site profissional, uma apresentação
+                        premium do seu negócio.</p>
                     <div class="mb-8">
                         <span class="text-slate-400 line-through text-sm">R$ 399,90</span>
                         <div class="flex items-baseline gap-1">
@@ -537,21 +541,20 @@
                     </div>
                     <ul class="space-y-4 mb-6 flex-grow text-sm">
                         <li class="flex items-center gap-3"><span
-                                class="material-icons-outlined text-primary text-sm">check_circle</span> Site Completo
-                            com Múltiplas Seções</li>
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Layout Premium
+                            Estilo App</li>
                         <li class="flex items-center gap-3"><span
-                                class="material-icons-outlined text-primary text-sm">check_circle</span> Catálogo de
-                            Serviços/Produtos</li>
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Catálogo Visual
+                            com Fotos e Preços</li>
                         <li class="flex items-center gap-3"><span
-                                class="material-icons-outlined text-primary text-sm">check_circle</span> Seção Sobre,
-                            FAQ e
-                            Depoimentos</li>
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Depoimentos com
+                            Foto de Clientes</li>
                         <li class="flex items-center gap-3"><span
-                                class="material-icons-outlined text-primary text-sm">check_circle</span> Botão Flutuante
-                            WhatsApp</li>
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Botões de Ação
+                            por WhatsApp</li>
                         <li class="flex items-center gap-3"><span
-                                class="material-icons-outlined text-primary text-sm">check_circle</span> Até 2 Páginas
-                            Internas Extras</li>
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Hospedagem
+                            Inclusa</li>
                     </ul>
                     <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
                         <p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">🎁 Você ganha:</p>
@@ -725,20 +728,35 @@
                     position: relative;
                     border-radius: 3rem;
                     padding: 3px;
-                    background: conic-gradient(from var(--border-angle), #6A009F, #B64CF1, #BA61E6, #B64CF1, #6A009F);
-                    animation: borderSpin 4s linear infinite;
+                    background: conic-gradient(from var(--border-angle), transparent 0%, transparent 70%, #BA61E6 78%, #B64CF1 82%, #7B2FF7 86%, transparent 94%, transparent 100%);
+                    animation: borderSpin 3s linear infinite;
+                }
+
+                .cta-glow-border::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    border-radius: 3rem;
+                    padding: 3px;
+                    background: linear-gradient(135deg, rgba(106, 0, 159, 0.15), rgba(182, 76, 241, 0.1));
+                    z-index: 0;
+                }
+
+                .cta-glow-border>div {
+                    position: relative;
+                    z-index: 1;
                 }
 
                 .cta-glow-border::before {
                     content: '';
                     position: absolute;
-                    inset: -4px;
-                    border-radius: 3.2rem;
-                    background: conic-gradient(from var(--border-angle), #6A009F, #B64CF1, #BA61E6, #B64CF1, #6A009F);
-                    filter: blur(16px);
-                    opacity: 0.4;
+                    inset: -6px;
+                    border-radius: 3.3rem;
+                    background: conic-gradient(from var(--border-angle), transparent 0%, transparent 70%, #BA61E6 78%, #B64CF1 82%, #7B2FF7 86%, transparent 94%, transparent 100%);
+                    filter: blur(20px);
+                    opacity: 0.5;
                     z-index: -1;
-                    animation: borderSpin 4s linear infinite;
+                    animation: borderSpin 3s linear infinite;
                 }
 
                 .sparo-btn {
