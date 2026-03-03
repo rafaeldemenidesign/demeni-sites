@@ -244,59 +244,174 @@
         </div>
     </section>
     <section class="py-24 bg-slate-50 dark:bg-[#0e0e12]" id="portfolio">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 px-4">
                 <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">Veja Alguns Sites Que Já Criamos</h2>
                 <p class="text-slate-600 dark:text-slate-400">Resultados reais para clientes reais em diversos nichos.
                 </p>
             </div>
-            <div class="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                <a href="https://oficial.rafaeldemeni.com/" target="_blank" class="relative group">
-                    <div
-                        class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
-                        <img alt="Site Rafael Demeni"
-                            class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
-                            src="img/site-rafael.png" />
+            <div class="relative">
+                <button onclick="document.getElementById('portfolioTrack').scrollBy({left:-220,behavior:'smooth'})"
+                    class="absolute left-2 md:left-4 top-[40%] -translate-y-1/2 z-10 w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-primary/80 transition-all hover:scale-110">
+                    <span class="material-icons-outlined text-lg">chevron_left</span>
+                </button>
+                <button onclick="document.getElementById('portfolioTrack').scrollBy({left:220,behavior:'smooth'})"
+                    class="absolute right-2 md:right-4 top-[40%] -translate-y-1/2 z-10 w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-primary/80 transition-all hover:scale-110">
+                    <span class="material-icons-outlined text-lg">chevron_right</span>
+                </button>
+                <div id="portfolioTrack"
+                    class="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory px-[calc(50%-430px)] pb-4"
+                    style="scrollbar-width:none;-ms-overflow-style:none;">
+                    <style>
+                        #portfolioTrack::-webkit-scrollbar {
+                            display: none;
+                        }
+                    </style>
+                    <a href="https://oficial.rafaeldemeni.com/" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Rafael Demeni"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-rafael.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mt-6 text-center">
-                        <p class="text-sm font-bold text-primary uppercase tracking-widest">Design</p>
-                        <h4 class="text-lg font-bold">Rafael Demeni</h4>
-                    </div>
-                </a>
-                <a href="https://ame-biscoitos-para-cachorro.rafaeldemeni.com" target="_blank"
-                    class="relative group mt-8 md:mt-0">
-                    <div
-                        class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
-                        <img alt="Site Ame+ Biscoitos"
-                            class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
-                            src="img/site-ame+.png" />
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Design</p>
+                            <h4 class="text-sm font-bold">Rafael Demeni</h4>
+                        </div>
+                    </a>
+                    <a href="https://ame-biscoitos-para-cachorro.rafaeldemeni.com" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Ame+ Biscoitos"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-ame+.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mt-6 text-center">
-                        <p class="text-sm font-bold text-primary uppercase tracking-widest">Pet Shop</p>
-                        <h4 class="text-lg font-bold">Ame+ Biscoitos</h4>
-                    </div>
-                </a>
-                <a href="https://roberta-joias.rafaeldemeni.com" target="_blank" class="relative group mt-8 md:mt-0">
-                    <div
-                        class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
-                        <img alt="Site Roberta Jóias"
-                            class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
-                            src="img/site-roberta.png" />
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Pet Shop</p>
+                            <h4 class="text-sm font-bold">Ame+ Biscoitos</h4>
+                        </div>
+                    </a>
+                    <a href="https://roberta-joias.rafaeldemeni.com" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Roberta Jóias"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-roberta.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mt-6 text-center">
-                        <p class="text-sm font-bold text-primary uppercase tracking-widest">Joalheria</p>
-                        <h4 class="text-lg font-bold">Roberta Jóias</h4>
-                    </div>
-                </a>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Joalheria</p>
+                            <h4 class="text-sm font-bold">Roberta Jóias</h4>
+                        </div>
+                    </a>
+                    <a href="https://oficial.rafaeldemeni.com/" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
+                        <div
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Rafael Demeni"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-rafael.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Design</p>
+                            <h4 class="text-sm font-bold">Rafael Demeni</h4>
+                        </div>
+                    </a>
+                    <a href="https://ame-biscoitos-para-cachorro.rafaeldemeni.com" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
+                        <div
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Ame+ Biscoitos"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-ame+.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Pet Shop</p>
+                            <h4 class="text-sm font-bold">Ame+ Biscoitos</h4>
+                        </div>
+                    </a>
+                    <a href="https://roberta-joias.rafaeldemeni.com" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
+                        <div
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Roberta Jóias"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-roberta.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Joalheria</p>
+                            <h4 class="text-sm font-bold">Roberta Jóias</h4>
+                        </div>
+                    </a>
+                    <a href="https://oficial.rafaeldemeni.com/" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
+                        <div
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Rafael Demeni"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-rafael.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Design</p>
+                            <h4 class="text-sm font-bold">Rafael Demeni</h4>
+                        </div>
+                    </a>
+                    <a href="https://ame-biscoitos-para-cachorro.rafaeldemeni.com" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
+                        <div
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Ame+ Biscoitos"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-ame+.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Pet Shop</p>
+                            <h4 class="text-sm font-bold">Ame+ Biscoitos</h4>
+                        </div>
+                    </a>
+                    <a href="https://roberta-joias.rafaeldemeni.com" target="_blank"
+                        class="group snap-start shrink-0 w-[200px]">
+                        <div
+                            class="bg-slate-900 rounded-2xl p-1 border-[3px] border-slate-700 shadow-2xl overflow-hidden aspect-[9/16] relative">
+                            <img alt="Roberta Jóias"
+                                class="w-full h-full object-cover object-top rounded-xl group-hover:scale-105 transition-transform duration-500"
+                                src="img/site-roberta.png" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs font-bold text-primary uppercase tracking-widest">Joalheria</p>
+                            <h4 class="text-sm font-bold">Roberta Jóias</h4>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
