@@ -57,7 +57,16 @@
         html {
             scroll-behavior: smooth;
             zoom: 0.9;
-            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='24' viewBox='0 0 20 24'><path d='M0 0l6.6 19.4L9.3 12l8 3.3L0 0z' fill='%237B2FF7' stroke='%235A1DB8' stroke-width='1'/></svg>") 0 0, auto;
+            cursor: url('img/cursor.png'), auto;
+        }
+
+        a,
+        button,
+        [role="button"],
+        .carousel-card,
+        summary,
+        [onclick] {
+            cursor: url('img/click.png'), pointer;
         }
 
         /* HERO BACKGROUND IMAGE - troque a URL pela sua imagem */
