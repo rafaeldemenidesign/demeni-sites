@@ -158,7 +158,7 @@
                     Quero Meu Site
                 </a>
                 <button
-                    onclick="document.getElementById('video-section').scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('videoLightbox').classList.remove('hidden'),600)"
+                    onclick="document.getElementById('video-section').scrollIntoView({behavior:'smooth'});setTimeout(openVideo,600)"
                     class="w-full sm:w-auto bg-slate-200 dark:bg-card-dark hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-xl font-bold text-lg border border-slate-300 dark:border-white/5 transition-all flex items-center justify-center gap-2">
                     <span class="material-icons-outlined">play_circle</span>
                     Assistir Apresentação
@@ -193,7 +193,7 @@
     <!-- Vídeo compacto com lightbox -->
     <section class="py-12 bg-slate-50 dark:bg-[#0e0e12]" id="video-section">
         <div class="flex justify-center px-4">
-            <div id="videoThumb" onclick="document.getElementById('videoLightbox').classList.remove('hidden')"
+            <div id="videoThumb" onclick="openVideo()"
                 class="relative rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg cursor-pointer group w-full max-w-xl aspect-video">
                 <img alt="Apresentação Demeni Sites" class="w-full h-full object-cover brightness-[0.4]"
                     src="https://img.youtube.com/vi/bwwzwgs_OA0/maxresdefault.jpg" />
@@ -210,18 +210,30 @@
     </section>
     <!-- Lightbox (fullscreen overlay) -->
     <div id="videoLightbox" class="hidden fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
-        onclick="this.classList.add('hidden')">
+        onclick="closeVideo()">
         <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors"
-            onclick="event.stopPropagation();this.parentElement.classList.add('hidden')">
+            onclick="event.stopPropagation();closeVideo()">
             <span class="material-icons-outlined text-3xl">close</span>
         </button>
         <div class="w-full max-w-4xl aspect-video mx-4" onclick="event.stopPropagation()">
-            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/bwwzwgs_OA0?autoplay=1"
-                title="Apresentação Demeni Sites" frameborder="0"
+            <iframe id="videoFrame" width="100%" height="100%" src=""
+                data-src="https://www.youtube.com/embed/bwwzwgs_OA0?autoplay=1" title="Apresentação Demeni Sites"
+                frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen style="border:0;border-radius:12px;"></iframe>
         </div>
     </div>
+    <script>
+        function openVideo() {
+            var f = document.getElementById('videoFrame');
+            f.src = f.dataset.src;
+            document.getElementById('videoLightbox').classList.remove('hidden');
+        }
+        function closeVideo() {
+            document.getElementById('videoFrame').src = '';
+            document.getElementById('videoLightbox').classList.add('hidden');
+        }
+    </script>
     <!-- O Site Ideal - Fullscreen Sparo Style -->
     <section class="bg-white dark:bg-background-dark" id="site-ideal">
         <div class="text-center pt-24 pb-8 px-4">
