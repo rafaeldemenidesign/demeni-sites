@@ -17,8 +17,8 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#4361EE",
-                        "primary-dark": "#3A0CA3",
+                        primary: "#7B2FF7",
+                        "primary-dark": "#5A1DB8",
                         "background-light": "#f9fafb",
                         "background-dark": "#0a0a0c",
                         "card-dark": "#18181f",
@@ -36,11 +36,11 @@
     </script>
     <style>
         .brand-gradient {
-            background: linear-gradient(135deg, #3A0CA3 0%, #4361EE 50%, #7B2FF7 100%);
+            background: linear-gradient(135deg, #5A1DB8 0%, #7B2FF7 50%, #A855F7 100%);
         }
 
         .brand-text-gradient {
-            background: linear-gradient(135deg, #4361EE 0%, #7B2FF7 100%);
+            background: linear-gradient(135deg, #7B2FF7 0%, #A855F7 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -77,7 +77,31 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(10, 10, 12, 0.7) 0%, rgba(10, 10, 12, 0.95) 100%);
+            background: linear-gradient(180deg, rgba(10, 10, 12, 0.45) 0%, rgba(10, 10, 12, 0.92) 100%);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 30%;
+            background: linear-gradient(to right, rgba(123, 47, 247, 0.15), transparent);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 30%;
+            background: linear-gradient(to left, rgba(123, 47, 247, 0.15), transparent);
+            z-index: 1;
+            pointer-events: none;
         }
 
         .hero-content {
@@ -158,90 +182,154 @@
             </div>
         </div>
     </section>
-    <section class="py-20 bg-slate-50 dark:bg-[#0e0e12]">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div
-                class="relative rounded-[2rem] overflow-hidden border-4 border-primary/20 shadow-[0_0_50px_rgba(67,97,238,0.15)] group">
-                <img alt="Background de tecnologia" class="w-full aspect-video object-cover brightness-[0.3]"
+    <!-- Seta animada -->
+    <div class="flex justify-center -mt-6 mb-0 relative z-10">
+        <a href="#video-section" class="animate-bounce">
+            <span class="material-icons-outlined text-primary text-2xl opacity-70">expand_more</span>
+        </a>
+    </div>
+    <!-- Vídeo compacto com lightbox -->
+    <section class="py-12 bg-slate-50 dark:bg-[#0e0e12]" id="video-section">
+        <div class="max-w-2xl mx-auto px-4">
+            <div id="videoThumb" onclick="document.getElementById('videoLightbox').classList.remove('hidden')"
+                class="relative rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg cursor-pointer group aspect-video max-h-[200px]">
+                <img alt="Apresentação Demeni Sites" class="w-full h-full object-cover brightness-[0.4]"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZtn90iHsyeINcr2mnrlvF3zWElqJ2FACHqgOx-kGNGk3g2NGkFipDKA-qphLb7enUrrrH7QtFEsreVs7LEVJlCgob8o2ksRPi9GNtT05s1TL7Y1DsHwBThyltmoQUPR29gHKqRRGNqx3i_L9aRYqXIjJRLOqAM8LOGRQKjyGseCCbg2jNmynrNNQavtwOmPSvzGC9LBSnNu8YueekBM5bzrklLtGq7B5v2kVyQthlSnuUJq_wWilm93Yuzj3GcWo0zIt-VcgiWFc" />
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <button
-                        class="w-24 h-24 bg-primary/90 hover:bg-primary rounded-full flex items-center justify-center text-white shadow-2xl transition-all hover:scale-110 group-hover:shadow-primary/40">
-                        <span class="material-icons-outlined text-5xl translate-x-1">play_arrow</span>
-                    </button>
+                    <div
+                        class="w-14 h-14 bg-primary/90 group-hover:bg-primary rounded-full flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-110">
+                        <span class="material-icons-outlined text-3xl translate-x-0.5">play_arrow</span>
+                    </div>
                 </div>
+                <p class="absolute bottom-3 left-0 right-0 text-center text-xs text-white/60 font-medium">Assistir
+                    Apresentação</p>
             </div>
         </div>
     </section>
+    <!-- Lightbox (fullscreen overlay) -->
+    <div id="videoLightbox" class="hidden fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
+        onclick="this.classList.add('hidden')">
+        <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors"
+            onclick="event.stopPropagation();this.parentElement.classList.add('hidden')">
+            <span class="material-icons-outlined text-3xl">close</span>
+        </button>
+        <div class="w-full max-w-4xl aspect-video mx-4" onclick="event.stopPropagation()">
+            <p class="text-white/40 text-center mt-8 text-sm">Vídeo de apresentação será adicionado em breve.</p>
+        </div>
+    </div>
+    <!-- O Site Ideal - Scroll Reveal -->
     <section class="py-24 bg-white dark:bg-background-dark">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">O Site Ideal Para Você Que...</h2>
                 <div class="h-1.5 w-24 brand-gradient mx-auto rounded-full"></div>
             </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div
-                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
+            <!-- Timeline vertical -->
+            <div class="relative">
+                <div class="absolute left-6 top-0 bottom-0 w-px bg-slate-200 dark:bg-white/10"></div>
+                <div id="timelineProgress" class="absolute left-6 top-0 w-px bg-primary transition-all duration-300"
+                    style="height:0"></div>
+
+                <div class="space-y-12">
                     <div
-                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-icons-outlined text-primary text-3xl">chat</span>
+                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
+                        <div
+                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
+                            <span class="material-icons-outlined text-primary text-xl">chat</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Vende pelo WhatsApp</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">Botões estratégicos que levam seu
+                                cliente direto para o seu atendimento em um clique.</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Vende pelo WhatsApp</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Botões estratégicos que levam seu cliente direto para
-                        o seu atendimento em um clique.</p>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
                     <div
-                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-icons-outlined text-primary text-3xl">devices</span>
+                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
+                        <div
+                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
+                            <span class="material-icons-outlined text-primary text-xl">devices</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Foca no Celular</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">90% dos seus clientes estão no
+                                celular. Sites ultrarrápidos e leves para mobile.</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Foca no Celular</h3>
-                    <p class="text-slate-600 dark:text-slate-400">90% dos seus clientes estão no celular. Criamos sites
-                        ultrarrápidos e leves para mobile.</p>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
                     <div
-                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-icons-outlined text-primary text-3xl">star</span>
+                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
+                        <div
+                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
+                            <span class="material-icons-outlined text-primary text-xl">star</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Quer Autoridade</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">Pare de parecer amador. Presença
+                                digital robusta que transmite confiança.</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Quer Autoridade</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Pare de parecer amador. Tenha uma presença digital
-                        robusta que transmite confiança.</p>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
                     <div
-                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-icons-outlined text-primary text-3xl">restaurant</span>
+                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
+                        <div
+                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
+                            <span class="material-icons-outlined text-primary text-xl">restaurant</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">É do Ramo de Serviços</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">Personal Trainer, Advogado ou Dono de
+                                Restaurante — temos o modelo certo.</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">É do Ramo de Serviços</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Seja você um Personal Trainer, Advogado ou Dono de
-                        Restaurante, nós temos o modelo certo.</p>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
                     <div
-                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-icons-outlined text-primary text-3xl">google</span>
+                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
+                        <div
+                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
+                            <span class="material-icons-outlined text-primary text-xl">search</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Quer ser Achado</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">Estrutura otimizada para aparecer nas
+                                buscas locais do Google.</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Quer ser Achado</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Estrutura otimizada para aparecer nas buscas locais do
-                        Google quando alguém procurar seu serviço.</p>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-card-dark p-8 rounded-3xl border border-slate-200 dark:border-white/5 hover:border-primary/30 transition-all group">
                     <div
-                        class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-icons-outlined text-primary text-3xl">bolt</span>
+                        class="reveal-card flex items-start gap-6 opacity-20 translate-y-6 transition-all duration-700">
+                        <div
+                            class="shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mt-1 border-2 border-transparent">
+                            <span class="material-icons-outlined text-primary text-xl">bolt</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Tem Pressa</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">Sem burocracia. Seu site no ar em
+                                tempo recorde para você começar a lucrar.</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Tem Pressa</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Sem burocracia ou esperas de meses. Seu site no ar em
-                        tempo recorde para você começar a lucrar.</p>
                 </div>
             </div>
         </div>
+        <script>
+            (function () {
+                const cards = document.querySelectorAll('.reveal-card');
+                const progress = document.getElementById('timelineProgress');
+                const section = progress.parentElement;
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) {
+                            e.target.style.opacity = '1';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.querySelector('.shrink-0').classList.add('border-primary/40');
+                        }
+                    });
+                }, { threshold: 0.3, rootMargin: '-10% 0px -10% 0px' });
+                cards.forEach(c => observer.observe(c));
+                // Progress bar
+                window.addEventListener('scroll', () => {
+                    const rect = section.getBoundingClientRect();
+                    const sH = section.offsetHeight;
+                    const scrolled = Math.max(0, Math.min(1, (-rect.top + window.innerHeight * 0.5) / sH));
+                    progress.style.height = (scrolled * 100) + '%';
+                });
+            })();
+        </script>
     </section>
     <section class="py-24 bg-slate-50 dark:bg-[#0e0e12]" id="portfolio">
         <div class="max-w-7xl mx-auto">
