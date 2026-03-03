@@ -4,7 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Demeni Agency | Seu Negócio Profissional Online</title>
+    <title>DemeniSITES</title>
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
@@ -55,6 +57,7 @@
         html {
             scroll-behavior: smooth;
             zoom: 0.9;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='24' viewBox='0 0 20 24'><path d='M0 0l6.6 19.4L9.3 12l8 3.3L0 0z' fill='%237B2FF7' stroke='%235A1DB8' stroke-width='1'/></svg>") 0 0, auto;
         }
 
         /* HERO BACKGROUND IMAGE - troque a URL pela sua imagem */
@@ -498,6 +501,15 @@
                     transition: box-shadow 0.4s ease, border-color 0.4s ease;
                 }
 
+                .carousel-card {
+                    filter: grayscale(100%) brightness(0.5);
+                    transition: filter 0.5s ease, transform 0.3s ease;
+                }
+
+                .carousel-card.active-card {
+                    filter: grayscale(0%) brightness(1);
+                }
+
                 .carousel-card:hover .card-frame {
                     box-shadow: 0 0 20px 6px rgba(123, 47, 247, 0.35);
                     border-color: rgba(123, 47, 247, 0.6);
@@ -543,12 +555,23 @@
                 let idx = total;
                 const step = cardW + gap;
                 let scrollInterval = null;
+                function highlightCenter() {
+                    const cards = track.querySelectorAll('.carousel-card');
+                    cards.forEach((c, i) => {
+                        if (i >= idx - 1 && i <= idx + 1) {
+                            c.classList.add('active-card');
+                        } else {
+                            c.classList.remove('active-card');
+                        }
+                    });
+                }
                 function setPos(animate) {
                     if (!animate) track.style.transition = 'none';
                     else track.style.transition = 'transform 0.5s ease-out';
                     const containerW = track.parentElement.offsetWidth;
                     const offset = (containerW / 2) - ((cardW / 2) + (idx * step));
                     track.style.transform = `translateX(${offset}px)`;
+                    highlightCenter();
                 }
                 function next() { idx++; setPos(true); }
                 function prev() { idx--; setPos(true); }
