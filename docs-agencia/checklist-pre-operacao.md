@@ -11,7 +11,7 @@
 - [x] Criar conta comercial (Mercado Pago) ✅
 - [x] Configurar link de pagamento para **D-1 Cartão Digital:**
   - PIX: **R$ 149,00** (preço líquido)
-  - Cartão: **R$ 174,00** parcelado vendedor em até 5x s/ juros
+  - Cartão: **R$ 174,00** parcelado vendedor em até 3x s/ juros (parcela ~R$ 58)
   - Link: **https://mpago.li/2kh8AFG**
 - [x] Configurar link de pagamento para **D-2 Minisite Profissional:**
   - PIX: **R$ 250,00** (preço líquido)
