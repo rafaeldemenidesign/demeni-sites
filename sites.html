@@ -158,6 +158,7 @@
                     Quero Meu Site
                 </a>
                 <button
+                    onclick="document.getElementById('video-section').scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('videoLightbox').classList.remove('hidden'),600)"
                     class="w-full sm:w-auto bg-slate-200 dark:bg-card-dark hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-xl font-bold text-lg border border-slate-300 dark:border-white/5 transition-all flex items-center justify-center gap-2">
                     <span class="material-icons-outlined">play_circle</span>
                     Assistir Apresentação
