@@ -138,6 +138,27 @@
             animation: logoGlow 8s linear infinite;
         }
 
+        .btn-glow {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-glow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.35) 47%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.35) 53%, transparent 60%, transparent 100%);
+            background-size: 300% 100%;
+            background-repeat: no-repeat;
+            animation: logoGlow 8s linear infinite;
+            animation-delay: 1.2s;
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
         /* Dark minimal scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -190,7 +211,7 @@
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#precos">Sites</a>
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#faq">Dúvidas</a>
             </nav>
-            <a class="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
+            <a class="btn-glow bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
                 href="https://wa.me/5583996353619">
                 Quero Meu Site
             </a>
