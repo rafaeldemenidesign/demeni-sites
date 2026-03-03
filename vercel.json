@@ -14,6 +14,16 @@
             "destination": "/sites.html"
         },
         {
+            "source": "/",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "app.rafaeldemeni.com"
+                }
+            ],
+            "destination": "/app.html"
+        },
+        {
             "source": "/sites",
             "destination": "/sites.html"
         },
