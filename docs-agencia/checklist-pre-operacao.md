@@ -8,17 +8,19 @@
 ## 🔴 Fase 1 — Sem Isso Não Vende (Bloqueante)
 
 ### 1. Link de Pagamento
-- [ ] Criar conta comercial (Mercado Pago, PagSeguro ou Stripe)
-- [ ] Configurar link de pagamento para **D-1 Cartão Digital:**
+- [x] Criar conta comercial (Mercado Pago) ✅
+- [x] Configurar link de pagamento para **D-1 Cartão Digital:**
   - PIX: **R$ 149,00** (preço líquido)
-  - Cartão: **R$ 174,00** em até 5x de R$ 34,80 s/ juros (~13.6% inflado para absorver taxa)
-- [ ] Configurar link de pagamento para **D-2 Minisite Profissional:**
+  - Cartão: **R$ 174,00** parcelado vendedor em até 5x s/ juros
+  - Link: **https://mpago.li/2kh8AFG**
+- [x] Configurar link de pagamento para **D-2 Minisite Profissional:**
   - PIX: **R$ 250,00** (preço líquido)
-  - Cartão: **R$ 289,90** em até 5x de R$ 57,98 s/ juros (~13.6% inflado para absorver taxa)
-- [ ] Testar Pix e Cartão de Crédito
+  - Cartão: **R$ 287,00** parcelado vendedor em até 5x s/ juros
+  - Link: **https://mpago.li/2NHMQ8y**
+- [ ] Testar Pix e Cartão de Crédito com compra real
 - [ ] Gerar QR Code de pagamento (para vendedor mostrar na hora)
 
-**Estratégia:** PIX = preço real que você recebe líquido. Cartão = preço inflado para cobrir as taxas do Mercado Pago. O cliente escolhe: paga menos no PIX ou parcela no cartão.
+**Estratégia:** PIX = preço real que você recebe líquido. Cartão = preço inflado para cobrir as taxas do Mercado Pago. Parcelamento 5x absorvido pelo vendedor. Redirecionamento pós-pagamento: core.rafaeldemeni.com
 
 ### 2. Chaveiros NFC Físicos
 - [ ] Produzir lote mínimo de **10 unidades de demo** (para o vendedor usar na demonstração)
