@@ -11,8 +11,10 @@
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
         rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link rel="preload" as="image" type="image/webp" href="BG-LP-Sites.webp" fetchpriority="high" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" media="print"
+        onload="this.media='all'" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography" defer></script>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -82,7 +84,7 @@
             background-position: center;
             background-repeat: no-repeat;
             /* background-image: url('SUA_IMAGEM_AQUI.jpg'); */
-            background-image: url('BG-LP-Sites.png?v=2');
+            background-image: url('BG-LP-Sites.webp');
         }
 
         .hero-bg::after {
@@ -287,7 +289,7 @@
         <div class="flex justify-center px-4">
             <div id="videoThumb" onclick="openVideo()"
                 class="relative rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg cursor-pointer group w-full max-w-xl aspect-video">
-                <img alt="Apresentação Demeni Sites" class="w-full h-full object-cover brightness-[0.4]"
+                <img alt="Apresentação Demeni Sites" class="w-full h-full object-cover brightness-[0.4]" loading="lazy"
                     src="https://img.youtube.com/vi/bwwzwgs_OA0/maxresdefault.jpg" />
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div
@@ -531,15 +533,15 @@
         <script>
             (function () {
                 const sites = [
-                    { href: 'https://oficial.rafaeldemeni.com/', img: 'img/site-rafael.png', alt: 'Rafael Demeni', cat: 'Design', name: 'Rafael Demeni' },
-                    { href: 'https://ame-biscoitos-para-cachorro.rafaeldemeni.com', img: 'img/site-ame+.png', alt: 'Ame+ Biscoitos', cat: 'Pet Shop', name: 'Ame+ Biscoitos' },
-                    { href: 'https://roberta-joias.rafaeldemeni.com', img: 'img/site-roberta.png', alt: 'Roberta Jóias', cat: 'Joalheria', name: 'Roberta Jóias' },
-                    { href: 'https://oficial.rafaeldemeni.com/', img: 'img/site-rafael.png', alt: 'Rafael Demeni', cat: 'Design', name: 'Rafael Demeni' },
-                    { href: 'https://ame-biscoitos-para-cachorro.rafaeldemeni.com', img: 'img/site-ame+.png', alt: 'Ame+ Biscoitos', cat: 'Pet Shop', name: 'Ame+ Biscoitos' },
-                    { href: 'https://roberta-joias.rafaeldemeni.com', img: 'img/site-roberta.png', alt: 'Roberta Jóias', cat: 'Joalheria', name: 'Roberta Jóias' },
-                    { href: 'https://oficial.rafaeldemeni.com/', img: 'img/site-rafael.png', alt: 'Rafael Demeni', cat: 'Design', name: 'Rafael Demeni' },
-                    { href: 'https://ame-biscoitos-para-cachorro.rafaeldemeni.com', img: 'img/site-ame+.png', alt: 'Ame+ Biscoitos', cat: 'Pet Shop', name: 'Ame+ Biscoitos' },
-                    { href: 'https://roberta-joias.rafaeldemeni.com', img: 'img/site-roberta.png', alt: 'Roberta Jóias', cat: 'Joalheria', name: 'Roberta Jóias' }
+                    { href: 'https://oficial.rafaeldemeni.com/', img: 'img/site-rafael.webp', alt: 'Rafael Demeni', cat: 'Design', name: 'Rafael Demeni' },
+                    { href: 'https://ame-biscoitos-para-cachorro.rafaeldemeni.com', img: 'img/site-ame+.webp', alt: 'Ame+ Biscoitos', cat: 'Pet Shop', name: 'Ame+ Biscoitos' },
+                    { href: 'https://roberta-joias.rafaeldemeni.com', img: 'img/site-roberta.webp', alt: 'Roberta Jóias', cat: 'Joalheria', name: 'Roberta Jóias' },
+                    { href: 'https://oficial.rafaeldemeni.com/', img: 'img/site-rafael.webp', alt: 'Rafael Demeni', cat: 'Design', name: 'Rafael Demeni' },
+                    { href: 'https://ame-biscoitos-para-cachorro.rafaeldemeni.com', img: 'img/site-ame+.webp', alt: 'Ame+ Biscoitos', cat: 'Pet Shop', name: 'Ame+ Biscoitos' },
+                    { href: 'https://roberta-joias.rafaeldemeni.com', img: 'img/site-roberta.webp', alt: 'Roberta Jóias', cat: 'Joalheria', name: 'Roberta Jóias' },
+                    { href: 'https://oficial.rafaeldemeni.com/', img: 'img/site-rafael.webp', alt: 'Rafael Demeni', cat: 'Design', name: 'Rafael Demeni' },
+                    { href: 'https://ame-biscoitos-para-cachorro.rafaeldemeni.com', img: 'img/site-ame+.webp', alt: 'Ame+ Biscoitos', cat: 'Pet Shop', name: 'Ame+ Biscoitos' },
+                    { href: 'https://roberta-joias.rafaeldemeni.com', img: 'img/site-roberta.webp', alt: 'Roberta Jóias', cat: 'Joalheria', name: 'Roberta Jóias' }
                 ];
                 const cardW = window.innerWidth >= 768 ? 280 : 200, gap = 20, total = sites.length;
                 const allItems = [...sites, ...sites, ...sites];
