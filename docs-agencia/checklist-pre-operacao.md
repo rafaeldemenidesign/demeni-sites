@@ -49,6 +49,12 @@
 
 **Status:** Portfólio base no ar com 3 sites reais + carrossel premium. Faltam 6 sites adicionais.
 
+### 4b. Refinamento Mobile da Landing Page
+- [ ] Revisar responsividade geral (hero, carrossel, cards, CTA, footer)
+- [ ] Ajustar tamanhos de fonte e espaçamentos para telas pequenas
+- [ ] Testar em dispositivos reais (iPhone, Android)
+- [ ] Ajustar seção "O Site Ideal" para scroll vertical mobile
+
 ---
 
 ## 🟡 Fase 2 — Operar com Vendedor (Importante)
