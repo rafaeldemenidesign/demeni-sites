@@ -490,7 +490,7 @@
 
                         #hoverLeft,
                         #hoverRight {
-                            width: 35% !important;
+                            width: 20% !important;
                         }
                     }
 
@@ -529,7 +529,7 @@
                     { href: 'https://ame-biscoitos-para-cachorro.rafaeldemeni.com', img: 'img/site-ame+.png', alt: 'Ame+ Biscoitos', cat: 'Pet Shop', name: 'Ame+ Biscoitos' },
                     { href: 'https://roberta-joias.rafaeldemeni.com', img: 'img/site-roberta.png', alt: 'Roberta Jóias', cat: 'Joalheria', name: 'Roberta Jóias' }
                 ];
-                const cardW = 200, gap = 20, total = sites.length;
+                const cardW = window.innerWidth >= 768 ? 280 : 200, gap = 20, total = sites.length;
                 const allItems = [...sites, ...sites, ...sites];
                 const track = document.getElementById('carouselTrack');
                 allItems.forEach((s, i) => {
