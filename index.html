@@ -267,6 +267,12 @@
                 return;
             }
 
+            // sites.rafaeldemeni.com → landing page de vendas
+            if (subdomain === 'sites') {
+                window.location.replace('/sites.html');
+                return;
+            }
+
             const slug = getClientSubdomain();
 
             if (slug) {
