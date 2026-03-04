@@ -93,6 +93,20 @@
             background: linear-gradient(135deg, #5A1DB8 0%, #7B2FF7 50%, #A855F7 100%);
         }
 
+        @keyframes glowPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 2px rgba(123, 47, 247, 0.4);
+                opacity: 0.6;
+            }
+
+            50% {
+                box-shadow: 0 0 10px rgba(123, 47, 247, 0.9), 0 0 20px rgba(123, 47, 247, 0.4);
+                opacity: 1;
+            }
+        }
+
         .brand-text-gradient {
             background: linear-gradient(135deg, #7B2FF7 0%, #A855F7 100%);
             -webkit-background-clip: text;
@@ -276,7 +290,8 @@
         <div class="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div
                 class="inline-flex items-center gap-2 bg-slate-100 dark:bg-card-dark px-4 py-2 rounded-full mb-8 border border-slate-200 dark:border-white/5">
-                <span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="flex h-2 w-2 rounded-full bg-primary"
+                    style="animation: glowPulse 2s ease-in-out infinite;"></span>
                 <span class="text-xs font-bold uppercase tracking-widest opacity-80">Vagas abertas para esta
                     semana</span>
             </div>
