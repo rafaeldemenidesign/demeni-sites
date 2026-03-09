@@ -214,9 +214,20 @@ const SupabaseClient = (function () {
         }
 
         try {
-            // 🛡️ FIX: Update the EXISTING project row by ID (not upsert by slug)
-            // The old .upsert(onConflict:'slug') was creating NEW rows because the
-            // original project (from createProject) had slug=null, so no conflict was found.
+            // 🛡️ SLUG UNIQUENESS CHECK: Prevent overwriting another project's slug
+            const { data: existing } = await supabase
+                .from('projects')
+                .select('id, user_id, name')
+                .eq('slug', slug)
+                .eq('published', true)
+                .neq('id', projectId)
+                .maybeSingle();
+
+            if (existing) {
+                console.error('❌ Slug already in use by project:', existing.id);
+                return { error: { message: `A URL "${slug}.rafaeldemeni.com" já está em uso por outro projeto. Escolha outra URL.` } };
+            }
+
             console.log('⏳ Updating project by ID...');
             const { data, error } = await supabase
                 .from('projects')
@@ -252,6 +263,46 @@ const SupabaseClient = (function () {
             .eq('published', true)
             .single();
 
+        return { data, error };
+    }
+
+    // ========== SLUG AVAILABILITY CHECK ==========
+    async function isSlugAvailable(slug, excludeProjectId) {
+        if (!supabase) return { available: false, error: 'Supabase not configured' };
+
+        let query = supabase
+            .from('projects')
+            .select('id, name')
+            .eq('slug', slug)
+            .eq('published', true);
+
+        if (excludeProjectId) {
+            query = query.neq('id', excludeProjectId);
+        }
+
+        const { data, error } = await query.maybeSingle();
+        if (error) return { available: false, error: error.message };
+        return { available: !data, existingProject: data };
+    }
+
+    // ========== UNPUBLISH SITE ==========
+    async function unpublishSite(slug) {
+        if (!supabase) return { error: { message: 'Supabase not configured' } };
+        console.log('🗑️ unpublishSite called for slug:', slug);
+
+        const { data, error } = await supabase
+            .from('projects')
+            .update({
+                published: false,
+                slug: null,
+                html_content: null,
+                published_url: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('slug', slug);
+
+        if (error) console.error('❌ unpublishSite error:', error);
+        else console.log('✅ Site unpublished:', slug);
         return { data, error };
     }
 
@@ -792,6 +843,8 @@ const SupabaseClient = (function () {
         // Publish
         publishSite,
         getPublishedSite,
+        isSlugAvailable,
+        unpublishSite,
         uploadOgImage,
         uploadAttachment,
         deleteAttachment,

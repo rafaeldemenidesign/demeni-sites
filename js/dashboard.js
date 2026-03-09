@@ -98,13 +98,14 @@ function navigateTo(page) {
         affiliates: 'Afiliados',
         help: 'Ajuda',
         'editor-d2': 'Editor D-2',
-        'editor-d1': 'Editor D-1'
+        'editor-d1': 'Editor D-1',
+        'editor-d1-new': 'Editor D-1'
     };
     const pageTitle = document.getElementById('page-title');
     if (pageTitle) pageTitle.textContent = titles[page] || 'Dashboard';
 
     // Toggle header mode (credits vs editor buttons)
-    const isEditorPage = page === 'editor-d2' || page === 'editor-d1';
+    const isEditorPage = page === 'editor-d2' || page === 'editor-d1' || page === 'editor-d1-new';
     toggleHeaderMode(isEditorPage);
 
     // Toggle sort dropdown (visible only on projects page)
@@ -131,6 +132,16 @@ function navigateTo(page) {
     }
     if (page === 'editor-d1') {
         initEditorD1();
+    }
+    if (page === 'editor-d1-new') {
+        initEditorD1New().catch(err => {
+            console.error('[Editor D1 New] ❌ Falha na inicialização:', err);
+        });
+        // Ensure publish button state is correct
+        setTimeout(() => {
+            const pid = UserData.getCurrentProjectId();
+            if (pid) updateHeaderPublishButton(pid);
+        }, 500);
     }
     if (page === 'affiliates') {
         initAffiliatePage();
@@ -520,13 +531,17 @@ async function loadProjects() {
 // Unified card renderer for all projects (published + drafts)
 // If lazy=true, images use data-src (loaded when card becomes visible)
 function renderProjectCard(project, lazy) {
+    const displayName = project.name || project.data?.profile?.name || project.data?.projectName || 'Novo Site';
+    const avatarName = encodeURIComponent(displayName.substring(0, 20));
     const hasThumbnail = !!project.thumbnail;
     const previewImage = project.thumbnail
         || project.data?.style?.bgImage
+        || project.data?.d2Adjustments?.hero?.bgImage
+        || project.data?.profile?.avatarImage
         || project.data?.profile?.avatar
-        || 'https://ui-avatars.com/api/?name=Site&background=666&color=fff';
-    const previewClass = (hasThumbnail || project.data?.style?.bgImage) ? 'project-thumbnail' : '';
-    const displayName = project.name || project.data?.profile?.name || 'Novo Site';
+        || `https://ui-avatars.com/api/?name=${avatarName}&background=666&color=fff`;
+    const hasBgImage = !!(project.data?.style?.bgImage || project.data?.d2Adjustments?.hero?.bgImage);
+    const previewClass = (hasThumbnail || hasBgImage) ? 'project-thumbnail' : '';
     const thumbnailStyle = hasThumbnail
         ? 'style="object-fit: cover; object-position: top center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; border-radius: 20px; margin: 0; box-shadow: none; z-index: 1;"'
         : '';
@@ -550,6 +565,9 @@ function renderProjectCard(project, lazy) {
            <a href="${project.publishedUrl}" target="_blank" class="btn-secondary" title="Abrir site">
                <i class="fas fa-external-link-alt"></i>
            </a>
+           <button class="btn-secondary" onclick="duplicateProject('${project.id}')" title="Duplicar projeto">
+               <i class="fas fa-clone"></i>
+           </button>
            <button class="btn-secondary btn-deactivate" onclick="deactivateProject('${project.id}')" title="Desativar site">
                <i class="fas fa-power-off"></i>
            </button>
@@ -627,8 +645,8 @@ async function selectModel(modelType) {
         // D-2: Navigate to integrated editor page
         navigateTo('editor-d2');
     } else {
-        // D-1: Navigate to embedded editor section
-        navigateTo('editor-d1');
+        // D-1: Navigate to new D-1 editor (clone do D-2)
+        navigateTo('editor-d1-new');
     }
 }
 
@@ -643,7 +661,7 @@ function editProject(id) {
 
     // Redirect based on model type
     const modelType = project?.modelType || 'd1';
-    const targetPage = modelType === 'd2' ? 'editor-d2' : 'editor-d1';
+    const targetPage = modelType === 'd2' ? 'editor-d2' : 'editor-d1-new';
 
     navigateTo(targetPage);
 
@@ -683,7 +701,7 @@ async function duplicateProject(id) {
 
     // Navigate to editor based on model type
     const modelType = newProject.modelType || 'd1';
-    const targetPage = modelType === 'd2' ? 'editor-d2' : 'editor-d1';
+    const targetPage = newProject.modelType === 'd2' ? 'editor-d2' : 'editor-d1-new';
     navigateTo(targetPage);
     saveNavigationState(targetPage, newProject.id);
 }
@@ -814,6 +832,21 @@ async function showPublishModal(projectId) {
                 subdomainInput.focus();
                 return;
             }
+
+            // 🛡️ Check if slug is available BEFORE spending credits
+            if (window.SupabaseClient?.isConfigured()) {
+                try {
+                    const { available } = await SupabaseClient.isSlugAvailable(subdomain, projectId);
+                    if (!available) {
+                        showNotification(`❌ A URL "${subdomain}.rafaeldemeni.com" já está em uso por outro projeto`);
+                        subdomainInput.focus();
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Slug check error:', e);
+                }
+            }
+
             closeModal();
             // Set subdomain in state
             if (window.d2State) {
@@ -1842,6 +1875,20 @@ function showChangeSubdomainModal(projectId) {
                 return;
             }
 
+            // 🛡️ Check if slug is available before proceeding
+            if (window.SupabaseClient?.isConfigured()) {
+                try {
+                    const { available, existingProject } = await SupabaseClient.isSlugAvailable(newSubdomain, projectId);
+                    if (!available) {
+                        showNotification(`❌ A URL "${newSubdomain}.rafaeldemeni.com" já está em uso`);
+                        newSubdomainInput.focus();
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Slug check error:', e);
+                }
+            }
+
             closeModal();
 
             // Deduct credits
@@ -2504,6 +2551,127 @@ async function copyAffiliateLink() {
 
 // navigateTo override removed — affiliates + editor-d2 init now in main navigateTo()
 
+// ========== SHARED HEADER BUTTONS (Save/Publish/Preview/Checkpoint) ==========
+let _headerButtonsWired = false;
+
+function setupEditorHeaderButtons() {
+    if (_headerButtonsWired) return;
+    _headerButtonsWired = true;
+
+    // Preview button
+    document.getElementById('btn-preview-header')?.addEventListener('click', () => {
+        const projectId = UserData.getCurrentProjectId();
+        if (!projectId) { showNotification('⚠️ Salve o projeto primeiro'); return; }
+        const isD1Active = document.getElementById('page-editor-d1-new')?.classList.contains('active');
+        if (isD1Active) { saveD1NewProject(); } else { saveD2Project(); }
+        const project = UserData.getProject(projectId);
+        if (project?.subdomain) {
+            window.open(`https://${project.subdomain}.rafaeldemeni.com`, '_blank');
+        } else {
+            const previewWin = window.open('', '_blank');
+            if (previewWin) {
+                const frame = document.createElement('div');
+                const isD1 = document.getElementById('page-editor-d1-new')?.classList.contains('active');
+                if (isD1 && window.renderPreviewD1New && window.d1State) {
+                    window.renderPreviewD1New(frame, window.d1State.getState());
+                } else {
+                    window.renderPreviewD2New(frame, window.d2State.getState());
+                }
+                const pName = isD1 ? window.d1State?.get('projectName', 'Novo Site') : window.d2State.get('projectName', 'Novo Site');
+                previewWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview - ${pName}</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>body{margin:0;padding:0;background:#1a1a2e;display:flex;justify-content:center;min-height:100vh}.preview-wrapper{width:100%;max-width:480px;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,0.4)}</style></head><body><div class="preview-wrapper">${frame.innerHTML}</div></body></html>`);
+                previewWin.document.close();
+            }
+        }
+    });
+
+    // Publish button
+    document.getElementById('btn-publish-header')?.addEventListener('click', async () => {
+        const projectId = UserData.getCurrentProjectId();
+        if (!projectId) { showNotification('⚠️ Nenhum projeto selecionado'); return; }
+        const btn = document.getElementById('btn-publish-header');
+        const prevHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        btn.disabled = true;
+        try {
+            const isD1Active = document.getElementById('page-editor-d1-new')?.classList.contains('active');
+            if (isD1Active) { saveD1NewProject(); } else { saveD2Project(); }
+            const ok = await UserData.explicitSave(projectId);
+            if (!ok) { showNotification('⚠️ Erro ao salvar. Tente novamente antes de publicar.'); return; }
+            showPublishModal(projectId);
+        } catch (e) {
+            console.error('[Publish] Save before publish failed:', e);
+            showNotification('⚠️ Erro ao salvar. Tente novamente.');
+        } finally {
+            btn.innerHTML = prevHTML;
+            btn.disabled = false;
+        }
+    });
+
+    // Save button
+    document.getElementById('btn-save-header')?.addEventListener('click', async () => {
+        const btn = document.getElementById('btn-save-header');
+        const btnCheckpoint = document.getElementById('btn-checkpoint-header');
+        const projectId = UserData.getCurrentProjectId();
+        if (!projectId) { showNotification('⚠️ Nenhum projeto selecionado'); return; }
+        btn.classList.add('saving');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        try {
+            const isD1Active = document.getElementById('page-editor-d1-new')?.classList.contains('active');
+            if (isD1Active) { saveD1NewProject(); } else { saveD2Project(); }
+            const ok = await UserData.explicitSave(projectId);
+            await UserData.saveCheckpoint(projectId);
+            if (window.ThumbnailCapture) {
+                ThumbnailCapture.capture(projectId).catch(e => console.warn('[Save] Thumbnail capture failed:', e.message));
+            }
+            if (ok) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
+                btn.classList.remove('saving');
+                btn.classList.add('saved');
+                btnCheckpoint.disabled = false;
+                console.log('💾 Projeto salvo + checkpoint criado');
+                showNotification('Projeto salvo com sucesso!', 'success');
+                setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Salvar'; btn.classList.remove('saved'); }, 2000);
+            } else { throw new Error('Save failed'); }
+        } catch (e) {
+            console.error('Save failed:', e);
+            btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+            btn.classList.remove('saving');
+            showNotification('❌ Erro ao salvar. Tente novamente.');
+        }
+    });
+
+    // Checkpoint button
+    document.getElementById('btn-checkpoint-header')?.addEventListener('click', async () => {
+        const projectId = UserData.getCurrentProjectId();
+        if (!projectId) return;
+        const checkpoint = await UserData.loadCheckpoint(projectId);
+        if (!checkpoint) { showNotification('⚠️ Nenhum checkpoint encontrado. Salve primeiro.'); return; }
+        const savedAt = new Date(checkpoint.savedAt).toLocaleTimeString('pt-BR');
+        if (!confirm(`Voltar ao último ponto salvo (${savedAt})?\n\nAs alterações feitas depois serão perdidas.`)) return;
+        const ok = await UserData.restoreCheckpoint(projectId);
+        if (ok) {
+            showNotification('⏪ Projeto restaurado ao último ponto salvo!');
+            const project = await UserData.getProjectAsync(projectId);
+            if (project?.data) {
+                const isD1Active = document.getElementById('page-editor-d1-new')?.classList.contains('active');
+                if (isD1Active && window.d1State) { window.d1State.setState(project.data); renderD1NewPreview(); }
+                else if (window.d2State) { window.d2State.setState(project.data); renderD2Preview(); }
+            }
+        } else { showNotification('❌ Falha ao restaurar'); }
+    });
+
+    // Check if checkpoint already exists
+    (async () => {
+        const projectId = UserData.getCurrentProjectId();
+        if (projectId) {
+            const cp = await UserData.hasCheckpoint(projectId);
+            if (cp.exists) document.getElementById('btn-checkpoint-header').disabled = false;
+        }
+    })();
+
+    console.log('[Header Buttons] ✅ Save/Publish/Preview/Checkpoint wired');
+}
+
 // ========== EDITOR D2 INITIALIZATION ==========
 let editorD2Initialized = false;
 
@@ -2583,150 +2751,8 @@ async function initEditorD2() {
         // Set up save button
         document.getElementById('btn-save-d2')?.addEventListener('click', saveD2Project);
 
-        // Preview button - opens full preview in new tab
-        document.getElementById('btn-preview-header')?.addEventListener('click', () => {
-            const projectId = UserData.getCurrentProjectId();
-            if (!projectId) {
-                showNotification('⚠️ Salve o projeto primeiro');
-                return;
-            }
-            // Auto-save before preview
-            saveD2Project();
-            // Open preview in new tab
-            const project = UserData.getProject(projectId);
-            if (project?.subdomain) {
-                window.open(`https://${project.subdomain}.rafaeldemeni.com`, '_blank');
-            } else {
-                // Generate preview HTML and open in new tab
-                const previewWin = window.open('', '_blank');
-                if (previewWin) {
-                    const frame = document.createElement('div');
-                    window.renderPreviewD2New(frame, window.d2State.getState());
-                    previewWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview - ${window.d2State.get('projectName', 'Novo Site')}</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>body{margin:0;padding:0;background:#1a1a2e;display:flex;justify-content:center;min-height:100vh}.preview-wrapper{width:100%;max-width:480px;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,0.4)}</style></head><body><div class="preview-wrapper">${frame.innerHTML}</div></body></html>`);
-                    previewWin.document.close();
-                }
-            }
-        });
-
-        // Publish button - shows confirmation modal
-        document.getElementById('btn-publish-header')?.addEventListener('click', async () => {
-            const projectId = UserData.getCurrentProjectId();
-            if (!projectId) {
-                showNotification('⚠️ Nenhum projeto selecionado');
-                return;
-            }
-            // 🛡️ FIX: Forçar save COMPLETO antes de publicar
-            const btn = document.getElementById('btn-publish-header');
-            const prevHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-            btn.disabled = true;
-
-            try {
-                saveD2Project();
-                const ok = await UserData.explicitSave(projectId);
-                if (!ok) {
-                    showNotification('⚠️ Erro ao salvar. Tente novamente antes de publicar.');
-                    return;
-                }
-                showPublishModal(projectId);
-            } catch (e) {
-                console.error('[Publish] Save before publish failed:', e);
-                showNotification('⚠️ Erro ao salvar. Tente novamente.');
-            } finally {
-                btn.innerHTML = prevHTML;
-                btn.disabled = false;
-            }
-        });
-
-        // 💾 SAVE BUTTON — save project + create checkpoint automatically
-        document.getElementById('btn-save-header')?.addEventListener('click', async () => {
-            const btn = document.getElementById('btn-save-header');
-            const btnCheckpoint = document.getElementById('btn-checkpoint-header');
-            const projectId = UserData.getCurrentProjectId();
-            if (!projectId) {
-                showNotification('⚠️ Nenhum projeto selecionado');
-                return;
-            }
-
-            btn.classList.add('saving');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-
-            try {
-                // 1. Gather current D2 state into the project
-                saveD2Project();
-                // 2. Flush to IndexedDB + cloud
-                const ok = await UserData.explicitSave(projectId);
-                // 3. Create checkpoint automatically
-                await UserData.saveCheckpoint(projectId);
-                // 4. Capture preview thumbnail (for dashboard card)
-                if (window.ThumbnailCapture) {
-                    ThumbnailCapture.capture(projectId).catch(e => {
-                        console.warn('[Save] Thumbnail capture failed:', e.message);
-                    });
-                }
-
-                if (ok) {
-                    btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
-                    btn.classList.remove('saving');
-                    btn.classList.add('saved');
-                    btnCheckpoint.disabled = false; // Enable restore
-                    console.log('💾 Projeto salvo + checkpoint criado');
-                    showNotification('Projeto salvo com sucesso!', 'success');
-                    setTimeout(() => {
-                        btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
-                        btn.classList.remove('saved');
-                    }, 2000);
-                } else {
-                    throw new Error('Save failed');
-                }
-            } catch (e) {
-                console.error('Save failed:', e);
-                btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
-                btn.classList.remove('saving');
-                showNotification('❌ Erro ao salvar. Tente novamente.');
-            }
-        });
-
-        // ⏪ CHECKPOINT BUTTON — restore to last saved point
-        document.getElementById('btn-checkpoint-header')?.addEventListener('click', async () => {
-            const projectId = UserData.getCurrentProjectId();
-            if (!projectId) return;
-
-            const checkpoint = await UserData.loadCheckpoint(projectId);
-            if (!checkpoint) {
-                showNotification('⚠️ Nenhum checkpoint encontrado. Salve primeiro.');
-                return;
-            }
-
-            const savedAt = new Date(checkpoint.savedAt).toLocaleTimeString('pt-BR');
-            if (!confirm(`Voltar ao último ponto salvo (${savedAt})?\n\nAs alterações feitas depois serão perdidas.`)) {
-                return;
-            }
-
-            const ok = await UserData.restoreCheckpoint(projectId);
-            if (ok) {
-                showNotification('⏪ Projeto restaurado ao último ponto salvo!');
-                // Reload editor with restored data
-                const project = await UserData.getProjectAsync(projectId);
-                if (project?.data && window.d2State) {
-                    window.d2State.setState(project.data);
-                    renderD2Preview();
-                }
-            } else {
-                showNotification('❌ Falha ao restaurar');
-            }
-        });
-
-        // Check if checkpoint already exists on editor open
-        (async () => {
-            const projectId = UserData.getCurrentProjectId();
-            if (projectId) {
-                const cp = await UserData.hasCheckpoint(projectId);
-                if (cp.exists) {
-                    document.getElementById('btn-checkpoint-header').disabled = false;
-                }
-            }
-        })();
+        // Header buttons (shared with D-1) — wire once
+        setupEditorHeaderButtons();
 
         // Add section button
         document.getElementById('btn-add-section-d2')?.addEventListener('click', () => {
@@ -2809,6 +2835,130 @@ function initEditorD1() {
 }
 
 window.initEditorD1 = initEditorD1;
+
+// ========== EDITOR D1 NEW (CLONE DO D2) ==========
+let editorD1NewInitialized = false;
+
+async function initEditorD1New() {
+    console.log('[Editor D1 New] Initializing...');
+
+    // Check if required modules are loaded
+    if (!window.d1State || !window.D1Controls || !window.renderPreviewD1New) {
+        console.log('[Editor D1 New] Waiting for modules to load...');
+        setTimeout(initEditorD1New, 100);
+        return;
+    }
+
+    // Get container elements
+    const sectionsList = document.getElementById('sections-list-d1-new');
+    const editPanel = document.getElementById('edit-panel-d1-new');
+    const previewFrame = document.getElementById('preview-frame-d1-new');
+
+    if (!sectionsList || !editPanel || !previewFrame) {
+        console.error('[Editor D1 New] Container elements not found');
+        return;
+    }
+
+    // Preload cache from IndexedDB
+    await UserData.preloadCache();
+
+    // Load saved project data
+    const projectId = UserData.getCurrentProjectId();
+    if (projectId) {
+        const project = await UserData.getProjectAsync(projectId);
+        if (project && project.data) {
+            console.log('[Editor D1 New] Loading saved project data for:', projectId);
+            window.d1State.loadState(project.data);
+        } else {
+            console.log('[Editor D1 New] No saved data found, using defaults');
+        }
+
+        // Load project name into header input
+        if (project) {
+            const projectNameInput = document.getElementById('project-name-header');
+            const savedName = project.name || project.data?.projectName || 'Novo Site';
+            if (projectNameInput) {
+                projectNameInput.value = savedName;
+            }
+            if (window.d1State) {
+                window.d1State.set('projectName', savedName);
+            }
+            console.log('[Editor D1 New] Project name loaded:', savedName);
+            updateHeaderPublishButton(projectId);
+        }
+    } else {
+        console.log('[Editor D1 New] No current project, using defaults');
+    }
+
+    // Only initialize components once
+    if (!editorD1NewInitialized) {
+        // Initialize section list
+        if (window.D1SectionList) {
+            new window.D1SectionList(sectionsList);
+            console.log('[Editor D1 New] Section list initialized');
+        }
+
+        // Initialize edit panel
+        if (window.D1EditPanel) {
+            new window.D1EditPanel(editPanel);
+            console.log('[Editor D1 New] Edit panel initialized');
+        }
+
+        // Subscribe state changes to update preview
+        window.d1State.subscribe(() => {
+            renderD1NewPreview();
+        });
+
+        // Header buttons (shared with D-2) — wire once
+        setupEditorHeaderButtons();
+
+        // Add section button
+        document.getElementById('btn-add-section-d1-new')?.addEventListener('click', () => {
+            if (window.D1AddSectionModal) {
+                const modal = new window.D1AddSectionModal();
+                modal.show();
+            }
+        });
+
+        editorD1NewInitialized = true;
+    }
+
+    // Render preview
+    renderD1NewPreview();
+    console.log('[Editor D1 New] Initialization complete');
+}
+
+function renderD1NewPreview() {
+    const previewFrame = document.getElementById('preview-frame-d1-new');
+    if (previewFrame && window.renderPreviewD1New && window.d1State) {
+        window.renderPreviewD1New(previewFrame, window.d1State.getState());
+    }
+}
+
+function saveD1NewProject() {
+    const projectId = UserData.getCurrentProject();
+    if (!projectId) {
+        showNotification('❌ Nenhum projeto selecionado');
+        return false;
+    }
+
+    const d1Data = window.d1State.getState();
+
+    if (!d1Data || typeof d1Data !== 'object') {
+        console.error('[Save D1] Estado vazio ou inválido!');
+        showNotification('❌ Erro: estado do editor está vazio');
+        return false;
+    }
+
+    console.log(`[Save D1] Salvando estado completo: ${Object.keys(d1Data).length} chaves, ${JSON.stringify(d1Data).length} bytes`);
+
+    UserData.updateProject(projectId, { data: d1Data });
+    return true;
+}
+
+window.initEditorD1New = initEditorD1New;
+window.saveD1NewProject = saveD1NewProject;
+window.renderD1NewPreview = renderD1NewPreview;
 
 
 // ========== NOTIFICATIONS ==========
