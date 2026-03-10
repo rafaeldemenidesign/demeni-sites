@@ -855,7 +855,9 @@ class D2HeroEditor {
 
             // Converte para WebP se possível
             try {
-                const dataUrl = await this.processImageFile(file);
+                // Usa compressIcon para preservar transparência do PNG
+                const compressor = window.ImageUtils ? window.ImageUtils.compressIcon : (f) => this.processImageFile(f);
+                const dataUrl = await compressor(file);
                 window.d2State.set('profile.logo', dataUrl);
             } catch (err) {
                 console.error('Erro ao processar imagem:', err);
