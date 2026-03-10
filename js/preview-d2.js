@@ -1359,8 +1359,9 @@ function renderPreviewD2New(frame, state) {
                                     ? `<i class="fas ${iconRef}" style="color:${categoriaIconColor}"></i>`
                                     : `<img src="${isUrl ? iconRef : baseUrl + '/' + iconRef}" alt="${cat.label}">`;
                             }
+                            const catLink = cat.link && cat.link !== '#' && !cat.link.startsWith('http') && !cat.link.startsWith('#') && !cat.link.startsWith('mailto:') && !cat.link.startsWith('tel:') ? 'https://' + cat.link : (cat.link || '#');
                             return `
-                    <a href="${cat.link || '#'}" class="d2-categoria-item">
+                    <a href="${catLink}" class="d2-categoria-item">
                         <div class="d2-categoria-icon">
                             ${iconHtml}
                         </div>
