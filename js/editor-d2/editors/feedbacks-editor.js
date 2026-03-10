@@ -101,6 +101,7 @@ class D2FeedbacksEditor {
                     value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, '#666666'),
                     path: `${this.basePath}.sectionSubtitle.color`
                 }));
+                container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionSubtitle` }));
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionSubtitle`));
 
                 // ── ESPAÇAMENTO ──

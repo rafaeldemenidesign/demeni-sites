@@ -101,6 +101,7 @@ class D2ProdutosEditor {
                     value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, 'rgba(255,255,255,0.7)'),
                     path: `${this.basePath}.sectionSubtitle.color`
                 }));
+                container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionSubtitle` }));
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionSubtitle`));
 
                 // ── ESPAÇAMENTO ──
@@ -350,6 +351,13 @@ class D2ProdutosEditor {
                     value: window.d2State.get(`${this.basePath}.btn.color`, '#ffffff'),
                     path: `${this.basePath}.btn.color`
                 }));
+
+                container.appendChild(C.createFontPicker({
+                    label: 'Família da fonte',
+                    value: window.d2State.get(`${this.basePath}.btn.font`, ''),
+                    path: `${this.basePath}.btn.font`
+                }));
+
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.btn`, { lineHeight: 1.2, letterSpacing: 0 }));
 
                 // ── COR DE FUNDO ──

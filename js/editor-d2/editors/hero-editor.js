@@ -655,6 +655,9 @@ class D2HeroEditor {
                     })
                 );
 
+                // Texto gradiente
+                container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.subtitle` }));
+
                 // Espaçamento entre linhas e letras
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.subtitle`));
 
@@ -709,6 +712,14 @@ class D2HeroEditor {
                                 label: 'Cor do texto',
                                 value: window.d2State.get(`${this.basePath}.btn.textStyle.color`, '#ffffff'),
                                 path: `${this.basePath}.btn.textStyle.color`
+                            })
+                        );
+
+                        inner.appendChild(
+                            C.createFontPicker({
+                                label: 'Família da fonte',
+                                value: window.d2State.get(`${this.basePath}.btn.textStyle.font`, ''),
+                                path: `${this.basePath}.btn.textStyle.font`
                             })
                         );
 

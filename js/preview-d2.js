@@ -244,6 +244,8 @@ function renderPreviewD2New(frame, state) {
     const heroSubtitleFont = get('hero.subtitle.font', 'Montserrat');
     const heroSubtitleLineHeight = get('hero.subtitle.lineHeight', 1.4);
     const heroSubtitleLetterSpacing = get('hero.subtitle.letterSpacing', 0);
+    const heroSubtitleGradientEnabled = get('hero.subtitle.textGradient.enabled', false);
+    const heroSubtitleGradient = get('hero.subtitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
 
     // Botão CTA
     const heroBtnText = get('hero.btn.text', 'QUERO SABER MAIS');
@@ -254,6 +256,7 @@ function renderPreviewD2New(frame, state) {
     const heroBtnFontSize = get('hero.btn.textStyle.size', 16);
     const heroBtnFontColor = get('hero.btn.textStyle.color', '#ffffff');
     const heroBtnFontWeight = get('hero.btn.textStyle.weight', 400);
+    const heroBtnFont = get('hero.btn.textStyle.font', '');
     const heroBtnLineHeight = get('hero.btn.textStyle.lineHeight', 1.2);
     const heroBtnLetterSpacing = get('hero.btn.textStyle.letterSpacing', 1);
     const heroBtnBgType = get('hero.btn.bgType', 'gradient');
@@ -314,6 +317,8 @@ function renderPreviewD2New(frame, state) {
     const categoriasTitleLetterSpacing = get('categorias.sectionTitle.letterSpacing', 0);
     const categoriasSubtitleLineHeight = get('categorias.sectionSubtitle.lineHeight', 1.4);
     const categoriasSubtitleLetterSpacing = get('categorias.sectionSubtitle.letterSpacing', 0);
+    const categoriasSubtitleGradientEnabled = get('categorias.sectionSubtitle.textGradient.enabled', false);
+    const categoriasSubtitleGradient = get('categorias.sectionSubtitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
 
     // =============================================
     // PRODUTOS - Valores dinâmicos
@@ -341,6 +346,8 @@ function renderPreviewD2New(frame, state) {
     const produtosTitleLetterSpacing = get('produtos.sectionTitle.letterSpacing', 0);
     const produtosSubtitleLineHeight = get('produtos.sectionSubtitle.lineHeight', 1.4);
     const produtosSubtitleLetterSpacing = get('produtos.sectionSubtitle.letterSpacing', 0);
+    const produtosSubtitleGradientEnabled = get('produtos.sectionSubtitle.textGradient.enabled', false);
+    const produtosSubtitleGradient = get('produtos.sectionSubtitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const produtosGridGap = get('produtos.gridGap', 16);
     const produtosGridColumns = get('produtos.gridColumns', 2);
     const produtosSectionPaddingH = get('produtos.sectionPaddingH', 32);
@@ -365,6 +372,7 @@ function renderPreviewD2New(frame, state) {
     const produtoBtnWeight = get('produtos.btn.weight', 600);
     const produtoBtnBgColor = get('produtos.btn.bgColor', '#25D366');
     const produtoBtnColor = get('produtos.btn.color', '#ffffff');
+    const produtoBtnFont = get('produtos.btn.font', '');
     const produtoBtnLineHeight = get('produtos.btn.lineHeight', 1.2);
     const produtoBtnLetterSpacing = get('produtos.btn.letterSpacing', 0);
     const produtoBtnRadius = get('produtos.btn.borderRadius', 20);
@@ -402,6 +410,8 @@ function renderPreviewD2New(frame, state) {
     const feedbacksTitleLetterSpacing = get('feedbacks.sectionTitle.letterSpacing', 0);
     const feedbacksSubtitleLineHeight = get('feedbacks.sectionSubtitle.lineHeight', 1.4);
     const feedbacksSubtitleLetterSpacing = get('feedbacks.sectionSubtitle.letterSpacing', 0);
+    const feedbacksSubtitleGradientEnabled = get('feedbacks.sectionSubtitle.textGradient.enabled', false);
+    const feedbacksSubtitleGradient = get('feedbacks.sectionSubtitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const feedbackAvatarSize = get('feedbacks.avatar.size', 60);
     const feedbackAvatarRadius = get('feedbacks.avatar.radius', 8);
     const feedbackNameSize = get('feedbacks.name.size', 16);
@@ -473,6 +483,7 @@ function renderPreviewD2New(frame, state) {
     const ctaBtnFontSize = ctaReplicateHero ? heroBtnFontSize : get('cta.btn.textStyle.size', 16);
     const ctaBtnFontWeight = ctaReplicateHero ? heroBtnFontWeight : get('cta.btn.textStyle.weight', 600);
     const ctaBtnFontColor = ctaReplicateHero ? heroBtnFontColor : get('cta.btn.textStyle.color', '#ffffff');
+    const ctaBtnFont = ctaReplicateHero ? heroBtnFont : get('cta.btn.textStyle.font', '');
     const ctaBtnLineHeight = ctaReplicateHero ? heroBtnLineHeight : get('cta.btn.textStyle.lineHeight', 1.2);
     const ctaBtnLetterSpacing = ctaReplicateHero ? heroBtnLetterSpacing : get('cta.btn.textStyle.letterSpacing', 1);
     const ctaBtnBgColor = ctaReplicateHero ? heroBtnBgColor : get('cta.btn.bgColor', '#5167E7');
@@ -562,7 +573,7 @@ function renderPreviewD2New(frame, state) {
     const baseFont = heroTitleFont || 'Montserrat';
 
     // Coleta todas as fontes usadas para gerar os @import do Google Fonts
-    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont].filter(Boolean));
+    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont].filter(Boolean));
     const fontImports = [...usedFonts].map(fontName => {
         const fontEntry = window.D2Controls?.FONT_REGISTRY?.find(f => f.value === fontName);
         return fontEntry ? `@import url('${fontEntry.url}');` : '';
@@ -790,6 +801,7 @@ function renderPreviewD2New(frame, state) {
                 line-height: ${heroSubtitleLineHeight};
                 letter-spacing: ${heroSubtitleLetterSpacing}px;
                 opacity: 0.9;
+                ${textGradientCSS(heroSubtitleGradientEnabled, heroSubtitleGradient)}
             }
             .d2-preview-container .d2-cta-btn {
                 display: inline-block;
@@ -798,7 +810,7 @@ function renderPreviewD2New(frame, state) {
                 border: none;
                 color: ${heroBtnFontColor};
                 text-decoration: none;
-                font-family: '${baseFont}', sans-serif;
+                font-family: ${heroBtnFont ? `'${heroBtnFont}', ` : ''}'${baseFont}', sans-serif;
                 font-size: ${heroBtnFontSize}px;
                 font-weight: ${heroBtnFontWeight};
                 line-height: ${heroBtnLineHeight};
@@ -867,6 +879,7 @@ function renderPreviewD2New(frame, state) {
                 line-height: ${categoriasSubtitleLineHeight};
                 letter-spacing: ${categoriasSubtitleLetterSpacing}px;
                 opacity: 0.8;
+                ${textGradientCSS(categoriasSubtitleGradientEnabled, categoriasSubtitleGradient)}
             }
             .d2-categorias-grid {
                 display: flex;
@@ -971,6 +984,7 @@ function renderPreviewD2New(frame, state) {
                 line-height: ${produtosSubtitleLineHeight};
                 letter-spacing: ${produtosSubtitleLetterSpacing}px;
                 opacity: 0.8;
+                ${textGradientCSS(produtosSubtitleGradientEnabled, produtosSubtitleGradient)}
             }
             .d2-produtos-grid {
                 display: flex;
@@ -1047,6 +1061,7 @@ function renderPreviewD2New(frame, state) {
                 padding: ${produtoBtnPaddingV}px ${produtoBtnPaddingH}px;
                 background: ${produtoBtnBackground};
                 color: ${produtoBtnColor};
+                font-family: ${produtoBtnFont ? `'${produtoBtnFont}', ` : ''}'${baseFont}', sans-serif;
                 font-size: ${produtoBtnSize}px;
                 font-weight: ${produtoBtnWeight};
                 line-height: ${produtoBtnLineHeight};
@@ -1117,6 +1132,7 @@ function renderPreviewD2New(frame, state) {
                 line-height: ${feedbacksSubtitleLineHeight};
                 letter-spacing: ${feedbacksSubtitleLetterSpacing}px;
                 opacity: 0.8;
+                ${textGradientCSS(feedbacksSubtitleGradientEnabled, feedbacksSubtitleGradient)}
             }
             .d2-feedbacks-list {
                 display: flex;
@@ -1245,6 +1261,7 @@ function renderPreviewD2New(frame, state) {
             .d2-cta-secundario .d2-cta-btn {
                 padding: ${ctaBtnPaddingV}px ${ctaBtnPaddingH}px;
                 background: ${ctaBtnBackground};
+                font-family: ${ctaBtnFont ? `'${ctaBtnFont}', ` : ''}'${baseFont}', sans-serif;
                 font-size: ${ctaBtnFontSize}px;
                 font-weight: ${ctaBtnFontWeight};
                 line-height: ${ctaBtnLineHeight};
