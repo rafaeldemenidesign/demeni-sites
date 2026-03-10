@@ -86,6 +86,7 @@ class D2CategoriasEditor {
                     path: `${this.basePath}.sectionTitle.color`
                 }));
                 container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionTitle` }));
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionTitle`));
 
                 // ── SUBTÍTULO ──
                 const subDiv = document.createElement('div');
@@ -120,6 +121,7 @@ class D2CategoriasEditor {
                     value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, '#666666'),
                     path: `${this.basePath}.sectionSubtitle.color`
                 }));
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionSubtitle`));
 
                 // ── ESPAÇAMENTO ──
                 const spDiv = document.createElement('div');
@@ -285,6 +287,8 @@ class D2CategoriasEditor {
                         path: `${this.basePath}.label.weight`
                     })
                 );
+
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.label`, { lineHeight: 1.2, letterSpacing: 0.5 }));
 
                 return container;
             }

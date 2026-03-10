@@ -226,6 +226,8 @@ function renderPreviewD2New(frame, state) {
     const heroTitleFont = get('hero.title.font', 'Montserrat');
     const heroTitleGradientEnabled = get('hero.title.textGradient.enabled', false);
     const heroTitleGradient = get('hero.title.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)');
+    const heroTitleLineHeight = get('hero.title.lineHeight', 1.4);
+    const heroTitleLetterSpacing = get('hero.title.letterSpacing', 0);
 
     // Helper: gera CSS para texto gradiente
     function textGradientCSS(enabled, gradient) {
@@ -240,6 +242,8 @@ function renderPreviewD2New(frame, state) {
     const heroSubtitleWeight = get('hero.subtitle.weight', 300);
     const heroSubtitleColor = get('hero.subtitle.color', '#ffffff');
     const heroSubtitleFont = get('hero.subtitle.font', 'Montserrat');
+    const heroSubtitleLineHeight = get('hero.subtitle.lineHeight', 1.4);
+    const heroSubtitleLetterSpacing = get('hero.subtitle.letterSpacing', 0);
 
     // Botão CTA
     const heroBtnText = get('hero.btn.text', 'QUERO SABER MAIS');
@@ -250,6 +254,8 @@ function renderPreviewD2New(frame, state) {
     const heroBtnFontSize = get('hero.btn.textStyle.size', 16);
     const heroBtnFontColor = get('hero.btn.textStyle.color', '#ffffff');
     const heroBtnFontWeight = get('hero.btn.textStyle.weight', 400);
+    const heroBtnLineHeight = get('hero.btn.textStyle.lineHeight', 1.2);
+    const heroBtnLetterSpacing = get('hero.btn.textStyle.letterSpacing', 1);
     const heroBtnBgType = get('hero.btn.bgType', 'gradient');
     const heroBtnBgColor = get('hero.btn.bgColor', '#5167E7');
     const heroBtnBgGradient = get('hero.btn.bgGradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)');
@@ -281,6 +287,8 @@ function renderPreviewD2New(frame, state) {
     const categoriaLabelSize = get('categorias.label.size', 10);
     const categoriaLabelColor = get('categorias.label.color', '#222222');
     const categoriaLabelWeight = get('categorias.label.weight', 500);
+    const categoriaLabelLineHeight = get('categorias.label.lineHeight', 1.2);
+    const categoriaLabelLetterSpacing = get('categorias.label.letterSpacing', 0.5);
     const categoriasItems = get('categorias.items', [
         { id: 1, label: 'PRODUTOS', icon: 'fa-box-open' },
         { id: 2, label: 'SERVIÇOS', icon: 'fa-concierge-bell' },
@@ -302,6 +310,10 @@ function renderPreviewD2New(frame, state) {
     const categoriasTitleGradientEnabled = get('categorias.sectionTitle.textGradient.enabled', false);
     const categoriasTitleGradient = get('categorias.sectionTitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const categoriasSubtitleWeight = get('categorias.sectionSubtitle.weight', 400);
+    const categoriasTitleLineHeight = get('categorias.sectionTitle.lineHeight', 1.4);
+    const categoriasTitleLetterSpacing = get('categorias.sectionTitle.letterSpacing', 0);
+    const categoriasSubtitleLineHeight = get('categorias.sectionSubtitle.lineHeight', 1.4);
+    const categoriasSubtitleLetterSpacing = get('categorias.sectionSubtitle.letterSpacing', 0);
 
     // =============================================
     // PRODUTOS - Valores dinâmicos
@@ -325,6 +337,10 @@ function renderPreviewD2New(frame, state) {
     const produtosTitleGradientEnabled = get('produtos.sectionTitle.textGradient.enabled', false);
     const produtosTitleGradient = get('produtos.sectionTitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const produtosSubtitleWeight = get('produtos.sectionSubtitle.weight', 400);
+    const produtosTitleLineHeight = get('produtos.sectionTitle.lineHeight', 1.4);
+    const produtosTitleLetterSpacing = get('produtos.sectionTitle.letterSpacing', 0);
+    const produtosSubtitleLineHeight = get('produtos.sectionSubtitle.lineHeight', 1.4);
+    const produtosSubtitleLetterSpacing = get('produtos.sectionSubtitle.letterSpacing', 0);
     const produtosGridGap = get('produtos.gridGap', 16);
     const produtosGridColumns = get('produtos.gridColumns', 2);
     const produtosSectionPaddingH = get('produtos.sectionPaddingH', 32);
@@ -337,14 +353,20 @@ function renderPreviewD2New(frame, state) {
     const produtoTitleSize = get('produtos.title.size', 15);
     const produtoTitleWeight = get('produtos.title.weight', 500);
     const produtoTitleColor = get('produtos.title.color', '#333333');
+    const produtoTitleLineHeight = get('produtos.title.lineHeight', 1.4);
+    const produtoTitleLetterSpacing = get('produtos.title.letterSpacing', 0);
     const produtoPrecoSize = get('produtos.preco.size', 16);
     const produtoPrecoWeight = get('produtos.preco.weight', 800);
     const produtoPrecoColor = get('produtos.preco.color', '#333333');
     const produtoPrecoCurrencyStyle = get('produtos.preco.currencyStyle', 'normal');
+    const produtoPrecoLineHeight = get('produtos.preco.lineHeight', 1.2);
+    const produtoPrecoLetterSpacing = get('produtos.preco.letterSpacing', 0);
     const produtoBtnSize = get('produtos.btn.size', 13);
     const produtoBtnWeight = get('produtos.btn.weight', 600);
     const produtoBtnBgColor = get('produtos.btn.bgColor', '#25D366');
     const produtoBtnColor = get('produtos.btn.color', '#ffffff');
+    const produtoBtnLineHeight = get('produtos.btn.lineHeight', 1.2);
+    const produtoBtnLetterSpacing = get('produtos.btn.letterSpacing', 0);
     const produtoBtnRadius = get('produtos.btn.borderRadius', 20);
     const produtoBtnPaddingH = get('produtos.btn.paddingH', 14);
     const produtoBtnPaddingV = get('produtos.btn.paddingV', 6);
@@ -376,14 +398,22 @@ function renderPreviewD2New(frame, state) {
     const feedbacksTitleGradientEnabled = get('feedbacks.sectionTitle.textGradient.enabled', false);
     const feedbacksTitleGradient = get('feedbacks.sectionTitle.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 50%, #2D3A81 100%)');
     const feedbacksSubtitleWeight = get('feedbacks.sectionSubtitle.weight', 400);
+    const feedbacksTitleLineHeight = get('feedbacks.sectionTitle.lineHeight', 1.4);
+    const feedbacksTitleLetterSpacing = get('feedbacks.sectionTitle.letterSpacing', 0);
+    const feedbacksSubtitleLineHeight = get('feedbacks.sectionSubtitle.lineHeight', 1.4);
+    const feedbacksSubtitleLetterSpacing = get('feedbacks.sectionSubtitle.letterSpacing', 0);
     const feedbackAvatarSize = get('feedbacks.avatar.size', 60);
     const feedbackAvatarRadius = get('feedbacks.avatar.radius', 8);
     const feedbackNameSize = get('feedbacks.name.size', 16);
     const feedbackNameWeight = get('feedbacks.name.weight', 500);
     const feedbackNameColor = get('feedbacks.name.color', '#1a365d');
+    const feedbackNameLineHeight = get('feedbacks.name.lineHeight', 1.2);
+    const feedbackNameLetterSpacing = get('feedbacks.name.letterSpacing', 0);
     const feedbackTextSize = get('feedbacks.text.size', 13);
     const feedbackTextWeight = get('feedbacks.text.weight', 400);
     const feedbackTextColor = get('feedbacks.text.color', '#666666');
+    const feedbackTextLineHeight = get('feedbacks.text.lineHeight', 1.5);
+    const feedbackTextLetterSpacing = get('feedbacks.text.letterSpacing', 0);
     const feedbackCardBgColor = get('feedbacks.card.bgColor', '#f5f5f5');
     const feedbackCardRadius = get('feedbacks.card.borderRadius', 12);
     const feedbackCardGlass = get('feedbacks.card.glass', false);
@@ -397,6 +427,8 @@ function renderPreviewD2New(frame, state) {
     const feedbackBottomCtaSize = get('feedbacks.bottomCta.size', 16);
     const feedbackBottomCtaWeight = get('feedbacks.bottomCta.weight', 400);
     const feedbackBottomCtaColor = get('feedbacks.bottomCta.color', '#333333');
+    const feedbackBottomCtaLineHeight = get('feedbacks.bottomCta.lineHeight', 1.4);
+    const feedbackBottomCtaLetterSpacing = get('feedbacks.bottomCta.letterSpacing', 0);
     const feedbackBottomCtaPaddingTop = get('feedbacks.bottomCta.paddingTop', 20);
     const feedbackBottomCtaPaddingBottom = get('feedbacks.bottomCta.paddingBottom', 20);
 
@@ -418,6 +450,8 @@ function renderPreviewD2New(frame, state) {
     const ctaTitleWeight = ctaReplicateHero ? heroTitleWeight : get('cta.title.weight', 400);
     const ctaTitleColor = ctaReplicateHero ? heroTitleColor : get('cta.title.color', '#ffffff');
     const ctaTitleMarginBottom = get('cta.title.marginBottom', 8);
+    const ctaTitleLineHeight = ctaReplicateHero ? heroTitleLineHeight : get('cta.title.lineHeight', 1.4);
+    const ctaTitleLetterSpacing = ctaReplicateHero ? heroTitleLetterSpacing : get('cta.title.letterSpacing', 0);
 
     // Subtitle: replicate hero or custom
     const ctaSubtitleText = get('cta.subtitle.text', '') || heroSubtitleText;
@@ -426,6 +460,8 @@ function renderPreviewD2New(frame, state) {
     const ctaSubtitleColor = ctaReplicateHero ? heroSubtitleColor : get('cta.subtitle.color', '#ffffff');
     const ctaSubtitleOpacity = ctaReplicateHero ? 0.8 : get('cta.subtitle.opacity', 0.8);
     const ctaSubtitleMarginBottom = get('cta.subtitle.marginBottom', 20);
+    const ctaSubtitleLineHeight = ctaReplicateHero ? heroSubtitleLineHeight : get('cta.subtitle.lineHeight', 1.4);
+    const ctaSubtitleLetterSpacing = ctaReplicateHero ? heroSubtitleLetterSpacing : get('cta.subtitle.letterSpacing', 0);
 
     // Button: replicate hero or custom
     const ctaBtnText = get('cta.btn.text', '') || heroBtnText;
@@ -437,6 +473,8 @@ function renderPreviewD2New(frame, state) {
     const ctaBtnFontSize = ctaReplicateHero ? heroBtnFontSize : get('cta.btn.textStyle.size', 16);
     const ctaBtnFontWeight = ctaReplicateHero ? heroBtnFontWeight : get('cta.btn.textStyle.weight', 600);
     const ctaBtnFontColor = ctaReplicateHero ? heroBtnFontColor : get('cta.btn.textStyle.color', '#ffffff');
+    const ctaBtnLineHeight = ctaReplicateHero ? heroBtnLineHeight : get('cta.btn.textStyle.lineHeight', 1.2);
+    const ctaBtnLetterSpacing = ctaReplicateHero ? heroBtnLetterSpacing : get('cta.btn.textStyle.letterSpacing', 1);
     const ctaBtnBgColor = ctaReplicateHero ? heroBtnBgColor : get('cta.btn.bgColor', '#5167E7');
     const ctaBtnBgType = get('cta.btn.bgType', 'solid');
     const ctaBtnBgGradient = get('cta.btn.bgGradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
@@ -461,14 +499,20 @@ function renderPreviewD2New(frame, state) {
     const footerTitleText = get('footer.title.text', 'Invista no seu negócio!');
     const footerTitleSize = get('footer.title.size', 24);
     const footerTitleColor = get('footer.title.color', '#ffffff');
+    const footerTitleLineHeight = get('footer.title.lineHeight', 1.4);
+    const footerTitleLetterSpacing = get('footer.title.letterSpacing', 0);
     const footerSubtitleText = get('footer.subtitle.text', '');
     const footerSubtitleSize = get('footer.subtitle.size', 14);
     const footerSubtitleOpacity = get('footer.subtitle.opacity', 0.6);
+    const footerSubtitleLineHeight = get('footer.subtitle.lineHeight', 1.4);
+    const footerSubtitleLetterSpacing = get('footer.subtitle.letterSpacing', 0);
     const footerInfoEmail = get('footer.info.email', '');
     const footerInfoPhone = get('footer.info.phone', '');
     const footerInfoCnpj = get('footer.info.cnpj', '');
     const footerTextSize = get('footer.info.size', 13);
     const footerTextOpacity = get('footer.info.opacity', 0.8);
+    const footerTextLineHeight = get('footer.info.lineHeight', 1.4);
+    const footerTextLetterSpacing = get('footer.info.letterSpacing', 0);
     const footerSocialSize = get('footer.social.size', 28);
     const footerSocialGap = get('footer.social.gap', 12);
     const footerSocialInstagram = get('footer.social.instagram', '');
@@ -733,6 +777,8 @@ function renderPreviewD2New(frame, state) {
                 font-family: '${heroTitleFont}', serif;
                 color: ${heroTitleColor};
                 margin-bottom: ${heroTitleSpacing}px;
+                line-height: ${heroTitleLineHeight};
+                letter-spacing: ${heroTitleLetterSpacing}px;
                 ${textGradientCSS(heroTitleGradientEnabled, heroTitleGradient)}
             }
             .d2-hero .subtitle {
@@ -741,6 +787,8 @@ function renderPreviewD2New(frame, state) {
                 font-family: '${heroSubtitleFont}', serif;
                 color: ${heroSubtitleColor};
                 margin-bottom: ${heroSubtitleSpacing}px;
+                line-height: ${heroSubtitleLineHeight};
+                letter-spacing: ${heroSubtitleLetterSpacing}px;
                 opacity: 0.9;
             }
             .d2-preview-container .d2-cta-btn {
@@ -753,7 +801,8 @@ function renderPreviewD2New(frame, state) {
                 font-family: '${baseFont}', sans-serif;
                 font-size: ${heroBtnFontSize}px;
                 font-weight: ${heroBtnFontWeight};
-                letter-spacing: 1px;
+                line-height: ${heroBtnLineHeight};
+                letter-spacing: ${heroBtnLetterSpacing}px;
                 border-radius: ${heroBtnBorderRadius}px;
                 box-shadow: 0 4px 15px ${hexToRgba(heroBtnBgColor, 0.4)};
                 transition: ${heroBtnHoverAnimation ? 'transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease' : 'none'};
@@ -806,6 +855,8 @@ function renderPreviewD2New(frame, state) {
                 margin-top: ${categoriasTitlePaddingTop}px;
                 margin-bottom: ${categoriasTitleGap}px;
                 color: ${categoriasSectionTitleColor};
+                line-height: ${categoriasTitleLineHeight};
+                letter-spacing: ${categoriasTitleLetterSpacing}px;
                 ${textGradientCSS(categoriasTitleGradientEnabled, categoriasTitleGradient)}
             }
             .d2-categorias .section-subtitle {
@@ -813,6 +864,8 @@ function renderPreviewD2New(frame, state) {
                 color: ${categoriasSectionSubtitleColor};
                 margin-bottom: ${categoriasTitlePaddingBottom}px;
                 font-weight: ${categoriasSubtitleWeight};
+                line-height: ${categoriasSubtitleLineHeight};
+                letter-spacing: ${categoriasSubtitleLetterSpacing}px;
                 opacity: 0.8;
             }
             .d2-categorias-grid {
@@ -853,11 +906,11 @@ function renderPreviewD2New(frame, state) {
             }
             .d2-categoria-item span {
                 font-size: ${categoriaLabelSize}px;
-                letter-spacing: 0.5px;
+                letter-spacing: ${categoriaLabelLetterSpacing}px;
                 color: ${categoriaLabelColor};
                 font-weight: ${categoriaLabelWeight};
                 text-align: center;
-                line-height: 1.2;
+                line-height: ${categoriaLabelLineHeight};
                 word-break: break-word;
                 max-width: 100%;
                 overflow: hidden;
@@ -906,6 +959,8 @@ function renderPreviewD2New(frame, state) {
                 margin-top: ${produtosTitlePaddingTop}px;
                 margin-bottom: ${produtosTitleGap}px;
                 color: ${produtosSectionTitleColor};
+                line-height: ${produtosTitleLineHeight};
+                letter-spacing: ${produtosTitleLetterSpacing}px;
                 ${textGradientCSS(produtosTitleGradientEnabled, produtosTitleGradient)}
             }
             .d2-produtos .section-subtitle {
@@ -913,6 +968,8 @@ function renderPreviewD2New(frame, state) {
                 color: ${produtosSectionSubtitleColor};
                 margin-bottom: ${produtosTitlePaddingBottom}px;
                 font-weight: ${produtosSubtitleWeight};
+                line-height: ${produtosSubtitleLineHeight};
+                letter-spacing: ${produtosSubtitleLetterSpacing}px;
                 opacity: 0.8;
             }
             .d2-produtos-grid {
@@ -953,7 +1010,8 @@ function renderPreviewD2New(frame, state) {
                 font-weight: ${produtoTitleWeight};
                 padding: 8px 6px 2px;
                 margin: 0;
-                line-height: 1.2;
+                line-height: ${produtoTitleLineHeight};
+                letter-spacing: ${produtoTitleLetterSpacing}px;
                 text-align: left;
                 color: ${produtoTitleColor};
             }
@@ -969,6 +1027,8 @@ function renderPreviewD2New(frame, state) {
                 font-size: ${produtoPrecoSize}px;
                 font-weight: ${produtoPrecoWeight};
                 color: ${produtoPrecoColor};
+                line-height: ${produtoPrecoLineHeight};
+                letter-spacing: ${produtoPrecoLetterSpacing}px;
                 display: inline-flex;
                 align-items: baseline;
                 white-space: nowrap;
@@ -989,6 +1049,8 @@ function renderPreviewD2New(frame, state) {
                 color: ${produtoBtnColor};
                 font-size: ${produtoBtnSize}px;
                 font-weight: ${produtoBtnWeight};
+                line-height: ${produtoBtnLineHeight};
+                letter-spacing: ${produtoBtnLetterSpacing}px;
                 border-radius: ${produtoBtnRadius}px;
                 text-transform: lowercase;
                 white-space: nowrap;
@@ -1043,6 +1105,8 @@ function renderPreviewD2New(frame, state) {
                 margin-top: ${feedbacksTitlePaddingTop}px;
                 margin-bottom: ${feedbacksTitleGap}px;
                 color: ${feedbacksSectionTitleColor};
+                line-height: ${feedbacksTitleLineHeight};
+                letter-spacing: ${feedbacksTitleLetterSpacing}px;
                 ${textGradientCSS(feedbacksTitleGradientEnabled, feedbacksTitleGradient)}
             }
             .d2-feedbacks .section-subtitle {
@@ -1050,6 +1114,8 @@ function renderPreviewD2New(frame, state) {
                 color: ${feedbacksSectionSubtitleColor};
                 margin-bottom: ${feedbacksTitlePaddingBottom}px;
                 font-weight: ${feedbacksSubtitleWeight};
+                line-height: ${feedbacksSubtitleLineHeight};
+                letter-spacing: ${feedbacksSubtitleLetterSpacing}px;
                 opacity: 0.8;
             }
             .d2-feedbacks-list {
@@ -1096,13 +1162,16 @@ function renderPreviewD2New(frame, state) {
                 color: ${feedbackNameColor};
                 font-weight: ${feedbackNameWeight};
                 font-size: ${feedbackNameSize}px;
+                line-height: ${feedbackNameLineHeight};
+                letter-spacing: ${feedbackNameLetterSpacing}px;
                 text-decoration: none;
                 display: block;
                 margin-bottom: 6px;
             }
             .d2-feedback-content p {
                 font-size: ${feedbackTextSize}px;
-                line-height: 1.3;
+                line-height: ${feedbackTextLineHeight};
+                letter-spacing: ${feedbackTextLetterSpacing}px;
                 color: ${feedbackTextColor};
                 font-weight: ${feedbackTextWeight};
             }
@@ -1112,6 +1181,8 @@ function renderPreviewD2New(frame, state) {
                 font-size: ${feedbackBottomCtaSize}px;
                 font-weight: ${feedbackBottomCtaWeight};
                 color: ${feedbackBottomCtaColor};
+                line-height: ${feedbackBottomCtaLineHeight};
+                letter-spacing: ${feedbackBottomCtaLetterSpacing}px;
                 text-align: center;
             }
 
@@ -1158,6 +1229,8 @@ function renderPreviewD2New(frame, state) {
                 font-size: ${ctaTitleSize}px;
                 font-weight: ${ctaTitleWeight};
                 color: ${ctaTitleColor};
+                line-height: ${ctaTitleLineHeight};
+                letter-spacing: ${ctaTitleLetterSpacing}px;
                 margin-bottom: ${ctaTitleMarginBottom}px;
             }
             .d2-cta-secundario p {
@@ -1165,6 +1238,8 @@ function renderPreviewD2New(frame, state) {
                 font-weight: ${ctaSubtitleWeight};
                 color: ${ctaSubtitleColor};
                 opacity: ${ctaSubtitleOpacity};
+                line-height: ${ctaSubtitleLineHeight};
+                letter-spacing: ${ctaSubtitleLetterSpacing}px;
                 margin-bottom: ${ctaSubtitleMarginBottom}px;
             }
             .d2-cta-secundario .d2-cta-btn {
@@ -1172,6 +1247,8 @@ function renderPreviewD2New(frame, state) {
                 background: ${ctaBtnBackground};
                 font-size: ${ctaBtnFontSize}px;
                 font-weight: ${ctaBtnFontWeight};
+                line-height: ${ctaBtnLineHeight};
+                letter-spacing: ${ctaBtnLetterSpacing}px;
                 color: ${ctaBtnFontColor};
                 border-radius: ${ctaBtnBorderRadius}px;
                 ${ctaBtnHoverAnimation ? 'transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;' : ''}
@@ -1195,16 +1272,21 @@ function renderPreviewD2New(frame, state) {
                 font-size: ${footerTitleSize}px;
                 font-weight: 400;
                 color: ${footerTitleColor};
+                line-height: ${footerTitleLineHeight};
+                letter-spacing: ${footerTitleLetterSpacing}px;
                 margin-bottom: 6px;
             }
             .d2-footer-subtitle {
                 font-size: ${footerSubtitleSize}px;
                 opacity: ${footerSubtitleOpacity};
+                line-height: ${footerSubtitleLineHeight};
+                letter-spacing: ${footerSubtitleLetterSpacing}px;
                 margin-bottom: 20px;
             }
             .d2-footer-info {
                 font-size: ${footerTextSize}px;
-                line-height: 1.8;
+                line-height: ${footerTextLineHeight};
+                letter-spacing: ${footerTextLetterSpacing}px;
                 opacity: ${footerTextOpacity};
                 margin-bottom: 20px;
             }

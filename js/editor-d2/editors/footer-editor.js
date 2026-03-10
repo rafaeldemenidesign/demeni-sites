@@ -110,6 +110,8 @@ class D2FooterEditor {
                     })
                 );
 
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.title`));
+
                 return container;
             }
         );
@@ -147,6 +149,8 @@ class D2FooterEditor {
                         path: `${this.basePath}.subtitle.opacity`
                     })
                 );
+
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.subtitle`));
 
                 return container;
             }
@@ -203,6 +207,8 @@ class D2FooterEditor {
                         path: `${this.basePath}.info.opacity`
                     })
                 );
+
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.info`, { lineHeight: 1.4 }));
 
                 return container;
             }

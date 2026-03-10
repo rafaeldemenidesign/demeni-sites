@@ -602,6 +602,34 @@ window.D2Controls = {
     },
 
     /**
+     * Cria controles de espaçamento de texto (line-height + letter-spacing)
+     * Helper reutilizável para padronizar em todos os campos de texto
+     * @param {string} basePath - Caminho base no d2State (ex: 'd2Adjustments.hero.title')
+     * @param {Object} [defaults] - Valores padrão opcionais
+     * @returns {DocumentFragment}
+     */
+    createTextSpacingControls(basePath, defaults = {}) {
+        const { lineHeight = 1.4, letterSpacing = 0 } = defaults;
+        const fragment = document.createDocumentFragment();
+
+        fragment.appendChild(this.createSlider({
+            label: 'Espaçamento entre linhas',
+            value: window.d2State.get(`${basePath}.lineHeight`, lineHeight),
+            min: 0.8, max: 2.5, step: 0.1, unit: '',
+            path: `${basePath}.lineHeight`
+        }));
+
+        fragment.appendChild(this.createSlider({
+            label: 'Espaçamento entre letras',
+            value: window.d2State.get(`${basePath}.letterSpacing`, letterSpacing),
+            min: -2, max: 10, step: 0.5, unit: 'px',
+            path: `${basePath}.letterSpacing`
+        }));
+
+        return fragment;
+    },
+
+    /**
      * Cria um Toggle Switch (on/off)
      * @param {Object} options - { label, value, path }
      */

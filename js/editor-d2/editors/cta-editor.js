@@ -175,6 +175,8 @@ class D2CTAEditor {
                         path: `${this.basePath}.title.marginBottom`
                     }));
 
+                    container.appendChild(C.createTextSpacingControls(`${this.basePath}.title`));
+
                     return container;
                 }
             );
@@ -226,6 +228,8 @@ class D2CTAEditor {
                         path: `${this.basePath}.subtitle.marginBottom`
                     }));
 
+                    container.appendChild(C.createTextSpacingControls(`${this.basePath}.subtitle`));
+
                     return container;
                 }
             );
@@ -275,6 +279,7 @@ class D2CTAEditor {
                         value: window.d2State.get(`${this.basePath}.btn.textStyle.color`, '#ffffff'),
                         path: `${this.basePath}.btn.textStyle.color`
                     }));
+                    container.appendChild(C.createTextSpacingControls(`${this.basePath}.btn.textStyle`, { lineHeight: 1.2, letterSpacing: 1 }));
 
                     // Aparência
                     const bgDiv = document.createElement('div');

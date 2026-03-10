@@ -66,6 +66,7 @@ class D2FeedbacksEditor {
                     path: `${this.basePath}.sectionTitle.color`
                 }));
                 container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionTitle` }));
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionTitle`));
 
                 // ── SUBTÍTULO ──
                 const subDiv = document.createElement('div');
@@ -100,6 +101,7 @@ class D2FeedbacksEditor {
                     value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, '#666666'),
                     path: `${this.basePath}.sectionSubtitle.color`
                 }));
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionSubtitle`));
 
                 // ── ESPAÇAMENTO ──
                 const spDiv = document.createElement('div');
@@ -160,6 +162,7 @@ class D2FeedbacksEditor {
                     value: window.d2State.get(`${this.basePath}.name.color`, '#1a365d'),
                     path: `${this.basePath}.name.color`
                 }));
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.name`, { lineHeight: 1.2 }));
 
                 // ── DEPOIMENTO ──
                 const textDiv = document.createElement('div');
@@ -183,6 +186,7 @@ class D2FeedbacksEditor {
                     value: window.d2State.get(`${this.basePath}.text.color`, '#666666'),
                     path: `${this.basePath}.text.color`
                 }));
+                container.appendChild(C.createTextSpacingControls(`${this.basePath}.text`, { lineHeight: 1.5 }));
 
                 return container;
             }
@@ -340,6 +344,7 @@ class D2FeedbacksEditor {
                         value: window.d2State.get(`${this.basePath}.bottomCta.color`, '#333333'),
                         path: `${this.basePath}.bottomCta.color`
                     }));
+                    container.appendChild(C.createTextSpacingControls(`${this.basePath}.bottomCta`));
                     container.appendChild(C.createSlider({
                         label: 'Espaço acima',
                         value: window.d2State.get(`${this.basePath}.bottomCta.paddingTop`, 20),
