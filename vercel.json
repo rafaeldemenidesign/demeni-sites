@@ -2,6 +2,30 @@
     "version": 2,
     "name": "demeni-sites",
     "public": true,
+    "redirects": [
+        {
+            "source": "/app.html",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "sites.rafaeldemeni.com"
+                }
+            ],
+            "destination": "https://app.rafaeldemeni.com/app.html",
+            "permanent": true
+        },
+        {
+            "source": "/app",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "sites.rafaeldemeni.com"
+                }
+            ],
+            "destination": "https://app.rafaeldemeni.com/app.html",
+            "permanent": true
+        }
+    ],
     "rewrites": [
         {
             "source": "/",
