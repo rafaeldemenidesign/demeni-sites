@@ -42,32 +42,9 @@
     <!-- Material Icons: lazy-load (only used for a few footer icons) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" media="print" onload="this.media='all'" />
 
-    <!-- TailwindCSS CDN: preconnect + preload for faster download -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#7B2FF7",
-                        "primary-dark": "#5A1DB8",
-                        "background-light": "#f9fafb",
-                        "background-dark": "#0a0a0c",
-                        "card-dark": "#18181f",
-                    },
-                    fontFamily: {
-                        sans: ["Inter", "sans-serif"],
-                        display: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.75rem",
-                    },
-                },
-            },
-        };
-    </script>
+    <!-- TailwindCSS: pre-compiled static CSS (replaces CDN runtime) -->
+    <link rel="stylesheet" href="css/sites.min.css">
+
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
     {
