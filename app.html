@@ -1556,6 +1556,16 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Importar Projeto -->
+                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                    <p style="font-size: 13px; color: #999; margin-bottom: 10px;">ou importe um projeto existente</p>
+                    <input type="file" id="import-project-input" accept=".json,.demeni.json" onchange="importProjectFile(event)" style="display: none;">
+                    <button onclick="document.getElementById('import-project-input').click()" 
+                        style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; background: rgba(14,165,233,0.15); color: #0ea5e9; border: 1px dashed #0ea5e9; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+                        <i class="fas fa-upload"></i> Importar .demeni.json
+                    </button>
+                </div>
             </div>
         </div>
     </div>

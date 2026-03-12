@@ -568,6 +568,9 @@ function renderProjectCard(project, lazy) {
            <button class="btn-secondary" onclick="duplicateProject('${project.id}')" title="Duplicar projeto">
                <i class="fas fa-clone"></i>
            </button>
+           <button class="btn-secondary" onclick="exportProject('${project.id}')" title="Exportar .demeni.json">
+               <i class="fas fa-download"></i>
+           </button>
            <button class="btn-secondary btn-deactivate" onclick="deactivateProject('${project.id}')" title="Desativar site">
                <i class="fas fa-power-off"></i>
            </button>
@@ -576,6 +579,9 @@ function renderProjectCard(project, lazy) {
            </button>`
         : `<button class="btn-action duplicate" onclick="duplicateProject('${project.id}')" title="Duplicar">
                <i class="fas fa-copy"></i>
+           </button>
+           <button class="btn-action" onclick="exportProject('${project.id}')" title="Exportar .demeni.json" style="background:rgba(14,165,233,0.15);color:#0ea5e9;">
+               <i class="fas fa-download"></i>
            </button>
            <button class="btn-action publish" onclick="showPublishModal('${project.id}')">
                <i class="fas fa-rocket"></i> Publicar
@@ -650,10 +656,71 @@ async function selectModel(modelType) {
     }
 }
 
+// ========== EXPORT / IMPORT ==========
+
+/**
+ * Export a single project as .demeni.json download
+ */
+async function exportProject(projectId) {
+    showNotification('📦 Exportando projeto...');
+    const result = await UserData.exportSingleProject(projectId);
+    if (result) {
+        showNotification(`✅ "${result.project.name}" exportado com sucesso!`);
+    } else {
+        showNotification('❌ Falha ao exportar projeto', 'error');
+    }
+}
+
+/**
+ * Import a project from a .demeni.json file
+ * Triggered by hidden file input
+ */
+async function importProjectFile(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate extension
+    if (!file.name.endsWith('.json') && !file.name.endsWith('.demeni.json')) {
+        showNotification('❌ Arquivo inválido. Use um arquivo .demeni.json', 'error');
+        event.target.value = '';
+        return;
+    }
+
+    showNotification('📦 Importando projeto...');
+
+    try {
+        const text = await file.text();
+        const jsonData = JSON.parse(text);
+
+        // Validate demeni format
+        if (!jsonData.project && !jsonData.demeniVersion) {
+            showNotification('❌ Formato inválido. Este não é um arquivo .demeni.json', 'error');
+            event.target.value = '';
+            return;
+        }
+
+        const newProject = await UserData.importSingleProject(jsonData);
+        if (newProject) {
+            showNotification(`✅ "${jsonData.project.name}" importado com sucesso!`);
+            closeModelSelectionModal();
+            loadProjects();
+        } else {
+            showNotification('❌ Falha ao importar projeto', 'error');
+        }
+    } catch (e) {
+        console.error('Import error:', e);
+        showNotification('❌ Erro ao ler arquivo: ' + e.message, 'error');
+    }
+
+    event.target.value = ''; // Reset for re-use
+}
+
 // Expose functions
 window.showModelSelectionModal = showModelSelectionModal;
 window.closeModelSelectionModal = closeModelSelectionModal;
 window.selectModel = selectModel;
+window.exportProject = exportProject;
+window.importProjectFile = importProjectFile;
 
 function editProject(id) {
     const project = UserData.getProject(id);

@@ -1063,6 +1063,98 @@ const UserData = (function () {
         return count;
     }
 
+    // ========== SINGLE PROJECT EXPORT/IMPORT ==========
+
+    /**
+     * Export a single project as a .demeni.json file (auto-download)
+     * The file is self-contained and portable — works across browsers, machines, and accounts.
+     */
+    async function exportSingleProject(projectId) {
+        const projects = getProjects();
+        const projectMeta = projects.find(p => p.id === projectId);
+        if (!projectMeta) {
+            console.error('❌ Projeto não encontrado:', projectId);
+            return null;
+        }
+
+        // Load full project data from IndexedDB
+        const data = await loadProjectData(projectId);
+        if (!data || Object.keys(data).length === 0) {
+            console.warn('⚠️ Projeto sem dados para exportar');
+            return null;
+        }
+
+        const exportObj = {
+            demeniVersion: '1.0',
+            exportedAt: new Date().toISOString(),
+            project: {
+                name: projectMeta.name || data.projectName || 'Projeto Exportado',
+                modelType: projectMeta.modelType || 'd2',
+                publishCost: projectMeta.publishCost || 40,
+                data: data
+            }
+        };
+
+        // Generate safe filename
+        const safeName = (exportObj.project.name || 'projeto')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .slice(0, 30);
+
+        const jsonStr = JSON.stringify(exportObj, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${safeName}.demeni.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log(`📦 Exportado "${exportObj.project.name}" (${(jsonStr.length / 1024).toFixed(1)}KB)`);
+        return exportObj;
+    }
+
+    /**
+     * Import a single project from a .demeni.json file
+     * Creates a new project in Supabase and injects all data.
+     * Returns the created project or null on failure.
+     */
+    async function importSingleProject(jsonData) {
+        // Validate format
+        if (!jsonData || !jsonData.project) {
+            console.error('❌ Formato inválido: falta campo "project"');
+            return null;
+        }
+
+        const { name, modelType, publishCost, data } = jsonData.project;
+        if (!data || typeof data !== 'object') {
+            console.error('❌ Formato inválido: falta campo "project.data"');
+            return null;
+        }
+
+        // Create project via platform API (Supabase + local)
+        const newProject = await createProject(name || 'Projeto Importado');
+        if (!newProject || !newProject.id) {
+            console.error('❌ Falha ao criar projeto');
+            return null;
+        }
+
+        // Update with imported data
+        updateProject(newProject.id, {
+            name: name || 'Projeto Importado',
+            modelType: modelType || 'd2',
+            publishCost: publishCost || 40,
+            data: data
+        });
+
+        console.log(`📦 Importado "${name}" como novo projeto (ID: ${newProject.id.substring(0, 8)})`);
+        return newProject;
+    }
+
     // ========== CHECKPOINT SYSTEM ==========
 
     // Save a checkpoint (snapshot) of the current project data
@@ -1209,6 +1301,8 @@ const UserData = (function () {
         loadProjectData,
         exportAllProjects,
         importAllProjects,
+        exportSingleProject,
+        importSingleProject,
 
         // 💾 Save + Checkpoint
         explicitSave,
