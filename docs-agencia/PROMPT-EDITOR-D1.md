@@ -29,6 +29,7 @@ O D-1 é o produto mais simples — um **minisite estilo Linktree** que o client
 - Campos: nome, bio, cor/imagem de fundo, imagem de banner, links (URL + label + ícone)
 - Botão de exportar/publicar o site gerado
 - O resultado final deve ser um HTML estático que eu hospedo no subdomínio do cliente
+- Tudo será criado a partir da duplicação do modelo já existente e funcional D-2. Analize sua estrutura, onde está localizado na plataforma e cada arquivo que compõe o site.
 
 ### Decisões técnicas:
 - **NÃO** reaproveitar o editor antigo (estava quebrado, não vale reconstruir)
