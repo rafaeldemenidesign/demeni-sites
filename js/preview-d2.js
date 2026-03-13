@@ -373,6 +373,7 @@ function renderPreviewD2New(frame, state) {
     const produtoBtnBgColor = get('produtos.btn.bgColor', '#25D366');
     const produtoBtnColor = get('produtos.btn.color', '#ffffff');
     const produtoBtnFont = get('produtos.btn.font', '');
+    const produtoTitleFont = get('produtos.title.font', '');
     const produtoBtnLineHeight = get('produtos.btn.lineHeight', 1.2);
     const produtoBtnLetterSpacing = get('produtos.btn.letterSpacing', 0);
     const produtoBtnRadius = get('produtos.btn.borderRadius', 20);
@@ -573,7 +574,7 @@ function renderPreviewD2New(frame, state) {
     const baseFont = heroTitleFont || 'Inter';
 
     // Coleta todas as fontes usadas para gerar os @import do Google Fonts
-    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont].filter(Boolean));
+    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont, produtoTitleFont].filter(Boolean));
     const fontImports = [...usedFonts].map(fontName => {
         const fontEntry = window.D2Controls?.FONT_REGISTRY?.find(f => f.value === fontName);
         return fontEntry ? `@import url('${fontEntry.url}');` : '';
@@ -1022,6 +1023,7 @@ function renderPreviewD2New(frame, state) {
             .d2-produto-card h3 {
                 font-size: ${produtoTitleSize}px;
                 font-weight: ${produtoTitleWeight};
+                font-family: ${produtoTitleFont ? `'${produtoTitleFont}', ` : ''}'${baseFont}', sans-serif;
                 padding: 8px 6px 2px;
                 margin: 0;
                 line-height: ${produtoTitleLineHeight};

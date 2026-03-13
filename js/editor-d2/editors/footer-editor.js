@@ -110,6 +110,14 @@ class D2FooterEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createFontPicker({
+                        label: 'Família da fonte',
+                        value: window.d2State.get(`${this.basePath}.title.font`, ''),
+                        path: `${this.basePath}.title.font`
+                    })
+                );
+
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.title`));
 
                 return container;

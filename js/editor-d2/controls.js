@@ -295,10 +295,12 @@ window.D2Controls = {
      */
     FONT_REGISTRY: [
         { value: 'Inter', label: 'Moderna', url: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Montserrat', label: 'Designer', url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap' },
         { value: 'Playfair Display', label: 'Elegante', url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap' },
         { value: 'Nunito', label: 'Divertida', url: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap' },
         { value: 'Bebas Neue', label: 'Impactante', url: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap' },
-        { value: 'Comfortaa', label: 'Suave', url: 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap' },
+        { value: 'Quicksand', label: 'Suave', url: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap' },
+        { value: 'Comfortaa', label: 'Arredondada', url: 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap' },
         { value: 'Lora', label: 'Clássica', url: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap' },
         { value: 'Poppins', label: 'Minimalista', url: 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap' },
         { value: 'Raleway', label: 'Sofisticada', url: 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&display=swap' },

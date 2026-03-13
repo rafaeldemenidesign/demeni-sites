@@ -86,6 +86,11 @@ class D2CategoriasEditor {
                     path: `${this.basePath}.sectionTitle.color`
                 }));
                 container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionTitle` }));
+                container.appendChild(C.createFontPicker({
+                    label: 'Família da fonte',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.font`, ''),
+                    path: `${this.basePath}.sectionTitle.font`
+                }));
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionTitle`));
 
                 // ── SUBTÍTULO ──
