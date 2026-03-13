@@ -1340,6 +1340,35 @@ async function generatePublishableHTML(state, projectName) {
                 wrapper.style.boxShadow = "0 0 60px rgba(0,0,0," + shadowAlpha + ")";
             }
         })();
+        // Carousel: auto-play + dot sync
+        (function(){
+            document.querySelectorAll('.d2-carousel-wrap').forEach(function(wrap){
+                var track=wrap.querySelector('.d2-carousel-track');
+                var dots=wrap.querySelectorAll('.d2-carousel-dot');
+                if(!track||dots.length===0)return;
+                var syncDots=function(){
+                    var w=track.offsetWidth;if(w===0)return;
+                    var idx=Math.round(track.scrollLeft/w);
+                    dots.forEach(function(d,i){d.style.background=i===idx?'#fff':'rgba(255,255,255,0.4)';});
+                };
+                track.addEventListener('scroll',syncDots,{passive:true});
+                dots.forEach(function(dot){
+                    dot.addEventListener('click',function(e){
+                        e.preventDefault();e.stopPropagation();
+                        track.scrollTo({left:parseInt(dot.dataset.idx)*track.offsetWidth,behavior:'smooth'});
+                    });
+                });
+                var advance=function(){
+                    var max=track.scrollWidth-track.offsetWidth;
+                    if(track.scrollLeft>=max-5){track.scrollTo({left:0,behavior:'smooth'});}
+                    else{track.scrollBy({left:track.offsetWidth,behavior:'smooth'});}
+                };
+                var iv=setInterval(advance,3000);
+                wrap.addEventListener('mouseenter',function(){clearInterval(iv);});
+                wrap.addEventListener('touchstart',function(){clearInterval(iv);},{passive:true});
+                wrap.addEventListener('mouseleave',function(){iv=setInterval(advance,3000);});
+            });
+        })();
         // Watermark — Powered by Demeni Sites
         (function(){
             var w=document.createElement('div');

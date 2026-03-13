@@ -498,17 +498,77 @@ class D2ProdutosEditor {
                                     })
                                 );
 
-                                itemContainer.appendChild(
-                                    C.createImagePicker({
-                                        label: 'Imagem',
-                                        value: product.image || '',
-                                        path: `d2Products.${index}.image`,
-                                        compact: true
-                                    })
-                                );
+                                // ── Imagens do Produto (Carrossel) ──
+                                const imagesDiv = document.createElement('div');
+                                imagesDiv.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 12px 0 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);';
+                                imagesDiv.textContent = 'Imagens (até 5)';
+                                itemContainer.appendChild(imagesDiv);
 
-                                // Ajuste da imagem (only if image exists)
-                                if (product.image) {
+                                // Migrate: single image → images array
+                                let images = product.images || [];
+                                if (images.length === 0 && product.image) {
+                                    images = [product.image];
+                                    window.d2State.set(`d2Products.${index}.images`, images);
+                                }
+
+                                // Thumbnail strip
+                                const strip = document.createElement('div');
+                                strip.style.cssText = 'display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;';
+
+                                images.forEach((img, imgIdx) => {
+                                    const thumb = document.createElement('div');
+                                    thumb.style.cssText = 'width: 60px; height: 60px; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;';
+                                    thumb.innerHTML = `
+                                        <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+                                        <button style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.7);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;line-height:1;" title="Remover">×</button>
+                                    `;
+                                    thumb.querySelector('button').addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        const prods = [...(window.d2State.get('d2Products') || [])];
+                                        const currentImgs = [...(prods[index].images || [])];
+                                        currentImgs.splice(imgIdx, 1);
+                                        prods[index] = { ...prods[index], images: currentImgs, image: currentImgs[0] || null };
+                                        window.d2State.set('d2Products', prods);
+                                    });
+                                    strip.appendChild(thumb);
+                                });
+
+                                // Add button (if < 5 images)
+                                if (images.length < 5) {
+                                    const addThumb = document.createElement('div');
+                                    addThumb.style.cssText = 'width: 60px; height: 60px; border-radius: 8px; border: 2px dashed rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; opacity: 0.5; transition: opacity 0.2s;';
+                                    addThumb.textContent = '+';
+                                    addThumb.addEventListener('mouseenter', () => addThumb.style.opacity = '1');
+                                    addThumb.addEventListener('mouseleave', () => addThumb.style.opacity = '0.5');
+
+                                    const fileInput = document.createElement('input');
+                                    fileInput.type = 'file';
+                                    fileInput.accept = 'image/*';
+                                    fileInput.style.display = 'none';
+                                    fileInput.addEventListener('change', async (e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+                                        try {
+                                            const compressor = window.ImageUtils ? window.ImageUtils.compressProductImage : C.convertToWebP.bind(C);
+                                            const webpDataUrl = await compressor(file);
+                                            const prods = [...(window.d2State.get('d2Products') || [])];
+                                            const currentImgs = [...(prods[index].images || [])];
+                                            currentImgs.push(webpDataUrl);
+                                            prods[index] = { ...prods[index], images: currentImgs, image: currentImgs[0] };
+                                            window.d2State.set('d2Products', prods);
+                                        } catch (err) {
+                                            console.error('[Produtos] Error adding image:', err);
+                                        }
+                                    });
+                                    addThumb.addEventListener('click', () => fileInput.click());
+                                    addThumb.appendChild(fileInput);
+                                    strip.appendChild(addThumb);
+                                }
+
+                                itemContainer.appendChild(strip);
+
+                                // Ajuste da imagem (only for first image)
+                                if (images.length > 0) {
                                     const posDiv = document.createElement('div');
                                     posDiv.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 12px 0 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);';
                                     posDiv.textContent = 'Ajuste da Foto';

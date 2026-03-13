@@ -1386,6 +1386,12 @@ function renderPreviewD2New(frame, state) {
                 opacity: 0.85;
                 line-height: 1.4;
             }
+            /* Carousel styles */
+            .d2-carousel-track::-webkit-scrollbar { display: none; }
+            .d2-carousel-track { scrollbar-width: none; -ms-overflow-style: none; }
+            .d2-carousel-wrap { position: relative; overflow: hidden; }
+            .d2-carousel-arrow { opacity: 0; transition: opacity 0.2s; }
+            .d2-carousel-wrap:hover .d2-carousel-arrow { opacity: 1; }
         </style>
 
         <div class="d2-preview-container">
@@ -1494,11 +1500,37 @@ function renderPreviewD2New(frame, state) {
                             const _pZoom = (p.imageZoom || 100) / 100;
                             const _pPosX = p.imagePosX ?? 50;
                             const _pPosY = p.imagePosY ?? 50;
+                            // Multi-image carousel support
+                            const productImages = p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []);
+                            let imageHTML;
+                            if (productImages.length > 1) {
+                                const carouselId = 'carousel-' + (p.id || Math.random().toString(36).substr(2,6));
+                                const slidesHTML = productImages.map((img, imgI) => `
+                                    <div class="d2-carousel-slide" style="flex-shrink:0;width:100%;scroll-snap-align:start;">
+                                        <img src="${img}" alt="${p.title || 'Produto'} ${imgI+1}" style="width:100%;height:100%;object-fit:cover;${imgI === 0 ? `object-position:${_pPosX}% ${_pPosY}%;${_pZoom !== 1 ? `transform:scale(${_pZoom});transform-origin:${_pPosX}% ${_pPosY}%;` : ''}` : ''}">
+                                    </div>
+                                `).join('');
+                                const dotsHTML = productImages.map((_, i) => `<span class="d2-carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}" style="width:7px;height:7px;border-radius:50%;background:${i === 0 ? '#fff' : 'rgba(255,255,255,0.4)'};cursor:pointer;transition:background 0.3s;"></span>`).join('');
+                                imageHTML = `
+                                    <div class="d2-produto-img d2-carousel-wrap" id="${carouselId}" style="position:relative;">
+                                        <div class="d2-carousel-track" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:100%;">
+                                            ${slidesHTML}
+                                        </div>
+                                        <div class="d2-carousel-dots" style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2;">
+                                            ${dotsHTML}
+                                        </div>
+                                        <button class="d2-carousel-arrow d2-carousel-prev" onclick="event.preventDefault();event.stopPropagation();var t=this.closest('.d2-carousel-wrap').querySelector('.d2-carousel-track');t.scrollBy({left:-t.offsetWidth,behavior:'smooth'})" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;cursor:pointer;font-size:12px;z-index:2;display:flex;align-items:center;justify-content:center;">&#8249;</button>
+                                        <button class="d2-carousel-arrow d2-carousel-next" onclick="event.preventDefault();event.stopPropagation();var t=this.closest('.d2-carousel-wrap').querySelector('.d2-carousel-track');t.scrollBy({left:t.offsetWidth,behavior:'smooth'})" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;cursor:pointer;font-size:12px;z-index:2;display:flex;align-items:center;justify-content:center;">&#8250;</button>
+                                    </div>`;
+                            } else {
+                                imageHTML = `
+                                    <div class="d2-produto-img">
+                                        <img src="${productImages[0] || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}" style="object-position:${_pPosX}% ${_pPosY}%;${_pZoom !== 1 ? `transform:scale(${_pZoom});transform-origin:${_pPosX}% ${_pPosY}%;` : ''}">
+                                    </div>`;
+                            }
                             return `
                     <a href="${prodLink}" class="d2-produto-card" ${p.link ? 'target="_blank"' : ''}>
-                        <div class="d2-produto-img">
-                            <img src="${p.image || baseUrl + '/produto.webp'}" alt="${p.title || 'Produto'}" style="object-position:${_pPosX}% ${_pPosY}%;${_pZoom !== 1 ? `transform:scale(${_pZoom});transform-origin:${_pPosX}% ${_pPosY}%;` : ''}">
-                        </div>
+                        ${imageHTML}
                         <h3>${p.title || 'Nome do Produto'}</h3>
                         <div class="d2-produto-footer">
                             <span class="d2-preco">${priceHtml}</span>
@@ -1637,6 +1669,55 @@ function renderPreviewD2New(frame, state) {
             }, { passive: true });
         }
     }
+
+    // Carousel: auto-play + dot sync
+    frame.querySelectorAll('.d2-carousel-wrap').forEach(wrap => {
+        const track = wrap.querySelector('.d2-carousel-track');
+        const dots = wrap.querySelectorAll('.d2-carousel-dot');
+        if (!track || dots.length === 0) return;
+
+        const syncDots = () => {
+            const slideW = track.offsetWidth;
+            if (slideW === 0) return;
+            const idx = Math.round(track.scrollLeft / slideW);
+            dots.forEach((d, i) => {
+                d.style.background = i === idx ? '#fff' : 'rgba(255,255,255,0.4)';
+            });
+        };
+
+        track.addEventListener('scroll', syncDots, { passive: true });
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const idx = parseInt(dot.dataset.idx);
+                track.scrollTo({ left: idx * track.offsetWidth, behavior: 'smooth' });
+            });
+        });
+
+        // Auto-play: advance every 3s, pause on hover
+        let autoPlayInterval = setInterval(() => {
+            const maxScroll = track.scrollWidth - track.offsetWidth;
+            if (track.scrollLeft >= maxScroll - 5) {
+                track.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                track.scrollBy({ left: track.offsetWidth, behavior: 'smooth' });
+            }
+        }, 3000);
+
+        wrap.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+        wrap.addEventListener('mouseleave', () => {
+            autoPlayInterval = setInterval(() => {
+                const maxScroll = track.scrollWidth - track.offsetWidth;
+                if (track.scrollLeft >= maxScroll - 5) {
+                    track.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    track.scrollBy({ left: track.offsetWidth, behavior: 'smooth' });
+                }
+            }, 3000);
+        });
+    });
 
     console.log('[Preview D2] Layout completo renderizado');
 }
