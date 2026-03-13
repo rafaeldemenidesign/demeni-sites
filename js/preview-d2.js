@@ -380,6 +380,10 @@ function renderPreviewD2New(frame, state) {
     const produtoBtnPaddingH = get('produtos.btn.paddingH', 14);
     const produtoBtnPaddingV = get('produtos.btn.paddingV', 6);
     const produtoBtnMarginTop = get('produtos.btn.marginTop', 0);
+    const carouselAutoplay = get('produtos.carousel.autoplay', true);
+    const carouselInterval = get('produtos.carousel.interval', 3);
+    const carouselShowArrows = get('produtos.carousel.arrows', true);
+    const carouselShowDots = get('produtos.carousel.dots', true);
     const produtoBtnText = get('produtos.btn.text', 'Comprar');
     const produtoBtnBgType = get('produtos.btn.bgType', 'solid');
     const produtoBtnBgGradient = get('produtos.btn.bgGradient', 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)');
@@ -1518,11 +1522,11 @@ function renderPreviewD2New(frame, state) {
                                         <div class="d2-carousel-track" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:100%;">
                                             ${slidesHTML}
                                         </div>
-                                        <div class="d2-carousel-dots" style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2;">
+                                        ${carouselShowDots ? `<div class="d2-carousel-dots" style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2;">` : '<div class="d2-carousel-dots" style="display:none;">'}
                                             ${dotsHTML}
                                         </div>
-                                        <button class="d2-carousel-arrow d2-carousel-prev" onclick="event.preventDefault();event.stopPropagation();var t=this.closest('.d2-carousel-wrap').querySelector('.d2-carousel-track');t.scrollBy({left:-t.offsetWidth,behavior:'smooth'})" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;cursor:pointer;font-size:12px;z-index:2;display:flex;align-items:center;justify-content:center;">&#8249;</button>
-                                        <button class="d2-carousel-arrow d2-carousel-next" onclick="event.preventDefault();event.stopPropagation();var t=this.closest('.d2-carousel-wrap').querySelector('.d2-carousel-track');t.scrollBy({left:t.offsetWidth,behavior:'smooth'})" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;cursor:pointer;font-size:12px;z-index:2;display:flex;align-items:center;justify-content:center;">&#8250;</button>
+                                        ${carouselShowArrows ? `<button class="d2-carousel-arrow d2-carousel-prev" onclick="event.preventDefault();event.stopPropagation();var t=this.closest('.d2-carousel-wrap').querySelector('.d2-carousel-track');t.scrollBy({left:-t.offsetWidth,behavior:'smooth'})" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;cursor:pointer;font-size:12px;z-index:2;display:flex;align-items:center;justify-content:center;">&#8249;</button>` : ''}
+                                        ${carouselShowArrows ? `<button class="d2-carousel-arrow d2-carousel-next" onclick="event.preventDefault();event.stopPropagation();var t=this.closest('.d2-carousel-wrap').querySelector('.d2-carousel-track');t.scrollBy({left:t.offsetWidth,behavior:'smooth'})" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;cursor:pointer;font-size:12px;z-index:2;display:flex;align-items:center;justify-content:center;">&#8250;</button>` : ''}
                                     </div>`;
                             } else {
                                 imageHTML = `
@@ -1698,27 +1702,30 @@ function renderPreviewD2New(frame, state) {
             });
         });
 
-        // Auto-play: advance every 3s, pause on hover
-        let autoPlayInterval = setInterval(() => {
-            const maxScroll = track.scrollWidth - track.offsetWidth;
-            if (track.scrollLeft >= maxScroll - 5) {
-                track.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                track.scrollBy({ left: track.offsetWidth, behavior: 'smooth' });
-            }
-        }, 3000);
-
-        wrap.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
-        wrap.addEventListener('mouseleave', () => {
-            autoPlayInterval = setInterval(() => {
+        // Auto-play: configurable interval, pause on hover
+        const autoplayMs = ${carouselInterval} * 1000;
+        if (${carouselAutoplay}) {
+            let autoPlayInterval = setInterval(() => {
                 const maxScroll = track.scrollWidth - track.offsetWidth;
                 if (track.scrollLeft >= maxScroll - 5) {
                     track.scrollTo({ left: 0, behavior: 'smooth' });
                 } else {
                     track.scrollBy({ left: track.offsetWidth, behavior: 'smooth' });
                 }
-            }, 3000);
-        });
+            }, autoplayMs);
+
+            wrap.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+            wrap.addEventListener('mouseleave', () => {
+                autoPlayInterval = setInterval(() => {
+                    const maxScroll = track.scrollWidth - track.offsetWidth;
+                    if (track.scrollLeft >= maxScroll - 5) {
+                        track.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        track.scrollBy({ left: track.offsetWidth, behavior: 'smooth' });
+                    }
+                }, autoplayMs);
+            });
+        }
     });
 
     console.log('[Preview D2] Layout completo renderizado');

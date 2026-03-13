@@ -1248,7 +1248,7 @@ async function generatePublishableHTML(state, projectName) {
     <link rel="manifest" href="${manifestDataUri}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=Bebas+Neue&family=Quicksand:wght@300;400;500;600;700&family=Comfortaa:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700;800;900&family=Abril+Fatface&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=Bebas+Neue&family=Quicksand:wght@300;400;500;600;700&family=Comfortaa:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700;800;900&family=Abril+Fatface&family=Pacifico&family=Great+Vibes&family=Alex+Brush&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1320,21 +1320,14 @@ async function generatePublishableHTML(state, projectName) {
             var customBlur = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImageBlur ?? 20)};
             var customZoom = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImageZoom ?? 110)};
             var shadowIntensity = ${JSON.stringify(state?.d2Adjustments?.desktop?.shadowIntensity ?? 50)};
+            var heroImageUrl = ${JSON.stringify(heroBgImage || null)};
             
             if (customBgEnabled && customBgImage) {
                 bg.style.backgroundImage = "url('" + customBgImage + "')";
                 bg.style.filter = "blur(" + customBlur + "px) brightness(0.4)";
                 bg.style.transform = "scale(" + (customZoom / 100) + ")";
-            } else {
-                // Auto-blur: use hero image
-                var heroImg = document.querySelector('.hero-bg-image');
-                if (heroImg) {
-                    var heroStyle = heroImg.getAttribute('style') || '';
-                    var match = heroStyle.match(/url\\(['"]?([^'")]+)['"]?\\)/);
-                    if (match) {
-                        bg.style.backgroundImage = "url('" + match[1] + "')";
-                    }
-                }
+            } else if (heroImageUrl) {
+                bg.style.backgroundImage = "url('" + heroImageUrl + "')";
             }
             // Apply shadow intensity
             var wrapper = document.querySelector('.site-wrapper');

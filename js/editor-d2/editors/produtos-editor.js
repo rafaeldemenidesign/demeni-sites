@@ -221,6 +221,39 @@ class D2ProdutosEditor {
         );
         fragment.appendChild(cardGroup);
 
+        // ===== CARROSSEL =====
+        const carouselGroup = C.createGroupExpander(
+            { title: 'Carrossel', icon: 'fa-images', expanded: false },
+            () => {
+                const container = document.createElement('div');
+
+                container.appendChild(C.createToggle({
+                    label: 'Autoplay',
+                    value: window.d2State.get(`${this.basePath}.carousel.autoplay`, true),
+                    path: `${this.basePath}.carousel.autoplay`
+                }));
+                container.appendChild(C.createSlider({
+                    label: 'Intervalo (segundos)',
+                    value: window.d2State.get(`${this.basePath}.carousel.interval`, 3),
+                    min: 1, max: 10, step: 0.5, unit: 's',
+                    path: `${this.basePath}.carousel.interval`
+                }));
+                container.appendChild(C.createToggle({
+                    label: 'Setas de navegação',
+                    value: window.d2State.get(`${this.basePath}.carousel.arrows`, true),
+                    path: `${this.basePath}.carousel.arrows`
+                }));
+                container.appendChild(C.createToggle({
+                    label: 'Bolinhas (dots)',
+                    value: window.d2State.get(`${this.basePath}.carousel.dots`, true),
+                    path: `${this.basePath}.carousel.dots`
+                }));
+
+                return container;
+            }
+        );
+        fragment.appendChild(carouselGroup);
+
         // ===== TÍTULO DO PRODUTO =====
         const prodTitleGroup = C.createGroupExpander(
             { title: 'Título do Produto', icon: 'fa-font', expanded: false },
@@ -559,6 +592,7 @@ class D2ProdutosEditor {
                                             const webpDataUrl = await compressor(file);
                                             const prods = [...(window.d2State.get('d2Products') || [])];
                                             const currentImgs = [...(prods[index].images || [])];
+                                            if (currentImgs.length >= 5) return; // Max 5 images
                                             currentImgs.push(webpDataUrl);
                                             prods[index] = { ...prods[index], images: currentImgs, image: currentImgs[0] };
                                             window.d2State.set('d2Products', prods);

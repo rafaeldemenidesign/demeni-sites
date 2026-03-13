@@ -305,7 +305,9 @@ window.D2Controls = {
         { value: 'Poppins', label: 'Minimalista', url: 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap' },
         { value: 'Raleway', label: 'Sofisticada', url: 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&display=swap' },
         { value: 'Abril Fatface', label: 'Display', url: 'https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap' },
-        { value: 'Pacifico', label: 'Handwriting', url: 'https://fonts.googleapis.com/css2?family=Pacifico&display=swap' }
+        { value: 'Pacifico', label: 'Handwriting', url: 'https://fonts.googleapis.com/css2?family=Pacifico&display=swap' },
+        { value: 'Great Vibes', label: 'Caligrafia Fina', url: 'https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap' },
+        { value: 'Alex Brush', label: 'Manuscrita', url: 'https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap' }
     ],
 
     /**
