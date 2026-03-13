@@ -445,13 +445,29 @@ function _sortProjects(projects) {
 }
 
 async function loadProjects() {
-    // Sync from cloud first (if available)
-    if (window.SupabaseClient && SupabaseClient.isConfigured()) {
-        await UserData.syncFromCloud();
-    }
-    const allProjects = UserData.getProjects();
     const empty = document.getElementById('empty-projects');
 
+    // ===== STALE-WHILE-REVALIDATE =====
+    // 1) Render cached local data INSTANTLY (no network wait)
+    const cachedProjects = UserData.getProjects();
+    _renderProjectGrid(cachedProjects, empty);
+
+    // 2) Background sync from cloud, re-render only if data changed
+    if (window.SupabaseClient && SupabaseClient.isConfigured()) {
+        UserData.syncFromCloud().then(() => {
+            const freshProjects = UserData.getProjects();
+            // Only re-render if count or IDs changed
+            const cachedIds = cachedProjects.map(p => p.id).sort().join(',');
+            const freshIds = freshProjects.map(p => p.id).sort().join(',');
+            if (cachedIds !== freshIds || cachedProjects.length !== freshProjects.length) {
+                _renderProjectGrid(freshProjects, empty);
+            }
+        }).catch(err => console.warn('⚠️ Background sync failed:', err));
+    }
+}
+
+// Extracted render logic — reusable by both initial + revalidation pass
+function _renderProjectGrid(allProjects, emptyEl) {
     if (allProjects.length === 0) {
         ['d1', 'd2', 'prime'].forEach(m => {
             const s = document.getElementById(`section-${m}`);
@@ -461,11 +477,11 @@ async function loadProjects() {
             if (g) g.style.display = 'none';
             if (sm) sm.style.display = 'none';
         });
-        empty.style.display = 'block';
+        if (emptyEl) emptyEl.style.display = 'block';
         return;
     }
 
-    empty.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'none';
 
     // Group by model type and cache sorted lists
     _projectCache = {
