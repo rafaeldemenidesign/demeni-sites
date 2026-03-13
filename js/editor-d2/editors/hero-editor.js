@@ -490,6 +490,62 @@ class D2HeroEditor {
         );
         fragment.appendChild(gradientGroup);
 
+        // ===== DESKTOP (BG para telas grandes) =====
+        const desktopGroup = C.createGroupExpander(
+            { title: 'Desktop', icon: 'fa-desktop', expanded: false },
+            () => {
+                const container = document.createElement('div');
+
+                // Info label
+                const info = document.createElement('div');
+                info.style.cssText = 'font-size: 11px; opacity: 0.6; margin-bottom: 12px; line-height: 1.4;';
+                info.textContent = 'No desktop (tela > 768px), o site é centralizado com a imagem do Hero desfocada como fundo. Ative o BG customizado para usar uma imagem diferente.';
+                container.appendChild(info);
+
+                container.appendChild(
+                    C.createToggle({
+                        label: 'BG Customizado',
+                        value: window.d2State.get('d2Adjustments.desktop.customBgEnabled', false),
+                        path: 'd2Adjustments.desktop.customBgEnabled'
+                    })
+                );
+
+                const customEnabled = window.d2State.get('d2Adjustments.desktop.customBgEnabled', false);
+                if (customEnabled) {
+                    // Reutiliza createBgSection com todos os controles (imagem, blur, zoom, pos, overlay)
+                    container.appendChild(
+                        C.createBgSection({
+                            basePath: 'd2Adjustments.desktop',
+                            defaults: {
+                                bgMode: 'image',
+                                bgImage: null,
+                                bgImageBlur: 20,
+                                bgImageZoom: 110,
+                                bgImagePosX: 50,
+                                bgImagePosY: 50,
+                                bgOverlay: true,
+                                bgOverlayOpacity: 60,
+                                bgOverlayColor: '#000000'
+                            },
+                            expanded: true
+                        })
+                    );
+                }
+
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Intensidade da sombra',
+                        value: window.d2State.get('d2Adjustments.desktop.shadowIntensity', 50),
+                        min: 0, max: 100, step: 5, unit: '%',
+                        path: 'd2Adjustments.desktop.shadowIntensity'
+                    })
+                );
+
+                return container;
+            }
+        );
+        fragment.appendChild(desktopGroup);
+
         // ===== SETA DE SCROLL =====
         const scrollGroup = C.createGroupExpander(
             { title: 'Seta de Scroll', icon: 'fa-chevron-down', expanded: false },

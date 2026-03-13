@@ -1249,34 +1249,49 @@ async function generatePublishableHTML(state, projectName) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0f; }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
+        html, body { width: 100%; min-height: 100vh; background: #0a0a0f; }
+        /* Desktop BG — auto-blur da hero image */
+        .d2-desktop-bg {
+            display: none;
         }
         .site-wrapper {
             width: 100%;
             min-height: 100vh;
             position: relative;
-            overflow-y: auto;
-            overflow-x: hidden;
         }
-        /* Desktop/Tablet: fixed phone-sized container with dynamic scale */
-        @media (min-width: 481px) {
-            body { align-items: flex-start; padding-top: 0; }
-            .site-wrapper {
-                width: 375px;
-                height: 812px;
-                min-height: 812px;
-                max-height: 812px;
-                border-radius: 20px;
-                box-shadow: 0 0 80px rgba(0,0,0,0.6);
-                /* Scale set dynamically by JS below */
+        /* Desktop/Tablet: Linktree-style centered content */
+        @media (min-width: 769px) {
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
+            .d2-desktop-bg {
+                display: block;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                z-index: 0;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                filter: blur(25px) brightness(0.4);
+                transform: scale(1.1);
+            }
+            .site-wrapper {
+                position: relative;
+                z-index: 1;
+                max-width: 430px;
+                min-height: 100vh;
+                box-shadow: 0 0 60px rgba(0,0,0,0.5);
+            }
+            .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
+            .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
         }
         /* Mobile: natural full-screen */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             html, body { overflow: visible; height: auto; }
             .site-wrapper {
                 width: 100%;
@@ -1284,41 +1299,46 @@ async function generatePublishableHTML(state, projectName) {
                 overflow-y: visible;
             }
         }
-        /* Hide scrollbar inside phone frame on desktop */
-        @media (min-width: 481px) {
-            .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
-            .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
-        }
     </style>
 </head>
 <body>
+    <div class="d2-desktop-bg" id="d2DesktopBg"></div>
     <div class="site-wrapper">
         ${siteHTML}
     </div>
     <script>
-        // Dynamic phone-viewport scaling for desktop
+        // Desktop: set hero image as blurred background (or custom BG)
         (function(){
-            if (window.innerWidth <= 480) return;
-            var wrapper = document.querySelector('.site-wrapper');
-            function fitToScreen() {
-                if (window.innerWidth <= 480) {
-                    wrapper.style.transform = '';
-                    wrapper.style.margin = '';
-                    return;
+            if (window.innerWidth < 769) return;
+            var bg = document.getElementById('d2DesktopBg');
+            if (!bg) return;
+            var customBgEnabled = ${JSON.stringify(!!state?.d2Adjustments?.desktop?.customBgEnabled)};
+            var customBgImage = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImage || null)};
+            var customBlur = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImageBlur ?? 20)};
+            var customZoom = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImageZoom ?? 110)};
+            var shadowIntensity = ${JSON.stringify(state?.d2Adjustments?.desktop?.shadowIntensity ?? 50)};
+            
+            if (customBgEnabled && customBgImage) {
+                bg.style.backgroundImage = "url('" + customBgImage + "')";
+                bg.style.filter = "blur(" + customBlur + "px) brightness(0.4)";
+                bg.style.transform = "scale(" + (customZoom / 100) + ")";
+            } else {
+                // Auto-blur: use hero image
+                var heroImg = document.querySelector('.hero-bg-image');
+                if (heroImg) {
+                    var heroStyle = heroImg.getAttribute('style') || '';
+                    var match = heroStyle.match(/url\\(['"]?([^'")]+)['"]?\\)/);
+                    if (match) {
+                        bg.style.backgroundImage = "url('" + match[1] + "')";
+                    }
                 }
-                var PHONE_W = 375, PHONE_H = 812;
-                var vw = window.innerWidth, vh = window.innerHeight;
-                // Scale based on viewport width — phone can extend beyond viewport height
-                var scale = Math.min((vw * 0.3) / PHONE_W, 2.0);
-                wrapper.style.transform = 'scale(' + scale + ')';
-                wrapper.style.transformOrigin = 'top center';
-                // Center vertically with margin
-                var scaledH = PHONE_H * scale;
-                var topMargin = Math.max(0, (vh - scaledH) / 2);
-                wrapper.style.marginTop = topMargin + 'px';
             }
-            fitToScreen();
-            window.addEventListener('resize', fitToScreen);
+            // Apply shadow intensity
+            var wrapper = document.querySelector('.site-wrapper');
+            if (wrapper) {
+                var shadowAlpha = shadowIntensity / 100;
+                wrapper.style.boxShadow = "0 0 60px rgba(0,0,0," + shadowAlpha + ")";
+            }
         })();
         // Watermark — Powered by Demeni Sites
         (function(){
