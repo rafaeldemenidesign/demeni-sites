@@ -228,12 +228,36 @@ const SupabaseClient = (function () {
                 return { error: { message: `A URL "${slug}.rafaeldemeni.com" já está em uso por outro projeto. Escolha outra URL.` } };
             }
 
-            console.log('⏳ Upserting project...');
+            // 🛡️ ENSURE PROJECT EXISTS: Imported projects may not have a Supabase row yet
+            const { data: projectRow } = await supabase
+                .from('projects')
+                .select('id')
+                .eq('id', projectId)
+                .maybeSingle();
+
+            if (!projectRow) {
+                console.log('📦 [Publish] Project not in Supabase, creating row first...');
+                const { error: insertError } = await supabase
+                    .from('projects')
+                    .insert({
+                        id: projectId,
+                        user_id: user.id,
+                        name: projectName,
+                        data: projectData,
+                        published: false
+                    });
+                if (insertError) {
+                    console.error('❌ [Publish] Insert failed:', insertError);
+                    return { error: insertError };
+                }
+                console.log('✅ [Publish] Project row created');
+            }
+
+            // Now UPDATE (row guaranteed to exist)
+            console.log('⏳ Updating project for publish...');
             const { data, error } = await supabase
                 .from('projects')
-                .upsert({
-                    id: projectId,
-                    user_id: user.id,
+                .update({
                     name: projectName,
                     slug: slug,
                     data: projectData,
@@ -242,7 +266,8 @@ const SupabaseClient = (function () {
                     published_url: `https://${slug}.rafaeldemeni.com`,
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'id' })
+                })
+                .eq('id', projectId)
                 .select()
                 .single();
 
