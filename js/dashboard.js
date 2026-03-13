@@ -566,26 +566,26 @@ function renderProjectCard(project, lazy) {
                <i class="fas fa-external-link-alt"></i>
            </a>
            <div class="project-actions-icons">
-               <button class="btn-icon" onclick="showChangeSubdomainModal('${project.id}')" title="Alterar URL (10 créditos)">
+               <button class="btn-icon" onclick="showChangeSubdomainModal('${project.id}')" title="Alterar URL">
                    <i class="fas fa-link"></i>
                </button>
                <button class="btn-icon" onclick="duplicateProject('${project.id}')" title="Duplicar">
                    <i class="fas fa-clone"></i>
                </button>
-               <button class="btn-icon" onclick="exportProject('${project.id}')" title="Exportar .demeni.json">
+               <button class="btn-icon" onclick="exportProject('${project.id}')" title="Exportar">
                    <i class="fas fa-download"></i>
                </button>
                <button class="btn-icon btn-deactivate" onclick="deactivateProject('${project.id}')" title="Desativar">
                    <i class="fas fa-power-off"></i>
                </button>
            </div>`
-        : `<button class="btn-action duplicate" onclick="duplicateProject('${project.id}')" title="Duplicar">
+        : `<button class="btn-secondary" onclick="duplicateProject('${project.id}')" title="Duplicar">
                <i class="fas fa-copy"></i>
            </button>
-           <button class="btn-action" onclick="exportProject('${project.id}')" title="Exportar .demeni.json" style="background:rgba(14,165,233,0.15);color:#0ea5e9;">
+           <button class="btn-secondary" onclick="exportProject('${project.id}')" title="Exportar">
                <i class="fas fa-download"></i>
            </button>
-           <button class="btn-action publish" onclick="showPublishModal('${project.id}')">
+           <button class="btn-action publish" onclick="showPublishModal('${project.id}')" style="width:100%;justify-content:center;">
                <i class="fas fa-rocket"></i> Publicar
            </button>`;
 
