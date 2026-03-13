@@ -1477,7 +1477,7 @@ function renderPreviewD2New(frame, state) {
                 ${produtosSectionTitleEnabled ? `<h2>${produtosSectionTitle}</h2>` : ''}
                 ${produtosSectionSubtitleEnabled ? `<p class="section-subtitle">${produtosSectionSubtitle}</p>` : ''}
                 <div class="d2-produtos-grid">
-                    ${(state?.d2Products || []).map(p => {
+                    ${(state?.d2Products || []).length > 0 ? (state?.d2Products || []).map(p => {
                             const rawPrice = p.price || 'R$ 0,00';
                             let priceHtml;
                             if (produtoPrecoCurrencyStyle === 'small') {
@@ -1505,7 +1505,11 @@ function renderPreviewD2New(frame, state) {
                             <span class="d2-produto-btn"${p.btnBgColor ? ` style="background:${p.btnBgColor}"` : ''}>${p.btnText || produtoBtnText}</span>
                         </div>
                     </a>`;
-                        }).join('')}
+                        }).join('') : `
+                    <div style="width:100%;padding:30px 20px;text-align:center;opacity:0.5;">
+                        <i class="fas fa-box-open" style="font-size:32px;margin-bottom:10px;display:block;"></i>
+                        <p style="font-size:14px;margin:0;">Adicione produtos pelo editor lateral</p>
+                    </div>`}
                 </div>
             </section>`;
 
@@ -1516,7 +1520,7 @@ function renderPreviewD2New(frame, state) {
                 ${feedbacksSectionTitleEnabled ? `<h2>${feedbacksSectionTitle}</h2>` : ''}
                 ${feedbacksSectionSubtitleEnabled ? `<p class="section-subtitle">${feedbacksSectionSubtitle}</p>` : ''}
                 <div class="d2-feedbacks-list">
-                    ${(state?.d2Feedbacks || []).map(f => {
+                    ${(state?.d2Feedbacks || []).length > 0 ? (state?.d2Feedbacks || []).map(f => {
                             const aZoom = (f.avatarZoom || 100) / 100;
                             const aPosX = f.avatarPosX ?? 50;
                             const aPosY = f.avatarPosY ?? 50;
@@ -1530,7 +1534,11 @@ function renderPreviewD2New(frame, state) {
                             <p>${f.text || 'Texto do depoimento aqui...'}</p>
                         </div>
                     </div>`;
-                        }).join('')}
+                        }).join('') : `
+                    <div style="width:100%;padding:30px 20px;text-align:center;opacity:0.5;">
+                        <i class="fas fa-comment-dots" style="font-size:32px;margin-bottom:10px;display:block;"></i>
+                        <p style="font-size:14px;margin:0;">Adicione depoimentos pelo editor lateral</p>
+                    </div>`}
                 </div>
                 ${feedbackBottomCtaEnabled ? `<p class="d2-feedbacks-cta">${feedbackBottomCtaText}</p>` : ''}
             </section>`;
