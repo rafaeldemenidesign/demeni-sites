@@ -558,34 +558,21 @@ function renderProjectCard(project, lazy) {
         ? `<span class="project-status published"><i class="fas fa-check-circle"></i> Ativo</span>`
         : '';
 
-    const publishedActions = isPublished
-        ? `<button class="btn-secondary" onclick="copyProjectLink('${project.publishedUrl}')" title="Copiar link">
-               <i class="fas fa-copy"></i>
-           </button>
-           <a href="${project.publishedUrl}" target="_blank" class="btn-secondary" title="Abrir site">
-               <i class="fas fa-external-link-alt"></i>
-           </a>
-           <div class="project-actions-icons">
-               <button class="btn-icon" onclick="showChangeSubdomainModal('${project.id}')" title="Alterar URL">
-                   <i class="fas fa-link"></i>
-               </button>
-               <button class="btn-icon" onclick="duplicateProject('${project.id}')" title="Duplicar">
-                   <i class="fas fa-clone"></i>
-               </button>
-               <button class="btn-icon" onclick="exportProject('${project.id}')" title="Exportar">
-                   <i class="fas fa-download"></i>
-               </button>
-               <button class="btn-icon btn-deactivate" onclick="deactivateProject('${project.id}')" title="Desativar">
-                   <i class="fas fa-power-off"></i>
-               </button>
+    // ========== CARD ACTIONS BLOCK ==========
+    const actionIcons = isPublished
+        ? `<div class="card-icon-grid">
+               <button class="card-icon-btn" onclick="copyProjectLink('${project.publishedUrl}')" title="Copiar link"><i class="fas fa-copy"></i></button>
+               <a href="${project.publishedUrl}" target="_blank" class="card-icon-btn" title="Abrir site"><i class="fas fa-external-link-alt"></i></a>
+               <button class="card-icon-btn" onclick="showChangeSubdomainModal('${project.id}')" title="Alterar URL"><i class="fas fa-link"></i></button>
+               <button class="card-icon-btn" onclick="duplicateProject('${project.id}')" title="Duplicar"><i class="fas fa-clone"></i></button>
+               <button class="card-icon-btn" onclick="exportProject('${project.id}')" title="Exportar"><i class="fas fa-download"></i></button>
+               <button class="card-icon-btn card-icon-danger" onclick="deactivateProject('${project.id}')" title="Desativar"><i class="fas fa-power-off"></i></button>
            </div>`
-        : `<button class="btn-secondary" onclick="duplicateProject('${project.id}')" title="Duplicar">
-               <i class="fas fa-copy"></i>
-           </button>
-           <button class="btn-secondary" onclick="exportProject('${project.id}')" title="Exportar">
-               <i class="fas fa-download"></i>
-           </button>
-           <button class="btn-action publish" onclick="showPublishModal('${project.id}')" style="width:100%;justify-content:center;">
+        : `<div class="card-icon-grid">
+               <button class="card-icon-btn" onclick="duplicateProject('${project.id}')" title="Duplicar"><i class="fas fa-clone"></i></button>
+               <button class="card-icon-btn" onclick="exportProject('${project.id}')" title="Exportar"><i class="fas fa-download"></i></button>
+           </div>
+           <button class="card-btn-publish" onclick="showPublishModal('${project.id}')">
                <i class="fas fa-rocket"></i> Publicar
            </button>`;
 
@@ -601,11 +588,11 @@ function renderProjectCard(project, lazy) {
         <div class="project-info">
             <h3 class="project-name">${displayName}</h3>
             <p class="project-date">${isPublished ? (project.publishedUrl || '') : formatDate(project.updatedAt)}</p>
-            <div class="project-actions">
-                <button class="btn-action" onclick="editProject('${project.id}')">
+            <div class="card-actions-block">
+                <button class="card-btn-edit" onclick="editProject('${project.id}')">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                ${publishedActions}
+                ${actionIcons}
             </div>
         </div>
     </div>

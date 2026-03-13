@@ -1459,43 +1459,112 @@ body {
     text-overflow: ellipsis;
 }
 
+/* ========== CARD ACTIONS BLOCK ========== */
+.card-actions-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Primary Edit Button — full width, frosted */
+.card-btn-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 0;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.card-btn-edit:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Icon Grid — uniform columns filling full width */
+.card-icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 5px;
+}
+
+/* Icon Button — square, uniform, minimal */
+.card-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0;
+    background: rgba(120, 140, 170, 0.15);
+    border: 1px solid rgba(120, 140, 170, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.card-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Danger icon (power-off) */
+.card-icon-danger:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #ef4444 !important;
+}
+
+/* Publish CTA — full width gradient accent */
+.card-btn-publish {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 0;
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.card-btn-publish:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+}
+
+/* Legacy compat — keep old .project-actions working for any stragglers */
 .project-actions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-/* Icon-only secondary row: compact grid of 4 */
-.project-actions-icons {
-    display: flex;
-    gap: 6px;
-    width: 100%;
-}
-
-.btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    height: 34px;
-    padding: 0;
-    background: rgba(120, 140, 170, 0.2);
-    border: 1px solid rgba(120, 140, 170, 0.3);
-    color: rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.75rem;
-    backdrop-filter: blur(10px);
-    transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-    background: rgba(120, 140, 170, 0.4);
-    border-color: rgba(120, 140, 170, 0.5);
-    color: #fff;
-}
-
-/* Apple-style minimal buttons */
+/* Apple-style minimal buttons (legacy) */
 .project-actions .btn-secondary,
 .project-actions .btn-primary {
     padding: 8px 16px;
@@ -1514,7 +1583,7 @@ body {
     border-color: rgba(120, 140, 170, 0.5);
 }
 
-/* Delete button - also minimal but subtle red */
+/* Delete button - minimal with subtle red */
 .btn-delete-project {
     position: absolute;
     top: 12px;
@@ -1532,27 +1601,12 @@ body {
     justify-content: center;
     font-size: 0.75rem;
     z-index: 15;
-    /* Above thumbnail */
 }
 
 .btn-delete-project:hover {
     background: rgba(239, 68, 68, 0.15);
     border-color: rgba(239, 68, 68, 0.3);
     color: var(--danger);
-}
-
-/* Deactivate button - orange/red tint on hover */
-.btn-deactivate:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    border-color: rgba(239, 68, 68, 0.3) !important;
-    color: #e74c3c !important;
-}
-
-/* Change URL button - blue tint on hover */
-.btn-change-url:hover {
-    background: rgba(9, 132, 227, 0.15) !important;
-    border-color: rgba(9, 132, 227, 0.3) !important;
-    color: #0984e3 !important;
 }
 
 /* ========== MODAL SYSTEM (Publish, Deactivate, Change URL) ========== */
