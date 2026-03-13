@@ -1,4 +1,4 @@
-﻿/* ===========================
+/* ===========================
    DEMENI SITES - SUPABASE CLIENT
    Database and Auth configuration
    =========================== */
@@ -228,10 +228,12 @@ const SupabaseClient = (function () {
                 return { error: { message: `A URL "${slug}.rafaeldemeni.com" já está em uso por outro projeto. Escolha outra URL.` } };
             }
 
-            console.log('⏳ Updating project by ID...');
+            console.log('⏳ Upserting project...');
             const { data, error } = await supabase
                 .from('projects')
-                .update({
+                .upsert({
+                    id: projectId,
+                    user_id: user.id,
                     name: projectName,
                     slug: slug,
                     data: projectData,
@@ -240,8 +242,7 @@ const SupabaseClient = (function () {
                     published_url: `https://${slug}.rafaeldemeni.com`,
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
-                })
-                .eq('id', projectId)
+                }, { onConflict: 'id' })
                 .select()
                 .single();
 
