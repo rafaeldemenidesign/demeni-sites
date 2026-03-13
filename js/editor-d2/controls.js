@@ -294,12 +294,16 @@ window.D2Controls = {
      * Cada estilo é uma categoria tipográfica distinta mapeada para uma Google Font.
      */
     FONT_REGISTRY: [
-        { value: 'Montserrat', label: 'Moderna', url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Inter', label: 'Moderna', url: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap' },
         { value: 'Playfair Display', label: 'Elegante', url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap' },
         { value: 'Nunito', label: 'Divertida', url: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap' },
-        { value: 'Oswald', label: 'Impactante', url: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap' },
-        { value: 'Quicksand', label: 'Suave', url: 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap' },
-        { value: 'Lora', label: 'Clássica', url: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap' }
+        { value: 'Bebas Neue', label: 'Impactante', url: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap' },
+        { value: 'Comfortaa', label: 'Suave', url: 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap' },
+        { value: 'Lora', label: 'Clássica', url: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap' },
+        { value: 'Poppins', label: 'Minimalista', url: 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Raleway', label: 'Sofisticada', url: 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&display=swap' },
+        { value: 'Abril Fatface', label: 'Display', url: 'https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap' },
+        { value: 'Pacifico', label: 'Handwriting', url: 'https://fonts.googleapis.com/css2?family=Pacifico&display=swap' }
     ],
 
     /**

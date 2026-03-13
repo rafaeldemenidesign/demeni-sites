@@ -223,7 +223,7 @@ function renderPreviewD2New(frame, state) {
     const heroTitleSpacing = get('hero.title.spacing', 4);
     const heroTitleWeight = get('hero.title.weight', 400);
     const heroTitleColor = get('hero.title.color', '#ffffff');
-    const heroTitleFont = get('hero.title.font', 'Montserrat');
+    const heroTitleFont = get('hero.title.font', 'Inter');
     const heroTitleGradientEnabled = get('hero.title.textGradient.enabled', false);
     const heroTitleGradient = get('hero.title.textGradient.gradient', 'linear-gradient(135deg, #5167E7 0%, #A3B1FE 33%, #495FDB 66%, #2D3A81 100%)');
     const heroTitleLineHeight = get('hero.title.lineHeight', 1.4);
@@ -241,7 +241,7 @@ function renderPreviewD2New(frame, state) {
     const heroSubtitleSpacing = get('hero.subtitle.spacing', 32);
     const heroSubtitleWeight = get('hero.subtitle.weight', 300);
     const heroSubtitleColor = get('hero.subtitle.color', '#ffffff');
-    const heroSubtitleFont = get('hero.subtitle.font', 'Montserrat');
+    const heroSubtitleFont = get('hero.subtitle.font', 'Inter');
     const heroSubtitleLineHeight = get('hero.subtitle.lineHeight', 1.4);
     const heroSubtitleLetterSpacing = get('hero.subtitle.letterSpacing', 0);
     const heroSubtitleGradientEnabled = get('hero.subtitle.textGradient.enabled', false);
@@ -570,7 +570,7 @@ function renderPreviewD2New(frame, state) {
     // CSS + HTML para renderizar DENTRO de uma div
     // Nota: Usamos o seletor do container (#preview-frame) em vez de body
     // Fonte base — usa a do hero title como referência principal
-    const baseFont = heroTitleFont || 'Montserrat';
+    const baseFont = heroTitleFont || 'Inter';
 
     // Coleta todas as fontes usadas para gerar os @import do Google Fonts
     const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont].filter(Boolean));
@@ -591,7 +591,7 @@ function renderPreviewD2New(frame, state) {
             
             /* Container do preview - substitui body */
             .d2-preview-container {
-                font-family: '${baseFont}', 'Montserrat', sans-serif;
+                font-family: '${baseFont}', 'Inter', sans-serif;
                 background: #0a0a0a;
                 color: #fff;
                 margin: 0;
