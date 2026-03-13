@@ -565,18 +565,20 @@ function renderProjectCard(project, lazy) {
            <a href="${project.publishedUrl}" target="_blank" class="btn-secondary" title="Abrir site">
                <i class="fas fa-external-link-alt"></i>
            </a>
-           <button class="btn-secondary btn-change-url" onclick="showChangeSubdomainModal('${project.id}')" title="Alterar URL (10 créditos)">
-               <i class="fas fa-link"></i>
-           </button>
-           <button class="btn-secondary" onclick="duplicateProject('${project.id}')" title="Duplicar projeto">
-               <i class="fas fa-clone"></i>
-           </button>
-           <button class="btn-secondary" onclick="exportProject('${project.id}')" title="Exportar .demeni.json">
-               <i class="fas fa-download"></i>
-           </button>
-           <button class="btn-secondary btn-deactivate" onclick="deactivateProject('${project.id}')" title="Desativar site">
-               <i class="fas fa-power-off"></i>
-           </button>`
+           <div class="project-actions-icons">
+               <button class="btn-icon" onclick="showChangeSubdomainModal('${project.id}')" title="Alterar URL (10 créditos)">
+                   <i class="fas fa-link"></i>
+               </button>
+               <button class="btn-icon" onclick="duplicateProject('${project.id}')" title="Duplicar">
+                   <i class="fas fa-clone"></i>
+               </button>
+               <button class="btn-icon" onclick="exportProject('${project.id}')" title="Exportar .demeni.json">
+                   <i class="fas fa-download"></i>
+               </button>
+               <button class="btn-icon btn-deactivate" onclick="deactivateProject('${project.id}')" title="Desativar">
+                   <i class="fas fa-power-off"></i>
+               </button>
+           </div>`
         : `<button class="btn-action duplicate" onclick="duplicateProject('${project.id}')" title="Duplicar">
                <i class="fas fa-copy"></i>
            </button>

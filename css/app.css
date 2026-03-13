@@ -1465,6 +1465,36 @@ body {
     flex-wrap: wrap;
 }
 
+/* Icon-only secondary row: compact grid of 4 */
+.project-actions-icons {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    background: rgba(120, 140, 170, 0.2);
+    border: 1px solid rgba(120, 140, 170, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    background: rgba(120, 140, 170, 0.4);
+    border-color: rgba(120, 140, 170, 0.5);
+    color: #fff;
+}
+
 /* Apple-style minimal buttons */
 .project-actions .btn-secondary,
 .project-actions .btn-primary {
