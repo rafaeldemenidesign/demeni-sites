@@ -933,14 +933,41 @@ async function showPublishModal(projectId) {
                 UserData.publishProject(projectId, publishedUrl);
 
                 // Deploy updated HTML to Supabase
-                const state = window.d2State ? window.d2State.getState() : null;
-                const pName = window.d2State?.get('projectName') || projectName;
+                let state = window.d2State ? window.d2State.getState() : null;
+                let pName = window.d2State?.get('projectName') || projectName;
+
+                // Fallback: load stored data if no editor open
+                if (!state) {
+                    try {
+                        const stored = await UserData.getProjectAsync(projectId);
+                        if (stored?.data) {
+                            state = stored.data;
+                            pName = stored.name || pName;
+                            console.log('📦 [Update] Using stored project data');
+                        }
+                    } catch (e) { console.warn('⚠️ [Update] Could not load stored data:', e); }
+                }
+
+                console.log('📋 [Update] state?', !!state, '| name:', pName, '| supabase?', !!window.SupabaseClient?.isConfigured());
                 const htmlContent = await generatePublishableHTML(state, pName);
+                console.log('📋 [Update] htmlContent?', !!htmlContent, '| length:', htmlContent?.length);
+
                 if (htmlContent && window.SupabaseClient?.isConfigured()) {
-                    SupabaseClient.publishSite(projectId, subdomain, htmlContent).then(({ error }) => {
-                        if (error) console.error('❌ [Update] Deploy error:', error);
-                        else console.log('✅ [Update] Site updated:', publishedUrl);
-                    });
+                    try {
+                        const { data, error } = await SupabaseClient.publishSite(projectId, subdomain, htmlContent);
+                        if (error) {
+                            console.error('❌ [Update] Deploy error:', error);
+                            showNotification('⚠️ Deploy falhou: ' + (error.message || 'Erro desconhecido'));
+                        } else {
+                            console.log('✅ [Update] Site updated:', publishedUrl);
+                        }
+                    } catch (e) {
+                        console.error('❌ [Update] Deploy exception:', e);
+                        showNotification('⚠️ Deploy falhou: ' + e.message);
+                    }
+                } else {
+                    console.warn('⚠️ [Update] Skipped deploy — htmlContent:', !!htmlContent, 'supabase:', !!window.SupabaseClient?.isConfigured());
+                    if (!htmlContent) showNotification('⚠️ Não foi possível gerar o HTML do site');
                 }
 
                 showPublishSuccess(publishedUrl);
