@@ -732,7 +732,7 @@ class D2HeroEditor {
                         label: 'Espaçamento inferior',
                         value: window.d2State.get(`${this.basePath}.subtitle.spacing`, 32),
                         min: 0,
-                        max: 128,
+                        max: 256,
                         step: 2,
                         unit: 'px',
                         path: `${this.basePath}.subtitle.spacing`

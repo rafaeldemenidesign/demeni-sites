@@ -772,21 +772,20 @@ function renderPreviewD2New(frame, state) {
                 z-index: 2;
             }
             .d2-hero .scroll-indicator {
-                position: absolute;
-                bottom: ${heroScrollIndicatorPadding}px;
-                left: 50%;
-                transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100});
+                position: relative;
+                display: block;
+                margin-top: ${heroScrollIndicatorMargin}px;
+                transform: scaleX(${heroScrollIndicatorThickness / 100});
                 z-index: 10;
                 color: ${heroScrollIndicatorColor};
                 font-size: ${heroScrollIndicatorSize}px;
                 animation: bounce 2s infinite;
                 opacity: 0.8;
-                margin-top: ${heroScrollIndicatorMargin}px;
             }
             @keyframes bounce {
-                0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100}) translateY(0); }
-                40% { transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100}) translateY(-10px); }
-                60% { transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100}) translateY(-5px); }
+                0%, 20%, 50%, 80%, 100% { transform: scaleX(${heroScrollIndicatorThickness / 100}) translateY(0); }
+                40% { transform: scaleX(${heroScrollIndicatorThickness / 100}) translateY(-10px); }
+                60% { transform: scaleX(${heroScrollIndicatorThickness / 100}) translateY(-5px); }
             }
             .d2-hero .hero-content {
                 position: relative;
@@ -798,7 +797,8 @@ function renderPreviewD2New(frame, state) {
                 font-weight: ${heroTitleWeight};
                 font-family: '${heroTitleFont}', serif;
                 color: ${heroTitleColor};
-                margin-bottom: ${heroTitleSpacing}px;
+                margin: 0 0 ${heroTitleSpacing}px 0;
+                padding: 0;
                 line-height: ${heroTitleLineHeight};
                 letter-spacing: ${heroTitleLetterSpacing}px;
                 ${textGradientCSS(heroTitleGradientEnabled, heroTitleGradient)}
@@ -808,7 +808,8 @@ function renderPreviewD2New(frame, state) {
                 font-weight: ${heroSubtitleWeight};
                 font-family: '${heroSubtitleFont}', serif;
                 color: ${heroSubtitleColor};
-                margin-bottom: ${heroSubtitleSpacing}px;
+                margin: 0 0 ${heroSubtitleSpacing}px 0;
+                padding: 0;
                 line-height: ${heroSubtitleLineHeight};
                 letter-spacing: ${heroSubtitleLetterSpacing}px;
                 opacity: 0.9;
@@ -1444,8 +1445,8 @@ function renderPreviewD2New(frame, state) {
                     <h1>${heroTitleText}</h1>
                     <p class="subtitle">${heroSubtitleText}</p>
                     <a href="${heroBtnLink}" class="d2-cta-btn">${heroBtnText}</a>
+                    ${heroScrollIndicatorEnabled ? `<div class="scroll-indicator"><i class="fas fa-chevron-down"></i></div>` : ''}
                 </div>
-                ${heroScrollIndicatorEnabled ? `<div class="scroll-indicator"><i class="fas fa-chevron-down"></i></div>` : ''}
             </section>`;
 
                     case 'categorias':
