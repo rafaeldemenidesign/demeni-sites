@@ -44,11 +44,15 @@ const ThumbnailCapture = (function () {
         try {
             console.log('[Thumbnail] Capturing preview...');
 
+            // Wait for images inside the preview to finish rendering
+            await new Promise(resolve => setTimeout(resolve, 300));
+
             const srcCanvas = await html2canvas(frame, {
                 scale: 1,
                 useCORS: true,
                 allowTaint: true,
-                logging: false
+                logging: false,
+                backgroundColor: null
             });
 
             // Guard: reject blank captures

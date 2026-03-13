@@ -2788,7 +2788,7 @@ function setupEditorHeaderButtons() {
             const ok = await UserData.explicitSave(projectId);
             await UserData.saveCheckpoint(projectId);
             if (window.ThumbnailCapture) {
-                ThumbnailCapture.capture(projectId).catch(e => console.warn('[Save] Thumbnail capture failed:', e.message));
+                await ThumbnailCapture.capture(projectId);
             }
             if (ok) {
                 btn.innerHTML = '<i class="fas fa-check"></i> Salvo!';
