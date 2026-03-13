@@ -2872,13 +2872,20 @@ async function initEditorD2() {
 
     // ====== LOAD SAVED PROJECT DATA ======
     const projectId = UserData.getCurrentProjectId();
+
+    // 🛡️ Always reset to defaults first — ensures clean state when switching projects
+    window.d2State.state = window.d2State.getDefaultState();
+
     if (projectId) {
         const project = await UserData.getProjectAsync(projectId);
-        if (project && project.data) {
+        if (project && project.data && Object.keys(project.data).length > 0) {
             console.log('[Editor D2] Loading saved project data for:', projectId);
             window.d2State.loadState(project.data);
         } else {
             console.log('[Editor D2] No saved data found, using defaults');
+            // 🛡️ Mark data as loaded so saves work for new projects
+            window.d2State._dataLoaded = true;
+            window.d2State.notifyListeners('*', window.d2State.state, null);
         }
 
         // Carrega nome do projeto no input do header
@@ -2899,6 +2906,8 @@ async function initEditorD2() {
         }
     } else {
         console.log('[Editor D2] No current project, using defaults');
+        window.d2State._dataLoaded = true;
+        window.d2State.notifyListeners('*', window.d2State.state, null);
     }
 
     // Only initialize components once
