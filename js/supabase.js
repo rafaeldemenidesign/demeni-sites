@@ -245,8 +245,13 @@ const SupabaseClient = (function () {
                     .insert({
                         user_id: user.id,
                         name: projectName,
+                        slug: slug,
                         data: projectData,
-                        published: false
+                        html_content: htmlContent,
+                        published: true,
+                        published_url: `https://${slug}.rafaeldemeni.com`,
+                        published_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
                     })
                     .select()
                     .single();
@@ -256,29 +261,12 @@ const SupabaseClient = (function () {
                     return { error: createErr || { message: 'Failed to create project in cloud' } };
                 }
 
-                effectiveId = newRow.id;
-                console.log('✅ [Publish] Created with Supabase ID:', effectiveId, '(local was:', projectId, ')');
-
-                // Remap local project to use Supabase ID
-                if (window.UserData) {
-                    try {
-                        // Get all local project data
-                        const localProject = UserData.getProjects().find(p => p.id === projectId);
-                        if (localProject) {
-                            // Delete old local entry, create new one with Supabase ID
-                            UserData.deleteProject(projectId);
-                            const projects = UserData.getProjects();
-                            localProject.id = effectiveId;
-                            projects.push(localProject);
-                            console.log('🔄 [Publish] Local project ID remapped:', projectId, '→', effectiveId);
-                        }
-                    } catch (e) {
-                        console.warn('⚠️ [Publish] ID remap failed:', e);
-                    }
-                }
+                // Success! The INSERT already has all publish data — no UPDATE needed
+                console.log('✅ [Publish] Project created & published with Supabase ID:', newRow.id);
+                return { data: newRow, error: null };
             }
 
-            // Now UPDATE (row guaranteed to exist with effectiveId)
+            // Project EXISTS — just UPDATE
             console.log('⏳ Updating project for publish...', effectiveId);
             const { data, error } = await supabase
                 .from('projects')
@@ -292,9 +280,7 @@ const SupabaseClient = (function () {
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', effectiveId)
-                .select()
-                .single();
+                .eq('id', effectiveId);
 
             console.log('✅ Supabase result:', { data: !!data, error });
             return { data, error };
