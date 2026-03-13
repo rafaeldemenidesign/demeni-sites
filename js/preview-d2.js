@@ -1709,8 +1709,8 @@ function renderPreviewD2New(frame, state) {
         });
 
         // Auto-play: configurable interval, pause on hover
-        const autoplayMs = ${carouselInterval} * 1000;
-        if (${carouselAutoplay}) {
+        const autoplayMs = carouselInterval * 1000;
+        if (carouselAutoplay) {
             let autoPlayInterval = setInterval(() => {
                 const maxScroll = track.scrollWidth - track.offsetWidth;
                 if (track.scrollLeft >= maxScroll - 5) {
