@@ -228,33 +228,58 @@ const SupabaseClient = (function () {
                 return { error: { message: `A URL "${slug}.rafaeldemeni.com" já está em uso por outro projeto. Escolha outra URL.` } };
             }
 
-            // 🛡️ ENSURE PROJECT EXISTS: Imported projects may not have a Supabase row yet
+            // 🛡️ ENSURE PROJECT EXISTS: Imported projects may not have a Supabase row
             const { data: projectRow } = await supabase
                 .from('projects')
                 .select('id')
                 .eq('id', projectId)
                 .maybeSingle();
 
+            let effectiveId = projectId;
+
             if (!projectRow) {
-                console.log('📦 [Publish] Project not in Supabase, creating row first...');
-                const { error: insertError } = await supabase
+                // Project doesn't exist in Supabase — create via createProject() which RLS allows
+                console.log('📦 [Publish] Project not in Supabase, creating via createProject...');
+                const { data: newRow, error: createErr } = await supabase
                     .from('projects')
                     .insert({
-                        id: projectId,
                         user_id: user.id,
                         name: projectName,
                         data: projectData,
                         published: false
-                    });
-                if (insertError) {
-                    console.error('❌ [Publish] Insert failed:', insertError);
-                    return { error: insertError };
+                    })
+                    .select()
+                    .single();
+
+                if (createErr || !newRow) {
+                    console.error('❌ [Publish] Create failed:', createErr);
+                    return { error: createErr || { message: 'Failed to create project in cloud' } };
                 }
-                console.log('✅ [Publish] Project row created');
+
+                effectiveId = newRow.id;
+                console.log('✅ [Publish] Created with Supabase ID:', effectiveId, '(local was:', projectId, ')');
+
+                // Remap local project to use Supabase ID
+                if (window.UserData) {
+                    try {
+                        // Get all local project data
+                        const localProject = UserData.getProjects().find(p => p.id === projectId);
+                        if (localProject) {
+                            // Delete old local entry, create new one with Supabase ID
+                            UserData.deleteProject(projectId);
+                            const projects = UserData.getProjects();
+                            localProject.id = effectiveId;
+                            projects.push(localProject);
+                            console.log('🔄 [Publish] Local project ID remapped:', projectId, '→', effectiveId);
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ [Publish] ID remap failed:', e);
+                    }
+                }
             }
 
-            // Now UPDATE (row guaranteed to exist)
-            console.log('⏳ Updating project for publish...');
+            // Now UPDATE (row guaranteed to exist with effectiveId)
+            console.log('⏳ Updating project for publish...', effectiveId);
             const { data, error } = await supabase
                 .from('projects')
                 .update({
@@ -267,7 +292,7 @@ const SupabaseClient = (function () {
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', projectId)
+                .eq('id', effectiveId)
                 .select()
                 .single();
 
