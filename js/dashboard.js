@@ -32,17 +32,20 @@ function restoreNavigationState() {
     const savedPage = localStorage.getItem('demeni_currentPage');
     const savedProjectId = localStorage.getItem('demeni_currentProjectId');
 
-    if (savedPage && savedPage !== 'projects') {
+    // Default to 'projects' if no saved page or if saved page is 'home' (disabled)
+    const targetPage = (!savedPage || savedPage === 'home') ? 'projects' : savedPage;
+
+    if (targetPage !== 'projects') {
         // Small delay to ensure DOM is ready
         setTimeout(() => {
             // If we're restoring to an editor page with a project ID, set it first
-            if (savedProjectId && (savedPage === 'editor-d2' || savedPage === 'editor-d1')) {
+            if (savedProjectId && (targetPage === 'editor-d2' || targetPage === 'editor-d1')) {
                 UserData.setCurrentProject(savedProjectId);
                 console.log('[Persistence] Restoring project:', savedProjectId);
             }
 
-            navigateTo(savedPage);
-            console.log('[Persistence] Restored to page:', savedPage);
+            navigateTo(targetPage);
+            console.log('[Persistence] Restored to page:', targetPage);
         }, 100);
     }
 }
