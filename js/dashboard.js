@@ -956,25 +956,31 @@ async function showPublishModal(projectId) {
                 console.log('📋 [Update] htmlContent?', !!htmlContent, '| length:', htmlContent?.length);
 
                 if (htmlContent && window.SupabaseClient?.isConfigured()) {
+                    let lastUpdateError = null;
                     try {
                         const { data, error } = await SupabaseClient.publishSite(projectId, subdomain, htmlContent);
                         if (error) {
+                            lastUpdateError = error;
                             console.error('❌ [Update] Deploy error:', error);
                             showNotification('⚠️ Deploy falhou: ' + (error.message || 'Erro desconhecido'));
                         } else {
                             console.log('✅ [Update] Site updated:', publishedUrl);
                         }
                     } catch (e) {
+                        lastUpdateError = e;
                         console.error('❌ [Update] Deploy exception:', e);
                         showNotification('⚠️ Deploy falhou: ' + e.message);
+                    }
+
+                    if (!lastUpdateError) {
+                        showPublishSuccess(publishedUrl);
+                        updateHeaderPublishButton(projectId);
                     }
                 } else {
                     console.warn('⚠️ [Update] Skipped deploy — htmlContent:', !!htmlContent, 'supabase:', !!window.SupabaseClient?.isConfigured());
                     if (!htmlContent) showNotification('⚠️ Não foi possível gerar o HTML do site');
                 }
 
-                showPublishSuccess(publishedUrl);
-                updateHeaderPublishButton(projectId);
                 loadProjects();
             } else {
                 publishProject(projectId, subdomain);
@@ -1559,13 +1565,19 @@ async function publishProject(id, subdomain) {
 
             if (lastError) {
                 console.error('❌ [Publish] Todas as tentativas falharam:', lastError);
-                showNotification(`⚠️ Site salvo localmente mas falhou no deploy após ${MAX_RETRIES} tentativas`);
+                showNotification(`⚠️ Publicação falhou após ${MAX_RETRIES} tentativas: ${lastError.message || 'Erro desconhecido'}. Verifique sua conexão e tente novamente.`);
+                return; // Don't show success if deploy failed
+            }
+        } else {
+            console.warn('⚠️ [Publish] Skipped deploy — htmlContent:', !!htmlContent, 'supabase:', !!window.SupabaseClient?.isConfigured());
+            if (!htmlContent) {
+                showNotification('⚠️ Não foi possível gerar o HTML do site');
+                return;
             }
         }
 
-        // Show success with URL
+        // Show success ONLY if deploy succeeded
         showPublishSuccess(result.publishedUrl);
-        // Update header button to "Atualizar" style
         updateHeaderPublishButton(id);
         loadProjects();
         refreshCredits();

@@ -594,6 +594,33 @@ class D2HeroEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Tamanho',
+                        value: window.d2State.get(`${this.basePath}.scrollIndicator.size`, 24),
+                        min: 8, max: 40, step: 1, unit: 'px',
+                        path: `${this.basePath}.scrollIndicator.size`
+                    })
+                );
+
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Espessura',
+                        value: window.d2State.get(`${this.basePath}.scrollIndicator.thickness`, 100),
+                        min: 30, max: 100, step: 5, unit: '%',
+                        path: `${this.basePath}.scrollIndicator.thickness`
+                    })
+                );
+
+                container.appendChild(
+                    C.createSlider({
+                        label: 'Distância do botão',
+                        value: window.d2State.get(`${this.basePath}.scrollIndicator.marginFromButton`, 0),
+                        min: 0, max: 200, step: 5, unit: 'px',
+                        path: `${this.basePath}.scrollIndicator.marginFromButton`
+                    })
+                );
+
                 return container;
             }
         );

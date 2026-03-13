@@ -218,6 +218,9 @@ function renderPreviewD2New(frame, state) {
     const heroScrollIndicatorEnabled = get('hero.scrollIndicator.enabled', true);
     const heroScrollIndicatorColor = get('hero.scrollIndicator.color', '#ffffff');
     const heroScrollIndicatorPadding = get('hero.scrollIndicator.paddingBottom', 20);
+    const heroScrollIndicatorSize = get('hero.scrollIndicator.size', 24);
+    const heroScrollIndicatorThickness = get('hero.scrollIndicator.thickness', 100);
+    const heroScrollIndicatorMargin = get('hero.scrollIndicator.marginFromButton', 0);
 
     // Título
     const heroTitleText = get('hero.title.text', '') || state?.profile?.name || 'Seu Nome';
@@ -772,17 +775,18 @@ function renderPreviewD2New(frame, state) {
                 position: absolute;
                 bottom: ${heroScrollIndicatorPadding}px;
                 left: 50%;
-                transform: translateX(-50%);
+                transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100});
                 z-index: 10;
                 color: ${heroScrollIndicatorColor};
-                font-size: 24px;
+                font-size: ${heroScrollIndicatorSize}px;
                 animation: bounce 2s infinite;
                 opacity: 0.8;
+                margin-top: ${heroScrollIndicatorMargin}px;
             }
             @keyframes bounce {
-                0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-                40% { transform: translateX(-50%) translateY(-10px); }
-                60% { transform: translateX(-50%) translateY(-5px); }
+                0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100}) translateY(0); }
+                40% { transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100}) translateY(-10px); }
+                60% { transform: translateX(-50%) scaleX(${heroScrollIndicatorThickness / 100}) translateY(-5px); }
             }
             .d2-hero .hero-content {
                 position: relative;
