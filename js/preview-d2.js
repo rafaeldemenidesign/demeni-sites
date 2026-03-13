@@ -203,6 +203,7 @@ function renderPreviewD2New(frame, state) {
     const heroSectionHeight = get('hero.sectionHeight', 100);
     const heroTextPosition = get('hero.textPosition', 'center');
     const heroContentPadding = get('hero.contentPadding', 60);
+    const heroContentPaddingTop = get('hero.contentPaddingTop', 0);
     // _REMOVED_ = usuário removeu explicitamente, usar null
     const rawHeroBg = get('hero.bgImage', null);
     const heroBgImage = rawHeroBg === '_REMOVED_' ? null : (rawHeroBg || 'img/hero-bg.webp');
@@ -213,6 +214,7 @@ function renderPreviewD2New(frame, state) {
     const heroGradientEnd = get('hero.gradient.colorEnd', '#0a0a0a');
     const heroGradientIntensity = get('hero.gradient.intensity', 60);
     const heroGradientPosition = get('hero.gradient.position', 50);
+    const heroGradientInvert = get('hero.gradient.invert', false);
     const heroScrollIndicatorEnabled = get('hero.scrollIndicator.enabled', true);
     const heroScrollIndicatorColor = get('hero.scrollIndicator.color', '#ffffff');
     const heroScrollIndicatorPadding = get('hero.scrollIndicator.paddingBottom', 20);
@@ -736,7 +738,7 @@ function renderPreviewD2New(frame, state) {
                 display: flex;
                 align-items: ${heroTextPosition === 'top' ? 'flex-start' : heroTextPosition === 'center' ? 'center' : 'flex-end'};
                 justify-content: center;
-                padding: ${heroTextPosition === 'top' ? '80px 0 ' + heroContentPadding + 'px' : heroTextPosition === 'center' ? '60px 0' : '60px 0 ' + heroContentPadding + 'px'};
+                padding: ${heroTextPosition === 'top' ? (heroContentPaddingTop || 80) + 'px 0 ' + heroContentPadding + 'px' : heroTextPosition === 'center' ? heroContentPaddingTop + 'px 0 ' + heroContentPadding + 'px' : heroContentPaddingTop + 'px 0 ' + heroContentPadding + 'px'};
                 overflow: hidden;
                 margin: 0;
             }
@@ -759,11 +761,11 @@ function renderPreviewD2New(frame, state) {
             }
             .d2-hero .hero-gradient {
                 position: absolute;
-                bottom: 0;
+                ${heroGradientInvert ? 'top' : 'bottom'}: 0;
                 left: 0;
                 width: 100%;
                 height: ${100 - heroGradientPosition}%;
-                background: linear-gradient(to top, ${heroGradientEnd} 0%, ${hexToRgba(heroGradientEnd, heroGradientIntensity / 100)} 50%, ${hexToRgba(heroGradientEnd, 0)} 100%);
+                background: linear-gradient(${heroGradientInvert ? 'to bottom' : 'to top'}, ${heroGradientEnd} 0%, ${hexToRgba(heroGradientEnd, heroGradientIntensity / 100)} 50%, ${hexToRgba(heroGradientEnd, 0)} 100%);
                 z-index: 2;
             }
             .d2-hero .scroll-indicator {

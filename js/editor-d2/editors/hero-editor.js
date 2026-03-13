@@ -99,9 +99,18 @@ class D2HeroEditor {
 
                 container.appendChild(
                     C.createSlider({
+                        label: 'Padding do conteúdo (cima)',
+                        value: window.d2State.get(`${this.basePath}.contentPaddingTop`, 0),
+                        min: 0, max: 150, step: 5, unit: 'px',
+                        path: `${this.basePath}.contentPaddingTop`
+                    })
+                );
+
+                container.appendChild(
+                    C.createSlider({
                         label: 'Padding do conteúdo (baixo)',
                         value: window.d2State.get(`${this.basePath}.contentPadding`, 60),
-                        min: 20, max: 150, step: 10, unit: 'px',
+                        min: 0, max: 150, step: 5, unit: 'px',
                         path: `${this.basePath}.contentPadding`
                     })
                 );
@@ -485,6 +494,14 @@ class D2HeroEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createToggle({
+                        label: 'Inverter (vem de cima)',
+                        value: window.d2State.get(`${this.basePath}.gradient.invert`, false),
+                        path: `${this.basePath}.gradient.invert`
+                    })
+                );
+
                 return container;
             }
         );
@@ -688,7 +705,7 @@ class D2HeroEditor {
                         label: 'Espaçamento inferior',
                         value: window.d2State.get(`${this.basePath}.subtitle.spacing`, 32),
                         min: 0,
-                        max: 64,
+                        max: 128,
                         step: 2,
                         unit: 'px',
                         path: `${this.basePath}.subtitle.spacing`
