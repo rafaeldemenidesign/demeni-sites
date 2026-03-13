@@ -1434,8 +1434,24 @@ async function publishProject(id, subdomain) {
 
     if (result.success) {
         // Generate HTML from editor preview
-        const state = window.d2State ? window.d2State.getState() : null;
-        const projectName = window.d2State?.get('projectName') || UserData.getProject(id)?.name || 'Meu Site';
+        // SWR: Try d2State (if editor is open), else load from stored project data
+        let state = window.d2State ? window.d2State.getState() : null;
+        let projectName = window.d2State?.get('projectName') || 'Meu Site';
+
+        if (!state) {
+            // Fallback: load stored project data (e.g. publishing from dashboard without editor)
+            try {
+                const storedProject = await UserData.getProjectAsync(id);
+                if (storedProject && storedProject.data) {
+                    state = storedProject.data;
+                    projectName = storedProject.name || projectName;
+                    console.log('📦 [Publish] Using stored project data (no editor open)');
+                }
+            } catch (e) {
+                console.warn('⚠️ [Publish] Could not load stored project data:', e);
+            }
+        }
+
         const htmlContent = await generatePublishableHTML(state, projectName);
 
         if (htmlContent && window.SupabaseClient?.isConfigured()) {
