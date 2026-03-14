@@ -214,7 +214,7 @@ const SupabaseClient = (function () {
         }
 
         try {
-            // 🛡️ SLUG UNIQUENESS CHECK: Prevent overwriting another project's slug
+            // 🛡️ SLUG UNIQUENESS CHECK: Only block if ANOTHER USER owns this slug
             const { data: existing } = await supabase
                 .from('projects')
                 .select('id, user_id, name')
@@ -223,97 +223,60 @@ const SupabaseClient = (function () {
                 .neq('id', projectId)
                 .maybeSingle();
 
-            if (existing) {
-                console.error('❌ Slug already in use by project:', existing.id);
+            if (existing && existing.user_id !== user.id) {
+                console.error('❌ Slug already in use by another user:', existing.id);
                 return { error: { message: `A URL "${slug}.rafaeldemeni.com" já está em uso por outro projeto. Escolha outra URL.` } };
             }
 
-            // 🛡️ ENSURE PROJECT EXISTS: Imported projects may not have a Supabase row
-            const { data: projectRow } = await supabase
-                .from('projects')
-                .select('id')
-                .eq('id', projectId)
-                .maybeSingle();
+            // If same user owns the slug under a different ID, use THAT row's ID for UPDATE
+            const resolvedId = existing ? existing.id : projectId;
+            console.log('🔍 [Publish] Resolved ID:', resolvedId, existing ? '(matched by slug+user)' : '(localStorage ID)');
 
-            let effectiveId = projectId;
+            // Publish payload
+            const publishPayload = {
+                name: projectName,
+                slug: slug,
+                data: projectData,
+                html_content: htmlContent,
+                published: true,
+                published_url: `https://${slug}.rafaeldemeni.com`,
+                published_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
 
-            if (!projectRow) {
-                // Project doesn't exist in Supabase — create via createProject() which RLS allows
-                console.log('📦 [Publish] Project not in Supabase, creating via createProject...');
-                const { data: newRow, error: createErr } = await supabase
-                    .from('projects')
-                    .insert({
-                        user_id: user.id,
-                        name: projectName,
-                        slug: slug,
-                        data: projectData,
-                        html_content: htmlContent,
-                        published: true,
-                        published_url: `https://${slug}.rafaeldemeni.com`,
-                        published_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    })
-                    .select()
-                    .single();
-
-                if (createErr || !newRow) {
-                    console.error('❌ [Publish] Create failed:', createErr);
-                    return { error: createErr || { message: 'Failed to create project in cloud' } };
-                }
-
-                // Success! The INSERT already has all publish data — no UPDATE needed
-                console.log('✅ [Publish] Project created & published with Supabase ID:', newRow.id);
-                return { data: newRow, error: null };
-            }
-
-            // Project EXISTS — just UPDATE
-            console.log('⏳ Updating project for publish...', effectiveId);
+            // Try UPDATE with resolved ID
+            console.log('⏳ Updating project for publish...', resolvedId);
             const { data, error } = await supabase
                 .from('projects')
-                .update({
-                    name: projectName,
-                    slug: slug,
-                    data: projectData,
-                    html_content: htmlContent,
-                    published: true,
-                    published_url: `https://${slug}.rafaeldemeni.com`,
-                    published_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', effectiveId)
+                .update(publishPayload)
+                .eq('id', resolvedId)
                 .select('id, slug, published');
 
             console.log('📊 Supabase UPDATE result:', { rowsUpdated: data?.length || 0, error });
 
-            // If UPDATE matched 0 rows, the project ID doesn't exist in Supabase — fallback to INSERT
-            if (!error && (!data || data.length === 0)) {
-                console.warn('⚠️ [Publish] UPDATE matched 0 rows! ID mismatch — falling back to INSERT...');
-                const { data: insertData, error: insertErr } = await supabase
-                    .from('projects')
-                    .insert({
-                        user_id: user.id,
-                        name: projectName,
-                        slug: slug,
-                        data: projectData,
-                        html_content: htmlContent,
-                        published: true,
-                        published_url: `https://${slug}.rafaeldemeni.com`,
-                        published_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    })
-                    .select()
-                    .single();
-
-                if (insertErr || !insertData) {
-                    console.error('❌ [Publish] Fallback INSERT also failed:', insertErr);
-                    return { error: insertErr || { message: 'Failed to publish (both UPDATE and INSERT failed)' } };
-                }
-
-                console.log('✅ [Publish] Fallback INSERT succeeded! New Supabase ID:', insertData.id);
-                return { data: insertData, error: null };
+            // If UPDATE succeeded, return
+            if (!error && data && data.length > 0) {
+                return { data, error: null };
             }
 
-            return { data, error };
+            // UPDATE matched 0 rows — fallback to INSERT
+            console.warn('⚠️ [Publish] UPDATE matched 0 rows — falling back to INSERT...');
+            const { data: insertData, error: insertErr } = await supabase
+                .from('projects')
+                .insert({
+                    user_id: user.id,
+                    ...publishPayload
+                })
+                .select()
+                .single();
+
+            if (insertErr || !insertData) {
+                console.error('❌ [Publish] Fallback INSERT failed:', insertErr);
+                return { error: insertErr || { message: 'Failed to publish' } };
+            }
+
+            console.log('✅ [Publish] Fallback INSERT succeeded! New Supabase ID:', insertData.id);
+            return { data: insertData, error: null };
         } catch (e) {
             console.error('❌ Supabase exception:', e);
             return { error: { message: e.message || 'Database error' } };
