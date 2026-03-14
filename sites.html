@@ -306,10 +306,22 @@
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#precos">Sites</a>
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#faq">Dúvidas</a>
             </nav>
-            <a id="header-cta-btn" class="hidden md:inline-flex btn-glow text-white px-6 py-1.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
-                style="background:#8836DA" href="#precos">
-                Quero Meu Card Digital
-            </a>
+            <div id="header-cta-wrap" class="hidden md:flex items-center gap-0 relative" style="height:36px">
+                <a id="header-cta-btn" class="btn-glow text-white px-6 py-1.5 rounded-full font-bold text-sm shadow-lg shadow-primary/20 whitespace-nowrap flex items-center justify-center"
+                    style="background:#8836DA;transition:all 0.45s cubic-bezier(.4,0,.2,1);position:relative;z-index:2" href="#precos">
+                    Quero Meu Card Digital
+                </a>
+                <a id="cta-d1" class="text-white px-4 py-1.5 rounded-full font-bold text-xs whitespace-nowrap flex items-center justify-center"
+                    style="background:#4a3a6a;opacity:0;width:0;overflow:hidden;transform:scale(0.5);transition:all 0.4s cubic-bezier(.4,0,.2,1);pointer-events:none;position:absolute;left:0;z-index:1"
+                    href="https://mpago.li/2kh8AFG">
+                    Quero D-1
+                </a>
+                <a id="cta-d2" class="text-white px-4 py-1.5 rounded-full font-bold text-xs whitespace-nowrap flex items-center justify-center"
+                    style="border:2px solid #8836DA;background:transparent;opacity:0;width:0;overflow:hidden;transform:scale(0.5);transition:all 0.4s cubic-bezier(.4,0,.2,1) 0.05s;pointer-events:none;position:absolute;right:0;z-index:1"
+                    href="https://mpago.li/2NHMQ8y">
+                    Quero D-2
+                </a>
+            </div>
         </div>
     </header>
     <section class="hero-section pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden relative" id="hero-fold">
@@ -1182,27 +1194,78 @@
         })();
     </script>
 
-    <!-- Header CTA: muda cor/link ao passar pela seção de preços -->
+    <!-- Header CTA: split/merge animation on pricing section -->
     <script>
         (function () {
-            const btn = document.getElementById('header-cta-btn');
+            const wrap = document.getElementById('header-cta-wrap');
+            const mainBtn = document.getElementById('header-cta-btn');
+            const d1 = document.getElementById('cta-d1');
+            const d2 = document.getElementById('cta-d2');
             const precosSection = document.getElementById('precos');
-            if (!btn || !precosSection) return;
-            const originalBg = '#8836DA';
-            const originalHref = '#precos';
-            const activeBg = '#16a34a';
-            const activeHref = 'https://wa.me/5583996353619?text=Quero%20Meu%20Card%20Digital';
+            if (!wrap || !mainBtn || !d1 || !d2 || !precosSection) return;
+
+            let isSplit = false;
+
+            function splitButtons() {
+                if (isSplit) return;
+                isSplit = true;
+                // Fade & shrink main button
+                mainBtn.style.opacity = '0';
+                mainBtn.style.width = '0';
+                mainBtn.style.padding = '0';
+                mainBtn.style.pointerEvents = 'none';
+                mainBtn.style.transform = 'scale(0.3)';
+                // Show split buttons
+                wrap.style.gap = '8px';
+                d1.style.position = 'relative';
+                d1.style.left = 'auto';
+                d1.style.opacity = '1';
+                d1.style.width = 'auto';
+                d1.style.padding = '6px 16px';
+                d1.style.transform = 'scale(1)';
+                d1.style.pointerEvents = 'auto';
+                d2.style.position = 'relative';
+                d2.style.right = 'auto';
+                d2.style.opacity = '1';
+                d2.style.width = 'auto';
+                d2.style.padding = '6px 16px';
+                d2.style.transform = 'scale(1)';
+                d2.style.pointerEvents = 'auto';
+            }
+
+            function mergeButtons() {
+                if (!isSplit) return;
+                isSplit = false;
+                // Hide split buttons
+                d1.style.opacity = '0';
+                d1.style.width = '0';
+                d1.style.padding = '0';
+                d1.style.transform = 'scale(0.3)';
+                d1.style.pointerEvents = 'none';
+                d2.style.opacity = '0';
+                d2.style.width = '0';
+                d2.style.padding = '0';
+                d2.style.transform = 'scale(0.3)';
+                d2.style.pointerEvents = 'none';
+                // Restore main button
+                wrap.style.gap = '0';
+                setTimeout(() => {
+                    d1.style.position = 'absolute';
+                    d1.style.left = '0';
+                    d2.style.position = 'absolute';
+                    d2.style.right = '0';
+                    mainBtn.style.opacity = '1';
+                    mainBtn.style.width = 'auto';
+                    mainBtn.style.padding = '6px 24px';
+                    mainBtn.style.pointerEvents = 'auto';
+                    mainBtn.style.transform = 'scale(1)';
+                }, 120);
+            }
+
             const obs = new IntersectionObserver((entries) => {
                 entries.forEach(e => {
-                    if (e.isIntersecting) {
-                        btn.style.background = activeBg;
-                        btn.href = activeHref;
-                        btn.style.boxShadow = '0 0 24px rgba(22, 163, 74, 0.4)';
-                    } else {
-                        btn.style.background = originalBg;
-                        btn.href = originalHref;
-                        btn.style.boxShadow = '';
-                    }
+                    if (e.isIntersecting) splitButtons();
+                    else mergeButtons();
                 });
             }, { threshold: 0.15 });
             obs.observe(precosSection);
