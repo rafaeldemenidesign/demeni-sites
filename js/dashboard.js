@@ -1294,7 +1294,7 @@ async function generatePublishableHTML(state, projectName) {
                 position: relative;
                 z-index: 1;
                 max-width: 310px;
-                max-height: calc(100vh - 64px);
+                max-height: calc(100vh - 120px);
                 border: 1px solid rgba(255,255,255,0.15);
                 border-radius: 20px;
                 overflow: hidden;
