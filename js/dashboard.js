@@ -1293,11 +1293,15 @@ async function generatePublishableHTML(state, projectName) {
             .site-wrapper {
                 position: relative;
                 z-index: 1;
-                max-width: 390px;
+                width: 320px;
+                max-width: 320px;
                 min-height: 100vh;
                 border: 1px solid rgba(255,255,255,0.15);
-                border-radius: 24px;
+                border-radius: 20px;
                 overflow: hidden;
+                transform: scale(1.25);
+                transform-origin: top center;
+                margin-bottom: 25%;
             }
             .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
             .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
