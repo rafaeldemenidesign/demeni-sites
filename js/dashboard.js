@@ -1300,7 +1300,7 @@ async function generatePublishableHTML(state, projectName) {
                 border-radius: 20px;
                 overflow-y: auto;
                 overflow-x: hidden;
-                transform: scale(1.25);
+                transform: scale(1.125);
             }
             .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
             .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
