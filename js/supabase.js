@@ -228,55 +228,36 @@ const SupabaseClient = (function () {
                 return { error: { message: `A URL "${slug}.rafaeldemeni.com" já está em uso por outro projeto. Escolha outra URL.` } };
             }
 
-            // If same user owns the slug under a different ID, use THAT row's ID for UPDATE
+            // If same user owns the slug under a different ID, use THAT row's ID
             const resolvedId = existing ? existing.id : projectId;
             console.log('🔍 [Publish] Resolved ID:', resolvedId, existing ? '(matched by slug+user)' : '(localStorage ID)');
 
-            // Publish payload
-            const publishPayload = {
-                name: projectName,
-                slug: slug,
-                data: projectData,
-                html_content: htmlContent,
-                published: true,
-                published_url: `https://${slug}.rafaeldemeni.com`,
-                published_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-
-            // Try UPDATE with resolved ID
-            console.log('⏳ Updating project for publish...', resolvedId);
+            // Use UPSERT: insert-or-update atomically, resolve by slug conflict
+            console.log('⏳ Publishing via upsert...', resolvedId);
             const { data, error } = await supabase
                 .from('projects')
-                .update(publishPayload)
-                .eq('id', resolvedId)
+                .upsert({
+                    id: resolvedId,
+                    user_id: user.id,
+                    name: projectName,
+                    slug: slug,
+                    data: projectData,
+                    html_content: htmlContent,
+                    published: true,
+                    published_url: `https://${slug}.rafaeldemeni.com`,
+                    published_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'slug' })
                 .select('id, slug, published');
 
-            console.log('📊 Supabase UPDATE result:', { rowsUpdated: data?.length || 0, error });
+            console.log('📊 Supabase UPSERT result:', { rows: data?.length || 0, error });
 
-            // If UPDATE succeeded, return
-            if (!error && data && data.length > 0) {
-                return { data, error: null };
+            if (error) {
+                console.error('❌ [Publish] Upsert failed:', error);
+                return { error };
             }
 
-            // UPDATE matched 0 rows — fallback to INSERT
-            console.warn('⚠️ [Publish] UPDATE matched 0 rows — falling back to INSERT...');
-            const { data: insertData, error: insertErr } = await supabase
-                .from('projects')
-                .insert({
-                    user_id: user.id,
-                    ...publishPayload
-                })
-                .select()
-                .single();
-
-            if (insertErr || !insertData) {
-                console.error('❌ [Publish] Fallback INSERT failed:', insertErr);
-                return { error: insertErr || { message: 'Failed to publish' } };
-            }
-
-            console.log('✅ [Publish] Fallback INSERT succeeded! New Supabase ID:', insertData.id);
-            return { data: insertData, error: null };
+            return { data, error: null };
         } catch (e) {
             console.error('❌ Supabase exception:', e);
             return { error: { message: e.message || 'Database error' } };
