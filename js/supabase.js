@@ -214,50 +214,31 @@ const SupabaseClient = (function () {
         }
 
         try {
-            // 🛡️ SLUG UNIQUENESS CHECK: Only block if ANOTHER USER owns this slug
-            const { data: existing } = await supabase
-                .from('projects')
-                .select('id, user_id, name')
-                .eq('slug', slug)
-                .eq('published', true)
-                .neq('id', projectId)
-                .maybeSingle();
+            // 🚀 Use server-side RPC function (bypasses RLS via SECURITY DEFINER)
+            console.log('⏳ Publishing via RPC...');
+            const { data, error } = await supabase.rpc('publish_site', {
+                p_user_id: user.id,
+                p_name: projectName,
+                p_slug: slug,
+                p_data: projectData,
+                p_html_content: htmlContent,
+                p_published_url: `https://${slug}.rafaeldemeni.com`
+            });
 
-            if (existing && existing.user_id !== user.id) {
-                console.error('❌ Slug already in use by another user:', existing.id);
-                return { error: { message: `A URL "${slug}.rafaeldemeni.com" já está em uso por outro projeto. Escolha outra URL.` } };
-            }
-
-            // If same user owns the slug under a different ID, use THAT row's ID
-            const resolvedId = existing ? existing.id : projectId;
-            console.log('🔍 [Publish] Resolved ID:', resolvedId, existing ? '(matched by slug+user)' : '(localStorage ID)');
-
-            // Use UPSERT: insert-or-update atomically, resolve by slug conflict
-            console.log('⏳ Publishing via upsert...', resolvedId);
-            const { data, error } = await supabase
-                .from('projects')
-                .upsert({
-                    id: resolvedId,
-                    user_id: user.id,
-                    name: projectName,
-                    slug: slug,
-                    data: projectData,
-                    html_content: htmlContent,
-                    published: true,
-                    published_url: `https://${slug}.rafaeldemeni.com`,
-                    published_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'slug' })
-                .select('id, slug, published');
-
-            console.log('📊 Supabase UPSERT result:', { rows: data?.length || 0, error });
+            console.log('📊 RPC result:', data);
 
             if (error) {
-                console.error('❌ [Publish] Upsert failed:', error);
+                console.error('❌ [Publish] RPC error:', error);
                 return { error };
             }
 
-            return { data, error: null };
+            if (data && !data.success) {
+                console.error('❌ [Publish] Server rejected:', data.error);
+                return { error: { message: data.error } };
+            }
+
+            console.log(`✅ [Publish] ${data.action === 'updated' ? 'Updated' : 'Created'} — ID: ${data.id}`);
+            return { data: [{ id: data.id, slug: slug, published: true }], error: null };
         } catch (e) {
             console.error('❌ Supabase exception:', e);
             return { error: { message: e.message || 'Database error' } };
