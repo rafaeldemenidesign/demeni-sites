@@ -300,9 +300,10 @@ const SupabaseClient = (function () {
     async function isSlugAvailable(slug, excludeProjectId) {
         if (!supabase) return { available: false, error: 'Supabase not configured' };
 
+        const user = await getUser();
         let query = supabase
             .from('projects')
-            .select('id, name')
+            .select('id, name, user_id')
             .eq('slug', slug)
             .eq('published', true);
 
@@ -312,6 +313,10 @@ const SupabaseClient = (function () {
 
         const { data, error } = await query.maybeSingle();
         if (error) return { available: false, error: error.message };
+        // If slug is in use by the SAME user (ID mismatch), it's still "available" for them
+        if (data && user && data.user_id === user.id) {
+            return { available: true, existingProject: data, sameUser: true };
+        }
         return { available: !data, existingProject: data };
     }
 
