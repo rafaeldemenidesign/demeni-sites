@@ -1297,7 +1297,8 @@ async function generatePublishableHTML(state, projectName) {
                 max-height: calc(100vh - 120px);
                 border: 1px solid rgba(255,255,255,0.15);
                 border-radius: 20px;
-                overflow: hidden;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
             .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
             .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
