@@ -280,9 +280,39 @@ const SupabaseClient = (function () {
                     published_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', effectiveId);
+                .eq('id', effectiveId)
+                .select('id, slug, published');
 
-            console.log('✅ Supabase result:', { data: !!data, error });
+            console.log('📊 Supabase UPDATE result:', { rowsUpdated: data?.length || 0, error });
+
+            // If UPDATE matched 0 rows, the project ID doesn't exist in Supabase — fallback to INSERT
+            if (!error && (!data || data.length === 0)) {
+                console.warn('⚠️ [Publish] UPDATE matched 0 rows! ID mismatch — falling back to INSERT...');
+                const { data: insertData, error: insertErr } = await supabase
+                    .from('projects')
+                    .insert({
+                        user_id: user.id,
+                        name: projectName,
+                        slug: slug,
+                        data: projectData,
+                        html_content: htmlContent,
+                        published: true,
+                        published_url: `https://${slug}.rafaeldemeni.com`,
+                        published_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                    .select()
+                    .single();
+
+                if (insertErr || !insertData) {
+                    console.error('❌ [Publish] Fallback INSERT also failed:', insertErr);
+                    return { error: insertErr || { message: 'Failed to publish (both UPDATE and INSERT failed)' } };
+                }
+
+                console.log('✅ [Publish] Fallback INSERT succeeded! New Supabase ID:', insertData.id);
+                return { data: insertData, error: null };
+            }
+
             return { data, error };
         } catch (e) {
             console.error('❌ Supabase exception:', e);
