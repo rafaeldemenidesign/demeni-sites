@@ -306,20 +306,20 @@
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#precos">Sites</a>
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#faq">Dúvidas</a>
             </nav>
-            <div id="header-cta-wrap" class="hidden md:flex items-center gap-0 relative" style="height:36px">
-                <a id="header-cta-btn" class="btn-glow text-white px-6 py-1.5 rounded-full font-bold text-sm shadow-lg shadow-primary/20 whitespace-nowrap flex items-center justify-center"
-                    style="background:#8836DA;transition:all 0.45s cubic-bezier(.4,0,.2,1);position:relative;z-index:2" href="#precos">
-                    Quero Meu Card Digital
+            <div id="header-cta-wrap" class="hidden md:flex items-center justify-center" style="height:36px;gap:0;transition:gap 0.3s ease">
+                <a id="header-cta-btn" class="btn-glow text-white rounded-full font-bold text-sm shadow-lg shadow-primary/20 flex items-center justify-center overflow-hidden"
+                    style="background:#8836DA;padding:6px 24px;height:36px;transition:width 0.3s ease,padding 0.3s ease,opacity 0.25s ease" href="#precos">
+                    <span id="cta-main-text" style="white-space:nowrap;display:inline-block;clip-path:inset(0 0% 0 0%);transition:clip-path 0.3s ease">Quero Meu Card Digital</span>
                 </a>
-                <a id="cta-d1" class="px-4 py-1.5 rounded-full font-bold text-xs whitespace-nowrap flex items-center justify-center"
-                    style="border:2px solid #64748b;color:#94a3b8;background:transparent;opacity:0;width:0;overflow:hidden;transform:scale(0.5);transition:all 0.4s cubic-bezier(.4,0,.2,1);pointer-events:none;position:absolute;left:0;z-index:1"
+                <a id="cta-d1" class="rounded-full font-bold text-xs flex items-center justify-center overflow-hidden"
+                    style="background:#8836DA;color:white;border:2px solid #8836DA;height:36px;width:0;padding:0;opacity:0;pointer-events:none;transition:width 0.3s ease,padding 0.3s ease,opacity 0.25s ease,background 0.3s ease,border-color 0.3s ease,color 0.3s ease"
                     href="https://mpago.li/2kh8AFG">
-                    Quero D-1
+                    <span id="cta-d1-text" style="white-space:nowrap;display:inline-block;transform:translateX(150%);transition:transform 0.3s ease">Quero D-1</span>
                 </a>
-                <a id="cta-d2" class="text-white px-4 py-1.5 rounded-full font-bold text-xs whitespace-nowrap flex items-center justify-center brand-gradient shadow-lg shadow-primary/20"
-                    style="opacity:0;width:0;overflow:hidden;transform:scale(0.5);transition:all 0.4s cubic-bezier(.4,0,.2,1) 0.05s;pointer-events:none;position:absolute;right:0;z-index:1"
+                <a id="cta-d2" class="rounded-full font-bold text-xs flex items-center justify-center overflow-hidden brand-gradient shadow-lg shadow-primary/20"
+                    style="color:white;height:36px;width:0;padding:0;opacity:0;pointer-events:none;transition:width 0.3s ease,padding 0.3s ease,opacity 0.25s ease"
                     href="https://mpago.li/2NHMQ8y">
-                    Quero D-2
+                    <span id="cta-d2-text" style="white-space:nowrap;display:inline-block;transform:translateX(-150%);transition:transform 0.3s ease">Quero D-2</span>
                 </a>
             </div>
         </div>
@@ -1194,72 +1194,95 @@
         })();
     </script>
 
-    <!-- Header CTA: split/merge animation on pricing section -->
+    <!-- Header CTA: 4-stage split/merge animation -->
     <script>
         (function () {
             const wrap = document.getElementById('header-cta-wrap');
             const mainBtn = document.getElementById('header-cta-btn');
+            const mainText = document.getElementById('cta-main-text');
             const d1 = document.getElementById('cta-d1');
             const d2 = document.getElementById('cta-d2');
+            const d1Text = document.getElementById('cta-d1-text');
+            const d2Text = document.getElementById('cta-d2-text');
             const precosSection = document.getElementById('precos');
-            if (!wrap || !mainBtn || !d1 || !d2 || !precosSection) return;
+            if (!wrap || !mainBtn || !mainText || !d1 || !d2 || !d1Text || !d2Text || !precosSection) return;
 
             let isSplit = false;
+            let animating = false;
 
             function splitButtons() {
-                if (isSplit) return;
+                if (isSplit || animating) return;
                 isSplit = true;
-                // Fade & shrink main button
-                mainBtn.style.opacity = '0';
-                mainBtn.style.width = '0';
-                mainBtn.style.padding = '0';
-                mainBtn.style.pointerEvents = 'none';
-                mainBtn.style.transform = 'scale(0.3)';
-                // Show split buttons
-                wrap.style.gap = '8px';
-                d1.style.position = 'relative';
-                d1.style.left = 'auto';
-                d1.style.opacity = '1';
-                d1.style.width = 'auto';
-                d1.style.padding = '6px 16px';
-                d1.style.transform = 'scale(1)';
-                d1.style.pointerEvents = 'auto';
-                d2.style.position = 'relative';
-                d2.style.right = 'auto';
-                d2.style.opacity = '1';
-                d2.style.width = 'auto';
-                d2.style.padding = '6px 16px';
-                d2.style.transform = 'scale(1)';
-                d2.style.pointerEvents = 'auto';
+                animating = true;
+
+                // STAGE 1→2: Text vanishes from sides to center
+                mainText.style.clipPath = 'inset(0 50% 0 50%)';
+
+                setTimeout(() => {
+                    // STAGE 2→3: Main button shrinks, two purple pills appear
+                    mainBtn.style.width = '0';
+                    mainBtn.style.padding = '0';
+                    mainBtn.style.opacity = '0';
+                    mainBtn.style.pointerEvents = 'none';
+
+                    wrap.style.gap = '8px';
+                    d1.style.width = '100px';
+                    d1.style.padding = '6px 16px';
+                    d1.style.opacity = '1';
+                    d2.style.width = '100px';
+                    d2.style.padding = '6px 16px';
+                    d2.style.opacity = '1';
+
+                    setTimeout(() => {
+                        // STAGE 3→4: D-1 loses purple fill, gains gray border + text slides in
+                        d1.style.background = 'transparent';
+                        d1.style.borderColor = '#64748b';
+                        d1.style.color = '#94a3b8';
+                        d1.style.pointerEvents = 'auto';
+                        d2.style.pointerEvents = 'auto';
+
+                        d1Text.style.transform = 'translateX(0)';
+                        d2Text.style.transform = 'translateX(0)';
+                        animating = false;
+                    }, 320);
+                }, 320);
             }
 
             function mergeButtons() {
-                if (!isSplit) return;
+                if (!isSplit || animating) return;
                 isSplit = false;
-                // Hide split buttons
-                d1.style.opacity = '0';
-                d1.style.width = '0';
-                d1.style.padding = '0';
-                d1.style.transform = 'scale(0.3)';
+                animating = true;
+
+                // REVERSE STAGE 4→3: Text slides out, D-1 regains purple
+                d1Text.style.transform = 'translateX(150%)';
+                d2Text.style.transform = 'translateX(-150%)';
+                d1.style.background = '#8836DA';
+                d1.style.borderColor = '#8836DA';
+                d1.style.color = 'white';
                 d1.style.pointerEvents = 'none';
-                d2.style.opacity = '0';
-                d2.style.width = '0';
-                d2.style.padding = '0';
-                d2.style.transform = 'scale(0.3)';
                 d2.style.pointerEvents = 'none';
-                // Restore main button
-                wrap.style.gap = '0';
+
                 setTimeout(() => {
-                    d1.style.position = 'absolute';
-                    d1.style.left = '0';
-                    d2.style.position = 'absolute';
-                    d2.style.right = '0';
-                    mainBtn.style.opacity = '1';
+                    // REVERSE STAGE 3→2: Pills merge
+                    d1.style.width = '0';
+                    d1.style.padding = '0';
+                    d1.style.opacity = '0';
+                    d2.style.width = '0';
+                    d2.style.padding = '0';
+                    d2.style.opacity = '0';
+                    wrap.style.gap = '0';
+
                     mainBtn.style.width = 'auto';
                     mainBtn.style.padding = '6px 24px';
+                    mainBtn.style.opacity = '1';
                     mainBtn.style.pointerEvents = 'auto';
-                    mainBtn.style.transform = 'scale(1)';
-                }, 120);
+
+                    setTimeout(() => {
+                        // REVERSE STAGE 2→1: Text reappears center to sides
+                        mainText.style.clipPath = 'inset(0 0% 0 0%)';
+                        animating = false;
+                    }, 320);
+                }, 320);
             }
 
             const obs = new IntersectionObserver((entries) => {
