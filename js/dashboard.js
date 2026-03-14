@@ -1268,7 +1268,7 @@ async function generatePublishableHTML(state, projectName) {
             min-height: 100vh;
             position: relative;
         }
-        /* Desktop/Tablet: Linktree-style centered content */
+        /* Desktop/Tablet: centered phone-like frame */
         @media (min-width: 769px) {
             body {
                 display: flex;
@@ -1276,6 +1276,7 @@ async function generatePublishableHTML(state, projectName) {
                 align-items: flex-start;
                 overflow-y: auto;
                 overflow-x: hidden;
+                padding: 32px 16px;
             }
             .d2-desktop-bg {
                 display: block;
@@ -1292,9 +1293,11 @@ async function generatePublishableHTML(state, projectName) {
             .site-wrapper {
                 position: relative;
                 z-index: 1;
-                max-width: 430px;
+                max-width: 390px;
                 min-height: 100vh;
-                box-shadow: 0 0 60px rgba(0,0,0,0.5);
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 24px;
+                overflow: hidden;
             }
             .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
             .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
@@ -1316,7 +1319,7 @@ async function generatePublishableHTML(state, projectName) {
         ${siteHTML}
     </div>
     <script>
-        // Desktop: set hero image as blurred background (or custom BG)
+        // Desktop: set hero image as blurred background (or custom BG) + frame styling
         (function(){
             if (window.innerWidth < 769) return;
             var bg = document.getElementById('d2DesktopBg');
@@ -1325,9 +1328,13 @@ async function generatePublishableHTML(state, projectName) {
             var customBgImage = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImage || null)};
             var customBlur = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImageBlur ?? 20)};
             var customZoom = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgImageZoom ?? 110)};
-            var shadowIntensity = ${JSON.stringify(state?.d2Adjustments?.desktop?.shadowIntensity ?? 50)};
+            var frameBorderColor = ${JSON.stringify(state?.d2Adjustments?.desktop?.frameBorderColor || 'rgba(255,255,255,0.15)')};
+            var bgColor = ${JSON.stringify(state?.d2Adjustments?.desktop?.bgColor || '#0a0a0f')};
             var heroImageUrl = ${JSON.stringify(heroBgImage || null)};
             
+            // Apply body background color
+            document.body.style.backgroundColor = bgColor;
+
             if (customBgEnabled && customBgImage) {
                 bg.style.backgroundImage = "url('" + customBgImage + "')";
                 bg.style.filter = "blur(" + customBlur + "px) brightness(0.4)";
@@ -1335,11 +1342,10 @@ async function generatePublishableHTML(state, projectName) {
             } else if (heroImageUrl) {
                 bg.style.backgroundImage = "url('" + heroImageUrl + "')";
             }
-            // Apply shadow intensity
+            // Apply frame border color
             var wrapper = document.querySelector('.site-wrapper');
             if (wrapper) {
-                var shadowAlpha = shadowIntensity / 100;
-                wrapper.style.boxShadow = "0 0 60px rgba(0,0,0," + shadowAlpha + ")";
+                wrapper.style.borderColor = frameBorderColor;
             }
         })();
         // Carousel: auto-play + dot sync
