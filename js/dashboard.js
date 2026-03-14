@@ -1293,7 +1293,7 @@ async function generatePublishableHTML(state, projectName) {
             .site-wrapper {
                 position: relative;
                 z-index: 1;
-                max-width: 375px;
+                max-width: 320px;
                 max-height: 90vh;
                 border: 1px solid rgba(255,255,255,0.15);
                 border-radius: 20px;
