@@ -250,9 +250,10 @@ class D2CategoriasEditor {
                         label: 'Cor do ícone (PNG)',
                         value: window.d2State.get(`${this.basePath}.icon.colorMode`, 'original'),
                         options: [
+                            { value: 'original', label: 'Original' },
+                            { value: 'colored', label: 'Cor do ícone' },
                             { value: 'white', label: 'Branco' },
-                            { value: 'black', label: 'Preto' },
-                            { value: 'original', label: 'Original' }
+                            { value: 'black', label: 'Preto' }
                         ],
                         path: `${this.basePath}.icon.colorMode`
                     })
@@ -283,6 +284,14 @@ class D2CategoriasEditor {
                         label: 'Cor do texto',
                         value: window.d2State.get(`${this.basePath}.label.color`, '#222222'),
                         path: `${this.basePath}.label.color`
+                    })
+                );
+
+                container.appendChild(
+                    C.createFontPicker({
+                        label: 'Família da fonte',
+                        value: window.d2State.get(`${this.basePath}.label.font`, 'Montserrat'),
+                        path: `${this.basePath}.label.font`
                     })
                 );
 

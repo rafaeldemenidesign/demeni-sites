@@ -46,25 +46,29 @@ async function compressImage(file, options = {}) {
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
 
-                // Fundo branco se NÃO preservar transparência (evita fundo preto em JPEGs)
-                if (!preserveTransparency) {
+                // Auto-detect PNG → always preserve transparency
+                const isPng = file.type === 'image/png' || (file.name && file.name.toLowerCase().endsWith('.png'));
+                const shouldPreserve = preserveTransparency || isPng;
+                if (isPng) console.log('[Image Utils] PNG detected — preserving transparency');
+
+                // Fundo branco apenas para JPEGs (evita fundo preto)
+                if (!shouldPreserve) {
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, width, height);
                 }
 
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Tenta WebP primeiro
+                // Tenta WebP primeiro (suporta alpha no Chrome)
                 let dataUrl;
                 try {
                     dataUrl = canvas.toDataURL('image/webp', quality);
-                    // Verifica se o browser realmente suporta WebP
                     if (!dataUrl.startsWith('data:image/webp')) {
                         throw new Error('WebP not supported');
                     }
                 } catch {
                     // Fallback: PNG se precisa de transparência, senão JPEG
-                    if (preserveTransparency) {
+                    if (shouldPreserve) {
                         dataUrl = canvas.toDataURL('image/png');
                     } else {
                         dataUrl = canvas.toDataURL('image/jpeg', quality);

@@ -295,6 +295,7 @@ function renderPreviewD2New(frame, state) {
     const categoriaLabelSize = get('categorias.label.size', 10);
     const categoriaLabelColor = get('categorias.label.color', '#222222');
     const categoriaLabelWeight = get('categorias.label.weight', 500);
+    const categoriaLabelFont = get('categorias.label.font', 'Montserrat') || 'Montserrat';
     const categoriaLabelLineHeight = get('categorias.label.lineHeight', 1.2);
     const categoriaLabelLetterSpacing = get('categorias.label.letterSpacing', 0.5);
     const categoriasItems = get('categorias.items', [
@@ -774,7 +775,7 @@ function renderPreviewD2New(frame, state) {
             .d2-hero .scroll-indicator {
                 position: relative;
                 display: block;
-                margin-top: ${heroScrollIndicatorMargin}px;
+                margin-top: ${heroScrollIndicatorMargin || 0}px;
                 transform: scaleX(${heroScrollIndicatorThickness / 100});
                 z-index: 10;
                 color: ${heroScrollIndicatorColor};
@@ -934,6 +935,7 @@ function renderPreviewD2New(frame, state) {
                 letter-spacing: ${categoriaLabelLetterSpacing}px;
                 color: ${categoriaLabelColor};
                 font-weight: ${categoriaLabelWeight};
+                font-family: '${categoriaLabelFont}', sans-serif;
                 text-align: center;
                 line-height: ${categoriaLabelLineHeight};
                 word-break: break-word;
@@ -1462,7 +1464,13 @@ function renderPreviewD2New(frame, state) {
                                 const cZoom = (cat.customIconZoom || 100) / 100;
                                 const cPosX = cat.customIconPosX ?? 50;
                                 const cPosY = cat.customIconPosY ?? 50;
-                                iconHtml = `<img src="${cat.customIcon}" alt="${cat.label}" style="transform:scale(${cZoom}) translate(${cPosX - 50}%, ${cPosY - 50}%);transform-origin:center center;filter:${categoriaIconFilter};">`;
+                                const transformCSS = `transform:scale(${cZoom}) translate(${cPosX - 50}%, ${cPosY - 50}%);transform-origin:center center;`;
+                                if (categoriaIconColorMode !== 'original') {
+                                    const maskColor = categoriaIconColorMode === 'white' ? '#ffffff' : categoriaIconColorMode === 'black' ? '#000000' : categoriaIconColor;
+                                    iconHtml = `<div style="${transformCSS}width:${Math.round(categoriaIconSize * 0.45)}px;height:${Math.round(categoriaIconSize * 0.45)}px;background:${maskColor};-webkit-mask:url('${cat.customIcon}') center/contain no-repeat;mask:url('${cat.customIcon}') center/contain no-repeat;"></div>`;
+                                } else {
+                                    iconHtml = `<img src="${cat.customIcon}" alt="${cat.label}" style="${transformCSS}">`;
+                                }
                             } else {
                                 const pngFallback = {
                                     'img/Pen Tool.png': 'fa-box-open',

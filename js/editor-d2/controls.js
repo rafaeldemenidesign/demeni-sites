@@ -507,10 +507,18 @@ window.D2Controls = {
 
                 canvas.width = width;
                 canvas.height = height;
+
+                // Preserve transparency for PNGs (same logic as image-utils.js)
+                const isPng = file.type === 'image/png' || (file.name && file.name.toLowerCase().endsWith('.png'));
+                if (isPng) {
+                    ctx.clearRect(0, 0, width, height);
+                }
+
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Converter para WebP
-                const webpDataUrl = canvas.toDataURL('image/webp', quality);
+                // PNG → keep as PNG (preserves alpha); others → WebP
+                const outputFormat = isPng ? 'image/png' : 'image/webp';
+                const webpDataUrl = canvas.toDataURL(outputFormat, isPng ? undefined : quality);
                 resolve(webpDataUrl);
             };
 
