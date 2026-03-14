@@ -1,4 +1,4 @@
-﻿/* ===========================
+/* ===========================
    DEMENI SITES - CREDITS MODULE
    Manages credits, purchases, and transactions
    =========================== */
@@ -200,8 +200,7 @@ const Credits = (function () {
 
         if (result.success) {
             const publishedUrl = subdomain ? `https://${subdomain}.rafaeldemeni.com` : `https://demeni.bio/${projectId.slice(0, 8)}`;
-            // 🛡️ FIX: AWAIT publishProject to prevent race condition with syncFromCloud
-            await UserData.publishProject(projectId, publishedUrl);
+            // NOTE: Do NOT call UserData.publishProject here — dashboard.js will call it AFTER deploy succeeds
 
             // Incrementar contador diário
             incrementTodayPublishes();
@@ -239,7 +238,7 @@ const Credits = (function () {
 
         if (result.success) {
             const publishedUrl = subdomain ? `https://${subdomain}.rafaeldemeni.com` : `https://demeni.bio/${projectId.slice(0, 8)}`;
-            UserData.publishProject(projectId, publishedUrl);
+            // NOTE: Do NOT call UserData.publishProject here — dashboard.js will call it AFTER deploy succeeds
             incrementTodayPublishes();
 
             if (window.XPSystem) {

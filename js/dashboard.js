@@ -931,9 +931,8 @@ async function showPublishModal(projectId) {
             UserData.updateProject(projectId, { subdomain: subdomain });
 
             if (isUpdate) {
-                // Free update — update project data + deploy updated HTML
+                // Free update — deploy updated HTML, mark published ONLY on success
                 const publishedUrl = `https://${subdomain}.rafaeldemeni.com`;
-                UserData.publishProject(projectId, publishedUrl);
 
                 // Deploy updated HTML to Supabase
                 let state = window.d2State ? window.d2State.getState() : null;
@@ -973,6 +972,7 @@ async function showPublishModal(projectId) {
                     }
 
                     if (!lastUpdateError) {
+                        UserData.publishProject(projectId, publishedUrl);
                         showPublishSuccess(publishedUrl);
                         updateHeaderPublishButton(projectId);
                     }
@@ -1576,7 +1576,8 @@ async function publishProject(id, subdomain) {
             }
         }
 
-        // Show success ONLY if deploy succeeded
+        // Show success ONLY if deploy succeeded — NOW mark project as published
+        await UserData.publishProject(id, result.publishedUrl);
         showPublishSuccess(result.publishedUrl);
         updateHeaderPublishButton(id);
         loadProjects();
