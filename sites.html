@@ -306,7 +306,7 @@
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#precos">Sites</a>
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#faq">Dúvidas</a>
             </nav>
-            <a class="hidden md:inline-flex btn-glow text-white px-6 py-1.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
+            <a id="header-cta-btn" class="hidden md:inline-flex btn-glow text-white px-6 py-1.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
                 style="background:#8836DA" href="#precos">
                 Quero Meu Card Digital
             </a>
@@ -932,14 +932,14 @@
         </div>
     </section>
     <section class="py-24 bg-slate-50 dark:bg-[#0e0e12]" id="faq">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl font-extrabold mb-4">Dúvidas Frequentes</h2>
                 <p class="text-slate-600 dark:text-slate-400">Respondemos as dúvidas que <span
                         class="font-bold text-primary">90% dos novos clientes</span> têm antes de
                     contratar.</p>
             </div>
-            <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="faq-grid">
                 <details open
                     class="group bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-white/5 p-6 cursor-pointer overflow-hidden">
                     <summary class="flex items-center justify-between font-bold text-lg list-none">
@@ -1163,6 +1163,49 @@
                 });
             }, { threshold: 0.2 });
             items.forEach(el => obs.observe(el));
+        })();
+    </script>
+
+    <!-- FAQ: accordion exclusivo (só um aberto por vez) -->
+    <script>
+        (function () {
+            const faqGrid = document.getElementById('faq-grid');
+            if (!faqGrid) return;
+            // Remove o 'open' default de todos exceto nenhum
+            faqGrid.querySelectorAll('details[open]').forEach(d => d.removeAttribute('open'));
+            faqGrid.addEventListener('toggle', function (e) {
+                if (e.target.tagName !== 'DETAILS' || !e.target.open) return;
+                faqGrid.querySelectorAll('details[open]').forEach(d => {
+                    if (d !== e.target) d.removeAttribute('open');
+                });
+            }, true);
+        })();
+    </script>
+
+    <!-- Header CTA: muda cor/link ao passar pela seção de preços -->
+    <script>
+        (function () {
+            const btn = document.getElementById('header-cta-btn');
+            const precosSection = document.getElementById('precos');
+            if (!btn || !precosSection) return;
+            const originalBg = '#8836DA';
+            const originalHref = '#precos';
+            const activeBg = '#16a34a';
+            const activeHref = 'https://wa.me/5583996353619?text=Quero%20Meu%20Card%20Digital';
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        btn.style.background = activeBg;
+                        btn.href = activeHref;
+                        btn.style.boxShadow = '0 0 24px rgba(22, 163, 74, 0.4)';
+                    } else {
+                        btn.style.background = originalBg;
+                        btn.href = originalHref;
+                        btn.style.boxShadow = '';
+                    }
+                });
+            }, { threshold: 0.15 });
+            obs.observe(precosSection);
         })();
     </script>
 </body>
