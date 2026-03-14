@@ -1273,10 +1273,10 @@ async function generatePublishableHTML(state, projectName) {
             body {
                 display: flex;
                 justify-content: center;
-                align-items: flex-start;
-                overflow-y: auto;
-                overflow-x: hidden;
-                padding: 32px 16px;
+                align-items: center;
+                height: 100vh;
+                overflow: hidden;
+                padding: 0 16px;
             }
             .d2-desktop-bg {
                 display: block;
@@ -1294,11 +1294,10 @@ async function generatePublishableHTML(state, projectName) {
                 position: relative;
                 z-index: 1;
                 max-width: 310px;
-                max-height: 90vh;
+                max-height: calc(100vh - 64px);
                 border: 1px solid rgba(255,255,255,0.15);
                 border-radius: 20px;
-                overflow-y: auto;
-                overflow-x: hidden;
+                overflow: hidden;
             }
             .site-wrapper::-webkit-scrollbar { width: 0; background: transparent; }
             .site-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
