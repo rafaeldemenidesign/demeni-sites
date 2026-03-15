@@ -908,11 +908,16 @@ async function showPublishModal(projectId) {
                 return;
             }
 
-            // 🛡️ Check if slug is available BEFORE spending credits
-            if (window.SupabaseClient?.isConfigured()) {
+            // 🛡️ Check if slug is available BEFORE spending credits (with timeout)
+            if (!isUpdate && window.SupabaseClient?.isConfigured()) {
                 try {
-                    const { available } = await SupabaseClient.isSlugAvailable(subdomain, projectId);
-                    if (!available) {
+                    const slugCheck = await Promise.race([
+                        SupabaseClient.isSlugAvailable(subdomain, projectId),
+                        new Promise(resolve => setTimeout(() => resolve({ available: true, timeout: true }), 5000))
+                    ]);
+                    if (slugCheck.timeout) {
+                        console.warn('[Publish] Slug check timed out, proceeding');
+                    } else if (!slugCheck.available) {
                         showNotification(`❌ A URL "${subdomain}.rafaeldemeni.com" já está em uso por outro projeto`);
                         subdomainInput.focus();
                         return;
@@ -921,6 +926,11 @@ async function showPublishModal(projectId) {
                     console.error('Slug check error:', e);
                 }
             }
+
+            // Visual feedback: show loading state on button
+            const prevBtnHTML = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+            confirmBtn.disabled = true;
 
             closeModal();
             // Set subdomain in state
