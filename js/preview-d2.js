@@ -368,6 +368,7 @@ function renderPreviewD2New(frame, state) {
     const produtoCardBorderEnabled = get('produtos.card.borderEnabled', false);
     const produtoCardBorderWidth = get('produtos.card.borderWidth', 1);
     const produtoCardBorderColor = get('produtos.card.borderColor', '#e0e0e0');
+    const produtoImageHeight = get('produtos.card.imageHeight', 75);
     const produtoTitleSize = get('produtos.title.size', 15);
     const produtoTitleWeight = get('produtos.title.weight', 500);
     const produtoTitleColor = get('produtos.title.color', '#333333');
@@ -1048,17 +1049,15 @@ function renderPreviewD2New(frame, state) {
             }
             .d2-produto-img {
                 width: 100%;
-                aspect-ratio: 4 / 3;
+                aspect-ratio: 100 / ${produtoImageHeight};
                 overflow: hidden;
                 border-radius: ${Math.max(produtoCardRadius - produtoCardPadding, 0)}px;
             }
             .d2-produto-img.d2-carousel-wrap {
-                overflow: visible;
+                overflow: clip;
             }
             .d2-produto-img.d2-carousel-wrap .d2-carousel-track {
                 border-radius: ${Math.max(produtoCardRadius - produtoCardPadding, 0)}px;
-                overflow: hidden;
-                overflow-x: auto;
             }
             .d2-produto-img img {
                 width: 100%;
@@ -1567,11 +1566,16 @@ function renderPreviewD2New(frame, state) {
                             let imageHTML;
                             if (productImages.length > 1) {
                                 const carouselId = 'carousel-' + (p.id || Math.random().toString(36).substr(2,6));
-                                const slidesHTML = productImages.map((img, imgI) => `
+                                const slidesHTML = productImages.map((img, imgI) => {
+                                    const s = (p.imageSettings || [])[imgI] || {};
+                                    const sZoom = (s.zoom || (imgI === 0 ? (p.imageZoom || 100) : 100)) / 100;
+                                    const sPosX = s.posX ?? (imgI === 0 ? (_pPosX) : 50);
+                                    const sPosY = s.posY ?? (imgI === 0 ? (_pPosY) : 50);
+                                    return `
                                     <div class="d2-carousel-slide" style="flex-shrink:0;width:100%;scroll-snap-align:start;">
-                                        <img src="${img}" alt="${p.title || 'Produto'} ${imgI+1}" style="width:100%;height:100%;object-fit:cover;${imgI === 0 ? `object-position:${_pPosX}% ${_pPosY}%;${_pZoom !== 1 ? `transform:scale(${_pZoom});transform-origin:${_pPosX}% ${_pPosY}%;` : ''}` : ''}">
-                                    </div>
-                                `).join('');
+                                        <img src="${img}" alt="${p.title || 'Produto'} ${imgI+1}" style="width:100%;height:100%;object-fit:cover;object-position:${sPosX}% ${sPosY}%;${sZoom !== 1 ? `transform:scale(${sZoom});transform-origin:${sPosX}% ${sPosY}%;` : ''}">
+                                    </div>`;
+                                }).join('');
                                 const dotsHTML = productImages.map((_, i) => `<span class="d2-carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}" style="width:7px;height:7px;border-radius:50%;background:${i === 0 ? '#fff' : 'rgba(255,255,255,0.4)'};cursor:pointer;transition:background 0.3s;"></span>`).join('');
                                 imageHTML = `
                                     <div class="d2-produto-img d2-carousel-wrap" id="${carouselId}" style="position:relative;">

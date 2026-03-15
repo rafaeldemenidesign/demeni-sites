@@ -193,6 +193,13 @@ class D2ProdutosEditor {
                     path: `${this.basePath}.card.borderRadius`
                 }));
 
+                container.appendChild(C.createSlider({
+                    label: 'Altura da imagem',
+                    value: window.d2State.get(`${this.basePath}.card.imageHeight`, 75),
+                    min: 40, max: 130, step: 5, unit: '%',
+                    path: `${this.basePath}.card.imageHeight`
+                }));
+
                 // ── BORDA ──
                 const borderDiv = document.createElement('div');
                 borderDiv.style.cssText = dividerStyle;
@@ -561,13 +568,22 @@ class D2ProdutosEditor {
                                         <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
                                         <button style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.7);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;line-height:1;" title="Remover">×</button>
                                     `;
+                                    // Delete button
                                     thumb.querySelector('button').addEventListener('click', (e) => {
                                         e.stopPropagation();
                                         const prods = [...(window.d2State.get('d2Products') || [])];
                                         const currentImgs = [...(prods[index].images || [])];
+                                        const currentSettings = [...(prods[index].imageSettings || [])];
                                         currentImgs.splice(imgIdx, 1);
-                                        prods[index] = { ...prods[index], images: currentImgs, image: currentImgs[0] || null };
+                                        currentSettings.splice(imgIdx, 1);
+                                        prods[index] = { ...prods[index], images: currentImgs, imageSettings: currentSettings, image: currentImgs[0] || null };
                                         window.d2State.set('d2Products', prods);
+                                    });
+                                    // Click thumbnail → open edit modal
+                                    thumb.addEventListener('click', (e) => {
+                                        if (e.target.tagName === 'BUTTON') return;
+                                        e.stopPropagation();
+                                        this._openImageEditModal(index, imgIdx, img, thumb);
                                     });
                                     strip.appendChild(thumb);
                                 });
@@ -607,38 +623,7 @@ class D2ProdutosEditor {
 
                                 itemContainer.appendChild(strip);
 
-                                // Ajuste da imagem (only for first image)
-                                if (images.length > 0) {
-                                    const posDiv = document.createElement('div');
-                                    posDiv.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 12px 0 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);';
-                                    posDiv.textContent = 'Ajuste da Foto';
-                                    itemContainer.appendChild(posDiv);
 
-                                    itemContainer.appendChild(
-                                        C.createSlider({
-                                            label: 'Zoom',
-                                            value: product.imageZoom || 100,
-                                            min: 100, max: 200, step: 5, unit: '%',
-                                            path: `d2Products.${index}.imageZoom`
-                                        })
-                                    );
-                                    itemContainer.appendChild(
-                                        C.createSlider({
-                                            label: 'Horizontal',
-                                            value: product.imagePosX ?? 50,
-                                            min: 0, max: 100, step: 1, unit: '%',
-                                            path: `d2Products.${index}.imagePosX`
-                                        })
-                                    );
-                                    itemContainer.appendChild(
-                                        C.createSlider({
-                                            label: 'Vertical',
-                                            value: product.imagePosY ?? 50,
-                                            min: 0, max: 100, step: 1, unit: '%',
-                                            path: `d2Products.${index}.imagePosY`
-                                        })
-                                    );
-                                }
 
                                 // ── Botão individual ──
                                 const btnDiv = document.createElement('div');
@@ -727,6 +712,140 @@ class D2ProdutosEditor {
         fragment.appendChild(productsGroup);
 
         return fragment;
+    }
+
+    /**
+     * Opens a mini-modal for editing individual image zoom/position
+     */
+    _openImageEditModal(productIndex, imageIndex, imageSrc, anchorEl) {
+        // Remove any existing modal
+        document.querySelector('.d2-img-edit-modal-overlay')?.remove();
+
+        const C = window.D2Controls;
+        const product = (window.d2State.get('d2Products') || [])[productIndex];
+        if (!product) return;
+
+        const settings = (product.imageSettings || [])[imageIndex] || {};
+        const zoom = settings.zoom || product.imageZoom || 100;
+        const posX = settings.posX ?? product.imagePosX ?? 50;
+        const posY = settings.posY ?? product.imagePosY ?? 50;
+
+        // Overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'd2-img-edit-modal-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
+
+        // Modal
+        const modal = document.createElement('div');
+        modal.style.cssText = 'background:#1e1e2e;border-radius:16px;padding:20px;width:320px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);';
+
+        // Preview image
+        const previewWrap = document.createElement('div');
+        previewWrap.style.cssText = 'width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;margin-bottom:16px;position:relative;';
+        const previewImg = document.createElement('img');
+        previewImg.src = imageSrc;
+        previewImg.style.cssText = `width:100%;height:100%;object-fit:cover;object-position:${posX}% ${posY}%;transform:scale(${zoom / 100});transform-origin:${posX}% ${posY}%;`;
+        previewWrap.appendChild(previewImg);
+
+        // Title
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:14px;font-weight:600;color:#fff;margin-bottom:12px;text-align:center;';
+        title.textContent = `Imagem ${imageIndex + 1}`;
+
+        modal.appendChild(title);
+        modal.appendChild(previewWrap);
+
+        // Helper to update settings
+        const updateSetting = (key, val) => {
+            const prods = [...(window.d2State.get('d2Products') || [])];
+            const settingsArr = [...(prods[productIndex].imageSettings || [])];
+            // Ensure array is long enough
+            while (settingsArr.length <= imageIndex) settingsArr.push({});
+            settingsArr[imageIndex] = { ...settingsArr[imageIndex], [key]: val };
+            prods[productIndex] = { ...prods[productIndex], imageSettings: settingsArr };
+            // Also update legacy fields if it's image 0
+            if (imageIndex === 0) {
+                if (key === 'zoom') prods[productIndex].imageZoom = val;
+                if (key === 'posX') prods[productIndex].imagePosX = val;
+                if (key === 'posY') prods[productIndex].imagePosY = val;
+            }
+            window.d2State.set('d2Products', prods);
+
+            // Update preview image
+            const s = settingsArr[imageIndex];
+            const z = (s.zoom || 100) / 100;
+            const px = s.posX ?? 50;
+            const py = s.posY ?? 50;
+            previewImg.style.objectPosition = `${px}% ${py}%`;
+            previewImg.style.transform = `scale(${z})`;
+            previewImg.style.transformOrigin = `${px}% ${py}%`;
+        };
+
+        // Zoom slider
+        modal.appendChild(C.createSlider({
+            label: 'Zoom',
+            value: zoom,
+            min: 100, max: 200, step: 5, unit: '%',
+            path: `__temp_img_zoom`,
+            onChange: (v) => updateSetting('zoom', v)
+        }));
+
+        // Horizontal slider
+        modal.appendChild(C.createSlider({
+            label: 'Horizontal',
+            value: posX,
+            min: 0, max: 100, step: 1, unit: '%',
+            path: `__temp_img_posX`,
+            onChange: (v) => updateSetting('posX', v)
+        }));
+
+        // Vertical slider
+        modal.appendChild(C.createSlider({
+            label: 'Vertical',
+            value: posY,
+            min: 0, max: 100, step: 1, unit: '%',
+            path: `__temp_img_posY`,
+            onChange: (v) => updateSetting('posY', v)
+        }));
+
+        // Since createSlider saves to path via d2State, we need manual event listeners
+        // to also call updateSetting. Override the slider inputs.
+        setTimeout(() => {
+            modal.querySelectorAll('input[type="range"]').forEach((slider, i) => {
+                slider.addEventListener('input', () => {
+                    const val = parseFloat(slider.value);
+                    if (i === 0) updateSetting('zoom', val);
+                    else if (i === 1) updateSetting('posX', val);
+                    else if (i === 2) updateSetting('posY', val);
+                });
+            });
+        }, 50);
+
+        // Close button
+        const closeBtn = document.createElement('button');
+        closeBtn.style.cssText = 'width:100%;padding:10px;background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;';
+        closeBtn.textContent = 'Fechar';
+        closeBtn.addEventListener('click', () => {
+            overlay.remove();
+            // Re-render the section to update the panel
+            document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                detail: { sectionId: 'produtos' }
+            }));
+        });
+        modal.appendChild(closeBtn);
+
+        overlay.appendChild(modal);
+        // Close on backdrop click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+                document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                    detail: { sectionId: 'produtos' }
+                }));
+            }
+        });
+
+        document.body.appendChild(overlay);
     }
 }
 
