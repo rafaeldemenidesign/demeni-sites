@@ -7,6 +7,7 @@ const PLATFORM_HOSTS = [
     'rafaeldemeni.com',
     'www.rafaeldemeni.com',
     'sites.rafaeldemeni.com',
+    'app.rafaeldemeni.com',
 ];
 
 const SUPABASE_URL = 'https://aeyxdqggngapczohqvbo.supabase.co';
