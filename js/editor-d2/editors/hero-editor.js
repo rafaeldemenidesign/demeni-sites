@@ -908,8 +908,12 @@ class D2HeroEditor {
                     () => {
                         const inner = document.createElement('div');
                         const currentLink = window.d2State.get(`${this.basePath}.btn.link`, '#');
+                        const isCustom = currentLink && currentLink !== '' && !currentLink.startsWith('#');
 
-                        // Dropdown para seções
+                        // Build select manually (createSelect doesn't support onChange)
+                        const selectContainer = document.createElement('div');
+                        selectContainer.className = 'control-item';
+
                         const sectionOptions = [
                             { value: '#', label: 'Nenhum (sem link)' },
                             { value: '#section-categorias', label: '↓ Categorias' },
@@ -920,40 +924,37 @@ class D2HeroEditor {
                             { value: 'custom', label: '🔗 Link externo...' }
                         ];
 
-                        const isCustom = currentLink && !currentLink.startsWith('#');
+                        const selectedValue = isCustom ? 'custom' : currentLink;
 
-                        inner.appendChild(
-                            C.createSelect({
-                                label: 'Destino',
-                                value: isCustom ? 'custom' : currentLink,
-                                options: sectionOptions,
-                                path: `${this.basePath}.btn.linkTarget`,
-                                onChange: (val) => {
-                                    if (val === 'custom') {
-                                        // Keep existing custom link or set empty
-                                        const existingLink = window.d2State.get(`${this.basePath}.btn.link`, '');
-                                        if (!existingLink || existingLink.startsWith('#')) {
-                                            window.d2State.set(`${this.basePath}.btn.link`, '');
-                                        }
-                                    } else {
-                                        window.d2State.set(`${this.basePath}.btn.link`, val);
-                                    }
-                                    window.d2State.set(`${this.basePath}.btn.linkTarget`, val);
-                                    // Re-render to show/hide custom URL field
-                                    document.dispatchEvent(new CustomEvent('d2:section-selected', {
-                                        detail: { sectionId: 'hero' }
-                                    }));
-                                }
-                            })
-                        );
+                        selectContainer.innerHTML = `
+                            <label>Destino</label>
+                            <select class="control-select">
+                                ${sectionOptions.map(opt => `<option value="${opt.value}" ${opt.value === selectedValue ? 'selected' : ''}>${opt.label}</option>`).join('')}
+                            </select>
+                        `;
 
-                        // Show custom URL input if "Link externo" is selected
-                        const linkTarget = window.d2State.get(`${this.basePath}.btn.linkTarget`, isCustom ? 'custom' : currentLink);
-                        if (linkTarget === 'custom' || isCustom) {
+                        const select = selectContainer.querySelector('select');
+                        select.addEventListener('change', () => {
+                            const val = select.value;
+                            if (val === 'custom') {
+                                window.d2State.set(`${this.basePath}.btn.link`, '');
+                            } else {
+                                window.d2State.set(`${this.basePath}.btn.link`, val);
+                            }
+                            // Re-render to show/hide custom URL field
+                            document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                                detail: { sectionId: 'hero' }
+                            }));
+                        });
+
+                        inner.appendChild(selectContainer);
+
+                        // Show custom URL input when "Link externo" is selected
+                        if (isCustom) {
                             inner.appendChild(
                                 C.createTextInput({
                                     label: 'URL',
-                                    value: isCustom ? currentLink : window.d2State.get(`${this.basePath}.btn.link`, ''),
+                                    value: currentLink,
                                     placeholder: 'https://exemplo.com',
                                     path: `${this.basePath}.btn.link`
                                 })
