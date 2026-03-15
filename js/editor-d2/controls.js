@@ -1005,6 +1005,22 @@ window.D2Controls = {
             path: `${tgPath}.enabled`
         }));
 
+        // Re-render when toggle changes (so presets appear/disappear)
+        const _subKey = `__d2TextGradSub_${basePath.replace(/\./g, '_')}`;
+        if (!window[_subKey]) {
+            window[_subKey] = true;
+            window.d2State.subscribe(({ path }) => {
+                if (path === `${tgPath}.enabled`) {
+                    // Determine which section to re-render
+                    const sectionId = basePath.startsWith('d2Adjustments.hero') ? 'hero'
+                        : basePath.replace('d2Adjustments.', '').split('.')[0];
+                    document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                        detail: { sectionId }
+                    }));
+                }
+            });
+        }
+
         // Presets de degradê (quando ativado)
         if (window.d2State.get(`${tgPath}.enabled`, false)) {
             const label = document.createElement('div');

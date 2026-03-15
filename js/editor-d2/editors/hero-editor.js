@@ -755,6 +755,14 @@ class D2HeroEditor {
                     })
                 );
 
+                container.appendChild(
+                    C.createFontPicker({
+                        label: 'Família da fonte',
+                        value: window.d2State.get(`${this.basePath}.subtitle.font`, 'Inter'),
+                        path: `${this.basePath}.subtitle.font`
+                    })
+                );
+
                 // Texto gradiente
                 container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.subtitle` }));
 

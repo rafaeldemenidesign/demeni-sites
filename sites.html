@@ -33,10 +33,15 @@
     <meta name="twitter:image" content="https://sites.rafaeldemeni.com/img/og-preview.png" />
     <link rel="icon" type="image/png" href="img/favicon.png">
     <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet" />
+    <!-- Inter: self-hosted for performance (eliminates render-blocking Google Fonts request) -->
+    <style>
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 300; font-display: swap; src: url('fonts/inter-300.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/inter-400.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/inter-500.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/inter-600.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/inter-700.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 800; font-display: swap; src: url('fonts/inter-800.woff2') format('woff2'); }
+    </style>
     <link rel="preload" as="image" type="image/webp" href="img/BG-LP-Sites-3.webp" fetchpriority="high" />
 
     <!-- Material Icons: lazy-load (only used for a few footer icons) -->
