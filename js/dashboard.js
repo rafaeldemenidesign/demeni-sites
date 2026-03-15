@@ -2761,7 +2761,7 @@ function setupEditorHeaderButtons() {
         }
     });
 
-    // Publish button
+    // Publish / Update button
     document.getElementById('btn-publish-header')?.addEventListener('click', async () => {
         const projectId = UserData.getCurrentProjectId();
         if (!projectId) { showNotification('⚠️ Nenhum projeto selecionado'); return; }
@@ -2773,7 +2773,9 @@ function setupEditorHeaderButtons() {
             const isD1Active = document.getElementById('page-editor-d1-new')?.classList.contains('active');
             if (isD1Active) { saveD1NewProject(); } else { saveD2Project(); }
             const ok = await UserData.explicitSave(projectId);
-            if (!ok) { showNotification('⚠️ Erro ao salvar. Tente novamente antes de publicar.'); return; }
+            if (!ok) {
+                console.warn('[Publish] Cloud save failed, proceeding with local data');
+            }
             showPublishModal(projectId);
         } catch (e) {
             console.error('[Publish] Save before publish failed:', e);
