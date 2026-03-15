@@ -1355,36 +1355,51 @@ async function generatePublishableHTML(state, projectName) {
         (function(){
             var autoplayEnabled = ${JSON.stringify(state?.d2Adjustments?.produtos?.carousel?.autoplay !== false)};
             var intervalMs = ${JSON.stringify((state?.d2Adjustments?.produtos?.carousel?.interval || 3) * 1000)};
-            document.querySelectorAll('.d2-carousel-wrap').forEach(function(wrap){
-                var track=wrap.querySelector('.d2-carousel-track');
-                var dots=wrap.querySelectorAll('.d2-carousel-dot');
-                if(!track||dots.length===0)return;
-                var syncDots=function(){
-                    var w=track.offsetWidth;if(w===0)return;
-                    var idx=Math.round(track.scrollLeft/w);
-                    dots.forEach(function(d,i){d.style.background=i===idx?'#fff':'rgba(255,255,255,0.4)';});
-                };
-                track.addEventListener('scroll',syncDots,{passive:true});
-                dots.forEach(function(dot){
-                    dot.addEventListener('click',function(e){
-                        e.preventDefault();e.stopPropagation();
-                        track.scrollTo({left:parseInt(dot.dataset.idx)*track.offsetWidth,behavior:'smooth'});
-                    });
+            function initCarousels(){
+                document.querySelectorAll('.d2-carousel-wrap').forEach(function(wrap){
+                    var track=wrap.querySelector('.d2-carousel-track');
+                    if(!track)return;
+                    var dots=wrap.querySelectorAll('.d2-carousel-dot');
+                    // Dot sync (works even if dots are hidden)
+                    if(dots.length>0){
+                        var syncDots=function(){
+                            var w=track.offsetWidth;if(w===0)return;
+                            var idx=Math.round(track.scrollLeft/w);
+                            dots.forEach(function(d,i){d.style.background=i===idx?'#fff':'rgba(255,255,255,0.4)';});
+                        };
+                        track.addEventListener('scroll',syncDots,{passive:true});
+                        dots.forEach(function(dot){
+                            dot.addEventListener('click',function(e){
+                                e.preventDefault();e.stopPropagation();
+                                track.scrollTo({left:parseInt(dot.dataset.idx)*track.offsetWidth,behavior:'smooth'});
+                            });
+                        });
+                    }
+                    // Autoplay (independent of dots)
+                    if(!autoplayEnabled)return;
+                    var slides=track.querySelectorAll('.d2-carousel-slide');
+                    if(slides.length<2)return;
+                    var advance=function(){
+                        var max=track.scrollWidth-track.offsetWidth;
+                        if(max<=0)return;
+                        if(track.scrollLeft>=max-5){track.scrollTo({left:0,behavior:'smooth'});}
+                        else{track.scrollBy({left:track.offsetWidth,behavior:'smooth'});}
+                    };
+                    var iv=setInterval(advance,intervalMs);
+                    var stopAP=function(){clearInterval(iv);};
+                    var startAP=function(){clearInterval(iv);iv=setInterval(advance,intervalMs);};
+                    wrap.addEventListener('mouseenter',stopAP);
+                    wrap.addEventListener('mouseleave',startAP);
+                    wrap.addEventListener('touchstart',stopAP,{passive:true});
+                    wrap.addEventListener('touchend',function(){setTimeout(startAP,2000);},{passive:true});
                 });
-                if(!autoplayEnabled)return;
-                var advance=function(){
-                    var max=track.scrollWidth-track.offsetWidth;
-                    if(track.scrollLeft>=max-5){track.scrollTo({left:0,behavior:'smooth'});}
-                    else{track.scrollBy({left:track.offsetWidth,behavior:'smooth'});}
-                };
-                var iv=setInterval(advance,intervalMs);
-                var stopAutoplay=function(){clearInterval(iv);};
-                var startAutoplay=function(){clearInterval(iv);iv=setInterval(advance,intervalMs);};
-                wrap.addEventListener('mouseenter',stopAutoplay);
-                wrap.addEventListener('mouseleave',startAutoplay);
-                wrap.addEventListener('touchstart',stopAutoplay,{passive:true});
-                wrap.addEventListener('touchend',function(){setTimeout(startAutoplay,2000);},{passive:true});
-            });
+            }
+            // Run after DOM is fully parsed and rendered
+            if(document.readyState==='loading'){
+                document.addEventListener('DOMContentLoaded',function(){setTimeout(initCarousels,100);});
+            } else {
+                setTimeout(initCarousels,100);
+            }
         })();
         // Watermark — Powered by Demeni Sites
         (function(){
