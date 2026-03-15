@@ -2728,14 +2728,22 @@ function setupEditorHeaderButtons() {
         try {
             const isD1Active = document.getElementById('page-editor-d1-new')?.classList.contains('active');
             if (isD1Active) { saveD1NewProject(); } else { saveD2Project(); }
-            const ok = await UserData.explicitSave(projectId);
+            // Timeout: don't hang forever if Supabase is slow
+            const saveWithTimeout = Promise.race([
+                UserData.explicitSave(projectId),
+                new Promise(resolve => setTimeout(() => resolve(false), 8000))
+            ]);
+            const ok = await saveWithTimeout;
             if (!ok) {
-                console.warn('[Publish] Cloud save failed, proceeding with local data');
+                console.warn('[Publish] Cloud save failed/timed out, proceeding with local data');
             }
             showPublishModal(projectId);
         } catch (e) {
             console.error('[Publish] Save before publish failed:', e);
-            showNotification('⚠️ Erro ao salvar. Tente novamente.');
+            // Even on error, try to publish with local data
+            try { showPublishModal(projectId); } catch(e2) {
+                showNotification('⚠️ Erro ao salvar. Tente novamente.');
+            }
         } finally {
             btn.innerHTML = prevHTML;
             btn.disabled = false;
