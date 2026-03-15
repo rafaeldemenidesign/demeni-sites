@@ -1452,19 +1452,7 @@ async function generatePublishableHTML(state, projectName) {
                 if(document.querySelector('.pwa-install-banner'))return;
                 var banner=document.createElement('div');
                 banner.className='pwa-install-banner';
-                banner.innerHTML='\
-                    <div style="display:flex;align-items:center;gap:12px;flex:1">\
-                        <div style="width:44px;height:44px;border-radius:12px;background:'+themeColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">\
-                            <img src="'+faviconUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">\
-                        </div>\
-                        <div style="flex:1">\
-                            <div style="font-weight:700;font-size:14px;color:#fff">'+appName+'</div>\
-                            <div style="font-size:12px;color:rgba(255,255,255,0.7)">Adicionar à tela inicial</div>\
-                        </div>\
-                    </div>\
-                    <button id="pwa-install-btn" style="background:#fff;color:'+themeColor+';border:none;padding:8px 18px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Instalar</button>\
-                    <button id="pwa-dismiss-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px 8px;margin-left:4px">&times;</button>\
-                ';
+                banner.innerHTML='<div style="display:flex;align-items:center;gap:12px;flex:1"><div style="width:44px;height:44px;border-radius:12px;background:'+themeColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden"><img src="'+faviconUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div><div style="flex:1"><div style="font-weight:700;font-size:14px;color:#fff">'+appName+'</div><div style="font-size:12px;color:rgba(255,255,255,0.7)">Adicionar \u00e0 tela inicial</div></div></div><button id="pwa-install-btn" style="background:#fff;color:'+themeColor+';border:none;padding:8px 18px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Instalar</button><button id="pwa-dismiss-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px 8px;margin-left:4px">&times;</button>';
                 banner.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,'+themeColor+','+themeColor+'dd);backdrop-filter:blur(10px);padding:14px 16px;display:flex;align-items:center;gap:8px;font-family:sans-serif;box-shadow:0 -4px 20px rgba(0,0,0,0.3);animation:pwa-slide-up .4s ease';
                 document.body.appendChild(banner);
 
@@ -1495,18 +1483,7 @@ async function generatePublishableHTML(state, projectName) {
                     if(document.querySelector('.pwa-install-banner'))return;
                     var banner=document.createElement('div');
                     banner.className='pwa-install-banner';
-                    banner.innerHTML='\
-                        <div style="display:flex;align-items:center;gap:12px;flex:1">\
-                            <div style="width:44px;height:44px;border-radius:12px;background:'+themeColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">\
-                                <img src="'+faviconUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">\
-                            </div>\
-                            <div style="flex:1">\
-                                <div style="font-weight:700;font-size:14px;color:#fff">'+appName+'</div>\
-                                <div style="font-size:12px;color:rgba(255,255,255,0.7)">Toque em <strong>Compartilhar</strong> ➜ <strong>Adicionar à Tela</strong></div>\
-                            </div>\
-                        </div>\
-                        <button id="pwa-dismiss-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px 8px">&times;</button>\
-                    ';
+                    banner.innerHTML='<div style="display:flex;align-items:center;gap:12px;flex:1"><div style="width:44px;height:44px;border-radius:12px;background:'+themeColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden"><img src="'+faviconUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div><div style="flex:1"><div style="font-weight:700;font-size:14px;color:#fff">'+appName+'</div><div style="font-size:12px;color:rgba(255,255,255,0.7)">Toque em <strong>Compartilhar</strong> \u27a1 <strong>Adicionar \u00e0 Tela</strong></div></div></div><button id="pwa-dismiss-btn" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px 8px">&times;</button>';
                     banner.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,'+themeColor+','+themeColor+'dd);backdrop-filter:blur(10px);padding:14px 16px;display:flex;align-items:center;gap:8px;font-family:sans-serif;box-shadow:0 -4px 20px rgba(0,0,0,0.3);animation:pwa-slide-up .4s ease';
                     var style=document.createElement('style');
                     style.textContent='@keyframes pwa-slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}';
