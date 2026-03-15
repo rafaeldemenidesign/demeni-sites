@@ -103,7 +103,7 @@ export default async function middleware(request) {
             status: 200,
             headers: {
                 'Content-Type': 'text/html; charset=utf-8',
-                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+                'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=2592000',
                 'X-Site-Name': data[0].name || slug,
                 'X-Powered-By': 'Demeni Sites',
             },
