@@ -189,6 +189,7 @@ function renderPreviewD2New(frame, state) {
     const sidebarAccentColor = get('header.sidebar.accentColor', '#e67e22');
     const sidebarWidth = get('header.sidebar.width', 280);
     const sidebarFontSize = get('header.sidebar.fontSize', 15);
+    const sidebarFont = get('header.sidebar.font', 'Inter');
     const sidebarIconSize = get('header.sidebar.iconSize', 16);
     const sidebarItemPadding = get('header.sidebar.itemPadding', 14);
     const sidebarBorderWidth = get('header.sidebar.borderWidth', 3);
@@ -588,7 +589,7 @@ function renderPreviewD2New(frame, state) {
     const baseFont = heroTitleFont || 'Inter';
 
     // Coleta todas as fontes usadas para gerar os @import do Google Fonts
-    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont, produtoTitleFont].filter(Boolean));
+    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont, produtoTitleFont, sidebarFont].filter(Boolean));
     const fontImports = [...usedFonts].map(fontName => {
         const fontEntry = window.D2Controls?.FONT_REGISTRY?.find(f => f.value === fontName);
         return fontEntry ? `@import url('${fontEntry.url}');` : '';
@@ -722,6 +723,7 @@ function renderPreviewD2New(frame, state) {
                 transition: background 0.2s, color 0.2s;
                 text-decoration: none;
                 font-size: ${sidebarFontSize}px;
+                font-family: '${sidebarFont}', sans-serif;
                 border-${headerLogoPosition === 'right' ? 'left' : 'right'}: ${sidebarBorderWidth}px solid transparent;
                 ${sidebarShowSeparators ? `border-bottom: 1px solid rgba(255,255,255,0.08);` : ''}
             }

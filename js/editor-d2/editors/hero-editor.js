@@ -317,6 +317,14 @@ class D2HeroEditor {
                 );
 
                 container.appendChild(
+                    C.createFontPicker({
+                        label: 'Família da fonte',
+                        value: window.d2State.get('d2Adjustments.header.sidebar.font', 'Inter'),
+                        path: 'd2Adjustments.header.sidebar.font'
+                    })
+                );
+
+                container.appendChild(
                     C.createSlider({
                         label: 'Tamanho do ícone',
                         value: window.d2State.get('d2Adjustments.header.sidebar.iconSize', 16),
