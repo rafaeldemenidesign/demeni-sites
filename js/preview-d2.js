@@ -1052,6 +1052,14 @@ function renderPreviewD2New(frame, state) {
                 overflow: hidden;
                 border-radius: ${Math.max(produtoCardRadius - produtoCardPadding, 0)}px;
             }
+            .d2-produto-img.d2-carousel-wrap {
+                overflow: visible;
+            }
+            .d2-produto-img.d2-carousel-wrap .d2-carousel-track {
+                border-radius: ${Math.max(produtoCardRadius - produtoCardPadding, 0)}px;
+                overflow: hidden;
+                overflow-x: auto;
+            }
             .d2-produto-img img {
                 width: 100%;
                 height: 100%;
@@ -1433,7 +1441,7 @@ function renderPreviewD2New(frame, state) {
             /* Carousel styles */
             .d2-carousel-track::-webkit-scrollbar { display: none; }
             .d2-carousel-track { scrollbar-width: none; -ms-overflow-style: none; }
-            .d2-carousel-wrap { position: relative; overflow: hidden; }
+            .d2-carousel-wrap { position: relative; }
             .d2-carousel-arrow { opacity: 0; transition: opacity 0.2s; }
             .d2-carousel-wrap:hover .d2-carousel-arrow { opacity: 1; }
         </style>
