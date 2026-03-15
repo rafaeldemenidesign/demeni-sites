@@ -1579,7 +1579,7 @@ function renderPreviewD2New(frame, state) {
                                 }).join('');
                                 const dotsHTML = productImages.map((_, i) => `<span class="d2-carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}" style="width:7px;height:7px;border-radius:50%;background:${i === 0 ? '#fff' : 'rgba(255,255,255,0.4)'};cursor:pointer;transition:background 0.3s;"></span>`).join('');
                                 imageHTML = `
-                                    <div class="d2-produto-img d2-carousel-wrap" id="${carouselId}" style="position:relative;">
+                                    <div class="d2-produto-img d2-carousel-wrap" id="${carouselId}" data-autoplay="${carouselAutoplay}" data-interval="${carouselInterval * 1000}" style="position:relative;">
                                         <div class="d2-carousel-track" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:100%;">
                                             ${slidesHTML}
                                         </div>

@@ -1351,53 +1351,9 @@ async function generatePublishableHTML(state, projectName) {
                 wrapper.style.borderColor = frameBorderColor;
             }
         })();
-        // Carousel: auto-play + dot sync + touch support
-        (function(){
-            var autoplayEnabled = ${JSON.stringify(state?.d2Adjustments?.produtos?.carousel?.autoplay !== false)};
-            var intervalMs = ${JSON.stringify((state?.d2Adjustments?.produtos?.carousel?.interval || 3) * 1000)};
-            function initCarousels(){
-                document.querySelectorAll('.d2-carousel-wrap').forEach(function(wrap){
-                    var track=wrap.querySelector('.d2-carousel-track');
-                    if(!track)return;
-                    var dots=wrap.querySelectorAll('.d2-carousel-dot');
-                    if(dots.length>0){
-                        var syncDots=function(){
-                            var w=track.offsetWidth;if(w===0)return;
-                            var idx=Math.round(track.scrollLeft/w);
-                            dots.forEach(function(d,i){d.style.background=i===idx?'#fff':'rgba(255,255,255,0.4)';});
-                        };
-                        track.addEventListener('scroll',syncDots,{passive:true});
-                        dots.forEach(function(dot){
-                            dot.addEventListener('click',function(e){
-                                e.preventDefault();e.stopPropagation();
-                                track.scrollTo({left:parseInt(dot.dataset.idx)*track.offsetWidth,behavior:'smooth'});
-                            });
-                        });
-                    }
-                    if(!autoplayEnabled)return;
-                    var slides=track.querySelectorAll('.d2-carousel-slide');
-                    if(slides.length<2)return;
-                    var advance=function(){
-                        var max=track.scrollWidth-track.offsetWidth;
-                        if(max<=0)return;
-                        if(track.scrollLeft>=max-5){track.scrollTo({left:0,behavior:'smooth'});}
-                        else{track.scrollBy({left:track.offsetWidth,behavior:'smooth'});}
-                    };
-                    var iv=setInterval(advance,intervalMs);
-                    var stopAP=function(){clearInterval(iv);};
-                    var startAP=function(){clearInterval(iv);iv=setInterval(advance,intervalMs);};
-                    wrap.addEventListener('mouseenter',stopAP);
-                    wrap.addEventListener('mouseleave',startAP);
-                    wrap.addEventListener('touchstart',stopAP,{passive:true});
-                    wrap.addEventListener('touchend',function(){setTimeout(startAP,2000);},{passive:true});
-                });
-            }
-            if(document.readyState==='loading'){
-                document.addEventListener('DOMContentLoaded',function(){setTimeout(initCarousels,100);});
-            } else {
-                setTimeout(initCarousels,100);
-            }
-        })();
+    </script>
+    <script src="https://app.rafaeldemeni.com/js/published-carousel.js"></script>
+    <script>
         // Watermark — Powered by Demeni Sites
         (function(){
             var w=document.createElement('div');
