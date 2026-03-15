@@ -1351,8 +1351,10 @@ async function generatePublishableHTML(state, projectName) {
                 wrapper.style.borderColor = frameBorderColor;
             }
         })();
-        // Carousel: auto-play + dot sync
+        // Carousel: auto-play + dot sync + touch support
         (function(){
+            var autoplayEnabled = ${JSON.stringify(state?.d2Adjustments?.produtos?.carousel?.autoplay !== false)};
+            var intervalMs = ${JSON.stringify((state?.d2Adjustments?.produtos?.carousel?.interval || 3) * 1000)};
             document.querySelectorAll('.d2-carousel-wrap').forEach(function(wrap){
                 var track=wrap.querySelector('.d2-carousel-track');
                 var dots=wrap.querySelectorAll('.d2-carousel-dot');
@@ -1369,15 +1371,19 @@ async function generatePublishableHTML(state, projectName) {
                         track.scrollTo({left:parseInt(dot.dataset.idx)*track.offsetWidth,behavior:'smooth'});
                     });
                 });
+                if(!autoplayEnabled)return;
                 var advance=function(){
                     var max=track.scrollWidth-track.offsetWidth;
                     if(track.scrollLeft>=max-5){track.scrollTo({left:0,behavior:'smooth'});}
                     else{track.scrollBy({left:track.offsetWidth,behavior:'smooth'});}
                 };
-                var iv=setInterval(advance,3000);
-                wrap.addEventListener('mouseenter',function(){clearInterval(iv);});
-                wrap.addEventListener('touchstart',function(){clearInterval(iv);},{passive:true});
-                wrap.addEventListener('mouseleave',function(){iv=setInterval(advance,3000);});
+                var iv=setInterval(advance,intervalMs);
+                var stopAutoplay=function(){clearInterval(iv);};
+                var startAutoplay=function(){clearInterval(iv);iv=setInterval(advance,intervalMs);};
+                wrap.addEventListener('mouseenter',stopAutoplay);
+                wrap.addEventListener('mouseleave',startAutoplay);
+                wrap.addEventListener('touchstart',stopAutoplay,{passive:true});
+                wrap.addEventListener('touchend',function(){setTimeout(startAutoplay,2000);},{passive:true});
             });
         })();
         // Watermark — Powered by Demeni Sites
