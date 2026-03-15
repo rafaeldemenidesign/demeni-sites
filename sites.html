@@ -306,21 +306,25 @@
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#precos">Sites</a>
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="#faq">Dúvidas</a>
             </nav>
-            <div id="header-cta-wrap" class="hidden md:flex items-center justify-center" style="height:36px;gap:0;transition:gap 0.3s ease">
-                <a id="header-cta-btn" class="btn-glow text-white rounded-full font-bold text-sm shadow-lg shadow-primary/20 flex items-center justify-center overflow-hidden"
-                    style="background:#8836DA;padding:6px 24px;height:36px;transition:width 0.3s ease,padding 0.3s ease,opacity 0.25s ease" href="#precos">
-                    <span id="cta-main-text" style="white-space:nowrap;display:inline-block;clip-path:inset(0 0% 0 0%);transition:clip-path 0.3s ease">Quero Meu Card Digital</span>
+            <div id="header-cta-wrap" class="hidden md:inline-flex relative">
+                <!-- Main button — ORIGINAL styling preserved -->
+                <a id="header-cta-btn" class="btn-glow text-white px-6 py-1.5 rounded-full font-bold text-sm shadow-lg shadow-primary/20 inline-flex items-center justify-center"
+                    style="background:#8836DA;transition:opacity 0.5s ease" href="#precos">
+                    <span id="cta-main-text" style="white-space:nowrap;display:inline-block;clip-path:inset(0 0% 0 0%);transition:clip-path 0.35s ease">Quero Meu Card Digital</span>
                 </a>
-                <a id="cta-d1" class="rounded-full font-bold text-xs flex items-center justify-center overflow-hidden"
-                    style="background:#8836DA;color:white;border:2px solid #8836DA;height:36px;width:0;padding:0;opacity:0;pointer-events:none;transition:width 0.3s ease,padding 0.3s ease,opacity 0.25s ease,background 0.3s ease,border-color 0.3s ease,color 0.3s ease"
-                    href="https://mpago.li/2kh8AFG">
-                    <span id="cta-d1-text" style="white-space:nowrap;display:inline-block;transform:translateX(150%);transition:transform 0.3s ease">Quero D-1</span>
-                </a>
-                <a id="cta-d2" class="rounded-full font-bold text-xs flex items-center justify-center overflow-hidden brand-gradient shadow-lg shadow-primary/20"
-                    style="color:white;height:36px;width:0;padding:0;opacity:0;pointer-events:none;transition:width 0.3s ease,padding 0.3s ease,opacity 0.25s ease"
-                    href="https://mpago.li/2NHMQ8y">
-                    <span id="cta-d2-text" style="white-space:nowrap;display:inline-block;transform:translateX(-150%);transition:transform 0.3s ease">Quero D-2</span>
-                </a>
+                <!-- Split buttons (overlayed absolutely, same size as parent) -->
+                <div id="cta-split" class="absolute inset-0 flex items-center justify-center gap-2" style="opacity:0;transition:opacity 0.5s ease;pointer-events:none">
+                    <a id="cta-d1" class="rounded-full font-bold text-xs flex items-center justify-center overflow-hidden h-full px-4"
+                        style="border:2px solid #64748b;color:#94a3b8;background:transparent"
+                        href="https://mpago.li/2kh8AFG">
+                        <span id="cta-d1-text" style="white-space:nowrap;display:inline-block;transform:translateX(200%);transition:transform 0.3s ease">Quero D-1</span>
+                    </a>
+                    <a id="cta-d2" class="rounded-full font-bold text-xs flex items-center justify-center overflow-hidden h-full px-4 brand-gradient shadow-lg shadow-primary/20"
+                        style="color:white"
+                        href="https://mpago.li/2NHMQ8y">
+                        <span id="cta-d2-text" style="white-space:nowrap;display:inline-block;transform:translateX(-200%);transition:transform 0.3s ease">Quero D-2</span>
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -754,14 +758,14 @@
                                 class="material-icons-outlined text-primary text-sm">check_circle</span> Hospedagem
                             1º Ano Inclusa</li>
                     </ul>
-                    <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+                    <a class="w-full text-center border-2 border-slate-500 text-slate-400 hover:bg-slate-600 hover:border-slate-600 hover:text-white py-4 rounded-xl font-bold transition-all"
+                        href="https://mpago.li/2kh8AFG">Quero o Card D-1</a>
+                    <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 mt-8">
                         <p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">🎁 Você ganha:</p>
                         <p class="text-sm font-semibold">Chaveiro Inteligente NFC</p>
                         <p class="text-xs text-slate-400">Artesanal em couro — seu cliente encosta o celular e o site
                             abre</p>
                     </div>
-                    <a class="w-full text-center border-2 border-slate-500 text-slate-400 hover:bg-slate-600 hover:border-slate-600 hover:text-white py-4 rounded-xl font-bold transition-all"
-                        href="https://mpago.li/2kh8AFG">Quero o Card D-1</a>
                 </div>
                 <div
                     class="bg-slate-50 dark:bg-card-dark p-10 rounded-3xl border-2 border-primary relative overflow-hidden flex flex-col h-full shadow-[0_0_40px_rgba(67,97,238,0.1)]">
@@ -796,15 +800,18 @@
                         <li class="flex items-center gap-3"><span
                                 class="material-icons-outlined text-primary text-sm">check_circle</span> Hospedagem
                             1º Ano Inclusa</li>
+                        <li class="flex items-center gap-3"><span
+                                class="material-icons-outlined text-primary text-sm">check_circle</span> Design
+                            Exclusivo Sob Medida</li>
                     </ul>
-                    <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+                    <a class="w-full text-center brand-gradient text-white py-4 rounded-xl font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                        href="https://mpago.li/2NHMQ8y">Quero o Card D-2 PRO</a>
+                    <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 mt-8">
                         <p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">🎁 Você ganha:</p>
                         <p class="text-sm font-semibold">Chaveiro Inteligente NFC</p>
                         <p class="text-xs text-slate-400">Artesanal em couro — seu cliente encosta o celular e o site
                             abre</p>
                     </div>
-                    <a class="w-full text-center brand-gradient text-white py-4 rounded-xl font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
-                        href="https://mpago.li/2NHMQ8y">Quero o Card D-2 PRO</a>
                 </div>
             </div>
             <!-- Setas indicativas (desktop only) -->
@@ -933,7 +940,7 @@
                 <div class="relative">
                     <img alt="Rafael Demeni - Fundador Demeni Sites"
                         class="rounded-[2.5rem] shadow-2xl w-full object-cover aspect-video md:aspect-square"
-                        src="img/Imagem-Final.png" />
+                        src="img/Imagem-Final.webp" />
                     <div
                         class="absolute -bottom-6 -left-6 bg-primary p-8 rounded-3xl text-white shadow-xl hidden lg:block">
                         <p class="text-3xl font-black">+50</p>
@@ -1194,95 +1201,84 @@
         })();
     </script>
 
-    <!-- Header CTA: 4-stage split/merge animation -->
+    <!-- Header CTA: 4-stage split/merge animation (fade/pulse) -->
     <script>
         (function () {
-            const wrap = document.getElementById('header-cta-wrap');
             const mainBtn = document.getElementById('header-cta-btn');
             const mainText = document.getElementById('cta-main-text');
-            const d1 = document.getElementById('cta-d1');
-            const d2 = document.getElementById('cta-d2');
+            const splitWrap = document.getElementById('cta-split');
             const d1Text = document.getElementById('cta-d1-text');
             const d2Text = document.getElementById('cta-d2-text');
             const precosSection = document.getElementById('precos');
-            if (!wrap || !mainBtn || !mainText || !d1 || !d2 || !d1Text || !d2Text || !precosSection) return;
+            if (!mainBtn || !mainText || !splitWrap || !d1Text || !d2Text || !precosSection) return;
 
             let isSplit = false;
-            let animating = false;
+            let timers = [];
 
-            function splitButtons() {
-                if (isSplit || animating) return;
-                isSplit = true;
-                animating = true;
+            function clearTimers() {
+                timers.forEach(t => clearTimeout(t));
+                timers = [];
+            }
 
-                // STAGE 1→2: Text vanishes from sides to center
-                mainText.style.clipPath = 'inset(0 50% 0 50%)';
-
-                setTimeout(() => {
-                    // STAGE 2→3: Main button shrinks, two purple pills appear
-                    mainBtn.style.width = '0';
-                    mainBtn.style.padding = '0';
+            function forceState(split) {
+                clearTimers();
+                if (split) {
+                    mainText.style.clipPath = 'inset(0 50% 0 50%)';
                     mainBtn.style.opacity = '0';
                     mainBtn.style.pointerEvents = 'none';
+                    splitWrap.style.opacity = '1';
+                    splitWrap.style.pointerEvents = 'auto';
+                    d1Text.style.transform = 'translateX(0)';
+                    d2Text.style.transform = 'translateX(0)';
+                } else {
+                    mainText.style.clipPath = 'inset(0 0% 0 0%)';
+                    mainBtn.style.opacity = '1';
+                    mainBtn.style.pointerEvents = 'auto';
+                    splitWrap.style.opacity = '0';
+                    splitWrap.style.pointerEvents = 'none';
+                    d1Text.style.transform = 'translateX(200%)';
+                    d2Text.style.transform = 'translateX(-200%)';
+                }
+            }
 
-                    wrap.style.gap = '8px';
-                    d1.style.width = '100px';
-                    d1.style.padding = '6px 16px';
-                    d1.style.opacity = '1';
-                    d2.style.width = '100px';
-                    d2.style.padding = '6px 16px';
-                    d2.style.opacity = '1';
+            function splitButtons() {
+                if (isSplit) return;
+                isSplit = true;
+                clearTimers();
 
-                    setTimeout(() => {
-                        // STAGE 3→4: D-1 loses purple fill, gains gray border + text slides in
-                        d1.style.background = 'transparent';
-                        d1.style.borderColor = '#64748b';
-                        d1.style.color = '#94a3b8';
-                        d1.style.pointerEvents = 'auto';
-                        d2.style.pointerEvents = 'auto';
+                mainText.style.clipPath = 'inset(0 50% 0 50%)';
 
-                        d1Text.style.transform = 'translateX(0)';
-                        d2Text.style.transform = 'translateX(0)';
-                        animating = false;
-                    }, 320);
-                }, 320);
+                timers.push(setTimeout(() => {
+                    mainBtn.style.opacity = '0';
+                    mainBtn.style.pointerEvents = 'none';
+                    splitWrap.style.opacity = '1';
+                    splitWrap.style.pointerEvents = 'auto';
+                }, 150));
+
+                timers.push(setTimeout(() => {
+                    d1Text.style.transform = 'translateX(0)';
+                    d2Text.style.transform = 'translateX(0)';
+                }, 300));
             }
 
             function mergeButtons() {
-                if (!isSplit || animating) return;
+                if (!isSplit) return;
                 isSplit = false;
-                animating = true;
+                clearTimers();
 
-                // REVERSE STAGE 4→3: Text slides out, D-1 regains purple
-                d1Text.style.transform = 'translateX(150%)';
-                d2Text.style.transform = 'translateX(-150%)';
-                d1.style.background = '#8836DA';
-                d1.style.borderColor = '#8836DA';
-                d1.style.color = 'white';
-                d1.style.pointerEvents = 'none';
-                d2.style.pointerEvents = 'none';
+                d1Text.style.transform = 'translateX(200%)';
+                d2Text.style.transform = 'translateX(-200%)';
 
-                setTimeout(() => {
-                    // REVERSE STAGE 3→2: Pills merge
-                    d1.style.width = '0';
-                    d1.style.padding = '0';
-                    d1.style.opacity = '0';
-                    d2.style.width = '0';
-                    d2.style.padding = '0';
-                    d2.style.opacity = '0';
-                    wrap.style.gap = '0';
-
-                    mainBtn.style.width = 'auto';
-                    mainBtn.style.padding = '6px 24px';
+                timers.push(setTimeout(() => {
+                    splitWrap.style.opacity = '0';
+                    splitWrap.style.pointerEvents = 'none';
                     mainBtn.style.opacity = '1';
                     mainBtn.style.pointerEvents = 'auto';
+                }, 150));
 
-                    setTimeout(() => {
-                        // REVERSE STAGE 2→1: Text reappears center to sides
-                        mainText.style.clipPath = 'inset(0 0% 0 0%)';
-                        animating = false;
-                    }, 320);
-                }, 320);
+                timers.push(setTimeout(() => {
+                    mainText.style.clipPath = 'inset(0 0% 0 0%)';
+                }, 300));
             }
 
             const obs = new IntersectionObserver((entries) => {
