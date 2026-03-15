@@ -435,6 +435,11 @@ function renderPreviewD2New(frame, state) {
     const feedbackNameColor = get('feedbacks.name.color', '#1a365d');
     const feedbackNameLineHeight = get('feedbacks.name.lineHeight', 1.2);
     const feedbackNameLetterSpacing = get('feedbacks.name.letterSpacing', 0);
+    const feedbackNameFont = get('feedbacks.name.font', '');
+    const feedbackTitleFont = get('feedbacks.sectionTitle.font', '');
+    const feedbackSubtitleFont = get('feedbacks.sectionSubtitle.font', '');
+    const feedbackTextFont = get('feedbacks.text.font', '');
+    const feedbackCtaFont = get('feedbacks.bottomCta.font', '');
     const feedbackTextSize = get('feedbacks.text.size', 13);
     const feedbackTextWeight = get('feedbacks.text.weight', 400);
     const feedbackTextColor = get('feedbacks.text.color', '#666666');
@@ -589,7 +594,7 @@ function renderPreviewD2New(frame, state) {
     const baseFont = heroTitleFont || 'Inter';
 
     // Coleta todas as fontes usadas para gerar os @import do Google Fonts
-    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont, produtoTitleFont, sidebarFont].filter(Boolean));
+    const usedFonts = new Set([baseFont, heroTitleFont, heroSubtitleFont, heroBtnFont, ctaBtnFont, produtoBtnFont, produtoTitleFont, sidebarFont, feedbackTitleFont, feedbackSubtitleFont, feedbackNameFont, feedbackTextFont, feedbackCtaFont].filter(Boolean));
     const fontImports = [...usedFonts].map(fontName => {
         const fontEntry = window.D2Controls?.FONT_REGISTRY?.find(f => f.value === fontName);
         return fontEntry ? `@import url('${fontEntry.url}');` : '';
@@ -1155,6 +1160,7 @@ function renderPreviewD2New(frame, state) {
                 color: ${feedbacksSectionTitleColor};
                 line-height: ${feedbacksTitleLineHeight};
                 letter-spacing: ${feedbacksTitleLetterSpacing}px;
+                ${feedbackTitleFont ? `font-family: '${feedbackTitleFont}', sans-serif;` : ''}
                 ${textGradientCSS(feedbacksTitleGradientEnabled, feedbacksTitleGradient)}
             }
             .d2-feedbacks .section-subtitle {
@@ -1165,6 +1171,7 @@ function renderPreviewD2New(frame, state) {
                 line-height: ${feedbacksSubtitleLineHeight};
                 letter-spacing: ${feedbacksSubtitleLetterSpacing}px;
                 opacity: 0.8;
+                ${feedbackSubtitleFont ? `font-family: '${feedbackSubtitleFont}', sans-serif;` : ''}
                 ${textGradientCSS(feedbacksSubtitleGradientEnabled, feedbacksSubtitleGradient)}
             }
             .d2-feedbacks-list {
@@ -1213,6 +1220,7 @@ function renderPreviewD2New(frame, state) {
                 font-size: ${feedbackNameSize}px;
                 line-height: ${feedbackNameLineHeight};
                 letter-spacing: ${feedbackNameLetterSpacing}px;
+                ${feedbackNameFont ? `font-family: '${feedbackNameFont}', sans-serif;` : ''}
                 text-decoration: none;
                 display: block;
                 margin-bottom: 6px;
@@ -1223,6 +1231,7 @@ function renderPreviewD2New(frame, state) {
                 letter-spacing: ${feedbackTextLetterSpacing}px;
                 color: ${feedbackTextColor};
                 font-weight: ${feedbackTextWeight};
+                ${feedbackTextFont ? `font-family: '${feedbackTextFont}', sans-serif;` : ''}
             }
             .d2-feedbacks-cta {
                 padding-top: ${feedbackBottomCtaPaddingTop}px;
@@ -1232,6 +1241,7 @@ function renderPreviewD2New(frame, state) {
                 color: ${feedbackBottomCtaColor};
                 line-height: ${feedbackBottomCtaLineHeight};
                 letter-spacing: ${feedbackBottomCtaLetterSpacing}px;
+                ${feedbackCtaFont ? `font-family: '${feedbackCtaFont}', sans-serif;` : ''}
                 text-align: center;
             }
 

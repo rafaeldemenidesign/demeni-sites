@@ -65,6 +65,11 @@ class D2FeedbacksEditor {
                     value: window.d2State.get(`${this.basePath}.sectionTitle.color`, '#333333'),
                     path: `${this.basePath}.sectionTitle.color`
                 }));
+                container.appendChild(C.createFontPicker({
+                    label: 'Família da fonte',
+                    value: window.d2State.get(`${this.basePath}.sectionTitle.font`, ''),
+                    path: `${this.basePath}.sectionTitle.font`
+                }));
                 container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionTitle` }));
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionTitle`));
 
@@ -100,6 +105,11 @@ class D2FeedbacksEditor {
                     label: 'Cor',
                     value: window.d2State.get(`${this.basePath}.sectionSubtitle.color`, '#666666'),
                     path: `${this.basePath}.sectionSubtitle.color`
+                }));
+                container.appendChild(C.createFontPicker({
+                    label: 'Família da fonte',
+                    value: window.d2State.get(`${this.basePath}.sectionSubtitle.font`, ''),
+                    path: `${this.basePath}.sectionSubtitle.font`
                 }));
                 container.appendChild(C.createTextGradientControls({ basePath: `${this.basePath}.sectionSubtitle` }));
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.sectionSubtitle`));
@@ -163,6 +173,11 @@ class D2FeedbacksEditor {
                     value: window.d2State.get(`${this.basePath}.name.color`, '#1a365d'),
                     path: `${this.basePath}.name.color`
                 }));
+                container.appendChild(C.createFontPicker({
+                    label: 'Família da fonte',
+                    value: window.d2State.get(`${this.basePath}.name.font`, ''),
+                    path: `${this.basePath}.name.font`
+                }));
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.name`, { lineHeight: 1.2 }));
 
                 // ── DEPOIMENTO ──
@@ -186,6 +201,11 @@ class D2FeedbacksEditor {
                     label: 'Cor',
                     value: window.d2State.get(`${this.basePath}.text.color`, '#666666'),
                     path: `${this.basePath}.text.color`
+                }));
+                container.appendChild(C.createFontPicker({
+                    label: 'Família da fonte',
+                    value: window.d2State.get(`${this.basePath}.text.font`, ''),
+                    path: `${this.basePath}.text.font`
                 }));
                 container.appendChild(C.createTextSpacingControls(`${this.basePath}.text`, { lineHeight: 1.5 }));
 
@@ -344,6 +364,11 @@ class D2FeedbacksEditor {
                         label: 'Cor',
                         value: window.d2State.get(`${this.basePath}.bottomCta.color`, '#333333'),
                         path: `${this.basePath}.bottomCta.color`
+                    }));
+                    container.appendChild(C.createFontPicker({
+                        label: 'Família da fonte',
+                        value: window.d2State.get(`${this.basePath}.bottomCta.font`, ''),
+                        path: `${this.basePath}.bottomCta.font`
                     }));
                     container.appendChild(C.createTextSpacingControls(`${this.basePath}.bottomCta`));
                     container.appendChild(C.createSlider({
