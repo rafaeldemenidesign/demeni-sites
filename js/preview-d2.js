@@ -747,10 +747,12 @@ function renderPreviewD2New(frame, state) {
                 align-items: ${heroTextPosition === 'top' ? 'flex-start' : heroTextPosition === 'center' ? 'center' : 'flex-end'};
                 justify-content: center;
                 padding: ${heroTextPosition === 'top' ? (heroContentPaddingTop || 80) + 'px 0 ' + heroContentPadding + 'px' : heroTextPosition === 'center' ? heroContentPaddingTop + 'px 0 ' + heroContentPadding + 'px' : heroContentPaddingTop + 'px 0 ' + heroContentPadding + 'px'};
-                overflow: hidden;
+                overflow: visible;
+                z-index: 1;
                 margin: 0;
             }
             .d2-hero .hero-bg {
+                overflow: hidden;
                 position: absolute;
                 top: 0;
                 left: 0;
