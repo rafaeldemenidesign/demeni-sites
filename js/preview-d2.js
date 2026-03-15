@@ -1476,7 +1476,10 @@ function renderPreviewD2New(frame, state) {
                 <div class="hero-content">
                     <h1>${heroTitleText}</h1>
                     <p class="subtitle">${heroSubtitleText}</p>
-                    <a href="${heroBtnLink}" class="d2-cta-btn">${heroBtnText}</a>
+                    ${heroBtnLink && heroBtnLink.startsWith('#section-')
+                        ? `<a href="javascript:void(0)" class="d2-cta-btn" onclick="var t=this.closest('.d2-preview-container').querySelector('${heroBtnLink}');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})">${heroBtnText}</a>`
+                        : `<a href="${heroBtnLink}" class="d2-cta-btn" ${heroBtnLink && heroBtnLink !== '#' && !heroBtnLink.startsWith('#') ? 'target="_blank"' : ''}>${heroBtnText}</a>`
+                    }
                     ${heroScrollIndicatorEnabled ? `<div class="scroll-indicator"><i class="fas fa-chevron-down"></i></div>` : ''}
                 </div>
             </section>`;
