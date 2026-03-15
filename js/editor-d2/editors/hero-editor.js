@@ -502,6 +502,61 @@ class D2HeroEditor {
                     })
                 );
 
+                // --- DOBRADO (segundo degradê oposto) ---
+                container.appendChild(
+                    C.createToggle({
+                        label: 'Dobrado (ambos os lados)',
+                        value: window.d2State.get(`${this.basePath}.gradient.dual`, false),
+                        path: `${this.basePath}.gradient.dual`
+                    })
+                );
+
+                // Re-render when dual toggle changes
+                const _dualKey = `__d2DualGradSub`;
+                if (!window[_dualKey]) {
+                    window[_dualKey] = true;
+                    window.d2State.subscribe(({ path }) => {
+                        if (path === `${this.basePath}.gradient.dual`) {
+                            document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                                detail: { sectionId: 'hero' }
+                            }));
+                        }
+                    });
+                }
+
+                if (window.d2State.get(`${this.basePath}.gradient.dual`, false)) {
+                    const dualDiv = document.createElement('div');
+                    dualDiv.style.cssText = 'font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);';
+                    dualDiv.textContent = '2º Degradê (lado oposto)';
+                    container.appendChild(dualDiv);
+
+                    container.appendChild(
+                        C.createSlider({
+                            label: 'Intensidade',
+                            value: window.d2State.get(`${this.basePath}.gradient.dual2Intensity`, 40),
+                            min: 0, max: 100, step: 5, unit: '%',
+                            path: `${this.basePath}.gradient.dual2Intensity`
+                        })
+                    );
+
+                    container.appendChild(
+                        C.createSlider({
+                            label: 'Posição',
+                            value: window.d2State.get(`${this.basePath}.gradient.dual2Position`, 50),
+                            min: 0, max: 100, step: 5, unit: '%',
+                            path: `${this.basePath}.gradient.dual2Position`
+                        })
+                    );
+
+                    container.appendChild(
+                        C.createColorPicker({
+                            label: 'Cor',
+                            value: window.d2State.get(`${this.basePath}.gradient.dual2Color`, '#0a0a0a'),
+                            path: `${this.basePath}.gradient.dual2Color`
+                        })
+                    );
+                }
+
                 return container;
             }
         );

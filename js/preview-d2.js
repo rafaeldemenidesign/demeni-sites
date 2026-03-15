@@ -215,6 +215,10 @@ function renderPreviewD2New(frame, state) {
     const heroGradientIntensity = get('hero.gradient.intensity', 60);
     const heroGradientPosition = get('hero.gradient.position', 50);
     const heroGradientInvert = get('hero.gradient.invert', false);
+    const heroGradientDual = get('hero.gradient.dual', false);
+    const heroGradientDual2Intensity = get('hero.gradient.dual2Intensity', 40);
+    const heroGradientDual2Position = get('hero.gradient.dual2Position', 50);
+    const heroGradientDual2Color = get('hero.gradient.dual2Color', '#0a0a0a');
     const heroScrollIndicatorEnabled = get('hero.scrollIndicator.enabled', true);
     const heroScrollIndicatorColor = get('hero.scrollIndicator.color', '#ffffff');
     const heroScrollIndicatorPadding = get('hero.scrollIndicator.paddingBottom', 20);
@@ -771,6 +775,16 @@ function renderPreviewD2New(frame, state) {
                 height: ${100 - heroGradientPosition}%;
                 background: linear-gradient(${heroGradientInvert ? 'to bottom' : 'to top'}, ${heroGradientEnd} 0%, ${hexToRgba(heroGradientEnd, heroGradientIntensity / 100)} 50%, ${hexToRgba(heroGradientEnd, 0)} 100%);
                 z-index: 2;
+            }
+            .d2-hero .hero-gradient-dual {
+                position: absolute;
+                ${heroGradientInvert ? 'bottom' : 'top'}: 0;
+                left: 0;
+                width: 100%;
+                height: ${100 - heroGradientDual2Position}%;
+                background: linear-gradient(${heroGradientInvert ? 'to top' : 'to bottom'}, ${heroGradientDual2Color} 0%, ${hexToRgba(heroGradientDual2Color, heroGradientDual2Intensity / 100)} 50%, ${hexToRgba(heroGradientDual2Color, 0)} 100%);
+                z-index: 2;
+                display: ${heroGradientDual ? 'block' : 'none'};
             }
             .d2-hero .scroll-indicator {
                 position: relative;
@@ -1443,6 +1457,7 @@ function renderPreviewD2New(frame, state) {
                     ${heroBgImage ? `<div class="hero-bg-image" style="background-image: url('${heroBgImage}')"></div>` : ''}
                 </div>
                 <div class="hero-gradient"></div>
+                <div class="hero-gradient-dual"></div>
                 <div class="hero-content">
                     <h1>${heroTitleText}</h1>
                     <p class="subtitle">${heroSubtitleText}</p>
