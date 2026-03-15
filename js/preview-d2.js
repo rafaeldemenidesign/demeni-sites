@@ -1054,10 +1054,11 @@ function renderPreviewD2New(frame, state) {
                 border-radius: ${Math.max(produtoCardRadius - produtoCardPadding, 0)}px;
             }
             .d2-produto-img.d2-carousel-wrap {
-                overflow: clip;
+                overflow: hidden;
             }
             .d2-produto-img.d2-carousel-wrap .d2-carousel-track {
                 border-radius: ${Math.max(produtoCardRadius - produtoCardPadding, 0)}px;
+                height: 100%;
             }
             .d2-produto-img img {
                 width: 100%;
