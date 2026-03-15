@@ -1355,11 +1355,21 @@ async function generatePublishableHTML(state, projectName) {
         (function(){
             var autoplayEnabled = ${JSON.stringify(state?.d2Adjustments?.produtos?.carousel?.autoplay !== false)};
             var intervalMs = ${JSON.stringify((state?.d2Adjustments?.produtos?.carousel?.interval || 3) * 1000)};
+            // === DEBUG: visible log ===
+            var dbg=document.createElement('div');
+            dbg.style.cssText='position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:11px;padding:8px;z-index:99999;max-height:40vh;overflow-y:auto;';
+            dbg.id='carousel-debug';
+            document.body.appendChild(dbg);
+            function log(msg){dbg.innerHTML+=msg+'<br>';console.log('[Carousel]',msg);}
+            log('autoplayEnabled='+autoplayEnabled+' intervalMs='+intervalMs);
             function initCarousels(){
-                document.querySelectorAll('.d2-carousel-wrap').forEach(function(wrap){
+                var wraps=document.querySelectorAll('.d2-carousel-wrap');
+                log('Found '+wraps.length+' carousel wraps');
+                wraps.forEach(function(wrap,wIdx){
                     var track=wrap.querySelector('.d2-carousel-track');
-                    if(!track)return;
+                    if(!track){log('  wrap['+wIdx+']: NO TRACK');return;}
                     var dots=wrap.querySelectorAll('.d2-carousel-dot');
+                    log('  wrap['+wIdx+']: track OK, dots='+dots.length+', offsetW='+track.offsetWidth+', scrollW='+track.scrollWidth+', overflowX='+getComputedStyle(track).overflowX+', parentOverflow='+getComputedStyle(wrap).overflow);
                     // Dot sync (works even if dots are hidden)
                     if(dots.length>0){
                         var syncDots=function(){
@@ -1376,12 +1386,13 @@ async function generatePublishableHTML(state, projectName) {
                         });
                     }
                     // Autoplay (independent of dots)
-                    if(!autoplayEnabled)return;
+                    if(!autoplayEnabled){log('  wrap['+wIdx+']: autoplay DISABLED');return;}
                     var slides=track.querySelectorAll('.d2-carousel-slide');
-                    if(slides.length<2)return;
+                    if(slides.length<2){log('  wrap['+wIdx+']: only '+slides.length+' slides, skip');return;}
+                    log('  wrap['+wIdx+']: STARTING autoplay, slides='+slides.length);
                     var advance=function(){
                         var max=track.scrollWidth-track.offsetWidth;
-                        if(max<=0)return;
+                        if(max<=0){log('  wrap['+wIdx+']: max<=0 ('+max+'), scrollW='+track.scrollWidth+' offW='+track.offsetWidth);return;}
                         if(track.scrollLeft>=max-5){track.scrollTo({left:0,behavior:'smooth'});}
                         else{track.scrollBy({left:track.offsetWidth,behavior:'smooth'});}
                     };
@@ -1396,9 +1407,10 @@ async function generatePublishableHTML(state, projectName) {
             }
             // Run after DOM is fully parsed and rendered
             if(document.readyState==='loading'){
-                document.addEventListener('DOMContentLoaded',function(){setTimeout(initCarousels,100);});
+                document.addEventListener('DOMContentLoaded',function(){log('DOMContentLoaded fired');setTimeout(function(){log('setTimeout fired');initCarousels();},100);});
             } else {
-                setTimeout(initCarousels,100);
+                log('DOM already ready (readyState='+document.readyState+')');
+                setTimeout(function(){log('setTimeout fired');initCarousels();},100);
             }
         })();
         // Watermark — Powered by Demeni Sites
