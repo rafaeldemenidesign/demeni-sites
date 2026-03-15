@@ -609,6 +609,7 @@ function renderPreviewD2New(frame, state) {
             
             /* GOOGLE FONTS - carregadas dinamicamente */
             ${fontImports}
+            html { scroll-behavior: smooth; }
             
             /* Container do preview - substitui body */
             .d2-preview-container {

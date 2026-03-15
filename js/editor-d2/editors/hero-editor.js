@@ -902,6 +902,69 @@ class D2HeroEditor {
                 );
                 container.appendChild(textGroup);
 
+                // Link do botão
+                const linkGroup = C.createGroupExpander(
+                    { title: 'Link do Botão', expanded: false, nested: true },
+                    () => {
+                        const inner = document.createElement('div');
+                        const currentLink = window.d2State.get(`${this.basePath}.btn.link`, '#');
+
+                        // Dropdown para seções
+                        const sectionOptions = [
+                            { value: '#', label: 'Nenhum (sem link)' },
+                            { value: '#section-categorias', label: '↓ Categorias' },
+                            { value: '#section-produtos', label: '↓ Produtos' },
+                            { value: '#section-feedbacks', label: '↓ Feedbacks' },
+                            { value: '#section-cta', label: '↓ CTA' },
+                            { value: '#section-footer', label: '↓ Footer' },
+                            { value: 'custom', label: '🔗 Link externo...' }
+                        ];
+
+                        const isCustom = currentLink && !currentLink.startsWith('#');
+
+                        inner.appendChild(
+                            C.createSelect({
+                                label: 'Destino',
+                                value: isCustom ? 'custom' : currentLink,
+                                options: sectionOptions,
+                                path: `${this.basePath}.btn.linkTarget`,
+                                onChange: (val) => {
+                                    if (val === 'custom') {
+                                        // Keep existing custom link or set empty
+                                        const existingLink = window.d2State.get(`${this.basePath}.btn.link`, '');
+                                        if (!existingLink || existingLink.startsWith('#')) {
+                                            window.d2State.set(`${this.basePath}.btn.link`, '');
+                                        }
+                                    } else {
+                                        window.d2State.set(`${this.basePath}.btn.link`, val);
+                                    }
+                                    window.d2State.set(`${this.basePath}.btn.linkTarget`, val);
+                                    // Re-render to show/hide custom URL field
+                                    document.dispatchEvent(new CustomEvent('d2:section-selected', {
+                                        detail: { sectionId: 'hero' }
+                                    }));
+                                }
+                            })
+                        );
+
+                        // Show custom URL input if "Link externo" is selected
+                        const linkTarget = window.d2State.get(`${this.basePath}.btn.linkTarget`, isCustom ? 'custom' : currentLink);
+                        if (linkTarget === 'custom' || isCustom) {
+                            inner.appendChild(
+                                C.createTextInput({
+                                    label: 'URL',
+                                    value: isCustom ? currentLink : window.d2State.get(`${this.basePath}.btn.link`, ''),
+                                    placeholder: 'https://exemplo.com',
+                                    path: `${this.basePath}.btn.link`
+                                })
+                            );
+                        }
+
+                        return inner;
+                    }
+                );
+                container.appendChild(linkGroup);
+
                 // Aparência do botão
                 const appearanceGroup = C.createGroupExpander(
                     { title: 'Cor do Botão', expanded: false, nested: true },
