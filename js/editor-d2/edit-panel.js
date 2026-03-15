@@ -20,7 +20,8 @@ class D2EditPanel {
             feedbacks: () => new window.D2FeedbacksEditor().render(),
             cta: () => new window.D2CTAEditor().render(),
             footer: () => new window.D2FooterEditor().render(),
-            pwa: () => new window.D2PWAEditor().render()
+            pwa: () => new window.D2PWAEditor().render(),
+            whatsapp: () => new window.D2WhatsAppEditor().render()
         };
 
         this.bindEvents();
@@ -76,7 +77,7 @@ class D2EditPanel {
         // Cria o header
         this.container.innerHTML = `
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas ${section.icon}"></i> ${section.name}</h2>
+                <h2 class="panel-title"><i class="${section.iconPrefix || 'fas'} ${section.icon}"></i> ${section.name}</h2>
             </div>
             <div class="panel-content" id="panel-content"></div>
         `;

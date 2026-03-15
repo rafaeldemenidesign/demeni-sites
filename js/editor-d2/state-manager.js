@@ -176,7 +176,8 @@ class D2StateManager {
                 { id: 'feedbacks', name: 'Feedbacks', icon: 'fa-comments', enabled: true, locked: false },
                 { id: 'cta', name: 'CTA', icon: 'fa-bullhorn', enabled: true, locked: false },
                 { id: 'footer', name: 'Footer', icon: 'fa-copyright', enabled: true, locked: true },
-                { id: 'pwa', name: 'PWA / Ícone', icon: 'fa-mobile-alt', enabled: true, locked: true }
+                { id: 'pwa', name: 'PWA / Ícone', icon: 'fa-mobile-alt', enabled: true, locked: true },
+                { id: 'whatsapp', name: 'WhatsApp', icon: 'fa-whatsapp', iconPrefix: 'fab', enabled: true, locked: true }
             ],
 
             // Produtos para a seção de produtos

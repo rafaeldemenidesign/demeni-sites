@@ -39,7 +39,7 @@ class D2SectionList {
                     ${!isLocked ? `<i class="fas fa-grip-vertical drag-handle"></i>` : ''}
                     
                     <div class="section-icon">
-                        <i class="fas ${section.icon}"></i>
+                        <i class="${section.iconPrefix || 'fas'} ${section.icon}"></i>
                     </div>
                     
                     <div class="section-info">
